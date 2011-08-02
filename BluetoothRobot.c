@@ -58,8 +58,11 @@ void SetupHardware(void)
 	clock_prescale_set(clock_div_1);
 
 	/* Hardware Initialization */
+	LCD_Init();
+	Headlights_Init();
 	Motors_Init();
 	RGB_Init();
+	Speaker_Init();
 	USB_Init();
 }
 

@@ -28,35 +28,14 @@
   this software.
 */
 
-#ifndef _BLUETOOTH_ROBOT_H_
-#define _BLUETOOTH_ROBOT_H_
+#include "Headlights.h"
 
-	/* Includes: */
-		#include <avr/io.h>
-		#include <avr/wdt.h>
-		#include <avr/power.h>
-		#include <avr/interrupt.h>
-		#include <stdbool.h>
-		
-		#include <LUFA/Drivers/USB/USB.h>
-		
-		#include "JoystickControl.h"
+void Headlights_Init(void)
+{
 
-		#include "Headlights.h"
-		#include "LCD.h"
-		#include "Motors.h"
-		#include "RGB.h"
-		#include "Speaker.h"
+}
 
-	/* Function Prototypes: */
-		void SetupHardware(void);
+void Headlights_SetState(const bool HeadlightsOn)
+{
 
-		void EVENT_USB_Host_HostError(const uint8_t ErrorCode);
-		void EVENT_USB_Host_DeviceAttached(void);
-		void EVENT_USB_Host_DeviceUnattached(void);
-		void EVENT_USB_Host_DeviceEnumerationFailed(const uint8_t ErrorCode,
-		                                            const uint8_t SubErrorCode);
-		void EVENT_USB_Host_DeviceEnumerationComplete(void);
-
-#endif
-
+}

@@ -38,6 +38,7 @@
 
 		#include <LUFA/Drivers/USB/USB.h>
 		
+		#include "Headlights.h"
 		#include "Motors.h"
 
 	/* Macros: */

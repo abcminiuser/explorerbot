@@ -105,7 +105,7 @@ void Joystick_USBTask(void)
 			if ((ReportItem->Attributes.Usage.Page        == USAGE_PAGE_BUTTON) &&
 			    (ReportItem->ItemType                     == HID_REPORT_ITEM_In))
 			{
-				// TODO
+				Headlights_SetState(ReportItem->Value != 0);
 			}
 			else if ((ReportItem->Attributes.Usage.Page   == USAGE_PAGE_GENERIC_DCTRL) &&
 			         ((ReportItem->Attributes.Usage.Usage == USAGE_X)                  ||

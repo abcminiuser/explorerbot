@@ -28,35 +28,19 @@
   this software.
 */
 
-#ifndef _BLUETOOTH_ROBOT_H_
-#define _BLUETOOTH_ROBOT_H_
+#ifndef _LCD_H_
+#define _LCD_H_
 
 	/* Includes: */
 		#include <avr/io.h>
-		#include <avr/wdt.h>
-		#include <avr/power.h>
-		#include <avr/interrupt.h>
 		#include <stdbool.h>
 		
-		#include <LUFA/Drivers/USB/USB.h>
-		
-		#include "JoystickControl.h"
-
-		#include "Headlights.h"
-		#include "LCD.h"
-		#include "Motors.h"
-		#include "RGB.h"
-		#include "Speaker.h"
-
 	/* Function Prototypes: */
-		void SetupHardware(void);
-
-		void EVENT_USB_Host_HostError(const uint8_t ErrorCode);
-		void EVENT_USB_Host_DeviceAttached(void);
-		void EVENT_USB_Host_DeviceUnattached(void);
-		void EVENT_USB_Host_DeviceEnumerationFailed(const uint8_t ErrorCode,
-		                                            const uint8_t SubErrorCode);
-		void EVENT_USB_Host_DeviceEnumerationComplete(void);
+		void LCD_Init(void);
+		void LCD_Clear(void);
+		void LCD_SetCursor(const uint8_t X,
+		                   const uint8_t Y);
+		void LCD_WriteChar(const char Character);
+		void LCD_WriteString(const char* String);
 
 #endif
-

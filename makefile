@@ -136,6 +136,7 @@ SRC = $(TARGET).c                                                 \
 	  LCD.c                                                       \
 	  Motors.c                                                    \
 	  RGB.c                                                       \
+	  Sensors.c                                                   \
 	  Speaker.c                                                   \
 	  $(LUFA_SRC_USB)                                             \
 	  $(LUFA_SRC_USBCLASS)                                        \

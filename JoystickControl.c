@@ -112,42 +112,18 @@ void Joystick_USBTask(void)
 			          (ReportItem->Attributes.Usage.Usage == USAGE_Y))                 &&
 			         (ReportItem->ItemType                == HID_REPORT_ITEM_In))
 			{
-				static int8_t MotorSpeed   = 0;
-				static int8_t MotorBalance = 0;
+				static int16_t MotorSpeed   = 0;
+				static int16_t MotorBalance = 0;
 				
-				int8_t JoystickPosition = HID_ALIGN_DATA(ReportItem, int8_t);
-				
-				if (JoystickPosition > 100)
-				  JoystickPosition = 100;
-				  
-				if (JoystickPosition < -100)
-				  JoystickPosition = -100;
+				int16_t JoystickPosition = HID_ALIGN_DATA(ReportItem, int16_t);
 
 				if (ReportItem->Attributes.Usage.Usage == USAGE_X)
 				  MotorBalance = JoystickPosition;
 				else if  (ReportItem->Attributes.Usage.Usage == USAGE_Y)
-				  MotorSpeed = JoystickPosition;
-				  
-				uint8_t MotorSpeedLeft  = MotorSpeed;
-				uint8_t MotorSpeedRight = MotorSpeed;
-				
-				if (MotorBalance < 0)
-				{
-					if (MotorSpeed > abs(MotorBalance))
-					  MotorSpeedRight -= abs(MotorBalance);
-					else
-					  MotorSpeedRight  = 0;					  
-				}
-				else
-				{
-					if (MotorSpeed > abs(MotorBalance))
-					  MotorSpeedLeft -= abs(MotorBalance);
-					else
-					  MotorSpeedLeft  = 0;				
-				}
+				  MotorSpeed   = JoystickPosition;
 
-				Motors_SetChannelSpeed(MOTOR_CHANNEL_Left, MotorSpeedLeft);
-				Motors_SetChannelSpeed(MOTOR_CHANNEL_Right, MotorSpeedRight);
+				Motors_SetChannelSpeed(MOTOR_CHANNEL_Left,  (MotorBalance <  100) ? MotorSpeed : 0);
+				Motors_SetChannelSpeed(MOTOR_CHANNEL_Right, (MotorBalance > -100) ? MotorSpeed : 0);
 			}
 		}
 	}

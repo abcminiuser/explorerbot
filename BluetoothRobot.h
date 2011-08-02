@@ -41,7 +41,6 @@
 		#include <stdbool.h>
 		
 		#include <LUFA/Drivers/USB/USB.h>
-		#include <LUFA/Drivers/Peripheral/TWI.h>
 		
 		#include "JoystickControl.h"
 
@@ -50,6 +49,7 @@
 		#include "LCD.h"
 		#include "Motors.h"
 		#include "RGB.h"
+		#include "Sensors.h"
 		#include "Speaker.h"
 
 	/* Function Prototypes: */

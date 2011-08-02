@@ -28,26 +28,25 @@
   this software.
 */
 
-#ifndef _MOTORS_H_
-#define _MOTORS_H_
+#ifndef _SENSORS_H_
+#define _SENSORS_H_
 
 	/* Includes: */
 		#include <avr/io.h>
-		#include <avr/interrupt.h>
 		#include <stdbool.h>
-		#include <stdlib.h>
-	
+		
+		#include <LUFA/Drivers/Peripheral/TWI.h>
+
 	/* Enums: */
 		typedef enum
 		{
-			MOTOR_CHANNEL_Left  = (1 << 0),
-			MOTOR_CHANNEL_Right = (1 << 1),
-			MOTOR_CHANNEL_All   = (MOTOR_CHANNEL_Left | MOTOR_CHANNEL_Right),
-		} Motor_Channel_t;
-	
+			SENSOR_Gyroscope,
+			SENSOR_Accelerometer,
+			SENSOR_Magnetometer,
+			SENSOR_Pressure,
+		} Sensors_t;
+
 	/* Function Prototypes: */
-		void Motors_Init(void);
-		void Motors_SetChannelSpeed(const Motor_Channel_t Channel, const int16_t Power);
+		void Sensors_Init(void);
 
 #endif
-

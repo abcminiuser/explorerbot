@@ -32,10 +32,11 @@
 
 void Buttons_Init(void)
 {
-	// TODO
+	DDRD  &= ~(BUTTON1_MASK | BUTTON2_MASK);
+	PORTD |=  (BUTTON1_MASK | BUTTON2_MASK);
 }
 
 uint8_t Buttons_GetStateMask(void)
 {
-	// TODO
+	return (~PIND & (BUTTON1_MASK | BUTTON2_MASK));
 }

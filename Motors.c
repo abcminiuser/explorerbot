@@ -32,12 +32,40 @@
 
 void Motors_Init(void)
 {
-	// TODO
+	DDRD   |= ((1 << 3) | (1 << 4));
+	DDRB   |= ((1 << 5) | (1 << 6));
+		
+	TCCR1A  = ((1 << WGM11) | (1 << WGM10) | (1 << COM1A1) | (1 << COM1A0) | (1 << COM1B1) | (1 << COM1B0));
+	TCCR1B  = (1 << CS10);
 	
 	Motors_SetChannelSpeed(MOTOR_CHANNEL_All, 0);
 }
 
-void Motors_SetChannelSpeed(const Motor_Channel_t Channel, const uint8_t Percentage)
+void Motors_SetChannelSpeed(const Motor_Channel_t Channel, const int16_t Power)
 {
-	// TODO
+	uint16_t MotorPWMValue = abs(Power);
+	
+	// DANGER: DO NOT REMOVE - CLAMPS AVERAGE VOLTAGE BELOW MOTOR DATASHEET THRESHOLD
+	if (MotorPWMValue > 0x200)
+	  MotorPWMValue = 0x200;
+
+	if (Channel & MOTOR_CHANNEL_Left)
+	{
+		if (Power < 0)
+		  PORTD &= ~(1 << 3);
+		else
+		  PORTD |=  (1 << 3);
+		
+		OCR1B = MotorPWMValue;
+	}
+	
+	if (Channel & MOTOR_CHANNEL_Right)
+	{
+		if (Power < 0)
+		  PORTD &= ~(1 << 4);
+		else
+		  PORTD |=  (1 << 4);
+		  
+		OCR1A = MotorPWMValue;
+	}
 }

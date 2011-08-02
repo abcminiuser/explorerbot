@@ -32,12 +32,15 @@
 
 void Headlights_Init(void)
 {
-	// TODO
+	DDRD |= (1 << 5);
 
 	Headlights_SetState(false);
 }
 
 void Headlights_SetState(const bool HeadlightsOn)
 {
-	// TODO
+	if (HeadlightsOn)
+	  PORTD |=  (1 << 5);
+	else
+	  PORTD &= ~(1 << 5);
 }

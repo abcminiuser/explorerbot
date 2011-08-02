@@ -36,6 +36,11 @@
 		#include <avr/pgmspace.h>
 		#include <stdbool.h>
 		
+	/* Macros: */
+		#define LCD_E    (1 << 3)
+		#define LCD_RW   (1 << 4)
+		#define LCD_RS   (1 << 5)
+		
 	/* Function Prototypes: */
 		void LCD_Init(void);
 		void LCD_Clear(void);

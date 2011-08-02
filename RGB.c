@@ -32,12 +32,12 @@
 
 void RGB_Init(void)
 {
-	// TODO
+	DDRF |= RGB_COLOUR_White;
 
 	RGB_SetColour(RGB_COLOUR_Off);
 }
 
 void RGB_SetColour(const RGB_Colour_t Colour)
 {
-	// TODO
+	PORTF = (PORTF | RGB_COLOUR_White) & ~Colour;
 }

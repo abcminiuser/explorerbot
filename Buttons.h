@@ -35,6 +35,10 @@
 		#include <avr/io.h>
 		#include <stdbool.h>
 
+	/* Macros: */
+		#define BUTTON1_MASK (1 << 7)
+		#define BUTTON2_MASK (1 << 6)
+
 	/* Function Prototypes: */
 		void    Buttons_Init(void);
 		uint8_t Buttons_GetStateMask(void);

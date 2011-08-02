@@ -73,8 +73,8 @@ void SetupHardware(void)
 	Headlights_Init();
 	Motors_Init();
 	RGB_Init();
+	Sensors_Init();
 	Speaker_Init();
-	TWI_Init(TWI_BIT_PRESCALE_64, 10);
 	USB_Init();
 }
 

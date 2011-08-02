@@ -32,10 +32,12 @@
 
 void RGB_Init(void)
 {
+	// TODO
 
+	RGB_SetColour(RGB_COLOUR_Off);
 }
 
 void RGB_SetColour(const RGB_Colour_t Colour)
 {
-	
+	// TODO
 }

@@ -28,22 +28,16 @@
   this software.
 */
 
-#ifndef _LCD_H_
-#define _LCD_H_
+#ifndef _BUTTONS_H_
+#define _BUTTONS_H_
 
 	/* Includes: */
 		#include <avr/io.h>
-		#include <avr/pgmspace.h>
 		#include <stdbool.h>
-		
+
 	/* Function Prototypes: */
-		void LCD_Init(void);
-		void LCD_Clear(void);
-		void LCD_SetBacklight(const uint8_t Intensity);
-		void LCD_SetCursor(const uint8_t Y,
-		                   const uint8_t X);
-		void LCD_WriteChar(const char Character);
-		void LCD_WriteString(const char* String);
-		void LCD_WriteString_P(const char* String);
+		void    Buttons_Init(void);
+		uint8_t Buttons_GetStateMask(void);
 
 #endif
+

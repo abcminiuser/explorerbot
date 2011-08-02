@@ -32,23 +32,28 @@
 
 void LCD_Init(void)
 {
-
+	// TODO
 }
 
 void LCD_Clear(void)
 {
-
+	// TODO
 }
 
-void LCD_SetCursor(const uint8_t X,
-                   const uint8_t Y)
+void LCD_SetBacklight(const uint8_t Intensity)
 {
+	// TODO
+}
 
+void LCD_SetCursor(const uint8_t Y,
+                   const uint8_t X)
+{
+	// TODO
 }
 
 void LCD_WriteChar(const char Character)
 {
-
+	// TODO
 }
 
 void LCD_WriteString(const char* String)
@@ -56,6 +61,17 @@ void LCD_WriteString(const char* String)
 	while (*String != 0x00)
 	{
 		LCD_WriteChar(*String);
+		String++;
+	}
+}
+
+void LCD_WriteString_P(const char* String)
+{
+	uint8_t CurrByte;
+
+	while ((CurrByte = pgm_read_byte(String)) != 0x00)
+	{
+		LCD_WriteChar(CurrByte);
 		String++;
 	}
 }

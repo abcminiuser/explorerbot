@@ -32,10 +32,12 @@
 
 void Headlights_Init(void)
 {
+	// TODO
 
+	Headlights_SetState(false);
 }
 
 void Headlights_SetState(const bool HeadlightsOn)
 {
-
+	// TODO
 }

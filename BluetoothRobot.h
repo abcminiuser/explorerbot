@@ -36,12 +36,16 @@
 		#include <avr/wdt.h>
 		#include <avr/power.h>
 		#include <avr/interrupt.h>
+		#include <avr/pgmspace.h>
+		#include <util/delay.h>
 		#include <stdbool.h>
 		
 		#include <LUFA/Drivers/USB/USB.h>
+		#include <LUFA/Drivers/Peripheral/TWI.h>
 		
 		#include "JoystickControl.h"
 
+		#include "Buttons.h"
 		#include "Headlights.h"
 		#include "LCD.h"
 		#include "Motors.h"

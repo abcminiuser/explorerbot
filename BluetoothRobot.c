@@ -36,7 +36,17 @@
 int main(void)
 {
 	SetupHardware();
-
+	
+	LCD_WriteString_P(PSTR("Bluetooth  Robot"));
+	LCD_SetCursor(2, 0);
+	LCD_WriteString_P(PSTR(" By Dean Camera "));
+	
+	for (uint8_t i = 0; i < 0xFF; i++)
+	{
+		LCD_SetBacklight(0);
+		Delay_MS(2);
+	}
+	
 	RGB_SetColour(RGB_ALIAS_Disconnected);
 	sei();
 
@@ -59,10 +69,12 @@ void SetupHardware(void)
 
 	/* Hardware Initialization */
 	LCD_Init();
+	Buttons_Init();
 	Headlights_Init();
 	Motors_Init();
 	RGB_Init();
 	Speaker_Init();
+	TWI_Init(TWI_BIT_PRESCALE_64, 10);
 	USB_Init();
 }
 

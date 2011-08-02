@@ -32,10 +32,12 @@
 
 void Speaker_Init(void)
 {
+	// TODO
 
+	Speaker_Tone(0);
 }
 
 void Speaker_Tone(const uint8_t PWMValue)
 {
-
+	// TODO
 }

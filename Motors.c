@@ -32,10 +32,12 @@
 
 void Motors_Init(void)
 {
+	// TODO
 	
+	Motors_SetChannelSpeed(MOTOR_CHANNEL_All, 0);
 }
 
 void Motors_SetChannelSpeed(const Motor_Channel_t Channel, const uint8_t Percentage)
 {
-	
+	// TODO
 }

@@ -36,7 +36,7 @@
 		#include <stdbool.h>
 		
 	/* Macros: */
-		#define FREQUENCY_TO_SPEAKER_VAL(freq)  (F_CPU / Frequency)
+		#define FREQUENCY_TO_SPEAKER_VAL(freq)  ((F_CPU / Frequency) - 1)
 
 	/* Function Prototypes: */
 		void Speaker_Init(void);

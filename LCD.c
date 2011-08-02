@@ -37,7 +37,6 @@ void LCD_Init(void)
 	DDRB |= (1 << 4);
 	
 	TCCR2A = ((1 << COM2A1) | (1 << COM2A0) | (1 << WGM21) | (1 << WGM20));
-	TCCR2B = (1 << CS20);
 
 	LCD_SetBacklight(0);
 	
@@ -52,6 +51,16 @@ void LCD_Clear(void)
 void LCD_SetBacklight(const uint8_t Intensity)
 {
 	OCR2A = Intensity;
+	
+	if (!(Intensity))
+	{
+		TCCR2B = 0;
+		PORTB &= ~(1 << 4);
+	}
+	else
+	{
+		TCCR2B = (1 << CS20);	
+	}
 }
 
 void LCD_SetCursor(const uint8_t Y,

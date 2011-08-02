@@ -43,10 +43,13 @@ int main(void)
 	
 	for (uint8_t i = 0; i < 0xFF; i++)
 	{
-		LCD_SetBacklight(0);
-		Delay_MS(2);
+		LCD_SetBacklight(i);
+		Speaker_Tone(i);
+
+		Delay_MS(3);
 	}
 	
+	Speaker_Tone(0);
 	RGB_SetColour(RGB_ALIAS_Disconnected);
 	sei();
 

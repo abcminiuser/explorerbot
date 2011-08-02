@@ -28,32 +28,42 @@
   this software.
 */
 
-#ifndef _BLUETOOTH_ROBOT_H_
-#define _BLUETOOTH_ROBOT_H_
+#ifndef _JOYSTICK_CONTROL_H_
+#define _JOYSTICK_CONTROL_H_
 
 	/* Includes: */
 		#include <avr/io.h>
-		#include <avr/wdt.h>
-		#include <avr/power.h>
-		#include <avr/interrupt.h>
 		#include <stdbool.h>
-		
+		#include <stdlib.h>
+
 		#include <LUFA/Drivers/USB/USB.h>
 		
-		#include "JoystickControl.h"
-
 		#include "Motors.h"
-		#include "RGB.h"
+
+	/* Macros: */
+		/** HID Report Descriptor Usage Page value for a toggle button. */
+		#define USAGE_PAGE_BUTTON           0x09
+
+		/** HID Report Descriptor Usage Page value for a Generic Desktop Control. */
+		#define USAGE_PAGE_GENERIC_DCTRL    0x01
+
+		/** HID Report Descriptor Usage for a Joystick. */
+		#define USAGE_JOYSTICK              0x04
+
+		/** HID Report Descriptor Usage value for a X axis movement. */
+		#define USAGE_X                     0x30
+
+		/** HID Report Descriptor Usage value for a Y axis movement. */
+		#define USAGE_Y                     0x31
 
 	/* Function Prototypes: */
-		void SetupHardware(void);
+		bool Joystick_ConfigurePipes(const USB_Descriptor_Device_t* DeviceDescriptor,
+		                             const uint16_t ConfigDescriptorSize,
+		                             uint8_t* ConfigDescriptorData);
+		bool Joystick_PostConfiguration(void);
+		void Joystick_USBTask(void);
 
-		void EVENT_USB_Host_HostError(const uint8_t ErrorCode);
-		void EVENT_USB_Host_DeviceAttached(void);
-		void EVENT_USB_Host_DeviceUnattached(void);
-		void EVENT_USB_Host_DeviceEnumerationFailed(const uint8_t ErrorCode,
-		                                            const uint8_t SubErrorCode);
-		void EVENT_USB_Host_DeviceEnumerationComplete(void);
+		bool CALLBACK_HIDParser_FilterHIDReportItem(HID_ReportItem_t* const CurrentItem);
 
 #endif
 

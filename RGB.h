@@ -28,32 +28,39 @@
   this software.
 */
 
-#ifndef _BLUETOOTH_ROBOT_H_
-#define _BLUETOOTH_ROBOT_H_
+#ifndef _RGB_H_
+#define _RGB_H_
 
 	/* Includes: */
 		#include <avr/io.h>
-		#include <avr/wdt.h>
-		#include <avr/power.h>
-		#include <avr/interrupt.h>
-		#include <stdbool.h>
-		
-		#include <LUFA/Drivers/USB/USB.h>
-		
-		#include "JoystickControl.h"
 
-		#include "Motors.h"
-		#include "RGB.h"
+	/* Enums: */
+		typedef enum
+		{
+			RGB_COLOUR_Off,
+			RGB_COLOUR_Red,
+			RGB_COLOUR_Green,
+			RGB_COLOUR_Blue,
+			RGB_COLOUR_Yellow,
+			RGB_COLOUR_Cyan,			
+			RGB_COLOUR_Magenta,
+			RGB_COLOUR_White,
+		} RGB_Colour_t;
+		
+		enum RGB_Colour_Aliases_t
+		{
+			RGB_ALIAS_Disconnected       = RGB_COLOUR_White,
+			RGB_ALIAS_Enumerating        = RGB_COLOUR_Yellow,
+			RGB_ALIAS_UnknownDevice      = RGB_COLOUR_Magenta,
+			RGB_ALIAS_Error              = RGB_COLOUR_Red,
+			RGB_ALIAS_Ready              = RGB_COLOUR_Green,
+			RGB_ALIAS_BluetoothConnected = RGB_COLOUR_Blue,
+			RGB_ALIAS_BluetoothBusy      = RGB_COLOUR_Cyan,
+		};
 
 	/* Function Prototypes: */
-		void SetupHardware(void);
-
-		void EVENT_USB_Host_HostError(const uint8_t ErrorCode);
-		void EVENT_USB_Host_DeviceAttached(void);
-		void EVENT_USB_Host_DeviceUnattached(void);
-		void EVENT_USB_Host_DeviceEnumerationFailed(const uint8_t ErrorCode,
-		                                            const uint8_t SubErrorCode);
-		void EVENT_USB_Host_DeviceEnumerationComplete(void);
+		void RGB_Init(void);
+		void RGB_SetColour(const RGB_Colour_t Colour);
 
 #endif
 

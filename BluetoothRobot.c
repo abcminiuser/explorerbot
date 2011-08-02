@@ -30,30 +30,6 @@
 
 #include "BluetoothRobot.h"
 
-/** Processed HID report descriptor items structure, containing information on each HID report element */
-static HID_ReportInfo_t HIDReportInfo;
-
-/** LUFA HID Class driver interface configuration and state information. This structure is
- *  passed to all HID Class driver functions, so that multiple instances of the same class
- *  within a device can be differentiated from one another.
- */
-USB_ClassInfo_HID_Host_t Joystick_HID_Interface =
-	{
-		.Config =
-			{
-				.DataINPipeNumber       = 1,
-				.DataINPipeDoubleBank   = false,
-
-				.DataOUTPipeNumber      = 2,
-				.DataOUTPipeDoubleBank  = false,
-
-				.HIDInterfaceProtocol   = HID_CSCP_NonBootProtocol,
-
-				.HIDParserData          = &HIDReportInfo
-			},
-	};
-
-
 /** Main program entry point. This routine configures the hardware required by the application, then
  *  enters a loop to run the application tasks in sequence.
  */
@@ -61,15 +37,12 @@ int main(void)
 {
 	SetupHardware();
 
-	puts_P(PSTR(ESC_FG_CYAN "Joystick Host Demo running.\r\n" ESC_FG_WHITE));
-
+	RGB_SetColour(RGB_ALIAS_Disconnected);
 	sei();
 
 	for (;;)
 	{
-		JoystickHost_Task();
-
-		HID_Host_USBTask(&Joystick_HID_Interface);
+		Joystick_USBTask();
 		USB_USBTask();
 	}
 }
@@ -85,57 +58,9 @@ void SetupHardware(void)
 	clock_prescale_set(clock_div_1);
 
 	/* Hardware Initialization */
-	Serial_Init(9600, false);
+	Motors_Init();
+	RGB_Init();
 	USB_Init();
-
-	/* Create a stdio stream for the serial port for stdin and stdout */
-	Serial_CreateStream(NULL);
-}
-
-/** Task to manage an enumerated USB joystick once connected, to display movement
- *  data as it is received.
- */
-void JoystickHost_Task(void)
-{
-	if (USB_HostState != HOST_STATE_Configured)
-	  return;
-
-	if (HID_Host_IsReportReceived(&Joystick_HID_Interface))
-	{
-		uint8_t JoystickReport[Joystick_HID_Interface.State.LargestReportSize];
-		HID_Host_ReceiveReport(&Joystick_HID_Interface, &JoystickReport);
-
-		for (uint8_t ReportNumber = 0; ReportNumber < HIDReportInfo.TotalReportItems; ReportNumber++)
-		{
-			HID_ReportItem_t* ReportItem = &HIDReportInfo.ReportItems[ReportNumber];
-
-			/* Update the report item value if it is contained within the current report */
-			if (!(USB_GetHIDReportItemInfo(JoystickReport, ReportItem)))
-			  continue;
-
-			/* Determine what report item is being tested, process updated value as needed */
-			if ((ReportItem->Attributes.Usage.Page        == USAGE_PAGE_BUTTON) &&
-			    (ReportItem->ItemType                     == HID_REPORT_ITEM_In))
-			{
-				// TODO
-			}
-			else if ((ReportItem->Attributes.Usage.Page   == USAGE_PAGE_GENERIC_DCTRL) &&
-			         ((ReportItem->Attributes.Usage.Usage == USAGE_X)                  ||
-			          (ReportItem->Attributes.Usage.Usage == USAGE_Y))                 &&
-			         (ReportItem->ItemType                == HID_REPORT_ITEM_In))
-			{
-				int16_t DeltaMovement = HID_ALIGN_DATA(ReportItem, int16_t);
-
-				if (DeltaMovement)
-				{
-					if (ReportItem->Attributes.Usage.Usage == USAGE_X)
-					  (void)0; // TODO
-					else
-					  (void)0; // TODO
-				}
-			}
-		}
-	}
 }
 
 /** Event handler for the USB_DeviceAttached event. This indicates that a device has been attached to the host, and
@@ -143,7 +68,7 @@ void JoystickHost_Task(void)
  */
 void EVENT_USB_Host_DeviceAttached(void)
 {
-	puts_P(PSTR("Device Attached.\r\n"));
+	RGB_SetColour(RGB_ALIAS_Enumerating);
 }
 
 /** Event handler for the USB_DeviceUnattached event. This indicates that a device has been removed from the host, and
@@ -151,7 +76,7 @@ void EVENT_USB_Host_DeviceAttached(void)
  */
 void EVENT_USB_Host_DeviceUnattached(void)
 {
-	puts_P(PSTR("\r\nDevice Unattached.\r\n"));
+	RGB_SetColour(RGB_ALIAS_Disconnected);
 }
 
 /** Event handler for the USB_DeviceEnumerationComplete event. This indicates that a device has been successfully
@@ -159,46 +84,49 @@ void EVENT_USB_Host_DeviceUnattached(void)
  */
 void EVENT_USB_Host_DeviceEnumerationComplete(void)
 {
+	USB_Descriptor_Device_t DeviceDescriptor;
 	uint16_t ConfigDescriptorSize;
 	uint8_t  ConfigDescriptorData[512];
 
+	if (USB_Host_GetDeviceDescriptor(&DeviceDescriptor) != HOST_SENDCONTROL_Successful)
+	{
+		RGB_SetColour(RGB_ALIAS_Error);
+		return;
+	}
+	  
 	if (USB_Host_GetDeviceConfigDescriptor(1, &ConfigDescriptorSize, ConfigDescriptorData,
 	                                       sizeof(ConfigDescriptorData)) != HOST_GETCONFIG_Successful)
 	{
-		puts_P(PSTR("Error Retrieving Configuration Descriptor.\r\n"));
+		RGB_SetColour(RGB_ALIAS_Error);
 		return;
 	}
 
-	if (HID_Host_ConfigurePipes(&Joystick_HID_Interface,
-	                            ConfigDescriptorSize, ConfigDescriptorData) != HID_ENUMERROR_NoError)
+	if (!(Joystick_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData)))
 	{
-		puts_P(PSTR("Attached Device Not a Valid Joystick.\r\n"));
+		RGB_SetColour(RGB_ALIAS_UnknownDevice);
 		return;
 	}
 
 	if (USB_Host_SetDeviceConfiguration(1) != HOST_SENDCONTROL_Successful)
 	{
-		puts_P(PSTR("Error Setting Device Configuration.\r\n"));
+		RGB_SetColour(RGB_ALIAS_Error);
 		return;
 	}
-
-	if (HID_Host_SetReportProtocol(&Joystick_HID_Interface) != 0)
+	
+	if (!(Joystick_PostConfiguration()))
 	{
-		puts_P(PSTR("Error Setting Report Protocol Mode or Not a Valid Joystick.\r\n"));
-		USB_Host_SetDeviceConfiguration(0);
+		RGB_SetColour(RGB_ALIAS_Error);
 		return;
 	}
 
-	puts_P(PSTR("Joystick Enumerated.\r\n"));
+	RGB_SetColour(RGB_ALIAS_Ready);
 }
 
 /** Event handler for the USB_HostError event. This indicates that a hardware error occurred while in host mode. */
 void EVENT_USB_Host_HostError(const uint8_t ErrorCode)
 {
 	USB_Disable();
-
-	printf_P(PSTR(ESC_FG_RED "Host Mode Error\r\n"
-	                         " -- Error Code %d\r\n" ESC_FG_WHITE), ErrorCode);
+	RGB_SetColour(RGB_ALIAS_Error);
 
 	for(;;);
 }
@@ -209,48 +137,5 @@ void EVENT_USB_Host_HostError(const uint8_t ErrorCode)
 void EVENT_USB_Host_DeviceEnumerationFailed(const uint8_t ErrorCode,
                                             const uint8_t SubErrorCode)
 {
-	printf_P(PSTR(ESC_FG_RED "Dev Enum Error\r\n"
-	                         " -- Error Code %d\r\n"
-	                         " -- Sub Error Code %d\r\n"
-	                         " -- In State %d\r\n" ESC_FG_WHITE), ErrorCode, SubErrorCode, USB_HostState);
+	RGB_SetColour(RGB_ALIAS_Error);
 }
-
-/** Callback for the HID Report Parser. This function is called each time the HID report parser is about to store
- *  an IN, OUT or FEATURE item into the HIDReportInfo structure. To save on RAM, we are able to filter out items
- *  we aren't interested in (preventing us from being able to extract them later on, but saving on the RAM they would
- *  have occupied).
- *
- *  \param[in] CurrentItem  Pointer to the item the HID report parser is currently working with
- *
- *  \return Boolean true if the item should be stored into the HID report structure, false if it should be discarded
- */
-bool CALLBACK_HIDParser_FilterHIDReportItem(HID_ReportItem_t* const CurrentItem)
-{
-	bool IsJoystick = false;
-
-	/* Iterate through the item's collection path, until either the root collection node or a collection with the
-	 * Joystick Usage is found - this prevents Mice, which use identical descriptors except for the Joystick usage
-	 * parent node, from being erroneously treated as a joystick by the demo
-	 */
-	for (HID_CollectionPath_t* CurrPath = CurrentItem->CollectionPath; CurrPath != NULL; CurrPath = CurrPath->Parent)
-	{
-		if ((CurrPath->Usage.Page  == USAGE_PAGE_GENERIC_DCTRL) &&
-		    (CurrPath->Usage.Usage == USAGE_JOYSTICK))
-		{
-			IsJoystick = true;
-			break;
-		}
-	}
-
-	/* If a collection with the joystick usage was not found, indicate that we are not interested in this item */
-	if (!IsJoystick)
-	  return false;
-
-	/* Check the attributes of the current item - see if we are interested in it or not;
-	 * only store BUTTON and GENERIC_DESKTOP_CONTROL items into the Processed HID Report
-	 * structure to save RAM and ignore the rest
-	 */
-	return ((CurrentItem->Attributes.Usage.Page == USAGE_PAGE_BUTTON) ||
-	        (CurrentItem->Attributes.Usage.Page == USAGE_PAGE_GENERIC_DCTRL));
-}
-

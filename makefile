@@ -130,9 +130,11 @@ include $(LUFA_PATH)/LUFA/makefile
 
 # List C source files here. (C dependencies are automatically generated.)
 SRC = $(TARGET).c                                                 \
+	  JoystickControl.c                                           \
+	  RGB.c                                                       \
+	  Motors.c                                                    \
 	  $(LUFA_SRC_USB)                                             \
 	  $(LUFA_SRC_USBCLASS)                                        \
-	  $(LUFA_SRC_SERIAL)
 
 
 # List C++ source files here. (C dependencies are automatically generated.)

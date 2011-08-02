@@ -28,32 +28,14 @@
   this software.
 */
 
-#ifndef _BLUETOOTH_ROBOT_H_
-#define _BLUETOOTH_ROBOT_H_
+#include "Motors.h"
 
-	/* Includes: */
-		#include <avr/io.h>
-		#include <avr/wdt.h>
-		#include <avr/power.h>
-		#include <avr/interrupt.h>
-		#include <stdbool.h>
-		
-		#include <LUFA/Drivers/USB/USB.h>
-		
-		#include "JoystickControl.h"
+void Motors_Init(void)
+{
+	
+}
 
-		#include "Motors.h"
-		#include "RGB.h"
-
-	/* Function Prototypes: */
-		void SetupHardware(void);
-
-		void EVENT_USB_Host_HostError(const uint8_t ErrorCode);
-		void EVENT_USB_Host_DeviceAttached(void);
-		void EVENT_USB_Host_DeviceUnattached(void);
-		void EVENT_USB_Host_DeviceEnumerationFailed(const uint8_t ErrorCode,
-		                                            const uint8_t SubErrorCode);
-		void EVENT_USB_Host_DeviceEnumerationComplete(void);
-
-#endif
-
+void Motors_SetChannelSpeed(const Motor_Channel_t Channel, const uint8_t Percentage)
+{
+	
+}

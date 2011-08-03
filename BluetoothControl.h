@@ -43,12 +43,28 @@
 		#include "RGB.h"
 		#include "Speaker.h"
 
+	/* Macros: */
+		/** Device Class value for the Bluetooth Device class. */
+		#define BLUETOOTH_DEVICE_CLASS           0xE0
+
+		/** Device Subclass value for the Bluetooth Device class. */
+		#define BLUETOOTH_DEVICE_SUBCLASS        0x01
+
+		/** Device Protocol value for the Bluetooth Device class. */
+		#define BLUETOOTH_DEVICE_PROTOCOL        0x01
+		
+		#define BLUETOOTH_DATA_IN_PIPE           1
+		#define BLUETOOTH_DATA_OUT_PIPE          2
+		#define BLUETOOTH_EVENTS_PIPE            3
+
 	/* Function Prototypes: */
-		bool Bluetooth_ConfigurePipes(const USB_Descriptor_Device_t* DeviceDescriptor,
-		                              const uint16_t ConfigDescriptorSize,
-		                              uint8_t* ConfigDescriptorData);
+		bool Bluetooth_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
+		                              uint16_t ConfigDescriptorSize,
+		                              void* ConfigDescriptorData);
 		bool Bluetooth_PostConfiguration(void);
 		void Bluetooth_USBTask(void);
+
+		uint8_t DComp_NextInterfaceBluetoothDataEndpoint(void* CurrentDescriptor);
 
 #endif
 

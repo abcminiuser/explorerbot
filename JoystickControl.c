@@ -61,9 +61,9 @@ USB_ClassInfo_HID_Host_t Joystick_HID_Interface =
  *
  *  \return  Boolean true if a valid HID Joystick interface was found, false otherwise.
  */
-bool Joystick_ConfigurePipes(const USB_Descriptor_Device_t* DeviceDescriptor,
-                             const uint16_t ConfigDescriptorSize,
-                             uint8_t* ConfigDescriptorData)
+bool Joystick_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
+                             uint16_t ConfigDescriptorSize,
+                             void* ConfigDescriptorData)
 {
 	return (HID_Host_ConfigurePipes(&Joystick_HID_Interface, ConfigDescriptorSize, ConfigDescriptorData) == HID_ENUMERROR_NoError);
 }
@@ -83,7 +83,7 @@ bool Joystick_PostConfiguration(void)
 /** Task to manage an enumerated USB joystick once connected, to display movement data as it is received. */
 void Joystick_USBTask(void)
 {
-	if (USB_HostState != HOST_STATE_Configured)
+	if ((USB_HostState != HOST_STATE_Configured) || !(Joystick_HID_Interface.State.IsActive))
 	  return;
 
 	if (HID_Host_IsReportReceived(&Joystick_HID_Interface))

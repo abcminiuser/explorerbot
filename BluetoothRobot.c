@@ -91,6 +91,8 @@ void SetupHardware(void)
  */
 void EVENT_USB_Host_DeviceAttached(void)
 {
+	LCD_Clear();
+	LCD_WriteString_P(PSTR("* Enumerating *"));
 	RGB_SetColour(RGB_ALIAS_Enumerating);
 }
 
@@ -99,6 +101,8 @@ void EVENT_USB_Host_DeviceAttached(void)
  */
 void EVENT_USB_Host_DeviceUnattached(void)
 {
+	LCD_Clear();
+	LCD_WriteString_P(PSTR("* Insert USB *"));
 	RGB_SetColour(RGB_ALIAS_Disconnected);
 }
 
@@ -113,6 +117,8 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 
 	if (USB_Host_GetDeviceDescriptor(&DeviceDescriptor) != HOST_SENDCONTROL_Successful)
 	{
+		LCD_Clear();
+		LCD_WriteString_P(PSTR("ERR: Dev Desc"));
 		RGB_SetColour(RGB_ALIAS_Error);
 		return;
 	}
@@ -120,6 +126,8 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 	if (USB_Host_GetDeviceConfigDescriptor(1, &ConfigDescriptorSize, ConfigDescriptorData,
 	                                       sizeof(ConfigDescriptorData)) != HOST_GETCONFIG_Successful)
 	{
+		LCD_Clear();
+		LCD_WriteString_P(PSTR("ERR: Config Desc"));
 		RGB_SetColour(RGB_ALIAS_Error);
 		return;
 	}
@@ -127,22 +135,30 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 	if (!(Joystick_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData)) &&
 	    !(Bluetooth_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData)))
 	{
+		LCD_Clear();
+		LCD_WriteString_P(PSTR("ERR: Unknown USB"));
 		RGB_SetColour(RGB_ALIAS_UnknownDevice);
 		return;
 	}
 
 	if (USB_Host_SetDeviceConfiguration(1) != HOST_SENDCONTROL_Successful)
 	{
+		LCD_Clear();
+		LCD_WriteString_P(PSTR("ERR: Set Config"));
 		RGB_SetColour(RGB_ALIAS_Error);
 		return;
 	}
 	
 	if (!(Joystick_PostConfiguration()) || !(Bluetooth_PostConfiguration()))
 	{
+		LCD_Clear();
+		LCD_WriteString_P(PSTR("ERR: Post Config"));
 		RGB_SetColour(RGB_ALIAS_Error);
 		return;
 	}
 	
+	LCD_Clear();
+	LCD_WriteString_P(PSTR("* SYSTEM READY *"));
 	RGB_SetColour(RGB_ALIAS_Ready);
 }
 
@@ -150,6 +166,9 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 void EVENT_USB_Host_HostError(const uint8_t ErrorCode)
 {
 	USB_Disable();
+
+	LCD_Clear();
+	LCD_WriteString_P(PSTR("ERR: Host Error"));
 	RGB_SetColour(RGB_ALIAS_Error);
 
 	for(;;);
@@ -161,5 +180,7 @@ void EVENT_USB_Host_HostError(const uint8_t ErrorCode)
 void EVENT_USB_Host_DeviceEnumerationFailed(const uint8_t ErrorCode,
                                             const uint8_t SubErrorCode)
 {
+	LCD_Clear();
+	LCD_WriteString_P(PSTR("ERR: Device Enum"));
 	RGB_SetColour(RGB_ALIAS_Error);
 }

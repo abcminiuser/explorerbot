@@ -60,9 +60,9 @@
 		#define USAGE_Y                     0x31
 
 	/* Function Prototypes: */
-		bool Joystick_ConfigurePipes(const USB_Descriptor_Device_t* DeviceDescriptor,
-		                             const uint16_t ConfigDescriptorSize,
-		                             uint8_t* ConfigDescriptorData);
+		bool Joystick_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
+		                             uint16_t ConfigDescriptorSize,
+		                             void* ConfigDescriptorData);
 		bool Joystick_PostConfiguration(void);
 		void Joystick_USBTask(void);
 

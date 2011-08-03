@@ -28,39 +28,25 @@
   this software.
 */
 
-#ifndef _RGB_H_
-#define _RGB_H_
+#ifndef _EXTERNAL_SRAM_H_
+#define _EXTERNAL_SRAM_H_
 
 	/* Includes: */
 		#include <avr/io.h>
-
-	/* Enums: */
-		typedef enum
-		{
-			RGB_COLOUR_Off          = 0,
-			RGB_COLOUR_Red          = (1 << 6),
-			RGB_COLOUR_Green        = (1 << 5),
-			RGB_COLOUR_Blue         = (1 << 4),
-			RGB_COLOUR_Yellow       = (RGB_COLOUR_Red  | RGB_COLOUR_Green),
-			RGB_COLOUR_Cyan         = (RGB_COLOUR_Blue | RGB_COLOUR_Green),			
-			RGB_COLOUR_Magenta      = (RGB_COLOUR_Red  | RGB_COLOUR_Blue),
-			RGB_COLOUR_White        = (RGB_COLOUR_Red  | RGB_COLOUR_Green | RGB_COLOUR_Blue),
-		} RGB_Colour_t;
 		
-		enum RGB_Colour_Aliases_t
-		{
-			RGB_ALIAS_Disconnected  = RGB_COLOUR_White,
-			RGB_ALIAS_Enumerating   = RGB_COLOUR_Yellow,
-			RGB_ALIAS_UnknownDevice = RGB_COLOUR_Magenta,
-			RGB_ALIAS_Error         = RGB_COLOUR_Red,
-			RGB_ALIAS_Ready         = RGB_COLOUR_Green,
-			RGB_ALIAS_Connected     = RGB_COLOUR_Blue,
-			RGB_ALIAS_Busy          = RGB_COLOUR_Cyan,
-		};
+	/* Macros: */
+		#define EXTERNAL_MEMORY_START 0x2100
 
 	/* Function Prototypes: */
-		void RGB_Init(void);
-		void RGB_SetColour(const RGB_Colour_t Colour);
+		void ExternalSRAM_Init(void);
+		
+	/* Inline Functions: */
+		static inline void ExternalSRAM_SetBank(const uint8_t Index)
+		{
+			if (Index)
+			  PORTE |=  (1 << 7);
+			else
+			  PORTE &= ~(1 << 7);
+		}
 
 #endif
-

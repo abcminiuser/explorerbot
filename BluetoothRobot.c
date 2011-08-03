@@ -37,10 +37,6 @@ int main(void)
 {
 	SetupHardware();
 	
-	LCD_WriteString_P(PSTR("Bluetooth  Robot"));
-	LCD_SetCursor(2, 0);
-	LCD_WriteString_P(PSTR(" By Dean Camera "));
-	
 	for (uint8_t i = 0; i < 0xFF; i++)
 	{
 		LCD_SetBacklight(i);
@@ -48,6 +44,10 @@ int main(void)
 
 		Delay_MS(3);
 	}
+
+	LCD_WriteString_P(PSTR("Bluetooth  Robot"));
+	LCD_SetCursor(2, 0);
+	LCD_WriteString_P(PSTR(" By Dean Camera "));
 	
 	Speaker_Tone(0);
 	RGB_SetColour(RGB_ALIAS_Disconnected);
@@ -70,10 +70,15 @@ void SetupHardware(void)
 	/* Disable clock division */
 	clock_prescale_set(clock_div_1);
 
+	/* Disable JTAG to allow RGB LEDs to work */
+	MCUCR |= (1 << JTD);
+	MCUCR |= (1 << JTD);
+
 	/* Hardware Initialization */
-	LCD_Init();
+	ExternalSRAM_Init();
 	Buttons_Init();
 	Headlights_Init();
+	LCD_Init();
 	Motors_Init();
 	RGB_Init();
 	Sensors_Init();
@@ -111,7 +116,7 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 		RGB_SetColour(RGB_ALIAS_Error);
 		return;
 	}
-	  
+
 	if (USB_Host_GetDeviceConfigDescriptor(1, &ConfigDescriptorSize, ConfigDescriptorData,
 	                                       sizeof(ConfigDescriptorData)) != HOST_GETCONFIG_Successful)
 	{
@@ -119,7 +124,8 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 		return;
 	}
 
-	if (!(Joystick_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData)))
+	if (!(Joystick_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData)) &&
+	    !(Bluetooth_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData)))
 	{
 		RGB_SetColour(RGB_ALIAS_UnknownDevice);
 		return;
@@ -131,12 +137,12 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 		return;
 	}
 	
-	if (!(Joystick_PostConfiguration()))
+	if (!(Joystick_PostConfiguration()) || !(Bluetooth_PostConfiguration()))
 	{
 		RGB_SetColour(RGB_ALIAS_Error);
 		return;
 	}
-
+	
 	RGB_SetColour(RGB_ALIAS_Ready);
 }
 

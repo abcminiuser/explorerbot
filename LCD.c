@@ -30,28 +30,83 @@
 
 #include "LCD.h"
 
+static void LCD_SetDataLines(const uint8_t Data)
+{
+	uint8_t NewData = 0;
+				
+	if (Data & 0x01)
+	  NewData |= LCD_DATA4;
+	  
+	if (Data & 0x02)
+	  NewData |= LCD_DATA5;
+
+	if (Data & 0x04)
+	  NewData |= LCD_DATA6;
+
+	if (Data & 0x08)
+	  NewData |= LCD_DATA7;
+
+	PORTF = (PORTF & ~(LCD_DATA7 | LCD_DATA6 | LCD_DATA5 | LCD_DATA4)) | NewData;
+	
+	PORTE |= LCD_E;
+	Delay_MS(1);
+	PORTE &= ~LCD_E;
+}
+		
+static uint8_t LCD_GetDataLines(void)
+{
+	uint8_t CurrDataLines;
+	uint8_t NewData = 0;
+	
+	PORTE |= LCD_E;
+	Delay_MS(1);
+	PORTE &= ~LCD_E;
+	
+	CurrDataLines = PINF;
+				
+	if (CurrDataLines & LCD_DATA4)
+	  NewData |= 0x01;
+	  
+	if (CurrDataLines & LCD_DATA5)
+	  NewData |= 0x02;
+	
+	if (CurrDataLines & LCD_DATA6)
+	  NewData |= 0x04;
+
+	if (CurrDataLines & LCD_DATA7)
+	  NewData |= 0x08;
+
+	return NewData;
+}
+
 void LCD_Init(void)
 {
 	DDRE |= LCD_E | LCD_RS | LCD_RW;
-	DDRF |= ((1 << 3) | (1 << 2) | (1 << 1) | (1 << 0));
+	DDRF |= LCD_DATA7 | LCD_DATA6 | LCD_DATA5 | LCD_DATA4;
 	DDRB |= (1 << 4);
 	
 	TCCR2A = ((1 << COM2A1) | (1 << COM2A0) | (1 << WGM21) | (1 << WGM20));
 
 	LCD_SetBacklight(0);
-	
-	// TODO
-}
 
-void LCD_Clear(void)
-{
-	// TODO
+	LCD_SetDataLines(0b0011);
+	Delay_MS(5);
+	LCD_SetDataLines(0b0011);
+	Delay_MS(1);
+	LCD_SetDataLines(0b0011);
+	LCD_SetDataLines(0b0010);
+	
+	LCD_WriteByte(0x88);
+	LCD_WriteByte(0x08);
+	LCD_WriteByte(0x01);
+	LCD_WriteByte(0x04);
+	
+	LCD_Clear();
+	LCD_SetCursor(1, 0);	
 }
 
 void LCD_SetBacklight(const uint8_t Intensity)
-{
-	OCR2A = Intensity;
-	
+{	
 	if (!(Intensity))
 	{
 		TCCR2B = 0;
@@ -59,26 +114,54 @@ void LCD_SetBacklight(const uint8_t Intensity)
 	}
 	else
 	{
+		OCR2A = Intensity;
 		TCCR2B = (1 << CS20);	
 	}
+}
+
+void LCD_Clear(void)
+{
+	PORTE &= ~LCD_RS;
+	LCD_WriteByte(0x01);
+	PORTE |=  LCD_RS;
 }
 
 void LCD_SetCursor(const uint8_t Y,
                    const uint8_t X)
 {
-	// TODO
+	PORTE &= ~LCD_RS;
+	LCD_WriteByte(0x80 | (((Y - 1) * 64) + X));
+	PORTE |=  LCD_RS;
 }
 
-void LCD_WriteChar(const char Character)
+uint8_t LCD_ReadByte(void)
 {
-	// TODO
+	uint8_t Byte = 0;
+
+	PORTF &= ~(LCD_DATA7 | LCD_DATA6 | LCD_DATA5 | LCD_DATA4);
+	DDRF  &= ~(LCD_DATA7 | LCD_DATA6 | LCD_DATA5 | LCD_DATA4);
+	PORTE |= LCD_RW;
+
+	Byte |= (LCD_GetDataLines() << 4);
+	Byte |= LCD_GetDataLines();
+	
+	return Byte;
+}
+
+void LCD_WriteByte(const uint8_t Byte)
+{
+	PORTE &= ~LCD_RW;
+	DDRF  |= LCD_DATA7 | LCD_DATA6 | LCD_DATA5 | LCD_DATA4;
+	
+	LCD_SetDataLines(Byte >> 4);
+	LCD_SetDataLines(Byte & 0x0F);
 }
 
 void LCD_WriteString(const char* String)
 {
 	while (*String != 0x00)
 	{
-		LCD_WriteChar(*String);
+		LCD_WriteByte(*String);
 		String++;
 	}
 }
@@ -89,7 +172,7 @@ void LCD_WriteString_P(const char* String)
 
 	while ((CurrByte = pgm_read_byte(String)) != 0x00)
 	{
-		LCD_WriteChar(CurrByte);
+		LCD_WriteByte(CurrByte);
 		String++;
 	}
 }

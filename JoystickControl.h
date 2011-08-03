@@ -40,6 +40,8 @@
 		
 		#include "Headlights.h"
 		#include "Motors.h"
+		#include "RGB.h"
+		#include "Speaker.h"
 
 	/* Macros: */
 		/** HID Report Descriptor Usage Page value for a toggle button. */

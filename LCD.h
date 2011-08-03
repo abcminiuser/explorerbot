@@ -35,20 +35,27 @@
 		#include <avr/io.h>
 		#include <avr/pgmspace.h>
 		#include <stdbool.h>
+
+		#include <LUFA/Common/Common.h>
 		
 	/* Macros: */
-		#define LCD_E    (1 << 3)
-		#define LCD_RW   (1 << 4)
-		#define LCD_RS   (1 << 5)
+		#define LCD_E      (1 << 3)
+		#define LCD_RW     (1 << 4)
+		#define LCD_RS     (1 << 5)
+		#define LCD_DATA7  (1 << 0)
+		#define LCD_DATA6  (1 << 1)
+		#define LCD_DATA5  (1 << 2)
+		#define LCD_DATA4  (1 << 3)
 		
 	/* Function Prototypes: */
-		void LCD_Init(void);
-		void LCD_Clear(void);
-		void LCD_SetBacklight(const uint8_t Intensity);
-		void LCD_SetCursor(const uint8_t Y,
-		                   const uint8_t X);
-		void LCD_WriteChar(const char Character);
-		void LCD_WriteString(const char* String);
-		void LCD_WriteString_P(const char* String);
-
+		void    LCD_Init(void);
+		void    LCD_SetBacklight(const uint8_t Intensity);
+		void    LCD_Clear(void);
+		void    LCD_SetCursor(const uint8_t Y,
+		                      const uint8_t X);
+		void    LCD_WriteByte(const uint8_t Byte);
+		uint8_t LCD_ReadByte(void);
+		void    LCD_WriteString(const char* String);
+		void    LCD_WriteString_P(const char* String);
+		
 #endif

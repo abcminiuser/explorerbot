@@ -41,8 +41,6 @@ void Speaker_Init(void)
 
 void Speaker_Tone(const uint8_t PWMValue)
 {
-	OCR0A = PWMValue;
-
 	if (!(PWMValue))
 	{
 		TCCR0B = 0;
@@ -50,6 +48,7 @@ void Speaker_Tone(const uint8_t PWMValue)
 	}
 	else
 	{
+		OCR0A = PWMValue;
 		TCCR0B = ((1 << CS01) | (1 << CS00));	
 	}
 }

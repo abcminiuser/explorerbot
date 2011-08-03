@@ -80,9 +80,7 @@ bool Joystick_PostConfiguration(void)
 	return (HID_Host_SetReportProtocol(&Joystick_HID_Interface) == 0);
 }
 
-/** Task to manage an enumerated USB joystick once connected, to display movement
- *  data as it is received.
- */
+/** Task to manage an enumerated USB joystick once connected, to display movement data as it is received. */
 void Joystick_USBTask(void)
 {
 	if (USB_HostState != HOST_STATE_Configured)
@@ -159,9 +157,13 @@ bool CALLBACK_HIDParser_FilterHIDReportItem(HID_ReportItem_t* const CurrentItem)
 		}
 	}
 
+#if !defined(ALLOW_MOUSE_CONTROL)
 	/* If a collection with the joystick usage was not found, indicate that we are not interested in this item */
 	if (!IsJoystick)
 	  return false;
+#endif
+
+	RGB_SetColour(RGB_ALIAS_Connected);
 
 	/* Check the attributes of the current item - see if we are interested in it or not;
 	 * only store BUTTON and GENERIC_DESKTOP_CONTROL items into the Processed HID Report

@@ -125,6 +125,7 @@ LUFA_OPTS += -D USE_STATIC_OPTIONS="(USB_OPT_REG_ENABLED | USB_OPT_AUTO_PLL)"
 LUFA_OPTS += -D NO_SOF_EVENTS
 LUFA_OPTS += -D HOST_STATE_AS_GPIOR
 LUFA_OPTS += -D HID_MAX_REPORTITEMS=15
+LUFA_OPTS += -D ALLOW_MOUSE_CONTROL
 
 # Create the LUFA source path variables by including the LUFA root makefile
 include $(LUFA_PATH)/LUFA/makefile
@@ -132,8 +133,10 @@ include $(LUFA_PATH)/LUFA/makefile
 
 # List C source files here. (C dependencies are automatically generated.)
 SRC = $(TARGET).c                                                 \
+	  BluetoothControl.c                                          \
 	  JoystickControl.c                                           \
 	  Buttons.c                                                   \
+	  ExternalSRAM.c                                              \
 	  Headlights.c                                                \
 	  LCD.c                                                       \
 	  Motors.c                                                    \
@@ -322,9 +325,7 @@ EXTRALIBDIRS =
 
 # 64 KB of external RAM, starting after internal RAM (ATmega128!),
 # only used for heap (malloc()).
-#EXTMEMOPTS = -Wl,--section-start,.data=0x801100,--defsym=__heap_end=0x80ffff
-
-EXTMEMOPTS =
+EXTMEMOPTS = -Wl,--section-start,.data=0x802100,--defsym=__heap_end=0x80ffff
 
 
 

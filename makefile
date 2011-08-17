@@ -325,7 +325,7 @@ EXTRALIBDIRS =
 
 # 64 KB of external RAM, starting after internal RAM (ATmega128!),
 # only used for heap (malloc()).
-EXTMEMOPTS = -Wl,--section-start,.data=0x802100,--defsym=__heap_end=0x80ffff
+#EXTMEMOPTS = -Wl,--section-start,.data=0x802100,--defsym=__heap_end=0x80ffff
 
 
 

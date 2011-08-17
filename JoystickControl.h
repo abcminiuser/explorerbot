@@ -58,6 +58,9 @@
 
 		/** HID Report Descriptor Usage value for a Y axis movement. */
 		#define USAGE_Y                     0x31
+		
+	/* External Variables: */
+		extern USB_ClassInfo_HID_Host_t Joystick_HID_Interface;
 
 	/* Function Prototypes: */
 		bool Joystick_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,

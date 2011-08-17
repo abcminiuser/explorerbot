@@ -32,9 +32,9 @@
 
 void Sensors_Init(void)
 {
-	DDRB &= ((1 << 0) | (1 << 1) | (1 << 2));
-	DDRB |= (1 << 3);
-	DDRD &= (1 << 2);
+	DDRB &= ~((1 << 0) | (1 << 1) | (1 << 2));
+	DDRB |=  (1 << 3);
+	DDRD &= ~(1 << 2);
 	
 	TWI_Init(TWI_BIT_PRESCALE_64, 10);
 }

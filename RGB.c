@@ -37,7 +37,7 @@ void RGB_Init(void)
 	RGB_SetColour(RGB_COLOUR_Off);
 }
 
-void RGB_SetColour(const RGB_Colour_t Colour)
+void RGB_SetColour(const uint8_t Colour)
 {
 	PORTF = (PORTF | RGB_COLOUR_White) & ~Colour;
 }

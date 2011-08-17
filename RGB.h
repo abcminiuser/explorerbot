@@ -38,9 +38,9 @@
 		typedef enum
 		{
 			RGB_COLOUR_Off          = 0,
-			RGB_COLOUR_Red          = (1 << 6),
+			RGB_COLOUR_Red          = (1 << 4),
 			RGB_COLOUR_Green        = (1 << 5),
-			RGB_COLOUR_Blue         = (1 << 4),
+			RGB_COLOUR_Blue         = (1 << 6),
 			RGB_COLOUR_Yellow       = (RGB_COLOUR_Red  | RGB_COLOUR_Green),
 			RGB_COLOUR_Cyan         = (RGB_COLOUR_Blue | RGB_COLOUR_Green),			
 			RGB_COLOUR_Magenta      = (RGB_COLOUR_Red  | RGB_COLOUR_Blue),
@@ -60,7 +60,7 @@
 
 	/* Function Prototypes: */
 		void RGB_Init(void);
-		void RGB_SetColour(const RGB_Colour_t Colour);
+		void RGB_SetColour(const uint8_t Colour);
 
 #endif
 

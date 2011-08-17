@@ -48,6 +48,7 @@ static void LCD_SetDataLines(const uint8_t Data)
 
 	PORTF = (PORTF & ~(LCD_DATA7 | LCD_DATA6 | LCD_DATA5 | LCD_DATA4)) | NewData;
 	
+	Delay_MS(1);
 	PORTE |= LCD_E;
 	Delay_MS(1);
 	PORTE &= ~LCD_E;
@@ -61,6 +62,7 @@ static uint8_t LCD_GetDataLines(void)
 	PORTE |= LCD_E;
 	Delay_MS(1);
 	PORTE &= ~LCD_E;
+	Delay_MS(1);
 	
 	CurrDataLines = PINF;
 				
@@ -81,14 +83,15 @@ static uint8_t LCD_GetDataLines(void)
 
 void LCD_Init(void)
 {
-	DDRE |= LCD_E | LCD_RS | LCD_RW;
-	DDRF |= LCD_DATA7 | LCD_DATA6 | LCD_DATA5 | LCD_DATA4;
+	DDRE |= (LCD_E | LCD_RS | LCD_RW);
+	DDRF |= (LCD_DATA7 | LCD_DATA6 | LCD_DATA5 | LCD_DATA4);
 	DDRB |= (1 << 4);
 	
-	TCCR2A = ((1 << COM2A1) | (1 << COM2A0) | (1 << WGM21) | (1 << WGM20));
+	TCCR2A = ((1 << COM2A1) | (1 << WGM20));
 
 	LCD_SetBacklight(0);
 
+	PORTE &= ~LCD_RS;
 	LCD_SetDataLines(0b0011);
 	Delay_MS(5);
 	LCD_SetDataLines(0b0011);
@@ -100,9 +103,11 @@ void LCD_Init(void)
 	LCD_WriteByte(0x08);
 	LCD_WriteByte(0x01);
 	LCD_WriteByte(0x04);
+	LCD_WriteByte(0x0C);
+	PORTE |=  LCD_RS;
 	
 	LCD_Clear();
-	LCD_SetCursor(1, 0);	
+	LCD_SetCursor(1, 0);
 }
 
 void LCD_SetBacklight(const uint8_t Intensity)
@@ -114,8 +119,8 @@ void LCD_SetBacklight(const uint8_t Intensity)
 	}
 	else
 	{
-		OCR2A = Intensity;
-		TCCR2B = (1 << CS20);	
+		OCR2A  = Intensity;
+		TCCR2B = (1 << CS21);
 	}
 }
 

@@ -101,6 +101,7 @@ void Joystick_USBTask(void)
 
 			/* Determine what report item is being tested, process updated value as needed */
 			if ((ReportItem->Attributes.Usage.Page        == USAGE_PAGE_BUTTON) &&
+			    (ReportItem->Attributes.Usage.Usage       == 1) &&			
 			    (ReportItem->ItemType                     == HID_REPORT_ITEM_In))
 			{
 				Headlights_SetState(ReportItem->Value != 0);
@@ -119,6 +120,14 @@ void Joystick_USBTask(void)
 				  MotorBalance = JoystickPosition;
 				else if  (ReportItem->Attributes.Usage.Usage == USAGE_Y)
 				  MotorSpeed   = JoystickPosition;
+
+				// Temp - digital motor control
+				if (MotorSpeed > 50)
+					MotorSpeed = 0x3FF;
+				else if (MotorSpeed < -50)
+					MotorSpeed = -0x3FF;
+				else
+					MotorSpeed = 0;
 
 				Motors_SetChannelSpeed(MOTOR_CHANNEL_Left,  (MotorBalance <  100) ? MotorSpeed : 0);
 				Motors_SetChannelSpeed(MOTOR_CHANNEL_Right, (MotorBalance > -100) ? MotorSpeed : 0);

@@ -74,8 +74,7 @@ void SetupHardware(void)
 	clock_prescale_set(clock_div_1);
 
 	/* Disable JTAG to allow RGB LEDs to work */
-	MCUCR |= (1 << JTD);
-	MCUCR |= (1 << JTD);
+	JTAG_DISABLE();
 
 	/* Hardware Initialization */
 	ExternalSRAM_Init();

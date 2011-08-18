@@ -34,9 +34,9 @@ void Motors_Init(void)
 {
 	DDRD   |= ((1 << 3) | (1 << 4));
 	DDRB   |= ((1 << 5) | (1 << 6));
-		
+
 	TCCR1A  = ((1 << WGM11) | (1 << WGM10) | (1 << COM1A1) | (1 << COM1B1));
-	TCCR1B  = (1 << CS10) | (1 << CS11);
+	TCCR1B  = (1 << CS11);
 	
 	Motors_SetChannelSpeed(MOTOR_CHANNEL_All, 0);
 }
@@ -46,12 +46,12 @@ void Motors_SetChannelSpeed(const uint8_t Channel, const int16_t Power)
 	uint16_t MotorPWMValue = abs(Power);
 	
 	/* DANGER: DO NOT REMOVE SPEED LIMITER BELOW - PREVENTS OVERCURRENT/OVERVOLTAGE OF MOTORS */
-	if (MotorPWMValue > 0x0FF)
-	  MotorPWMValue = 0x0FF;
+	if (MotorPWMValue > 0x2FF)
+	  MotorPWMValue = 0x2FF;
 
 	if (Channel & MOTOR_CHANNEL_Left)
 	{
-		if (Power < 0)
+		if (Power <= 0)
 		  PORTD &= ~(1 << 3);
 		else
 		  PORTD |=  (1 << 3);
@@ -61,7 +61,7 @@ void Motors_SetChannelSpeed(const uint8_t Channel, const int16_t Power)
 	
 	if (Channel & MOTOR_CHANNEL_Right)
 	{
-		if (Power < 0)
+		if (Power <= 0)
 		  PORTD &= ~(1 << 4);
 		else
 		  PORTD |=  (1 << 4);

@@ -51,65 +51,21 @@ void Motors_SetChannelSpeed(const uint8_t Channel, const int16_t Power)
 
 	if (Channel & MOTOR_CHANNEL_Left)
 	{
-		bool ChangingDirection = false;
-		
-		ChangingDirection |= ( (PORTD & (1 << 3)) && (Power < 0));
-		ChangingDirection |= (!(PORTD & (1 << 3)) && (Power > 0));
-		
-		if (ChangingDirection)
-		{
-			while (OCR1B != 0)
-			{
-				OCR1B--;
-				Delay_MS(1);
-			}
+		if (Power < 0)
+		  PORTD &= ~(1 << 3);
+		else
+		  PORTD |=  (1 << 3);
 
-			if (Power < 0)
-			  PORTD &= ~(1 << 3);
-			else
-			  PORTD |=  (1 << 3);
-		}
-
-		while (OCR1B != MotorPWMValue)
-		{
-			if (OCR1B < MotorPWMValue)
-			  OCR1B++;
-			else
-			  OCR1B--;
-
-			Delay_MS(1);
-		}
+		OCR1B = MotorPWMValue;
 	}
 	
 	if (Channel & MOTOR_CHANNEL_Right)
 	{
-		bool ChangingDirection = false;
-		
-		ChangingDirection |= ( (PORTD & (1 << 4)) && (Power < 0));
-		ChangingDirection |= (!(PORTD & (1 << 4)) && (Power > 0));
-		
-		if (ChangingDirection)
-		{
-			while (OCR1A != 0)
-			{
-				OCR1A--;
-				Delay_MS(1);
-			}
-
-			if (Power < 0)
-			  PORTD &= ~(1 << 4);
-			else
-			  PORTD |=  (1 << 4);
-		}
+		if (Power < 0)
+		  PORTD &= ~(1 << 4);
+		else
+		  PORTD |=  (1 << 4);
 	
-		while (OCR1A != MotorPWMValue)
-		{
-			if (OCR1A < MotorPWMValue)
-			  OCR1A++;
-			else
-			  OCR1A--;
-
-			Delay_MS(1);
-		}
+		OCR1A = MotorPWMValue;
 	}
 }

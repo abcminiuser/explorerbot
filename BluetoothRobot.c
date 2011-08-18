@@ -36,23 +36,28 @@
 int main(void)
 {
 	SetupHardware();
-
-	LCD_WriteString_P(PSTR("Bluetooth  Robot"));
-	LCD_SetCursor(2, 0);
-	LCD_WriteString_P(PSTR(" By Dean Camera "));
-
-	for (uint8_t i = 0; i < 128; i++)
-	{
-		LCD_SetBacklight(i);
-		Delay_MS(5);
-	}
+	StartupSequence();
 
 	EVENT_USB_Host_DeviceUnattached();
-
 	sei();
 
 	for (;;)
 	{
+		uint8_t ButtonStatus = Buttons_GetStateMask();
+
+		if (ButtonStatus & BUTTON1_MASK)
+		  Motors_SetChannelSpeed(MOTOR_CHANNEL_All, 0);
+		  
+		if (ButtonStatus & BUTTON2_MASK)
+		{
+			Motors_SetChannelSpeed(MOTOR_CHANNEL_All, 0);
+			USB_Disable();
+			
+			wdt_enable(WDTO_15MS);
+			for(;;);
+		}
+		
+		Bluetooth_USBTask();
 		Joystick_USBTask();
 		USB_USBTask();
 	}
@@ -84,6 +89,29 @@ void SetupHardware(void)
 	USB_Init();
 }
 
+/** System startup sequence, to test system hardware and display welcome/startup message to the user. */
+void StartupSequence(void)
+{
+	const uint8_t ColourMap[] = {RGB_COLOUR_Red,  RGB_COLOUR_Yellow,  RGB_COLOUR_Green, RGB_COLOUR_Cyan,
+	                             RGB_COLOUR_Blue, RGB_COLOUR_Magenta, RGB_COLOUR_White, RGB_COLOUR_Off};
+
+	LCD_WriteString_P(PSTR("Bluetooth  Robot"));
+	LCD_SetCursor(2, 0);
+	LCD_WriteString_P(PSTR(" By Dean Camera "));
+
+	for (uint8_t i = 0; i < (0xFF / 2); i++)
+	{
+		LCD_SetBacklight(i);
+		Delay_MS(5);
+	}
+	
+	for (uint8_t i = 0; i < sizeof(ColourMap); i++)
+	{
+		RGB_SetColour(ColourMap[i]);
+		Delay_MS(150);
+	}
+}
+
 /** Event handler for the USB_DeviceAttached event. This indicates that a device has been attached to the host, and
  *  starts the library USB task to begin the enumeration and USB management process.
  */
@@ -99,8 +127,10 @@ void EVENT_USB_Host_DeviceAttached(void)
  */
 void EVENT_USB_Host_DeviceUnattached(void)
 {
+	Motors_SetChannelSpeed(MOTOR_CHANNEL_All, 0);
+
 	LCD_Clear();
-	LCD_WriteString_P(PSTR("* Insert USB *"));
+	LCD_WriteString_P(PSTR(" * Insert USB *"));
 	RGB_SetColour(RGB_ALIAS_Disconnected);
 }
 
@@ -165,12 +195,13 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 /** Event handler for the USB_HostError event. This indicates that a hardware error occurred while in host mode. */
 void EVENT_USB_Host_HostError(const uint8_t ErrorCode)
 {
-	USB_Disable();
+	Motors_SetChannelSpeed(MOTOR_CHANNEL_All, 0);
 
 	LCD_Clear();
 	LCD_WriteString_P(PSTR("ERR: Host Error"));
 	RGB_SetColour(RGB_ALIAS_Error);
 
+	USB_Disable();
 	for(;;);
 }
 

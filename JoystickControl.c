@@ -77,7 +77,13 @@ bool Joystick_PostConfiguration(void)
 	if (!(Joystick_HID_Interface.State.IsActive))
 	  return true;
 
-	return (HID_Host_SetReportProtocol(&Joystick_HID_Interface) == 0);
+	HID_Host_SetReportProtocol(&Joystick_HID_Interface);
+	
+	if (!(HIDReportInfo.TotalReportItems))
+	  return false;
+	  
+	RGB_SetColour(RGB_ALIAS_Connected);
+	return true;
 }
 
 /** Task to manage an enumerated USB joystick once connected, to display movement data as it is received. */
@@ -171,8 +177,6 @@ bool CALLBACK_HIDParser_FilterHIDReportItem(HID_ReportItem_t* const CurrentItem)
 	if (!IsJoystick)
 	  return false;
 #endif
-
-	RGB_SetColour(RGB_ALIAS_Connected);
 
 	/* Check the attributes of the current item - see if we are interested in it or not;
 	 * only store BUTTON and GENERIC_DESKTOP_CONTROL items into the Processed HID Report

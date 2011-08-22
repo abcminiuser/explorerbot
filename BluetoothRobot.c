@@ -37,6 +37,39 @@ int main(void)
 {
 	SetupHardware();
 	StartupSequence();
+	
+	uint16_t SensorError = Sensors_CheckSensors();
+	
+	if (SensorError)
+	{
+		LCD_Clear();
+		LCD_WriteString_P((SensorError == SENSOR_Pressure) ? PSTR("PRESSURE ONE ERR") : PSTR("INERTIAL ONE ERR"));
+		LCD_SetCursor(2, 0);
+		
+		switch (SensorError & ~SENSOR_ERROR_ID)
+		{
+			case SENSOR_Pressure:
+				LCD_WriteString_P(PSTR("PRS"));
+				break;
+			case SENSOR_Compass:
+				LCD_WriteString_P(PSTR("CMP"));
+				break;
+			case SENSOR_Accelerometer:
+				LCD_WriteString_P(PSTR("ACC"));
+				break;
+			case SENSOR_Gyroscope:
+				LCD_WriteString_P(PSTR("GYR"));
+				break;
+		}
+		
+		if (SensorError & SENSOR_ERROR_ID)
+		  LCD_WriteString_P(PSTR(" ID"));
+		else
+		  LCD_WriteString_P(PSTR(" NAK"));
+	
+		for (uint8_t i = 0; i < 20; i++)
+		  Delay_MS(100);
+	}
 
 	EVENT_USB_Host_DeviceUnattached();
 	sei();
@@ -75,6 +108,10 @@ void SetupHardware(void)
 
 	/* Disable JTAG to allow RGB LEDs to work */
 	JTAG_DISABLE();
+	
+	/* Disable unused peripheral modules */
+	PRR0 = ((1 << PRADC)  | (1 << PRSPI));
+	PRR1 = ((1 << PRTIM3) | (1 << PRUSART1));
 
 	/* Hardware Initialization */
 	ExternalSRAM_Init();
@@ -91,8 +128,8 @@ void SetupHardware(void)
 /** System startup sequence, to test system hardware and display welcome/startup message to the user. */
 void StartupSequence(void)
 {
-	const uint8_t ColourMap[] = {RGB_COLOUR_Red,  RGB_COLOUR_Yellow,  RGB_COLOUR_Green, RGB_COLOUR_Cyan,
-	                             RGB_COLOUR_Blue, RGB_COLOUR_Magenta, RGB_COLOUR_White, RGB_COLOUR_Off};
+	const uint8_t ColourMap[] = {RGB_COLOUR_Green, RGB_COLOUR_Cyan,   RGB_COLOUR_Blue,  RGB_COLOUR_Magenta,
+	                             RGB_COLOUR_Red,   RGB_COLOUR_Yellow, RGB_COLOUR_White, RGB_COLOUR_Off};
 
 	LCD_WriteString_P(PSTR("Bluetooth  Robot"));
 	LCD_SetCursor(2, 0);

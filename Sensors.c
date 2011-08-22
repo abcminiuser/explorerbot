@@ -36,5 +36,39 @@ void Sensors_Init(void)
 	DDRB |=  (1 << 3);
 	DDRD &= ~(1 << 2);
 	
-	TWI_Init(TWI_BIT_PRESCALE_64, 10);
+	PORTB |= (1 << 3);
+	
+	TWI_Init(TWI_BIT_PRESCALE_4, (F_CPU / 4 / 10000) / 2);
+}
+
+uint16_t Sensors_CheckSensors(void)
+{
+	uint8_t ReturnedID;
+	const struct
+	{
+		uint8_t Address;
+		uint8_t IDRegister;
+		uint8_t ExpectedID;
+	} SensorInfo[] =
+		{
+			{SENSOR_Pressure,      0xD0, 0x55},
+			{SENSOR_Compass,       0x00, 0x48},
+			{SENSOR_Accelerometer, 0x00, 0x02},
+			{SENSOR_Gyroscope,     0x00, 0x69},
+		};
+	
+	Delay_MS(100);
+	
+	for (uint8_t i = 0; i < (sizeof(SensorInfo) / sizeof(SensorInfo[0])); i++)
+	{
+		/* Attempt to read the current sensor's ID register, return error if sensor cannot be communicated with */
+		if (TWI_ReadPacket(SensorInfo[i].Address, 100, &SensorInfo[i].IDRegister, sizeof(uint8_t), &ReturnedID, sizeof(ReturnedID)) != TWI_ERROR_NoError)
+		  return SensorInfo[i].Address;
+		
+		/* Verify the returned sensor ID against the expected sensor ID */
+		if (ReturnedID != SensorInfo[i].ExpectedID)
+		  return (SENSOR_ERROR_ID | SensorInfo[i].Address);
+	}
+	
+	return 0;
 }

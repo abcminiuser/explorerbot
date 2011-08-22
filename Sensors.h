@@ -36,17 +36,26 @@
 		#include <stdbool.h>
 		
 		#include <LUFA/Drivers/Peripheral/TWI.h>
-
+		
+	/* Macros: */
+		#define AK8975_ADDRESS          (0x0C << 1)
+		#define ITG3200_ADDRESS         (0x68 << 1)
+		#define BMA150_ADDRESS          (0x38 << 1)
+		#define BMP085_ADDRESS          (0x77 << 1)
+		
+		#define SENSOR_ERROR_ID         (1 << 8)
+		
 	/* Enums: */
 		typedef enum
 		{
-			SENSOR_Gyroscope,
-			SENSOR_Accelerometer,
-			SENSOR_Magnetometer,
-			SENSOR_Pressure,
+			SENSOR_Compass            = AK8975_ADDRESS,
+			SENSOR_Accelerometer      = BMA150_ADDRESS,
+			SENSOR_Gyroscope          = ITG3200_ADDRESS,
+			SENSOR_Pressure           = BMP085_ADDRESS,
 		} Sensors_t;
 
 	/* Function Prototypes: */
-		void Sensors_Init(void);
+		void     Sensors_Init(void);
+		uint16_t Sensors_CheckSensors(void);
 
 #endif

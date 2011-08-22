@@ -97,6 +97,8 @@ void Joystick_USBTask(void)
 		uint8_t JoystickReport[Joystick_HID_Interface.State.LargestReportSize];
 		HID_Host_ReceiveReport(&Joystick_HID_Interface, &JoystickReport);
 
+		bool Found = false;
+
 		for (uint8_t ReportNumber = 0; ReportNumber < HIDReportInfo.TotalReportItems; ReportNumber++)
 		{
 			HID_ReportItem_t* ReportItem = &HIDReportInfo.ReportItems[ReportNumber];
@@ -105,42 +107,40 @@ void Joystick_USBTask(void)
 			if (!(USB_GetHIDReportItemInfo(JoystickReport, ReportItem)))
 			  continue;
 
-			/* Determine what report item is being tested, process updated value as needed */
-			if ((ReportItem->Attributes.Usage.Page        == USAGE_PAGE_BUTTON) &&
-			    (ReportItem->Attributes.Usage.Usage       == 1) &&			
-			    (ReportItem->ItemType                     == HID_REPORT_ITEM_In))
+			if (ReportItem->Attributes.Usage.Page == USAGE_PAGE_BUTTON)
 			{
-				Headlights_SetState(ReportItem->Value != 0);
-			}
-			else if ((ReportItem->Attributes.Usage.Page   == USAGE_PAGE_GENERIC_DCTRL) &&
-			         ((ReportItem->Attributes.Usage.Usage == USAGE_X)                  ||
-			          (ReportItem->Attributes.Usage.Usage == USAGE_Y))                 &&
-			         (ReportItem->ItemType                == HID_REPORT_ITEM_In))
-			{
-				static int16_t MotorSpeed   = 0;
-				static int16_t MotorBalance = 0;
+				if ((ReportItem->Attributes.Usage.Usage == 2) && ReportItem->Value)
+				{
+					Motors_SetChannelSpeed(MOTOR_CHANNEL_All,    0x3FF);
+					Found = true;
+				}
+				else if ((ReportItem->Attributes.Usage.Usage == 1) && ReportItem->Value)
+				{
+					Motors_SetChannelSpeed(MOTOR_CHANNEL_Left,   0x3FF);
+					Motors_SetChannelSpeed(MOTOR_CHANNEL_Right, -0x3FF);
+					Found = true;
+				}
+				else if ((ReportItem->Attributes.Usage.Usage == 3) && ReportItem->Value)
+				{
+					Motors_SetChannelSpeed(MOTOR_CHANNEL_All,   -0x3FF);
+					Found = true;
+				}
+				else if ((ReportItem->Attributes.Usage.Usage == 4) && ReportItem->Value)
+				{
+					Motors_SetChannelSpeed(MOTOR_CHANNEL_Left,  -0x3FF);
+					Motors_SetChannelSpeed(MOTOR_CHANNEL_Right,  0x3FF);
+					Found = true;
+				}
 				
-				int16_t JoystickPosition = HID_ALIGN_DATA(ReportItem, int16_t);
-
-				if (ReportItem->Attributes.Usage.Usage == USAGE_X)
-				  MotorBalance = JoystickPosition;
-				else if  (ReportItem->Attributes.Usage.Usage == USAGE_Y)
-				  MotorSpeed   = JoystickPosition;
-
-				// Temp - digital motor control
-				if (MotorSpeed > 50)
-					MotorSpeed = 0x3FF;
-				else if (MotorSpeed < -50)
-					MotorSpeed = -0x3FF;
-				else
-					MotorSpeed = 0;
-
-				Motors_SetChannelSpeed(MOTOR_CHANNEL_Left,  (MotorBalance <  100) ? MotorSpeed : 0);
-				Motors_SetChannelSpeed(MOTOR_CHANNEL_Right, (MotorBalance > -100) ? MotorSpeed : 0);
+				if (ReportItem->Attributes.Usage.Usage == 5)
+				  Headlights_SetState(ReportItem->Value != 0);
 			}
 		}
-	}
 
+		if (!(Found))
+		  Motors_SetChannelSpeed(MOTOR_CHANNEL_All, 0);
+	}
+	
 	/* Run the HID Class Driver service task on the HID Joystick interface */
 	HID_Host_USBTask(&Joystick_HID_Interface);
 }

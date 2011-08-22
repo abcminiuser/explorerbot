@@ -35,6 +35,6 @@ void ExternalSRAM_Init(void)
 	DDRE  |= (1 << 7) | (1 << 6) | (1 << 2) | (1 << 1) | (1 << 0);
 	PORTE |= (1 << 2) | (1 << 1) | (1 << 0);
 	
-	XMCRA |= (1 << SRE);  // enable XMEM interface with 0 wait states
+	XMCRA |= (1 << SRE);
 	XMCRB  = 0;
 }

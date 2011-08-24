@@ -30,7 +30,12 @@
 
 #include "BluetoothControl.h"
 
+/** Pointer to the start of external memmory in the address space */
+uint8_t* const ExternalMemoryStart = (uint8_t*)EXTERNAL_MEMORY_START;
+
+/** Indicates if the Bluetooth control mode is currently active or not */
 bool IsActive;
+
 
 /** Attempts to configure the system pipes for the attached Bluetooth adapter.
  *
@@ -141,8 +146,9 @@ bool Bluetooth_PostConfiguration(void)
 {
 	if (!IsActive)
 	  return true;
+	  
+	Bluetooth_Init(ExternalMemoryStart);
 
-	// TODO, initialize stack
 	return true;
 }
 
@@ -151,5 +157,88 @@ void Bluetooth_USBTask(void)
 {
 	if ((USB_HostState != HOST_STATE_Configured) || !IsActive)
 	  return;
+
+	Pipe_SelectPipe(BLUETOOTH_DATA_IN_PIPE);
+	Pipe_Unfreeze();
+	
+	if (Pipe_IsINReceived())
+	{
+		BT_ACL_Header_t* PacketHeader = (BT_ACL_Header_t*)ExternalMemoryStart;
+
+		Pipe_Read_Stream_LE(PacketHeader, sizeof(BT_ACL_Header_t), NULL);
+		Pipe_Read_Stream_LE((PacketHeader + 1), PacketHeader->DataLength, NULL);
+		Pipe_ClearIN();
+		Pipe_Freeze();
+
+		RGB_SetColour(RGB_ALIAS_Busy);
+		Bluetooth_ProcessPacket(BLUETOOTH_PACKET_ACLData, ExternalMemoryStart);
+		RGB_SetColour(RGB_ALIAS_Connected);
+	}
+	
+	Pipe_Freeze();
+	
+	Pipe_SelectPipe(BLUETOOTH_EVENTS_PIPE);
+	Pipe_Unfreeze();
+	
+	if (Pipe_IsINReceived())
+	{
+		BT_HCIEvent_Header_t* EventHeader = (BT_HCIEvent_Header_t*)ExternalMemoryStart;
+
+		Pipe_Read_Stream_LE(EventHeader, sizeof(BT_HCIEvent_Header_t), NULL);
+		Pipe_Read_Stream_LE((EventHeader + 1), EventHeader->ParameterLength, NULL);
+		Pipe_ClearIN();
+		Pipe_Freeze();
+
+		RGB_SetColour(RGB_ALIAS_Busy);
+		Bluetooth_ProcessPacket(BLUETOOTH_PACKET_HCIEvent, ExternalMemoryStart);
+		RGB_SetColour(RGB_ALIAS_Connected);
+	}
+	
+	Pipe_Freeze();
+	
+	/* Keep on running the management routine until all pending packets have been sent */
+	while (Bluetooth_ManageConnections()) {};
+}
+
+void CALLBACK_Bluetooth_SendPacket(const uint8_t Type, const uint16_t Length, uint8_t* Data)
+{
+	RGB_SetColour(RGB_ALIAS_Busy);
+
+	switch (Type)
+	{
+		case BLUETOOTH_PACKET_HCICommand:
+			USB_ControlRequest = (USB_Request_Header_t)
+				{
+					.bmRequestType = (REQDIR_HOSTTODEVICE | REQTYPE_CLASS | REQREC_DEVICE),
+					.bRequest      = 0,
+					.wValue        = 0,
+					.wIndex        = 0,
+					.wLength       = Length
+				};
+
+			Pipe_SelectPipe(PIPE_CONTROLPIPE);
+			
+			if (USB_Host_SendControlRequest(Data) != HOST_SENDCONTROL_Successful)
+			{
+				LCD_Clear();
+				LCD_WriteString_P(PSTR("ERR: BT HCI Cmd"));
+				RGB_SetColour(RGB_ALIAS_Error);
+				for (;;);
+			}
+			
+			break;
+		default:
+			Pipe_SelectPipe(BLUETOOTH_DATA_OUT_PIPE);
+			Pipe_Unfreeze();
+
+			Pipe_Write_16_LE(Length);			
+			Pipe_Write_Stream_LE(Data, Length, NULL);
+			Pipe_ClearOUT();
+			Pipe_Freeze();
+			
+			break;
+	}
+
+	RGB_SetColour(RGB_ALIAS_Connected);
 }
 

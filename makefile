@@ -125,7 +125,7 @@ LUFA_OPTS += -D USE_STATIC_OPTIONS="(USB_OPT_REG_ENABLED | USB_OPT_AUTO_PLL)"
 LUFA_OPTS += -D NO_SOF_EVENTS
 LUFA_OPTS += -D HOST_STATE_AS_GPIOR
 LUFA_OPTS += -D HID_MAX_REPORTITEMS=30
-LUFA_OPTS += -D ALLOW_MOUSE_CONTROL
+LUFA_OPTS += -D HOST_DEVICE_SETTLE_DELAY_MS=500
 
 # Create the LUFA source path variables by including the LUFA root makefile
 include $(LUFA_PATH)/LUFA/makefile
@@ -146,7 +146,9 @@ SRC = $(TARGET).c                                                 \
 	  $(LUFA_SRC_USB)                                             \
 	  $(LUFA_SRC_USBCLASS)                                        \
 	  $(LUFA_SRC_TWI)                                             \
-
+	  Bluetooth/Bluetooth.c                                       \
+	  Bluetooth/BluetoothHCI.c                                    \
+	  Bluetooth/BluetoothACL.c                                    \
 
 # List C++ source files here. (C dependencies are automatically generated.)
 CPPSRC =

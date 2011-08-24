@@ -38,10 +38,11 @@
 
 		#include <LUFA/Drivers/USB/USB.h>
 		
-		#include "Headlights.h"
-		#include "Motors.h"
+		#include "ExternalSRAM.h"
 		#include "RGB.h"
-		#include "Speaker.h"
+		#include "LCD.h"
+		
+		#include "Bluetooth/Bluetooth.h"
 
 	/* Macros: */
 		/** Device Class value for the Bluetooth Device class. */

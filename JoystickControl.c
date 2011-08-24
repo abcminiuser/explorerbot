@@ -172,11 +172,9 @@ bool CALLBACK_HIDParser_FilterHIDReportItem(HID_ReportItem_t* const CurrentItem)
 		}
 	}
 
-#if !defined(ALLOW_MOUSE_CONTROL)
 	/* If a collection with the joystick usage was not found, indicate that we are not interested in this item */
 	if (!IsJoystick)
 	  return false;
-#endif
 
 	/* Check the attributes of the current item - see if we are interested in it or not;
 	 * only store BUTTON and GENERIC_DESKTOP_CONTROL items into the Processed HID Report

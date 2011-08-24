@@ -36,40 +36,8 @@
 int main(void)
 {
 	SetupHardware();
-	StartupSequence();
-	
-	uint16_t SensorError = Sensors_CheckSensors();
-	
-	if (SensorError)
-	{
-		LCD_Clear();
-		LCD_WriteString_P((SensorError == SENSOR_Pressure) ? PSTR("PRESSURE ONE ERR") : PSTR("INERTIAL ONE ERR"));
-		LCD_SetCursor(2, 0);
-		
-		switch (SensorError & ~SENSOR_ERROR_ID)
-		{
-			case SENSOR_Pressure:
-				LCD_WriteString_P(PSTR("PRS"));
-				break;
-			case SENSOR_Compass:
-				LCD_WriteString_P(PSTR("CMP"));
-				break;
-			case SENSOR_Accelerometer:
-				LCD_WriteString_P(PSTR("ACC"));
-				break;
-			case SENSOR_Gyroscope:
-				LCD_WriteString_P(PSTR("GYR"));
-				break;
-		}
-		
-		if (SensorError & SENSOR_ERROR_ID)
-		  LCD_WriteString_P(PSTR(" ID"));
-		else
-		  LCD_WriteString_P(PSTR(" NAK"));
-	
-		for (uint8_t i = 0; i < 20; i++)
-		  Delay_MS(100);
-	}
+//	StartupSequence();
+//	CheckSensors();
 
 	EVENT_USB_Host_DeviceUnattached();
 	sei();
@@ -145,6 +113,43 @@ void StartupSequence(void)
 	{
 		RGB_SetColour(ColourMap[i]);
 		Delay_MS(150);
+	}
+}
+
+/** Check the board sensors to ensure that they are attached and operating correctly. */
+void CheckSensors(void)
+{
+	uint16_t SensorError = Sensors_CheckSensors();
+	
+	if (SensorError)
+	{
+		LCD_Clear();
+		LCD_WriteString_P((SensorError == SENSOR_Pressure) ? PSTR("PRESSURE ONE ERR") : PSTR("INERTIAL ONE ERR"));
+		LCD_SetCursor(2, 0);
+		
+		switch (SensorError & ~SENSOR_ERROR_ID)
+		{
+			case SENSOR_Pressure:
+				LCD_WriteString_P(PSTR("PRS"));
+				break;
+			case SENSOR_Compass:
+				LCD_WriteString_P(PSTR("CMP"));
+				break;
+			case SENSOR_Accelerometer:
+				LCD_WriteString_P(PSTR("ACC"));
+				break;
+			case SENSOR_Gyroscope:
+				LCD_WriteString_P(PSTR("GYR"));
+				break;
+		}
+		
+		if (SensorError & SENSOR_ERROR_ID)
+		  LCD_WriteString_P(PSTR(" ID"));
+		else
+		  LCD_WriteString_P(PSTR(" NAK"));
+	
+		for (uint8_t i = 0; i < 20; i++)
+		  Delay_MS(100);
 	}
 }
 

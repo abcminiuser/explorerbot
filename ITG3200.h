@@ -28,39 +28,24 @@
   this software.
 */
 
-#ifndef _SENSORS_H_
-#define _SENSORS_H_
+#ifndef _SENSORS_ITG3200_H_
+#define _SENSORS_ITG3200_H_
 
-	/* Includes: */
-		#include <avr/io.h>
-		#include <stdbool.h>
-		
-		#include <LUFA/Drivers/Peripheral/TWI.h>
-		
-		#include "AK8975.h"
-		#include "ITG3200.h"
-		#include "BMA150.h"
-		#include "BMP085.h"
-		
 	/* Macros: */
-		#define AK8975_ADDRESS          (0x0C << 1)
-		#define ITG3200_ADDRESS         (0x68 << 1)
-		#define BMA150_ADDRESS          (0x38 << 1)
-		#define BMP085_ADDRESS          (0x77 << 1)
-		
-		#define SENSOR_ERROR_ID         (1 << 15)
-		
-	/* Enums: */
-		typedef enum
-		{
-			SENSOR_Compass            = AK8975_ADDRESS,
-			SENSOR_Accelerometer      = BMA150_ADDRESS,
-			SENSOR_Gyroscope          = ITG3200_ADDRESS,
-			SENSOR_Pressure           = BMP085_ADDRESS,
-		} Sensors_t;
-
-	/* Function Prototypes: */
-		void     Sensors_Init(void);
-		uint16_t Sensors_CheckSensors(void);
+		#define ITG3200_WHO		0x00
+		#define	ITG3200_SMPL	0x15
+		#define ITG3200_DLPF	0x16
+		#define ITG3200_INT_C	0x17
+		#define ITG3200_INT_S	0x1A
+		#define	ITG3200_TMP_H	0x1B
+		#define	ITG3200_TMP_L	0x1C
+		#define	ITG3200_GX_H	0x1D
+		#define	ITG3200_GX_L	0x1E
+		#define	ITG3200_GY_H	0x1F
+		#define	ITG3200_GY_L	0x20
+		#define ITG3200_GZ_H	0x21
+		#define ITG3200_GZ_L	0x22
+		#define ITG3200_PWR_M	0x3E
 
 #endif
+

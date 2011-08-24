@@ -28,39 +28,32 @@
   this software.
 */
 
-#ifndef _SENSORS_H_
-#define _SENSORS_H_
+#ifndef _SENSORS_BMP085_H_
+#define _SENSORS_BMP085_H_
 
-	/* Includes: */
-		#include <avr/io.h>
-		#include <stdbool.h>
-		
-		#include <LUFA/Drivers/Peripheral/TWI.h>
-		
-		#include "AK8975.h"
-		#include "ITG3200.h"
-		#include "BMA150.h"
-		#include "BMP085.h"
-		
 	/* Macros: */
-		#define AK8975_ADDRESS          (0x0C << 1)
-		#define ITG3200_ADDRESS         (0x68 << 1)
-		#define BMA150_ADDRESS          (0x38 << 1)
-		#define BMP085_ADDRESS          (0x77 << 1)
-		
-		#define SENSOR_ERROR_ID         (1 << 15)
-		
-	/* Enums: */
-		typedef enum
-		{
-			SENSOR_Compass            = AK8975_ADDRESS,
-			SENSOR_Accelerometer      = BMA150_ADDRESS,
-			SENSOR_Gyroscope          = ITG3200_ADDRESS,
-			SENSOR_Pressure           = BMP085_ADDRESS,
-		} Sensors_t;
+		#define BMP085_CAL_AC1             0xAA
+		#define BMP085_CAL_AC2             0xAC
+		#define BMP085_CAL_AC3             0xAE
+		#define BMP085_CAL_AC4             0xB0
+		#define BMP085_CAL_AC5             0xB2
+		#define BMP085_CAL_AC6             0xB4
+		#define BMP085_CAL_B1              0xB6
+		#define BMP085_CAL_B2              0xB8
+		#define BMP085_CAL_MB              0xBA
+		#define BMP085_CAL_MC              0xBC
+		#define BMP085_CAL_MD              0xBE
 
-	/* Function Prototypes: */
-		void     Sensors_Init(void);
-		uint16_t Sensors_CheckSensors(void);
+		#define BMP085_CONTROL             0xF4
+		#define BMP085_TEMPDATA            0xF6
+		#define BMP085_PRESSUREDATA        0xF6
+		#define BMP085_READTEMPCMD         0x2E
+		#define BMP085_READPRESSURECMD     0x34
+
+		#define BMP085_ULTRALOWPOWER       0
+		#define BMP085_STANDARD            1
+		#define BMP085_HIGHRES             2
+		#define BMP085_ULTRAHIGHRES        3
 
 #endif
+

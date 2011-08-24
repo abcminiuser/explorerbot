@@ -27,23 +27,24 @@
 	/* Enums: */
 		enum BT_HCIStates_t
 		{
-			HCISTATE_Init_Reset             = 2,
-			HCISTATE_Init_ReadBufferSize    = 3,
-			HCISTATE_Init_GetBDADDR         = 4,
-			HCISTATE_Init_SetLocalName      = 5,
-			HCISTATE_Init_SetDeviceClass    = 6,
-			HCISTATE_Init_WriteScanEnable   = 7,
-			HCISTATE_Init_FinalizeInit      = 8,
+			HCISTATE_Init_Reset             = 0,
+			HCISTATE_Init_ReadBufferSize    = 1,
+			HCISTATE_Init_GetBDADDR         = 2,
+			HCISTATE_Init_SetLocalName      = 3,
+			HCISTATE_Init_SetDeviceClass    = 4,
+			HCISTATE_Init_SetScanEnable     = 5,
 
-			HCISTATE_Conn_AcceptConnection  = 9,
-			HCISTATE_Conn_RejectConnection  = 10,
-			HCISTATE_Conn_SendPINCode       = 11,
-			HCISTATE_Conn_SendLinkKeyNAK    = 12,
+			HCISTATE_Idle                   = 6,
+
+			HCISTATE_Conn_AcceptConnection  = 7,
+			HCISTATE_Conn_RejectConnection  = 8,
+			HCISTATE_Conn_SendPINCode       = 9,
+			HCISTATE_Conn_SendLinkKeyNAK    = 10,
 		};
 
 	/* Function Prototypes: */
-		void Bluetooth_HCI_Init(void);
-		void Bluetooth_HCI_ProcessPacket(uint8_t* Data);
-		bool Bluetooth_HCI_Manage(void);
+		void Bluetooth_HCI_Init(Bluetooth_Device_t* const StackState);
+		void Bluetooth_HCI_ProcessPacket(Bluetooth_Device_t* const StackState, uint8_t* Data);
+		bool Bluetooth_HCI_Manage(Bluetooth_Device_t* const StackState);
 
 #endif

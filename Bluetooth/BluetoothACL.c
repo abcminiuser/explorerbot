@@ -14,17 +14,17 @@
 
 #include "BluetoothACL.h"
 
-void Bluetooth_ACL_Init(void)
+void Bluetooth_ACL_Init(Bluetooth_Device_t* const StackState)
 {
 
 }
 
-void Bluetooth_ACL_ProcessPacket(uint8_t* Data)
+void Bluetooth_ACL_ProcessPacket(Bluetooth_Device_t* const StackState, uint8_t* Data)
 {
 
 }
 
-bool Bluetooth_ACL_Manage(void)
+bool Bluetooth_ACL_Manage(Bluetooth_Device_t* const StackState)
 {
 	return false;
 }

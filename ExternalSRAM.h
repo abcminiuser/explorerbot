@@ -35,7 +35,7 @@
 		#include <avr/io.h>
 		
 	/* Macros: */
-		#define EXTERNAL_MEMORY_START 0x2100
+		#define EXTERNAL_MEMORY_START ((void*)0x2100)
 
 	/* Function Prototypes: */
 		void ExternalSRAM_Init(void);

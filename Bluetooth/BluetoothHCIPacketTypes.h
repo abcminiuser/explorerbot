@@ -18,7 +18,16 @@
 	/* Includes: */
 		#include "BluetoothCommon.h"
 
-	/* Type Defines: */	
+	/* Enums: */
+		enum BT_ScanEnable_Modes_t
+		{
+			BT_SCANMODE_NoScansEnabled       = 0,
+			BT_SCANMODE_InquiryScanOnly      = 1,
+			BT_SCANMODE_PageScanOnly         = 2,
+			BT_SCANMODE_InquiryAndPageScans  = 3,
+		};
+
+	/* Type Defines: */
 		typedef struct
 		{
 			uint16_t OpCode;
@@ -30,6 +39,7 @@
 		{
 			uint8_t  EventCode;
 			uint8_t  ParameterLength;
+			uint8_t  Parameters[];
 		} ATTR_PACKED BT_HCIEvent_Header_t;
 
 		typedef struct
@@ -43,7 +53,7 @@
 		{
 			uint8_t  HCIPacketsAllowable;
 			uint16_t Opcode;
-			uint8_t  ReturnParams[];
+			uint8_t  Parameters[];
 		} ATTR_PACKED BT_HCIEvent_CommandComplete_t;
 
 		typedef struct

@@ -30,8 +30,20 @@
 
 #include "BluetoothControl.h"
 
+Bluetooth_Device_t Bluetooth_Module =
+	{
+		.Config = 
+			{
+				.Class              = (DEVICE_CLASS_SERVICE_CAPTURING | DEVICE_CLASS_MAJOR_COMPUTER | DEVICE_CLASS_MINOR_COMPUTER_PALM),
+				.Name               = "Bluetooth Robot",
+				.PINCode            = "0000",
+				.Discoverable       = true,
+				.OutputPacketBuffer = EXTERNAL_MEMORY_START,
+			}
+	};
+
 /** Pointer to the start of external memmory in the address space */
-uint8_t* const ExternalMemoryStart = (uint8_t*)EXTERNAL_MEMORY_START;
+uint8_t* const ExternalMemoryStart  = EXTERNAL_MEMORY_START;
 
 /** Indicates if the Bluetooth control mode is currently active or not */
 bool IsActive;
@@ -147,7 +159,7 @@ bool Bluetooth_PostConfiguration(void)
 	if (!IsActive)
 	  return true;
 	  
-	Bluetooth_Init(ExternalMemoryStart);
+	Bluetooth_Init(&Bluetooth_Module);
 
 	return true;
 }
@@ -171,7 +183,7 @@ void Bluetooth_USBTask(void)
 		Pipe_Freeze();
 
 		RGB_SetColour(RGB_ALIAS_Busy);
-		Bluetooth_ProcessPacket(BLUETOOTH_PACKET_ACLData, ExternalMemoryStart);
+		Bluetooth_ProcessPacket(&Bluetooth_Module, BLUETOOTH_PACKET_ACLData, ExternalMemoryStart);
 		RGB_SetColour(RGB_ALIAS_Connected);
 	}
 	
@@ -190,17 +202,17 @@ void Bluetooth_USBTask(void)
 		Pipe_Freeze();
 
 		RGB_SetColour(RGB_ALIAS_Busy);
-		Bluetooth_ProcessPacket(BLUETOOTH_PACKET_HCIEvent, ExternalMemoryStart);
+		Bluetooth_ProcessPacket(&Bluetooth_Module, BLUETOOTH_PACKET_HCIEvent, ExternalMemoryStart);
 		RGB_SetColour(RGB_ALIAS_Connected);
 	}
 	
 	Pipe_Freeze();
 	
 	/* Keep on running the management routine until all pending packets have been sent */
-	while (Bluetooth_ManageConnections()) {};
+	while (Bluetooth_ManageConnections(&Bluetooth_Module)) {};
 }
 
-void CALLBACK_Bluetooth_SendPacket(const uint8_t Type, const uint16_t Length, uint8_t* Data)
+void CALLBACK_Bluetooth_SendPacket(Bluetooth_Device_t* const StackState, const uint8_t Type, const uint16_t Length, uint8_t* Data)
 {
 	RGB_SetColour(RGB_ALIAS_Busy);
 

@@ -18,6 +18,37 @@
 	/* Includes: */
 		#include <LUFA/Common/Common.h>
 
+	/* Defines: */
+		#define BT_BDADDR_LEN           6
+
+	/* Type Defines: */
+		typedef struct
+		{
+			struct
+			{
+				uint32_t Class; /**< Class of the local device, a mask of DEVICE_CLASS_* masks. */
+				char     PINCode[16]; /**< Pin code required to send or receive in order to authenticate with a remote device. */
+				char*    Name; /**< Name of the local Bluetooth device, up to 248 characters. */
+				bool     Discoverable;
+				void*    OutputPacketBuffer;
+			} Config;
+			
+			struct
+			{
+				struct
+				{
+					uint8_t State;
+					bool    StateTransition;
+					uint8_t LocalBDADDR[BT_BDADDR_LEN];
+				} HCI;
+				
+				struct
+				{
+				
+				} ACL;
+			} State;
+		} Bluetooth_Device_t;
+
 	/* Enums: */
 		enum Bluetooth_PacketType_t
 		{
@@ -28,10 +59,10 @@
 		};
 
 	/* External Variables: */
-		extern void* Bluetooth_OutputPacketBuffer;
+		extern Bluetooth_Device_t* Bluetooth_StackState;
 
 	/* User Implemented Callback Functions: */
-		void CALLBACK_Bluetooth_SendPacket(const uint8_t Type, const uint16_t Length, uint8_t* Data);
+		void CALLBACK_Bluetooth_SendPacket(Bluetooth_Device_t* const StackState, const uint8_t Type, const uint16_t Length, uint8_t* Data);
 		
 #endif
 

@@ -30,6 +30,9 @@
 
 #include "ExternalSRAM.h"
 
+/** Initializes the external SRAM hardware driver ready for use. This must be called before
+ *  attempting to read to or write from external SRAM memory.
+ */
 void ExternalSRAM_Init(void)
 {
 	DDRE  |= ((1 << 7) | (1 << 6) | (1 << 2) | (1 << 1) | (1 << 0));

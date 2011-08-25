@@ -30,6 +30,9 @@
 
 #include "RGB.h"
 
+/** Initializes the RGB hardware driver ready for use. This must be called
+ *  before any other functions in the RGB driver.
+ */
 void RGB_Init(void)
 {
 	DDRF |= RGB_COLOUR_White;
@@ -37,6 +40,10 @@ void RGB_Init(void)
 	RGB_SetColour(RGB_COLOUR_Off);
 }
 
+/** Sets the colour of the RGB status LED mounted on the robot.
+ *
+ *  \param[in] Colour  New colour to set the RGB LED to, a value from the \ref RGB_Colour_t or \ref RGB_Colour_Aliases_t enums.
+ */
 void RGB_SetColour(const uint8_t Colour)
 {
 	PORTF = (PORTF | RGB_COLOUR_White) & ~Colour;

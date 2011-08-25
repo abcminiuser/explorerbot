@@ -30,12 +30,13 @@
 
 #include "BluetoothControl.h"
 
+/** Bluetooth stack configuration and state stable, used to configure an instance of the Bluetooth stack. */
 Bluetooth_Device_t Bluetooth_Module =
 	{
 		.Config = 
 			{
 				.Class              = (DEVICE_CLASS_SERVICE_CAPTURING | DEVICE_CLASS_MAJOR_COMPUTER | DEVICE_CLASS_MINOR_COMPUTER_PALM),
-				.Name               = "Bluetooth Robot",
+				.Name               = "Dean's Bluetooth Robot",
 				.PINCode            = "0000",
 				.Discoverable       = true,
 				.OutputPacketBuffer = EXTERNAL_MEMORY_START,
@@ -178,7 +179,7 @@ void Bluetooth_USBTask(void)
 		BT_ACL_Header_t* PacketHeader = (BT_ACL_Header_t*)ExternalMemoryStart;
 
 		Pipe_Read_Stream_LE(PacketHeader, sizeof(BT_ACL_Header_t), NULL);
-		Pipe_Read_Stream_LE((PacketHeader + 1), PacketHeader->DataLength, NULL);
+		Pipe_Read_Stream_LE(PacketHeader->Data, PacketHeader->DataLength, NULL);
 		Pipe_ClearIN();
 		Pipe_Freeze();
 
@@ -197,7 +198,7 @@ void Bluetooth_USBTask(void)
 		BT_HCIEvent_Header_t* EventHeader = (BT_HCIEvent_Header_t*)ExternalMemoryStart;
 
 		Pipe_Read_Stream_LE(EventHeader, sizeof(BT_HCIEvent_Header_t), NULL);
-		Pipe_Read_Stream_LE((EventHeader + 1), EventHeader->ParameterLength, NULL);
+		Pipe_Read_Stream_LE(EventHeader->Parameters, EventHeader->ParameterLength, NULL);
 		Pipe_ClearIN();
 		Pipe_Freeze();
 
@@ -229,15 +230,7 @@ void CALLBACK_Bluetooth_SendPacket(Bluetooth_Device_t* const StackState, const u
 				};
 
 			Pipe_SelectPipe(PIPE_CONTROLPIPE);
-			
-			if (USB_Host_SendControlRequest(Data) != HOST_SENDCONTROL_Successful)
-			{
-				LCD_Clear();
-				LCD_WriteString_P(PSTR("ERR: BT HCI Cmd"));
-				RGB_SetColour(RGB_ALIAS_Error);
-				for (;;);
-			}
-			
+			USB_Host_SendControlRequest(Data);
 			break;
 		default:
 			Pipe_SelectPipe(BLUETOOTH_DATA_OUT_PIPE);
@@ -247,10 +240,49 @@ void CALLBACK_Bluetooth_SendPacket(Bluetooth_Device_t* const StackState, const u
 			Pipe_Write_Stream_LE(Data, Length, NULL);
 			Pipe_ClearOUT();
 			Pipe_Freeze();
-			
 			break;
 	}
 
 	RGB_SetColour(RGB_ALIAS_Connected);
 }
 
+bool CALLBACK_Bluetooth_ConnectionRequest(Bluetooth_Device_t* const StackState, BT_HCI_Connection_t* const ConnectionHandle)
+{
+	char BDADDRBuffer[17];
+	sprintf(BDADDRBuffer, "%02X%02X%02X%02X%02X%02X", ConnectionHandle->BDADDR[0], ConnectionHandle->BDADDR[1],
+	                                                  ConnectionHandle->BDADDR[2], ConnectionHandle->BDADDR[3],
+	                                                  ConnectionHandle->BDADDR[4], ConnectionHandle->BDADDR[5]);
+
+	LCD_Clear();
+	LCD_WriteString("Conn Request:");
+	LCD_SetCursor(2, 0);
+	LCD_WriteString(BDADDRBuffer);
+
+	// Accept all requests from all devices regardless of BDADDR
+	return true;
+}
+
+void EVENT_Bluetooth_ConnectionComplete(Bluetooth_Device_t* const StackState, BT_HCI_Connection_t* const ConnectionHandle)
+{	
+	char BDADDRBuffer[17];
+	sprintf(BDADDRBuffer, "%02X%02X%02X%02X%02X%02X", ConnectionHandle->BDADDR[0], ConnectionHandle->BDADDR[1],
+	                                                  ConnectionHandle->BDADDR[2], ConnectionHandle->BDADDR[3],
+	                                                  ConnectionHandle->BDADDR[4], ConnectionHandle->BDADDR[5]);
+	LCD_Clear();
+	LCD_WriteString("Connected:");
+	LCD_SetCursor(2, 0);
+	LCD_WriteString(BDADDRBuffer);
+}
+
+void EVENT_Bluetooth_DisconnectionComplete(Bluetooth_Device_t* const StackState, BT_HCI_Connection_t* const ConnectionHandle)
+{
+	char BDADDRBuffer[17];
+	sprintf(BDADDRBuffer, "%02X%02X%02X%02X%02X%02X", ConnectionHandle->BDADDR[0], ConnectionHandle->BDADDR[1],
+	                                                  ConnectionHandle->BDADDR[2], ConnectionHandle->BDADDR[3],
+	                                                  ConnectionHandle->BDADDR[4], ConnectionHandle->BDADDR[5]);
+
+	LCD_Clear();
+	LCD_WriteString("Disconnected:");
+	LCD_SetCursor(2, 0);
+	LCD_WriteString(BDADDRBuffer);
+}

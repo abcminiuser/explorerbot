@@ -30,6 +30,10 @@
 
 #include "LCD.h"
 
+/** Latches a 4-bit data word onto the LCD bus.
+ *
+ *  \param[in] Data  Data word (4-bits) to latch onto the LCD bus.
+ */
 static void LCD_SetDataLines(const uint8_t Data)
 {
 	uint8_t NewData = 0;
@@ -53,7 +57,11 @@ static void LCD_SetDataLines(const uint8_t Data)
 	Delay_MS(1);
 	PORTE &= ~LCD_E;
 }
-		
+
+/** Retrieves the next 4-bits of data from the LCD bus.
+ *
+ *  \return Next 4-bit word of data from the LCD bus.
+ */
 static uint8_t LCD_GetDataLines(void)
 {
 	uint8_t CurrDataLines;
@@ -81,6 +89,9 @@ static uint8_t LCD_GetDataLines(void)
 	return NewData;
 }
 
+/** Intializes the LCD driver ready for use. This must be called before any other
+ *  functions in the LCD driver.
+ */
 void LCD_Init(void)
 {
 	DDRE |= (LCD_E | LCD_RS | LCD_RW);
@@ -110,6 +121,10 @@ void LCD_Init(void)
 	LCD_SetCursor(1, 0);
 }
 
+/** Sets the LCD backlight intensity level.
+ *
+ *  \param[in] Intensity  Intensity of the backlight, a value between 0 (off) and 255 (maximum brightness).
+ */
 void LCD_SetBacklight(const uint8_t Intensity)
 {	
 	if (!(Intensity))
@@ -124,6 +139,7 @@ void LCD_SetBacklight(const uint8_t Intensity)
 	}
 }
 
+/** Clears all text on the LCD display, moving the cursor back to the (1, 0) home position. */
 void LCD_Clear(void)
 {
 	PORTE &= ~LCD_RS;
@@ -131,6 +147,11 @@ void LCD_Clear(void)
 	PORTE |=  LCD_RS;
 }
 
+/** Sets the LCD cursor position to the nominated position on the LCD display.
+ *
+ *  \param[in] Y  Line number of the cursor, either 1 or 2.
+ *  \param[in] X  Character index, from 0 to 15.
+ */
 void LCD_SetCursor(const uint8_t Y,
                    const uint8_t X)
 {
@@ -139,6 +160,10 @@ void LCD_SetCursor(const uint8_t Y,
 	PORTE |=  LCD_RS;
 }
 
+/** Reads a byte of data from the LCD bus, at the current LCD DRAM address.
+ *
+ *  \return Read byte of data from the LCD
+ */
 uint8_t LCD_ReadByte(void)
 {
 	uint8_t Byte = 0;
@@ -153,6 +178,10 @@ uint8_t LCD_ReadByte(void)
 	return Byte;
 }
 
+/** Writes a byte of data to the LCD bus, at the current LCD DRAM address.
+ *
+ *  \param[in] Byte  Byte of data to write to the LCD.
+ */
 void LCD_WriteByte(const uint8_t Byte)
 {
 	PORTE &= ~LCD_RW;
@@ -162,6 +191,10 @@ void LCD_WriteByte(const uint8_t Byte)
 	LCD_SetDataLines(Byte & 0x0F);
 }
 
+/** Writes a NUL terminated string to the LCD bus, starting from the current LCD DRAM address.
+ *
+ *  \param[in] String  Pointer to the start of a string to write to the LCD, stored in SRAM.
+ */
 void LCD_WriteString(const char* String)
 {
 	while (*String != 0x00)
@@ -171,6 +204,10 @@ void LCD_WriteString(const char* String)
 	}
 }
 
+/** Writes a NUL terminated string to the LCD bus, starting from the current LCD DRAM address.
+ *
+ *  \param[in] String  Pointer to the start of a string to write to the LCD, stored in FLASH.
+ */
 void LCD_WriteString_P(const char* String)
 {
 	uint8_t CurrByte;

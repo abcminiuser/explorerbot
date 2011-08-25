@@ -19,12 +19,12 @@
 		#include "BluetoothCommon.h"
 
 	/* Type Defines: */	
-	/* Type Defines: */	
 		/** Bluetooth ACL header structure, common to all ACL data packets. */
 		typedef struct
 		{
 			uint16_t ConnectionHandle; /**< Unique device connection handle of the ACL packet */
 			uint16_t DataLength; /**< Length of the packet payload, in bytes */
+			uint8_t  Data[];
 		} ATTR_PACKED BT_ACL_Header_t;
 
 		/** Bluetooth ACL data packet header structure, for ACL packets containing L2CAP data. */

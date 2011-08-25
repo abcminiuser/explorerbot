@@ -33,13 +33,7 @@
 			HCISTATE_Init_SetLocalName      = 3,
 			HCISTATE_Init_SetDeviceClass    = 4,
 			HCISTATE_Init_SetScanEnable     = 5,
-
 			HCISTATE_Idle                   = 6,
-
-			HCISTATE_Conn_AcceptConnection  = 7,
-			HCISTATE_Conn_RejectConnection  = 8,
-			HCISTATE_Conn_SendPINCode       = 9,
-			HCISTATE_Conn_SendLinkKeyNAK    = 10,
 		};
 
 	/* Function Prototypes: */

@@ -30,12 +30,19 @@
 
 #include "Buttons.h"
 
+/** Initializes the Buttons hardware driver, ready for use. This must be called prior to
+ *  any other functions in this driver.
+ */
 void Buttons_Init(void)
 {
 	DDRD  &= ~(BUTTON1_MASK | BUTTON2_MASK);
 	PORTD |=  (BUTTON1_MASK | BUTTON2_MASK);
 }
 
+/** Retrieves the state of all the buttons in the device.
+ *
+ *  \return A \c BUTTON*_MASK mask of pressed buttons.
+ */
 uint8_t Buttons_GetStateMask(void)
 {
 	return (~PIND & (BUTTON1_MASK | BUTTON2_MASK));

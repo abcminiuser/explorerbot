@@ -35,7 +35,7 @@
 		#include <avr/io.h>
 
 	/* Enums: */
-		typedef enum
+		enum RGB_Colour_t
 		{
 			RGB_COLOUR_Off          = 0,
 			RGB_COLOUR_Red          = (1 << 4),
@@ -45,7 +45,7 @@
 			RGB_COLOUR_Cyan         = (RGB_COLOUR_Blue | RGB_COLOUR_Green),			
 			RGB_COLOUR_Magenta      = (RGB_COLOUR_Red  | RGB_COLOUR_Blue),
 			RGB_COLOUR_White        = (RGB_COLOUR_Red  | RGB_COLOUR_Green | RGB_COLOUR_Blue),
-		} RGB_Colour_t;
+		};
 		
 		enum RGB_Colour_Aliases_t
 		{

@@ -30,6 +30,9 @@
 
 #include "Motors.h"
 
+/** Initializes the Motors hardware driver ready for use. This must be called before any other
+ *  functions in the Motors hardware driver.
+ */
 void Motors_Init(void)
 {
 	DDRD   |= ((1 << 3) | (1 << 4));
@@ -41,13 +44,18 @@ void Motors_Init(void)
 	Motors_SetChannelSpeed(MOTOR_CHANNEL_All, 0);
 }
 
+/** Sets the current speed of the robot motors.
+ *
+ *  \param[in] Channel  Motor channel whose speed is to be altered, a value from the \ref Motor_Channel_t enum.
+ *  \param[in] Power    Motor power to set the given channel(s) to, a value between 0 (off) and \ref MAX_MOTOR_POWER.
+ */
 void Motors_SetChannelSpeed(const uint8_t Channel, const int16_t Power)
 {
 	uint16_t MotorPWMValue = abs(Power);
 	
 	/* DANGER: DO NOT REMOVE SPEED LIMITER BELOW - PREVENTS OVERCURRENT/OVERVOLTAGE OF MOTORS */
-	if (MotorPWMValue > 0x200)
-	  MotorPWMValue = 0x200;
+	if (MotorPWMValue > MAX_MOTOR_POWER)
+	  MotorPWMValue = MAX_MOTOR_POWER;
 
 	if (Channel & MOTOR_CHANNEL_Left)
 	{

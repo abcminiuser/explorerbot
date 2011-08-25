@@ -30,6 +30,9 @@
 
 #include "Speaker.h"
 
+/** Initializes the Speaker hardware driver ready for use. This must be called before any other
+ *  functions in the Speaker hardware driver.
+ */
 void Speaker_Init(void)
 {
 	DDRB |= (1 << 7);
@@ -39,6 +42,10 @@ void Speaker_Init(void)
 	Speaker_Tone(0);
 }
 
+/** Sets the tone generated from the speaker. This tone value does not have a defined frequency correspondance.
+ *
+ *  \param[in] PWMValue  PWM value to load into the speaker PWM timer (8-bit).
+ */
 void Speaker_Tone(const uint8_t PWMValue)
 {
 	if (!(PWMValue))

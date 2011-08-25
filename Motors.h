@@ -38,6 +38,9 @@
 		#include <stdlib.h>
 		
 		#include <LUFA/Common/Common.h>
+		
+	/* Macros: */
+		#define MAX_MOTOR_POWER   0x0200
 	
 	/* Enums: */
 		typedef enum

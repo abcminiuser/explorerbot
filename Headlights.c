@@ -30,6 +30,9 @@
 
 #include "Headlights.h"
 
+/** Initializes the Headlights hardware driver ready for use. This must be called
+ *  before any other functions in the Headlights driver.
+ */
 void Headlights_Init(void)
 {
 	DDRD |= (1 << 5);
@@ -37,6 +40,10 @@ void Headlights_Init(void)
 	Headlights_SetState(false);
 }
 
+/** Turns on or off the robot Headlights.
+ *
+ *  \param[in] HeadlightsOn  Boolean \c true to turn the headlights on, \c false to turn headlights off.
+ */
 void Headlights_SetState(const bool HeadlightsOn)
 {
 	if (HeadlightsOn)

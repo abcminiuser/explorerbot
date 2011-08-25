@@ -30,6 +30,9 @@
 
 #include "Sensors.h"
 
+/** Initializes the robot sensors mounted on the board, ready for use. This must be called before any other functions in the
+ *  sensors hardware driver.
+ */
 void Sensors_Init(void)
 {
 	DDRB &= ~((1 << 0) | (1 << 1) | (1 << 2));
@@ -41,6 +44,11 @@ void Sensors_Init(void)
 	TWI_Init(TWI_BIT_PRESCALE_4, (F_CPU / 4 / 10000) / 2);
 }
 
+/** Checks to ensure that all sensors mounted on the robot are present and working correctly.
+ *
+ *  \return First malfunctioning sensor ID, a value from \ref Sensors_t if one is malfunctioning, zero otherwise. If the sensor
+ *          responded on the bus but returned an incorrect device ID, the result will be bit-ORed with \ref SENSOR_ERROR_ID.
+ */ 
 uint16_t Sensors_CheckSensors(void)
 {
 	uint8_t ReturnedID;

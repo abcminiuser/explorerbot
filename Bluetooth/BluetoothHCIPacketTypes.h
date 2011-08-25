@@ -26,6 +26,13 @@
 			BT_SCANMODE_PageScanOnly         = 2,
 			BT_SCANMODE_InquiryAndPageScans  = 3,
 		};
+		
+		enum BT_LinkTypes_t
+		{
+			BT_LINKTYPE_SCO                  = 0,
+			BT_LINKTYPE_ACL                  = 1,
+			BT_LINKTYPE_eSCO                 = 2,
+		};
 
 	/* Type Defines: */
 		typedef struct
@@ -58,7 +65,7 @@
 
 		typedef struct
 		{
-			uint8_t  RemoteAddress[6];
+			uint8_t  RemoteBDADDR[BT_BDADDR_LEN];
 			uint8_t  ClassOfDevice_Service;
 			uint16_t ClassOfDevice_MajorMinor;
 			uint8_t  LinkType;
@@ -67,43 +74,50 @@
 		typedef struct
 		{
 			uint8_t  Status;
-			uint16_t ConnectionHandle;
-			uint8_t  RemoteAddress[6];
+			uint16_t Handle;
+			uint8_t  RemoteBDADDR[BT_BDADDR_LEN];
 			uint8_t  LinkType;
 			uint8_t  EncryptionEnabled;
 		} ATTR_PACKED BT_HCIEvent_ConnectionComplete_t;
 
 		typedef struct
 		{
-			uint8_t  RemoteAddress[6];
+			uint8_t  Status;
+			uint16_t Handle;
+			uint8_t  Reason;
+		} ATTR_PACKED BT_HCIEvent_DisconnectionComplete_t;
+
+		typedef struct
+		{
+			uint8_t  RemoteBDADDR[BT_BDADDR_LEN];
 		} ATTR_PACKED BT_HCIEvent_PinCodeReq_t;
 
 		typedef struct
 		{
-			uint8_t  RemoteAddress[6];
+			uint8_t  RemoteBDADDR[BT_BDADDR_LEN];
 		} ATTR_PACKED BT_HCIEvent_LinkKeyReq_t;
 
 		typedef struct
 		{
-			uint8_t  RemoteAddress[6];
+			uint8_t  RemoteBDADDR[BT_BDADDR_LEN];
 		} ATTR_PACKED BT_HCICommand_LinkKeyNAKResp_t;
 
 		typedef struct
 		{
-			uint8_t  RemoteAddress[6];
+			uint8_t  RemoteBDADDR[BT_BDADDR_LEN];
 			uint8_t  PINCodeLength;
 			char     PINCode[16];
 		} ATTR_PACKED BT_HCICommand_PinCodeResp_t;
 
 		typedef struct
 		{
-			uint8_t  RemoteAddress[6];
+			uint8_t  RemoteBDADDR[BT_BDADDR_LEN];
 			uint8_t  SlaveRole;
 		} ATTR_PACKED BT_HCICommand_AcceptConnectionReq_t;
 
 		typedef struct
 		{
-			uint8_t  RemoteAddress[6];
+			uint8_t  RemoteBDADDR[BT_BDADDR_LEN];
 			uint8_t  Reason;
 		} ATTR_PACKED BT_HCICommand_RejectConnectionReq_t;
 		

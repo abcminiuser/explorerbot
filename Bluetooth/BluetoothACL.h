@@ -21,10 +21,21 @@
 		
 		#include "BluetoothCommon.h"
 		#include "BluetoothACLPacketTypes.h"
+		#include "BluetoothACLSignalCodes.h"
+
+	/* Macros: */
+		/** Lowest possible channel number for L2CAP data channels. */
+		#define BT_CHANNELNUMBER_BASEOFFSET       0x0040
+
+		/** Bluetooth specification defined channel number for signaling commands. */
+		#define BT_CHANNEL_SIGNALING              0x0001
+
+		/** Bluetooth specification defined channel number for connectionless data. */
+		#define BT_CHANNEL_CONNECTIONLESS         0x0002
 
 	/* Function Prototypes: */
-		void Bluetooth_ACL_Init(Bluetooth_Device_t* const StackState);
-		void Bluetooth_ACL_ProcessPacket(Bluetooth_Device_t* const StackState, uint8_t* Data);
-		bool Bluetooth_ACL_Manage(Bluetooth_Device_t* const StackState);
+		void Bluetooth_ACL_Init(BT_StackConfig_t* const StackState);
+		void Bluetooth_ACL_ProcessPacket(BT_StackConfig_t* const StackState);
+		bool Bluetooth_ACL_Manage(BT_StackConfig_t* const StackState);
 
 #endif

@@ -32,6 +32,7 @@
 		{
 			uint16_t PayloadLength; /**< Size of the data payload, in bytes */
 			uint16_t DestinationChannel; /**< Destination channel in the device the data is directed to */
+			uint8_t  Payload[];
 		} ATTR_PACKED BT_DataPacket_Header_t;
 
 		/** Bluetooth signaling command header structure, for all ACL packets containing a signaling command. */

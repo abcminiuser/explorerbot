@@ -24,8 +24,8 @@
 		#include "BluetoothHCI.h"
 
 	/* Function Prototypes: */
-		void Bluetooth_Init(Bluetooth_Device_t* const StackState);
-		bool Bluetooth_ManageConnections(Bluetooth_Device_t* const StackState);
-		void Bluetooth_ProcessPacket(Bluetooth_Device_t* const StackState, const uint8_t Type, uint8_t* Data);
+		void Bluetooth_Init(BT_StackConfig_t* const StackState);
+		bool Bluetooth_ManageConnections(BT_StackConfig_t* const StackState);
+		void Bluetooth_ProcessPacket(BT_StackConfig_t* const StackState, const uint8_t Type);
 
 #endif

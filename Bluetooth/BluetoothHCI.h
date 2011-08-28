@@ -37,8 +37,12 @@
 		};
 
 	/* Function Prototypes: */
-		void Bluetooth_HCI_Init(Bluetooth_Device_t* const StackState);
-		void Bluetooth_HCI_ProcessPacket(Bluetooth_Device_t* const StackState, uint8_t* Data);
-		bool Bluetooth_HCI_Manage(Bluetooth_Device_t* const StackState);
+		BT_HCI_Connection_t* Bluetooth_HCI_FindConnection(BT_StackConfig_t* const StackState,
+		                                                  const uint8_t* const BDADDR,
+		                                                  const uint16_t Handle);
+
+		void Bluetooth_HCI_Init(BT_StackConfig_t* const StackState);
+		void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState);
+		bool Bluetooth_HCI_Manage(BT_StackConfig_t* const StackState);
 
 #endif

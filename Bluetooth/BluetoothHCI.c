@@ -22,7 +22,9 @@
  *
  *  \return Pointer to the new connection handle if one was created, NULL otherwise.
  */
-static BT_HCI_Connection_t* Bluetooth_HCI_NewConnection(Bluetooth_Device_t* const StackState, const uint8_t* const BDADDR, const uint8_t LinkType)
+static BT_HCI_Connection_t* Bluetooth_HCI_NewConnection(BT_StackConfig_t* const StackState,
+                                                        const uint8_t* const BDADDR,
+                                                        const uint8_t LinkType)
 {
 	for (uint8_t i = 0; i < MAX_DEVICE_CONNECTIONS; i++)
 	{
@@ -40,6 +42,25 @@ static BT_HCI_Connection_t* Bluetooth_HCI_NewConnection(Bluetooth_Device_t* cons
 	return NULL;
 }
 
+/** Closes an existing Bluetooth device connection, if one exists in the given Bluetooth stack state HCI connection table.
+ *
+ *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.
+ *  \param[in]      Handle      Link handle of the connection to close.
+ *
+ *  \return Pointer to the new connection handle if one was created, NULL otherwise.
+ */
+static BT_HCI_Connection_t* Bluetooth_HCI_CloseConnection(BT_StackConfig_t* const StackState,
+                                                          const uint16_t Handle)
+{
+	BT_HCI_Connection_t* ConnectionHandle = Bluetooth_HCI_FindConnection(StackState, NULL, Handle);
+	
+	if (!(ConnectionHandle))
+	  return NULL;
+	
+	ConnectionHandle->State = HCI_CONSTATE_Free;
+	return ConnectionHandle;
+}
+
 /** Finds the corresponding Bluetooth device connection from the remote device's address or link handle.
  *
  *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.
@@ -48,7 +69,9 @@ static BT_HCI_Connection_t* Bluetooth_HCI_NewConnection(Bluetooth_Device_t* cons
  *
  *  \return Pointer to the device connection handle if one was found, NULL otherwise.
  */
-static BT_HCI_Connection_t* Bluetooth_HCI_FindConnection(Bluetooth_Device_t* const StackState, const uint8_t* const BDADDR, const uint16_t Handle)
+BT_HCI_Connection_t* Bluetooth_HCI_FindConnection(BT_StackConfig_t* const StackState,
+                                                  const uint8_t* const BDADDR,
+                                                  const uint16_t Handle)
 {
 	for (uint8_t i = 0; i < MAX_DEVICE_CONNECTIONS; i++)
 	{
@@ -72,29 +95,11 @@ static BT_HCI_Connection_t* Bluetooth_HCI_FindConnection(Bluetooth_Device_t* con
 	return NULL;
 }
 
-/** Closes an existing Bluetooth device connection, if one exists in the given Bluetooth stack state HCI connection table.
- *
- *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.
- *  \param[in]      Handle      Link handle of the connection to close.
- *
- *  \return Pointer to the new connection handle if one was created, NULL otherwise.
- */
-static BT_HCI_Connection_t* Bluetooth_HCI_CloseConnection(Bluetooth_Device_t* const StackState, const uint16_t Handle)
-{
-	BT_HCI_Connection_t* ConnectionHandle = Bluetooth_HCI_FindConnection(StackState, NULL, Handle);
-	
-	if (!(ConnectionHandle))
-	  return NULL;
-	
-	ConnectionHandle->State = HCI_CONSTATE_Free;
-	return ConnectionHandle;
-}
-
 /** Initalizes the Bluetooth HCI layer, ready for new device connections.
  *
  *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.
  */
-void Bluetooth_HCI_Init(Bluetooth_Device_t* const StackState)
+void Bluetooth_HCI_Init(BT_StackConfig_t* const StackState)
 {
 	StackState->State.HCI.State           = HCISTATE_Init_Reset;
 	StackState->State.HCI.StateTransition = true;
@@ -106,11 +111,10 @@ void Bluetooth_HCI_Init(Bluetooth_Device_t* const StackState)
 /** Processes a recieved Bluetooth HCI packet from a Bluetooth adapter.
  *
  *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.
- *  \param[in]      Data        Pointer to the start of the HCI data.
  */
-void Bluetooth_HCI_ProcessPacket(Bluetooth_Device_t* const StackState, uint8_t* Data)
+void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState)
 {
-	BT_HCIEvent_Header_t*   HCIEventHeader = (BT_HCIEvent_Header_t*)Data;
+	BT_HCIEvent_Header_t*   HCIEventHeader = (BT_HCIEvent_Header_t*)StackState->Config.PacketBuffer;
 	uint8_t                 NextHCIState   = StackState->State.HCI.State;
 
 	if (HCIEventHeader->EventCode == EVENT_COMMAND_COMPLETE)
@@ -165,7 +169,7 @@ void Bluetooth_HCI_ProcessPacket(Bluetooth_Device_t* const StackState, uint8_t* 
 		if (ConnectionHandle)
 		  RejectionReason = CALLBACK_Bluetooth_ConnectionRequest(StackState, ConnectionHandle) ? 0 : ERROR_UNACCEPTABLE_BDADDR;
 		
-		BT_HCICommand_Header_t* HCICommandHeader = (BT_HCICommand_Header_t*)StackState->Config.OutputPacketBuffer;
+		BT_HCICommand_Header_t* HCICommandHeader = (BT_HCICommand_Header_t*)StackState->Config.PacketBuffer;
 
 		/* If a rejection reason was given, reject the request, otherwise send a connection request accept */
 		if (RejectionReason)
@@ -187,8 +191,7 @@ void Bluetooth_HCI_ProcessPacket(Bluetooth_Device_t* const StackState, uint8_t* 
 			HCIAcceptConnectionHeader->SlaveRole = true;		
 		}
 
-		CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCICommand, (sizeof(BT_HCICommand_Header_t) + HCICommandHeader->ParameterLength),
-		                              StackState->Config.OutputPacketBuffer);
+		CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCICommand, (sizeof(BT_HCICommand_Header_t) + HCICommandHeader->ParameterLength));
 	}
 	else if (HCIEventHeader->EventCode == EVENT_CONNECTION_COMPLETE)
 	{
@@ -218,20 +221,6 @@ void Bluetooth_HCI_ProcessPacket(Bluetooth_Device_t* const StackState, uint8_t* 
 		if (ConnectionHandle)
 		  EVENT_Bluetooth_DisconnectionComplete(StackState, ConnectionHandle);
 	}
-	#if 0
-	else if ((HCIEventHeader->EventCode != 0x1B) && (HCIEventHeader->EventCode != 0x0F)) // TODO: Remove
-	{
-		char Buffer[17];
-		
-		sprintf(Buffer, "UNK EVENT: %02X", HCIEventHeader->EventCode);
-	
-		LCD_Clear();
-		LCD_WriteString(Buffer);
-		Delay_MS(200);
-		Delay_MS(200);
-		Delay_MS(200);
-	}
-	#endif
 	
 	StackState->State.HCI.StateTransition = (StackState->State.HCI.State != NextHCIState);
 	StackState->State.HCI.State           = NextHCIState;
@@ -243,9 +232,9 @@ void Bluetooth_HCI_ProcessPacket(Bluetooth_Device_t* const StackState, uint8_t* 
  *
  *  \return Boolean \c true if more HCI management tasks are pending, \c false otherwise.
  */
-bool Bluetooth_HCI_Manage(Bluetooth_Device_t* const StackState)
+bool Bluetooth_HCI_Manage(BT_StackConfig_t* const StackState)
 {
-	BT_HCICommand_Header_t* HCICommandHeader = (BT_HCICommand_Header_t*)StackState->Config.OutputPacketBuffer;
+	BT_HCICommand_Header_t* HCICommandHeader = (BT_HCICommand_Header_t*)StackState->Config.PacketBuffer;
 
 	/* Only process HCI state transitions (one action per transition) */
 	if (!(StackState->State.HCI.StateTransition))
@@ -288,8 +277,7 @@ bool Bluetooth_HCI_Manage(Bluetooth_Device_t* const StackState)
 	
 	if (HCICommandHeader->OpCode)
 	{
-		CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCICommand, (sizeof(BT_HCICommand_Header_t) + HCICommandHeader->ParameterLength),
-		                              StackState->Config.OutputPacketBuffer);
+		CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCICommand, (sizeof(BT_HCICommand_Header_t) + HCICommandHeader->ParameterLength));
 	}
 	
 	StackState->State.HCI.StateTransition = false;

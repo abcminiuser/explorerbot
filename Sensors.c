@@ -30,6 +30,8 @@
 
 #include "Sensors.h"
 
+Sensor_t Sensors;
+
 /** Initializes the robot sensors mounted on the board, ready for use. This must be called before any other functions in the
  *  sensors hardware driver.
  */
@@ -42,6 +44,8 @@ void Sensors_Init(void)
 	PORTB |= (1 << 3);
 	
 	TWI_Init(TWI_BIT_PRESCALE_4, (F_CPU / 4 / 10000) / 2);
+	
+	memset(&Sensors, 0x00, sizeof(Sensors));
 }
 
 /** Checks to ensure that all sensors mounted on the robot are present and working correctly.
@@ -65,7 +69,7 @@ uint16_t Sensors_CheckSensors(void)
 			{SENSOR_Gyroscope,     0x00, 0x69},
 		};
 	
-	Delay_MS(100);
+	Delay_MS(50);
 	
 	for (uint8_t i = 0; i < (sizeof(SensorInfo) / sizeof(SensorInfo[0])); i++)
 	{
@@ -78,5 +82,43 @@ uint16_t Sensors_CheckSensors(void)
 		  return (SENSOR_ERROR_ID | SensorInfo[i].Address);
 	}
 	
+	// TEMP
+	uint8_t PacketBuffer[6];
+	uint8_t RegisterAddress;
+	RegisterAddress = AK8975_REG_CNTL;
+	PacketBuffer[0] = AK8975_REG_CNTL_MODE_ONCE;
+	TWI_WritePacket(SENSOR_Compass, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1);
+
 	return 0;
 }
+
+void Sensors_Update(void)
+{
+	uint8_t PacketBuffer[6];
+	uint8_t RegisterAddress;
+	
+	// Read the Compass' status register, check if data is ready for reading
+	RegisterAddress = AK8975_REG_ST1;
+	if ((TWI_ReadPacket(SENSOR_Compass, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1) == TWI_ERROR_NoError) &&
+        (PacketBuffer[0] & AK8975_REG_ST1_DRDY_MASK))
+	{
+		// Read the converted data
+		RegisterAddress = AK8975_REG_HXL;
+		if (TWI_ReadPacket(SENSOR_Compass, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 6) == TWI_ERROR_NoError)
+		{
+			Sensors.Orientation.Triplicate.X = (((uint16_t)PacketBuffer[1] << 8) | PacketBuffer[0]);
+			Sensors.Orientation.Triplicate.Y = (((uint16_t)PacketBuffer[3] << 8) | PacketBuffer[2]);
+			Sensors.Orientation.Triplicate.Z = (((uint16_t)PacketBuffer[5] << 8) | PacketBuffer[4]);
+		}
+		else
+		{
+			Sensors.Orientation.Triplicate.X = 1234;		
+		}
+		
+		// Start next conversion
+		RegisterAddress = AK8975_REG_CNTL;
+		PacketBuffer[0] = AK8975_REG_CNTL_MODE_ONCE;
+		TWI_WritePacket(SENSOR_Compass, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1);
+	}
+}
+

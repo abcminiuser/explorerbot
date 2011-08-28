@@ -51,11 +51,10 @@
 		#define AK8975_REG_ST2_HOFL_MASK        (1 << 3)
 
 		#define AK8975_REG_CNTL                 0x0A
-		#define AK8975_REG_CNTL_MODE_MASK       (0xF << 0)
-		#define AK8975_REG_CNTL_MODE_POWER_DOWN 0
-		#define AK8975_REG_CNTL_MODE_ONCE       1
-		#define AK8975_REG_CNTL_MODE_SELF_TEST  8
-		#define AK8975_REG_CNTL_MODE_FUSE_ROM   0xF
+		#define AK8975_REG_CNTL_MODE_POWER_DOWN (0  << 0)
+		#define AK8975_REG_CNTL_MODE_ONCE       (1  << 0)
+		#define AK8975_REG_CNTL_MODE_SELF_TEST  (8  << 0)
+		#define AK8975_REG_CNTL_MODE_FUSE_ROM   (15 << 0)
 
 		#define AK8975_REG_RSVC                 0x0B
 		#define AK8975_REG_ASTC                 0x0C

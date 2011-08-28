@@ -53,6 +53,8 @@
 		void    LCD_Clear(void);
 		void    LCD_SetCursor(const uint8_t Y,
 		                      const uint8_t X);
+		void    LCD_SetCustomChar(const uint8_t Index,
+		                          const uint8_t* CharacterData);
 		void    LCD_WriteByte(const uint8_t Byte);
 		uint8_t LCD_ReadByte(void);
 		void    LCD_WriteString(const char* String);

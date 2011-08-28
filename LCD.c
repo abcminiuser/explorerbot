@@ -160,6 +160,22 @@ void LCD_SetCursor(const uint8_t Y,
 	PORTE |=  LCD_RS;
 }
 
+/** Sets the given LCD custom character index to the given character data.
+ *
+ *  \param[in] Index          Index of the custom character to set, between 1 and 8.
+ *  \param[in] CharacterData  Pointer to the character data.
+ */
+void LCD_SetCustomChar(const uint8_t Index,
+                       const uint8_t* CharacterData)
+{
+	PORTE &= ~LCD_RS;
+	LCD_WriteByte(0x40 | (Index << 3));
+	PORTE |=  LCD_RS;
+	
+	for (uint8_t i = 0; i < 8; i++)
+	  LCD_WriteByte(*(CharacterData++));
+}
+
 /** Reads a byte of data from the LCD bus, at the current LCD DRAM address.
  *
  *  \return Read byte of data from the LCD

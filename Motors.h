@@ -52,7 +52,8 @@
 	
 	/* Function Prototypes: */
 		void Motors_Init(void);
-		void Motors_SetChannelSpeed(const uint8_t Channel, const int16_t Power);
+		void Motors_SetChannelSpeed(const uint8_t Channel,
+		                            const int16_t Power);
 
 #endif
 

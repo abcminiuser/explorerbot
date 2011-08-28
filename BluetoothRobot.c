@@ -58,6 +58,7 @@ int main(void)
 			for(;;);
 		}
 		
+//		Sensors_Update();
 		Bluetooth_USBTask();
 		Joystick_USBTask();
 		USB_USBTask();
@@ -99,6 +100,7 @@ void StartupSequence(void)
 	const uint8_t ColourMap[] = {RGB_COLOUR_Green, RGB_COLOUR_Cyan,   RGB_COLOUR_Blue,  RGB_COLOUR_Magenta,
 	                             RGB_COLOUR_Red,   RGB_COLOUR_Yellow, RGB_COLOUR_White, RGB_COLOUR_Off};
 
+	LCD_Clear();
 	LCD_WriteString_P(PSTR("Bluetooth  Robot"));
 	LCD_SetCursor(2, 0);
 	LCD_WriteString_P(PSTR(" By Dean Camera "));
@@ -230,6 +232,7 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 	LCD_WriteString_P(PSTR("* System Ready *"));
 	LCD_SetCursor(2, 0);
 	LCD_WriteString_P(Joystick_HID_Interface.State.IsActive ? PSTR("   (HID Mode)") : PSTR("(Bluetooth Mode)"));
+	
 	RGB_SetColour(RGB_ALIAS_Ready);
 }
 

@@ -58,9 +58,35 @@
 			SENSOR_Gyroscope          = ITG3200_ADDRESS,
 			SENSOR_Pressure           = BMP085_ADDRESS,
 		} Sensors_t;
+		
+	/* Type Defines: */
+		typedef union
+		{
+			uint16_t Value;
+			
+			struct
+			{
+				uint16_t X;
+				uint16_t Y;
+				uint16_t Z;
+			} Triplicate;
+		} SensorData_t;
+		
+		typedef struct
+		{
+			SensorData_t Direction;
+			SensorData_t Acceleration;
+			SensorData_t Pressure;
+			SensorData_t Orientation;
+			SensorData_t Temperature;
+		} Sensor_t;
+	
+	/* External Variables: */
+		extern Sensor_t Sensors;
 
 	/* Function Prototypes: */
 		void     Sensors_Init(void);
 		uint16_t Sensors_CheckSensors(void);
+		void     Sensors_Update(void);
 
 #endif

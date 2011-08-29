@@ -176,6 +176,23 @@
 		void EVENT_Bluetooth_DisconnectionComplete(BT_StackConfig_t* const StackState,
 		                                           BT_HCI_Connection_t* const Connection);
 
+		/** User application event callback, fired when the Bluetooth stack has sucessfully opened a logical ACL connection to
+		 *  a remote device.
+		 *
+		 *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.
+		 *  \param[in, out] Channel     Pointer to the opened device connection information.
+		 */
+		void EVENT_Bluetooth_ChannelOpened(BT_StackConfig_t* const StackState,
+		                                   BT_ACL_Channel_t* const Channel);
+
+		/** User application event callback, fired when the Bluetooth stack has closed a logical ACL connection to a remote device.
+		 *
+		 *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.
+		 *  \param[in, out] Channel     Pointer to the closed device connection information.
+		 */
+		void EVENT_Bluetooth_ChannelClosed(BT_StackConfig_t* const StackState,
+		                                   BT_ACL_Channel_t* const Channel);
+
 		/** User application callback, fired when the Bluetooth stack has received data on an open connection.
 		 *
 		 *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.

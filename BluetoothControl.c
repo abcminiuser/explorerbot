@@ -293,6 +293,24 @@ bool CALLBACK_Bluetooth_ChannelRequest(BT_StackConfig_t* const StackState,
 	return true;
 }
 
+void EVENT_Bluetooth_ChannelOpened(BT_StackConfig_t* const StackState,
+                                   BT_ACL_Channel_t* const Channel)
+{
+	LCD_Clear();
+	LCD_WriteString("ACL Open");
+	LCD_SetCursor(2, 0);
+	LCD_WriteFormattedString("L:%04X R:%04X", Channel->LocalNumber, Channel->RemoteNumber);
+}
+
+void EVENT_Bluetooth_ChannelClosed(BT_StackConfig_t* const StackState,
+                                   BT_ACL_Channel_t* const Channel)
+{
+	LCD_Clear();
+	LCD_WriteString("ACL Closed");
+	LCD_SetCursor(2, 0);
+	LCD_WriteFormattedString("L:%04X R:%04X", Channel->LocalNumber, Channel->RemoteNumber);
+}
+
 void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
                                   BT_HCI_Connection_t* const Connection,
                                   BT_ACL_Channel_t* const Channel,
@@ -300,7 +318,9 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
                                   uint8_t* Data)
 {
 	LCD_Clear();
-	LCD_WriteFormattedString("ACL %04X %04X", Channel->LocalNumber, Channel->RemoteNumber);
+	LCD_WriteString("ACL Recv");
+	LCD_SetCursor(2, 0);
+	LCD_WriteFormattedString("L:%04X R:%04X", Channel->LocalNumber, Channel->RemoteNumber);
 	for(;;);
 }
 

@@ -45,13 +45,17 @@
 		                                            const uint16_t ConnectionHandle,
 		                                            const uint16_t LocalChannel,
 		                                            const uint16_t RemoteChannel);
-
 		void Bluetooth_ACL_Init(BT_StackConfig_t* const StackState);
 		void Bluetooth_ACL_ProcessPacket(BT_StackConfig_t* const StackState);
 		bool Bluetooth_ACL_Manage(BT_StackConfig_t* const StackState);
+
 		bool Bluetooth_ACL_SendPacket(BT_StackConfig_t* const StackState,
 		                              BT_ACL_Channel_t* const ACLChannel,
 		                              uint16_t Length,
 		                              void* Data);
-								
+		BT_ACL_Channel_t* Bluetooth_ACL_OpenChannel(BT_StackConfig_t* const StackState,
+                                                    BT_HCI_Connection_t* const HCIConnection,
+                                                    const uint16_t PSM);
+		void Bluetooth_ACL_CloseChannel(BT_StackConfig_t* const StackState,
+		                                BT_ACL_Channel_t* const ACLChannel);
 #endif

@@ -14,6 +14,19 @@
 
 #include "BluetoothACL.h"
 
+void Bluetooth_ACL_NotifyHCIDisconnection(BT_StackConfig_t* const StackState,
+                                          const uint16_t ConnectionHandle)
+{
+	for (uint8_t i = 0; i < MAX_LOGICAL_CHANNELS; i++)
+	{
+		BT_ACL_Channel_t* CurrentChannel = &StackState->State.ACL.Channels[i];
+		
+		// Clear any open connections that are associated with the destroyed connection handle
+		if (CurrentChannel->ConnectionHandle == ConnectionHandle)
+		  CurrentChannel->State = ACL_CHANSTATE_Closed;
+	}
+}
+
 BT_ACL_Channel_t* Bluetooth_ACL_FindChannel(BT_StackConfig_t* const StackState,
                                             const uint16_t ConnectionHandle,
                                             const uint16_t LocalChannel,
@@ -65,10 +78,10 @@ static BT_ACL_Channel_t* Bluetooth_ACL_NewChannel(BT_StackConfig_t* const StackS
 	return NULL;
 }
 
-static bool Bluetooth_ACL_SendSignal(BT_StackConfig_t* const StackState,
-                                     BT_HCI_Connection_t* HCIConnection,
-                                     uint16_t Length,
-                                     void* Data)
+static bool Bluetooth_ACL_SendSignalPacket(BT_StackConfig_t* const StackState,
+                                           BT_HCI_Connection_t* HCIConnection,
+                                           uint16_t Length,
+                                           void* Data)
 {
 	BT_ACL_Channel_t SignalChannel;
 	SignalChannel.ConnectionHandle = HCIConnection->Handle;
@@ -76,12 +89,12 @@ static bool Bluetooth_ACL_SendSignal(BT_StackConfig_t* const StackState,
 	SignalChannel.LocalNumber      = BT_CHANNEL_SIGNALING;
 	SignalChannel.RemoteNumber     = BT_CHANNEL_SIGNALING;
 
-	return Bluetooth_ACL_Send(StackState, &SignalChannel, Length, Data);
+	return Bluetooth_ACL_SendPacket(StackState, &SignalChannel, Length, Data);
 }
 
-static void Bluetooth_ACL_Signal_ConnRequest(BT_StackConfig_t* const StackState,
-                                             BT_HCI_Connection_t* const HCIConnection,
-                                             BT_Signal_Header_t* const SignalCommandHeader)
+static inline void Bluetooth_ACL_Signal_ConnRequest(BT_StackConfig_t* const StackState,
+                                                    BT_HCI_Connection_t* const HCIConnection,
+                                                    BT_Signal_Header_t* const SignalCommandHeader)
 {
 	BT_Signal_ConnectionReq_t* ConnectionRequest = (BT_Signal_ConnectionReq_t*)SignalCommandHeader->Data;
 				
@@ -110,15 +123,15 @@ static void Bluetooth_ACL_Signal_ConnRequest(BT_StackConfig_t* const StackState,
 	// Fill out the Connection Response in the response packet
 	ResponsePacket.ConnectionResponse.DestinationChannel = ACLChannel->LocalNumber;
 	ResponsePacket.ConnectionResponse.SourceChannel      = ACLChannel->RemoteNumber;
-	ResponsePacket.ConnectionResponse.Result             = RejectionReason;
+	ResponsePacket.ConnectionResponse.Result             = cpu_to_le16(RejectionReason);
 	ResponsePacket.ConnectionResponse.Status             = 0x00;
 	
-	Bluetooth_ACL_SendSignal(StackState, HCIConnection, sizeof(ResponsePacket), &ResponsePacket);
+	Bluetooth_ACL_SendSignalPacket(StackState, HCIConnection, sizeof(ResponsePacket), &ResponsePacket);
 }
 
-static void Bluetooth_ACL_Signal_ConnResp(BT_StackConfig_t* const StackState,
-                                          BT_HCI_Connection_t* const HCIConnection,
-                                          BT_Signal_Header_t* const SignalCommandHeader)
+static inline void Bluetooth_ACL_Signal_ConnResp(BT_StackConfig_t* const StackState,
+                                                 BT_HCI_Connection_t* const HCIConnection,
+                                                 BT_Signal_Header_t* const SignalCommandHeader)
 {
 	BT_Signal_ConnectionResp_t* ConnectionResponse = (BT_Signal_ConnectionResp_t*)SignalCommandHeader->Data;
 		
@@ -133,9 +146,9 @@ static void Bluetooth_ACL_Signal_ConnResp(BT_StackConfig_t* const StackState,
 	}
 }
 
-static void Bluetooth_ACL_Signal_EchoReq(BT_StackConfig_t* const StackState,
-                                         BT_HCI_Connection_t* const HCIConnection,
-                                         BT_Signal_Header_t* const SignalCommandHeader)
+static inline void Bluetooth_ACL_Signal_EchoReq(BT_StackConfig_t* const StackState,
+                                                BT_HCI_Connection_t* const HCIConnection,
+                                                BT_Signal_Header_t* const SignalCommandHeader)
 {
 	struct
 	{
@@ -147,12 +160,12 @@ static void Bluetooth_ACL_Signal_EchoReq(BT_StackConfig_t* const StackState,
 	ResponsePacket.SignalCommandHeader.Identifier = SignalCommandHeader->Identifier;
 	ResponsePacket.SignalCommandHeader.Length     = CPU_TO_LE16(0);
 
-	Bluetooth_ACL_SendSignal(StackState, HCIConnection, sizeof(ResponsePacket), &ResponsePacket);
+	Bluetooth_ACL_SendSignalPacket(StackState, HCIConnection, sizeof(ResponsePacket), &ResponsePacket);
 }
 
-static void Bluetooth_ACL_Signal_DisconnectionReq(BT_StackConfig_t* const StackState,
-                                                  BT_HCI_Connection_t* const HCIConnection,
-                                                  BT_Signal_Header_t* const SignalCommandHeader)
+static inline void Bluetooth_ACL_Signal_DisconnectionReq(BT_StackConfig_t* const StackState,
+                                                         BT_HCI_Connection_t* const HCIConnection,
+                                                         BT_Signal_Header_t* const SignalCommandHeader)
 {
 	BT_Signal_DisconnectionReq_t* DisconnectionRequest = (BT_Signal_DisconnectionReq_t*)SignalCommandHeader->Data;
 
@@ -177,12 +190,12 @@ static void Bluetooth_ACL_Signal_DisconnectionReq(BT_StackConfig_t* const StackS
 	if (ACLChannel)
 	  ACLChannel->State = ACL_CHANSTATE_Closed;
 
-	Bluetooth_ACL_SendSignal(StackState, HCIConnection, sizeof(ResponsePacket), &ResponsePacket);
+	Bluetooth_ACL_SendSignalPacket(StackState, HCIConnection, sizeof(ResponsePacket), &ResponsePacket);
 }
 
-static void Bluetooth_ACL_Signal_DisconnectionResp(BT_StackConfig_t* const StackState,
-                                                   BT_HCI_Connection_t* const HCIConnection,
-                                                   BT_Signal_Header_t* const SignalCommandHeader)
+static inline void Bluetooth_ACL_Signal_DisconnectionResp(BT_StackConfig_t* const StackState,
+                                                          BT_HCI_Connection_t* const HCIConnection,
+                                                          BT_Signal_Header_t* const SignalCommandHeader)
 {
 	BT_Signal_DisconnectionResp_t* DisconnectionResponse = (BT_Signal_DisconnectionResp_t*)SignalCommandHeader->Data;
 
@@ -193,9 +206,9 @@ static void Bluetooth_ACL_Signal_DisconnectionResp(BT_StackConfig_t* const Stack
 	  ACLChannel->State = ACL_CHANSTATE_Closed;
 }
 
-static void Bluetooth_ACL_Signal_InformationReq(BT_StackConfig_t* const StackState,
-                                                BT_HCI_Connection_t* const HCIConnection,
-                                                BT_Signal_Header_t* const SignalCommandHeader)
+static inline void Bluetooth_ACL_Signal_InformationReq(BT_StackConfig_t* const StackState,
+                                                       BT_HCI_Connection_t* const HCIConnection,
+                                                       BT_Signal_Header_t* const SignalCommandHeader)
 {
 	BT_Signal_InformationReq_t* InformationRequest = (BT_Signal_InformationReq_t*)SignalCommandHeader->Data;
 
@@ -203,8 +216,7 @@ static void Bluetooth_ACL_Signal_InformationReq(BT_StackConfig_t* const StackSta
 	{
 		BT_Signal_Header_t          SignalCommandHeader;
 		BT_Signal_InformationResp_t InformationResponse;
-
-		uint8_t Data[4];
+		uint8_t                     Data[4];
 	} ResponsePacket;
 
 	uint8_t DataLen = 0;
@@ -213,20 +225,19 @@ static void Bluetooth_ACL_Signal_InformationReq(BT_StackConfig_t* const StackSta
 	switch (InformationRequest->InfoType)
 	{
 		case BT_INFOREQ_MTU:
-			ResponsePacket.InformationResponse.Result = BT_INFORMATION_SUCCESSFUL;
+			ResponsePacket.InformationResponse.Result = CPU_TO_LE16(BT_INFORMATION_SUCCESSFUL);
 			DataLen = 2;
 
 			*((uint16_t*)&ResponsePacket.Data) = CPU_TO_LE16(DEFAULT_ACL_CHANNEL_MTU);
 			break;
 		case BT_INFOREQ_EXTENDEDFEATURES:
-			ResponsePacket.InformationResponse.Result = BT_INFORMATION_SUCCESSFUL;
+			ResponsePacket.InformationResponse.Result = CPU_TO_LE16(BT_INFORMATION_SUCCESSFUL);
 			DataLen = 4;
 
 			*((uint32_t*)&ResponsePacket.Data) = CPU_TO_LE32(0);
 			break;
 		default:
-			ResponsePacket.InformationResponse.Result = BT_INFORMATION_NOTSUPPORTED;
-			DataLen = 0;
+			ResponsePacket.InformationResponse.Result = CPU_TO_LE16(BT_INFORMATION_NOTSUPPORTED);
 			break;
 	}
 
@@ -238,7 +249,100 @@ static void Bluetooth_ACL_Signal_InformationReq(BT_StackConfig_t* const StackSta
 	/* Fill out the Information Response in the response packet */
 	ResponsePacket.InformationResponse.InfoType = InformationRequest->InfoType;
 
-	Bluetooth_ACL_SendSignal(StackState, NULL, (sizeof(ResponsePacket) - sizeof(ResponsePacket.Data) + DataLen), &ResponsePacket);
+	Bluetooth_ACL_SendSignalPacket(StackState, HCIConnection, (sizeof(ResponsePacket) - sizeof(ResponsePacket.Data) + DataLen), &ResponsePacket);
+}
+
+static inline void Bluetooth_ACL_Signal_ConfigReq(BT_StackConfig_t* const StackState,
+                                                  BT_HCI_Connection_t* const HCIConnection,
+                                                  BT_Signal_Header_t* const SignalCommandHeader)
+{
+	BT_Signal_ConfigurationReq_t* ConfigurationRequest = (BT_Signal_ConfigurationReq_t*)SignalCommandHeader->Data;
+
+	// Find the existing channel in the channel table if it exists
+	BT_ACL_Channel_t* ACLChannel = Bluetooth_ACL_FindChannel(StackState, HCIConnection->Handle, 0, ConfigurationRequest->DestinationChannel);
+
+	// Only look at the channel configuration options if a valid channel entry for the local channel number was found
+	if (ACLChannel != NULL)
+	{
+		// Update channel state based on the current state
+		switch (ACLChannel->State)
+		{
+			case ACL_CHANSTATE_Config_WaitConfig:
+				ACLChannel->State = ACL_CHANSTATE_Config_WaitSendConfig;
+				break;
+			case ACL_CHANSTATE_Config_WaitReqResp:
+				ACLChannel->State = ACL_CHANSTATE_Config_WaitResp;
+				break;
+			case ACL_CHANSTATE_Config_WaitReq:
+				ACLChannel->State = ACL_CHANSTATE_Open;
+				break;
+		}
+		
+		uint8_t* OptionsPos = (uint8_t*)ConfigurationRequest->Options;
+		uint8_t* OptionsEnd = (uint8_t*)((intptr_t)OptionsPos + (SignalCommandHeader->Length - sizeof(ConfigurationRequest)));
+
+		while (OptionsPos < OptionsEnd)
+		{
+			BT_Config_Option_Header_t* OptionHeader = (BT_Config_Option_Header_t*)OptionsPos;
+			
+			/* Store the remote MTU option's value if present */
+			if (OptionHeader->Type == BT_CONFIG_OPTION_MTU)
+			  ACLChannel->RemoteMTU = le16_to_cpu(*((uint16_t*)OptionHeader->Data));
+
+			/* Progress to the next option in the packet */
+			OptionsPos += (sizeof(BT_Config_Option_Header_t) + OptionHeader->Length);			
+		}
+	}
+
+	struct
+	{
+		BT_Signal_Header_t            SignalCommandHeader;
+		BT_Signal_ConfigurationResp_t ConfigurationResponse;
+	} ResponsePacket;
+
+	// Fill out the Signal Command header in the response packet
+	ResponsePacket.SignalCommandHeader.Code              = BT_SIGNAL_CONFIGURATION_RESPONSE;
+	ResponsePacket.SignalCommandHeader.Identifier        = SignalCommandHeader->Identifier;
+	ResponsePacket.SignalCommandHeader.Length            = CPU_TO_LE16(sizeof(ResponsePacket.ConfigurationResponse));
+
+	/* Fill out the Configuration Response in the response packet */
+	ResponsePacket.ConfigurationResponse.SourceChannel   = ACLChannel->RemoteNumber;
+	ResponsePacket.ConfigurationResponse.Flags           = 0x00;
+	ResponsePacket.ConfigurationResponse.Result          = (ACLChannel != NULL) ? CPU_TO_LE16(BT_CONFIGURATION_SUCCESSFUL) : CPU_TO_LE16(BT_CONFIGURATION_REJECTED);
+
+	Bluetooth_ACL_SendSignalPacket(StackState, HCIConnection, sizeof(ResponsePacket), &ResponsePacket);
+}
+
+static inline void Bluetooth_ACL_Signal_ConfigResp(BT_StackConfig_t* const StackState,
+                                                   BT_HCI_Connection_t* const HCIConnection,
+                                                   BT_Signal_Header_t* const SignalCommandHeader)
+{
+	BT_Signal_ConfigurationResp_t* ConfigurationResponse = (BT_Signal_ConfigurationResp_t*)SignalCommandHeader->Data;
+
+	// Find the existing channel in the channel table if it exists
+	BT_ACL_Channel_t* ACLChannel = Bluetooth_ACL_FindChannel(StackState, HCIConnection->Handle, 0, ConfigurationResponse->SourceChannel);
+	
+	if (!(ACLChannel))
+	  return;
+
+	// Check if the channel configuration completed successfully
+	if (ConfigurationResponse->Result == CPU_TO_LE16(BT_CONFIGURATION_SUCCESSFUL))
+	{
+		switch (ACLChannel->State)
+		{
+			case ACL_CHANSTATE_Config_WaitReqResp:
+				ACLChannel->State = ACL_CHANSTATE_Config_WaitReq;
+				break;
+			case ACL_CHANSTATE_Config_WaitResp:
+				ACLChannel->State = ACL_CHANSTATE_Open;
+				break;
+		}
+	}
+	else
+	{
+		// Configuration failed, close the channel
+		ACLChannel->State = ACL_CHANSTATE_Closed;
+	}
 }
 
 /** Initalizes the Bluetooth ACL layer, ready for new channel connections.
@@ -275,41 +379,27 @@ void Bluetooth_ACL_ProcessPacket(BT_StackConfig_t* const StackState)
 		switch (SignalCommandHeader->Code)
 		{
 			case BT_SIGNAL_CONNECTION_REQUEST:
-				LCD_Clear();
-				LCD_WriteString("CON REQ");
 				Bluetooth_ACL_Signal_ConnRequest(StackState, HCIConnection, SignalCommandHeader);
 				break;
 			case BT_SIGNAL_CONNECTION_RESPONSE:
-				LCD_Clear();
-				LCD_WriteString("CON RESP");
 				Bluetooth_ACL_Signal_ConnResp(StackState, HCIConnection, SignalCommandHeader);
 				break;
 			case BT_SIGNAL_CONFIGURATION_REQUEST:
-				LCD_Clear();
-				LCD_WriteString("CONFIG REQ");
+				Bluetooth_ACL_Signal_ConfigReq(StackState, HCIConnection, SignalCommandHeader);
 				break;
 			case BT_SIGNAL_CONFIGURATION_RESPONSE:
-				LCD_Clear();
-				LCD_WriteString("CONFIG RESP");
+				Bluetooth_ACL_Signal_ConfigResp(StackState, HCIConnection, SignalCommandHeader);
 				break;
 			case BT_SIGNAL_DISCONNECTION_REQUEST:
-				LCD_Clear();
-				LCD_WriteString("DISCON REQ");
 				Bluetooth_ACL_Signal_DisconnectionReq(StackState, HCIConnection, SignalCommandHeader);
 				break;
 			case BT_SIGNAL_DISCONNECTION_RESPONSE:
-				LCD_Clear();
-				LCD_WriteString("DISCON RESP");
 				Bluetooth_ACL_Signal_DisconnectionResp(StackState, HCIConnection, SignalCommandHeader);
 				break;
 			case BT_SIGNAL_ECHO_REQUEST:
-				LCD_Clear();
-				LCD_WriteString("ECHO REQ");
 				Bluetooth_ACL_Signal_EchoReq(StackState, HCIConnection, SignalCommandHeader);
 				break;
 			case BT_SIGNAL_INFORMATION_REQUEST:
-				LCD_Clear();
-				LCD_WriteString("INFO REQ");
 				Bluetooth_ACL_Signal_InformationReq(StackState, HCIConnection, SignalCommandHeader);
 				break;
 		}
@@ -332,16 +422,70 @@ void Bluetooth_ACL_ProcessPacket(BT_StackConfig_t* const StackState)
  */
 bool Bluetooth_ACL_Manage(BT_StackConfig_t* const StackState)
 {
+	// Check for any half-open channels, send configuration details to the remote device if found
+	for (uint8_t i = 0; i < MAX_LOGICAL_CHANNELS; i++)
+	{
+		BT_ACL_Channel_t* CurrentChannel = &StackState->State.ACL.Channels[i];
+
+		// Check if we are in a channel state which requires a configuration request to be sent
+		switch (CurrentChannel->State)
+		{
+			case ACL_CHANSTATE_Config_WaitConfig:
+				CurrentChannel->State = ACL_CHANSTATE_Config_WaitReqResp;
+				break;
+			case ACL_CHANSTATE_Config_WaitSendConfig:
+				CurrentChannel->State = ACL_CHANSTATE_Config_WaitResp;
+				break;
+			default:
+				continue;
+		}
+
+		// Find the associated HCI connection via the connection handle indicated in the ACL packet header
+		BT_HCI_Connection_t* HCIConnection = Bluetooth_HCI_FindConnection(StackState, NULL, CurrentChannel->ConnectionHandle);
+
+		// If the HCI connection is invalid, abort the configuration
+		if (!(HCIConnection))
+		  continue;
+
+		struct
+		{
+			BT_Signal_Header_t           SignalCommandHeader;
+			BT_Signal_ConfigurationReq_t ConfigurationRequest;
+
+			struct
+			{
+				BT_Config_Option_Header_t Header;
+				uint16_t Value;
+			} Option_LocalMTU;
+		} PacketData;
+
+		/* Fill out the Signal Command header in the response packet */
+		PacketData.SignalCommandHeader.Code            = BT_SIGNAL_CONFIGURATION_REQUEST;
+		PacketData.SignalCommandHeader.Identifier      = ++HCIConnection->CurrentIdentifier;
+		PacketData.SignalCommandHeader.Length          = sizeof(PacketData.ConfigurationRequest) +
+		                                                 sizeof(PacketData.Option_LocalMTU);
+
+		/* Fill out the Configuration Request in the response packet, including local MTU information */
+		PacketData.ConfigurationRequest.DestinationChannel = CurrentChannel->RemoteNumber;
+		PacketData.ConfigurationRequest.Flags          = 0;
+		PacketData.Option_LocalMTU.Header.Type         = CPU_TO_LE16(BT_CONFIG_OPTION_MTU);
+		PacketData.Option_LocalMTU.Header.Length       = sizeof(PacketData.Option_LocalMTU.Value);
+		PacketData.Option_LocalMTU.Value               = cpu_to_le16(CurrentChannel->LocalMTU);
+
+		Bluetooth_ACL_SendSignalPacket(StackState, HCIConnection, sizeof(PacketData), &PacketData);
+		return true;
+	}
+	
 	return false;
 }
 
-bool Bluetooth_ACL_Send(BT_StackConfig_t* const StackState,
-                        BT_ACL_Channel_t* const ACLChannel,
-                        uint16_t Length,
-                        void* Data)
+bool Bluetooth_ACL_SendPacket(BT_StackConfig_t* const StackState,
+                              BT_ACL_Channel_t* const ACLChannel,
+                              uint16_t Length,
+                              void* Data)
 {
-	/* If the destination channel is not the signaling channel and it is not currently fully open, abort */
-	if (ACLChannel->State != ACL_CHANSTATE_Open)
+	// If the destination channel is not the signaling channel and it is not currently fully open, abort
+	if (!(ACLChannel) || (ACLChannel->State != ACL_CHANSTATE_Open))
 	  return false;
 
 	BT_HCI_Connection_t* HCIConnection = Bluetooth_HCI_FindConnection(StackState, NULL, ACLChannel->ConnectionHandle);
@@ -365,4 +509,3 @@ bool Bluetooth_ACL_Send(BT_StackConfig_t* const StackState,
 	CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_ACLData, (sizeof(BT_ACL_Header_t) + sizeof(BT_DataPacket_Header_t) + Length));
 	return true;
 }
-

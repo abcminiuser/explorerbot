@@ -51,11 +51,10 @@
 		{
 			RGB_ALIAS_Disconnected  = RGB_COLOUR_White,
 			RGB_ALIAS_Enumerating   = RGB_COLOUR_Yellow,
-			RGB_ALIAS_UnknownDevice = RGB_COLOUR_Magenta,
 			RGB_ALIAS_Error         = RGB_COLOUR_Red,
 			RGB_ALIAS_Ready         = RGB_COLOUR_Green,
 			RGB_ALIAS_Connected     = RGB_COLOUR_Blue,
-			RGB_ALIAS_Busy          = RGB_COLOUR_Cyan,
+			RGB_ALIAS_Busy          = RGB_COLOUR_Magenta,
 		};
 
 	/* Function Prototypes: */

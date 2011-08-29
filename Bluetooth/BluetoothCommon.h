@@ -78,6 +78,7 @@
 			uint8_t  RemoteBDADDR[BT_BDADDR_LEN];
 			uint16_t Handle;
 			uint8_t  LinkType;
+			uint8_t  CurrentIdentifier;
 		} BT_HCI_Connection_t;
 	
 		/** Type define for a Bluetooth ACL channel information structure. This structure contains all the relevant

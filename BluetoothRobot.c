@@ -208,7 +208,7 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 	{
 		LCD_Clear();
 		LCD_WriteString_P(PSTR("ERR: Unknown USB"));
-		RGB_SetColour(RGB_ALIAS_UnknownDevice);
+		RGB_SetColour(RGB_ALIAS_Error);
 		return;
 	}
 

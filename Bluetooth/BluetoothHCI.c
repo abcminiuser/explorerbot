@@ -33,8 +33,9 @@ static BT_HCI_Connection_t* Bluetooth_HCI_NewConnection(BT_StackConfig_t* const 
 		if (Connection->State == HCI_CONSTATE_Free)
 		{
 			memcpy(Connection->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
-			Connection->State    = HCI_CONSTATE_New;
-			Connection->LinkType = LinkType;
+			Connection->State             = HCI_CONSTATE_New;
+			Connection->LinkType          = LinkType;
+			Connection->CurrentIdentifier = 0x01;
 			return Connection;
 		}
 	}
@@ -162,11 +163,9 @@ void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState)
 			memcpy(HCIRejectConnectionHeader->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
 			HCIRejectConnectionHeader->Reason = RejectionReason;
 			
+			// Mark the connection as free again as it was rejected
 			if (Connection)
-			{
-				// Mark the connection as free again as it was rejected
-				Connection->State  = HCI_CONSTATE_Free;
-			}
+			  Connection->State = HCI_CONSTATE_Free;
 		}
 		else
 		{
@@ -208,20 +207,62 @@ void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState)
 		if (Connection)
 		{
 			Connection->State = HCI_CONSTATE_Free;
+			
+			Bluetooth_ACL_NotifyHCIDisconnection(StackState, Connection->Handle);			
 			EVENT_Bluetooth_DisconnectionComplete(StackState, Connection);
 		}
 	}
 	else if (HCIEventHeader->EventCode == EVENT_PIN_CODE_REQUEST)
 	{
-		LCD_Clear();
-		LCD_WriteString("PIN CODE");
-		for(;;);
+		BT_HCIEvent_PinCodeReq_t* PINCodeRequestEventHeader = (BT_HCIEvent_PinCodeReq_t*)&HCIEventHeader->Parameters;		
+
+		/* Must first copy the Remote BDADDR to a temporary buffer so we can overwrite it in the packet buffer */
+		uint8_t RemoteBDADDR[BT_BDADDR_LEN];
+		memcpy(RemoteBDADDR, &PINCodeRequestEventHeader->RemoteBDADDR, BT_BDADDR_LEN);
+
+		BT_HCICommand_Header_t* HCICommandHeader = (BT_HCICommand_Header_t*)StackState->Config.PacketBuffer;
+		
+		// Check if a PIN code has been set of one or more characters
+		if ((StackState->Config.PINCode != NULL) && strlen(StackState->Config.PINCode))
+		{
+			BT_HCICommand_PinCodeACKResp_t* PINKeyACKResponse = (BT_HCICommand_PinCodeACKResp_t*)&HCIEventHeader->Parameters;
+			uint8_t KeyLength = MIN(strlen(StackState->Config.PINCode), 16);
+
+			HCICommandHeader->OpCode          = CPU_TO_LE16(OGF_LINK_CONTROL | OCF_LINK_CONTROL_PIN_CODE_REQUEST_REPLY);
+			HCICommandHeader->ParameterLength = sizeof(BT_HCICommand_PinCodeACKResp_t);
+			
+			memcpy(&PINKeyACKResponse->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
+			PINKeyACKResponse->PINCodeLength = KeyLength;
+			memcpy(&PINKeyACKResponse->PINCode, StackState->Config.PINCode, KeyLength);
+		}
+		else
+		{
+			BT_HCICommand_PinCodeNAKResp_t* PINKeyNAKResponse = (BT_HCICommand_PinCodeNAKResp_t*)&HCIEventHeader->Parameters;
+
+			HCICommandHeader->OpCode          = CPU_TO_LE16(OGF_LINK_CONTROL | OCF_LINK_CONTROL_PIN_CODE_REQUEST_NEG_REPLY);
+			HCICommandHeader->ParameterLength = sizeof(BT_HCICommand_PinCodeNAKResp_t);
+			
+			memcpy(&PINKeyNAKResponse->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
+		}
+
+		CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCICommand, (sizeof(BT_HCICommand_Header_t) + HCICommandHeader->ParameterLength));
 	}
 	else if (HCIEventHeader->EventCode == EVENT_LINK_KEY_REQUEST)
 	{
-		LCD_Clear();
-		LCD_WriteString("LINK KEY");
-		for(;;);
+		BT_HCIEvent_LinkKeyReq_t* LinkKeyRequestEventHeader = (BT_HCIEvent_LinkKeyReq_t*)&HCIEventHeader->Parameters;
+
+		/* Must first copy the Remote BDADDR to a temporary buffer so we can overwrite it in the packet buffer */
+		uint8_t RemoteBDADDR[BT_BDADDR_LEN];
+		memcpy(RemoteBDADDR, &LinkKeyRequestEventHeader->RemoteBDADDR, BT_BDADDR_LEN);
+
+		BT_HCICommand_Header_t* HCICommandHeader = (BT_HCICommand_Header_t*)StackState->Config.PacketBuffer;
+		HCICommandHeader->OpCode          = CPU_TO_LE16(OGF_LINK_CONTROL | OCF_LINK_CONTROL_LINK_KEY_REQUEST_NEG_REPLY),
+		HCICommandHeader->ParameterLength = sizeof(BT_HCICommand_LinkKeyNAKResp_t);
+		
+		BT_HCICommand_LinkKeyNAKResp_t* LinkKeyRequestNAKHeader = (BT_HCICommand_LinkKeyNAKResp_t*)&HCIEventHeader->Parameters;		
+		memcpy(&LinkKeyRequestNAKHeader->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
+
+		CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCICommand, (sizeof(BT_HCICommand_Header_t) + HCICommandHeader->ParameterLength));
 	}
 	
 	StackState->State.HCI.StateTransition = (StackState->State.HCI.State != NextHCIState);

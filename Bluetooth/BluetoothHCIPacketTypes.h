@@ -107,7 +107,12 @@
 			uint8_t  RemoteBDADDR[BT_BDADDR_LEN];
 			uint8_t  PINCodeLength;
 			char     PINCode[16];
-		} ATTR_PACKED BT_HCICommand_PinCodeResp_t;
+		} ATTR_PACKED BT_HCICommand_PinCodeACKResp_t;
+
+		typedef struct
+		{
+			uint8_t  RemoteBDADDR[BT_BDADDR_LEN];
+		} ATTR_PACKED BT_HCICommand_PinCodeNAKResp_t;
 
 		typedef struct
 		{

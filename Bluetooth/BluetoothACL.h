@@ -38,6 +38,9 @@
 		#define BT_ACL_FIRST_AUTOFLUSH            (1 << 13)
 
 	/* Function Prototypes: */
+		void Bluetooth_ACL_NotifyHCIDisconnection(BT_StackConfig_t* const StackState,
+		                                          const uint16_t ConnectionHandle);
+
 		BT_ACL_Channel_t* Bluetooth_ACL_FindChannel(BT_StackConfig_t* const StackState,
 		                                            const uint16_t ConnectionHandle,
 		                                            const uint16_t LocalChannel,
@@ -46,9 +49,9 @@
 		void Bluetooth_ACL_Init(BT_StackConfig_t* const StackState);
 		void Bluetooth_ACL_ProcessPacket(BT_StackConfig_t* const StackState);
 		bool Bluetooth_ACL_Manage(BT_StackConfig_t* const StackState);
-		bool Bluetooth_ACL_Send(BT_StackConfig_t* const StackState,
-		                        BT_ACL_Channel_t* const ACLChannel,
-		                        uint16_t Length,
-		                        void* Data);
-
+		bool Bluetooth_ACL_SendPacket(BT_StackConfig_t* const StackState,
+		                              BT_ACL_Channel_t* const ACLChannel,
+		                              uint16_t Length,
+		                              void* Data);
+								
 #endif

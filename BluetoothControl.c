@@ -301,6 +301,7 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
 {
 	LCD_Clear();
 	LCD_WriteFormattedString("ACL %04X %04X", Channel->LocalNumber, Channel->RemoteNumber);
+	for(;;);
 }
 
 

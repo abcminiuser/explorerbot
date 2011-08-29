@@ -35,6 +35,8 @@
 		#include <avr/io.h>
 		#include <avr/pgmspace.h>
 		#include <stdbool.h>
+		#include <stdarg.h>
+		#include <stdio.h>
 
 		#include <LUFA/Common/Common.h>
 		
@@ -58,6 +60,7 @@
 		void    LCD_WriteByte(const uint8_t Byte);
 		uint8_t LCD_ReadByte(void);
 		void    LCD_WriteString(const char* String);
+		void    LCD_WriteFormattedString(const char* FormatString, ...);
 		void    LCD_WriteString_P(const char* String);
 		
 #endif

@@ -41,6 +41,7 @@
 			uint8_t  Code; /**< Signal code, a BT_SIGNAL_* mask value */
 			uint8_t  Identifier; /**< Unique signal command identifier to link requests and responses */
 			uint16_t Length; /**< Length of the signaling command data, in bytes */
+			uint8_t  Data[];
 		} ATTR_PACKED BT_Signal_Header_t;
 
 		/** Connection Request signaling command structure, for channel connection requests. */

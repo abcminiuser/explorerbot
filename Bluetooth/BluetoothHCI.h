@@ -24,6 +24,9 @@
 		#include "BluetoothHCIEventCodes.h"
 		#include "BluetoothHCIPacketTypes.h"
 	
+	/* Macros: */
+		#define BT_HCI_CONNECTION_HANDLE_MASK     0x0FFF	
+	
 	/* Enums: */
 		enum BT_HCIStates_t
 		{

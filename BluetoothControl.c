@@ -36,7 +36,7 @@ BT_StackConfig_t Bluetooth_Module =
 		.Config = 
 			{
 				.Class              = (DEVICE_CLASS_SERVICE_CAPTURING | DEVICE_CLASS_MAJOR_COMPUTER | DEVICE_CLASS_MINOR_COMPUTER_PALM),
-				.Name               = "Dean's Bluetooth Robot",
+				.Name               = "Bluetooth Robot",
 				.PINCode            = "0000",
 				.Discoverable       = true,
 				.PacketBuffer       = EXTERNAL_MEMORY_START,
@@ -175,6 +175,7 @@ void Bluetooth_USBTask(void)
 	{
 		BT_ACL_Header_t* PacketHeader = (BT_ACL_Header_t*)Bluetooth_Module.Config.PacketBuffer;
 
+		// Read in the ACL packet data from the Data IN pipe
 		Pipe_Read_Stream_LE(PacketHeader, sizeof(BT_ACL_Header_t), NULL);
 		Pipe_Read_Stream_LE(PacketHeader->Data, PacketHeader->DataLength, NULL);
 		Pipe_ClearIN();
@@ -194,6 +195,7 @@ void Bluetooth_USBTask(void)
 	{
 		BT_HCIEvent_Header_t* EventHeader = (BT_HCIEvent_Header_t*)Bluetooth_Module.Config.PacketBuffer;
 
+		// Read in the Event packet data from the Event IN pipe
 		Pipe_Read_Stream_LE(EventHeader, sizeof(BT_HCIEvent_Header_t), NULL);
 		Pipe_Read_Stream_LE(EventHeader->Parameters, EventHeader->ParameterLength, NULL);
 		Pipe_ClearIN();
@@ -206,7 +208,7 @@ void Bluetooth_USBTask(void)
 	
 	Pipe_Freeze();
 	
-	/* Keep on running the management routine until all pending packets have been sent */
+	// Keep on running the management routine until all pending packets have been sent
 	while (Bluetooth_ManageConnections(&Bluetooth_Module)) {};
 }
 
@@ -216,6 +218,7 @@ void CALLBACK_Bluetooth_SendPacket(BT_StackConfig_t* const StackState,
 {
 	RGB_SetColour(RGB_ALIAS_Busy);
 
+	// Determine the type of packet being sent, use appropriate pipe
 	switch (Type)
 	{
 		case BLUETOOTH_PACKET_HCICommand:
@@ -228,6 +231,7 @@ void CALLBACK_Bluetooth_SendPacket(BT_StackConfig_t* const StackState,
 					.wLength       = Length
 				};
 
+			// HCI commands must be sent over the Control pipe
 			Pipe_SelectPipe(PIPE_CONTROLPIPE);
 			USB_Host_SendControlRequest(StackState->Config.PacketBuffer);
 			break;
@@ -235,7 +239,7 @@ void CALLBACK_Bluetooth_SendPacket(BT_StackConfig_t* const StackState,
 			Pipe_SelectPipe(BLUETOOTH_DATA_OUT_PIPE);
 			Pipe_Unfreeze();
 
-			Pipe_Write_16_LE(Length);			
+			// ACL packets must be sent over the Data OUT pipe
 			Pipe_Write_Stream_LE(StackState->Config.PacketBuffer, Length, NULL);
 			Pipe_ClearOUT();
 			Pipe_Freeze();
@@ -248,15 +252,12 @@ void CALLBACK_Bluetooth_SendPacket(BT_StackConfig_t* const StackState,
 bool CALLBACK_Bluetooth_ConnectionRequest(BT_StackConfig_t* const StackState,
                                           BT_HCI_Connection_t* const ConnectionHandle)
 {
-	char BDADDRBuffer[17];
-	sprintf(BDADDRBuffer, "%02X%02X%02X%02X%02X%02X", ConnectionHandle->BDADDR[0], ConnectionHandle->BDADDR[1],
-	                                                  ConnectionHandle->BDADDR[2], ConnectionHandle->BDADDR[3],
-	                                                  ConnectionHandle->BDADDR[4], ConnectionHandle->BDADDR[5]);
-
 	LCD_Clear();
 	LCD_WriteString("Conn Request:");
 	LCD_SetCursor(2, 0);
-	LCD_WriteString(BDADDRBuffer);
+	LCD_WriteFormattedString("%02X%02X:%02X%02X:%02X%02X", ConnectionHandle->RemoteBDADDR[0], ConnectionHandle->RemoteBDADDR[1],
+	                                                       ConnectionHandle->RemoteBDADDR[2], ConnectionHandle->RemoteBDADDR[3],
+	                                                       ConnectionHandle->RemoteBDADDR[4], ConnectionHandle->RemoteBDADDR[5]);
 
 	// Accept all requests from all devices regardless of BDADDR
 	return true;
@@ -265,26 +266,41 @@ bool CALLBACK_Bluetooth_ConnectionRequest(BT_StackConfig_t* const StackState,
 void EVENT_Bluetooth_ConnectionComplete(BT_StackConfig_t* const StackState,
                                         BT_HCI_Connection_t* const ConnectionHandle)
 {	
-	char BDADDRBuffer[17];
-	sprintf(BDADDRBuffer, "%02X%02X%02X%02X%02X%02X", ConnectionHandle->BDADDR[0], ConnectionHandle->BDADDR[1],
-	                                                  ConnectionHandle->BDADDR[2], ConnectionHandle->BDADDR[3],
-	                                                  ConnectionHandle->BDADDR[4], ConnectionHandle->BDADDR[5]);
 	LCD_Clear();
 	LCD_WriteString("Connected:");
 	LCD_SetCursor(2, 0);
-	LCD_WriteString(BDADDRBuffer);
+	LCD_WriteFormattedString("%02X%02X:%02X%02X:%02X%02X", ConnectionHandle->RemoteBDADDR[0], ConnectionHandle->RemoteBDADDR[1],
+	                                                       ConnectionHandle->RemoteBDADDR[2], ConnectionHandle->RemoteBDADDR[3],
+	                                                       ConnectionHandle->RemoteBDADDR[4], ConnectionHandle->RemoteBDADDR[5]);
 }
 
 void EVENT_Bluetooth_DisconnectionComplete(BT_StackConfig_t* const StackState,
                                            BT_HCI_Connection_t* const ConnectionHandle)
 {
-	char BDADDRBuffer[17];
-	sprintf(BDADDRBuffer, "%02X%02X%02X%02X%02X%02X", ConnectionHandle->BDADDR[0], ConnectionHandle->BDADDR[1],
-	                                                  ConnectionHandle->BDADDR[2], ConnectionHandle->BDADDR[3],
-	                                                  ConnectionHandle->BDADDR[4], ConnectionHandle->BDADDR[5]);
-
 	LCD_Clear();
 	LCD_WriteString("Disconnected:");
 	LCD_SetCursor(2, 0);
-	LCD_WriteString(BDADDRBuffer);
+	LCD_WriteFormattedString("%02X%02X:%02X%02X:%02X%02X", ConnectionHandle->RemoteBDADDR[0], ConnectionHandle->RemoteBDADDR[1],
+	                                                       ConnectionHandle->RemoteBDADDR[2], ConnectionHandle->RemoteBDADDR[3],
+	                                                       ConnectionHandle->RemoteBDADDR[4], ConnectionHandle->RemoteBDADDR[5]);
 }
+
+bool CALLBACK_Bluetooth_ChannelRequest(BT_StackConfig_t* const StackState,
+                                       BT_HCI_Connection_t* const Connection,
+                                       BT_ACL_Channel_t* const Channel)
+{
+	// Accept all channel requests from all devices regardless of PSM
+	return true;
+}
+
+void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
+                                  BT_HCI_Connection_t* const Connection,
+                                  BT_ACL_Channel_t* const Channel,
+                                  uint16_t Length,
+                                  uint8_t* Data)
+{
+	LCD_Clear();
+	LCD_WriteFormattedString("ACL %04X %04X", Channel->LocalNumber, Channel->RemoteNumber);
+}
+
+

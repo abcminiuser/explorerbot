@@ -220,6 +220,22 @@ void LCD_WriteString(const char* String)
 	}
 }
 
+/** Writes a formatted string to the LCD display, starting from the current LCD DRAM address.
+ *
+ *  \param[in] FormatString  Pointer to the start of a \c printf() format string, stored in SRAM.
+ */
+void LCD_WriteFormattedString(const char* FormatString, ...)
+{
+	char LineBuffer[20];
+
+    va_list va;
+    va_start(va, FormatString);
+    vsprintf(LineBuffer, FormatString, va);
+    va_end(va);
+
+	LCD_WriteString(LineBuffer);
+}
+
 /** Writes a NUL terminated string to the LCD bus, starting from the current LCD DRAM address.
  *
  *  \param[in] String  Pointer to the start of a string to write to the LCD, stored in FLASH.

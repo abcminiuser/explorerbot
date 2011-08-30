@@ -23,7 +23,7 @@
 		#define BT_BDADDR_LEN              6
 		
 		/** Maximum number of simultaneous device connections. */
-		#define MAX_DEVICE_CONNECTIONS     1
+		#define MAX_DEVICE_CONNECTIONS     2
 		
 		/** Maximum number of simultaneous ACL logical channels. */
 		#define MAX_LOGICAL_CHANNELS       5

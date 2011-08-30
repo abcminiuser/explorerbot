@@ -72,12 +72,13 @@ static BT_ACL_Channel_t* Bluetooth_ACL_NewChannel(BT_StackConfig_t* const StackS
 
 		if (CurrentChannel->State != ACL_CHANSTATE_Closed)
 		  continue;
-		  
-		CurrentChannel->LocalNumber  = cpu_to_le16(BT_CHANNEL_BASEOFFSET + i);
-		CurrentChannel->RemoteNumber = RemoteChannel;
-		CurrentChannel->LocalMTU     = DEFAULT_ACL_CHANNEL_MTU;
-		CurrentChannel->State        = ACL_CHANSTATE_New;
-		CurrentChannel->PSM          = PSM;
+
+		CurrentChannel->ConnectionHandle = ConnectionHandle;
+		CurrentChannel->LocalNumber      = cpu_to_le16(BT_CHANNEL_BASEOFFSET + i);
+		CurrentChannel->RemoteNumber     = RemoteChannel;
+		CurrentChannel->LocalMTU         = DEFAULT_ACL_CHANNEL_MTU;
+		CurrentChannel->State            = ACL_CHANSTATE_New;
+		CurrentChannel->PSM              = PSM;
 		return CurrentChannel;
 	}
 	
@@ -108,6 +109,7 @@ static inline void Bluetooth_ACL_Signal_ConnRequest(BT_StackConfig_t* const Stac
 	BT_ACL_Channel_t* ACLChannel      = Bluetooth_ACL_NewChannel(StackState, HCIConnection->Handle, ConnectionRequest->SourceChannel, ConnectionRequest->PSM);
 	uint8_t           RejectionReason = BT_CONNECTION_REFUSED_RESOURCES;
 	
+	// If there was space in the channel table, request action from the user to accept/reject the connection
 	if (ACLChannel)
 	{
 		RejectionReason   = CALLBACK_Bluetooth_ChannelRequest(StackState, HCIConnection, ACLChannel) ? BT_CONNECTION_SUCCESSFUL : BT_CONNECTION_REFUSED_PSM;
@@ -147,7 +149,7 @@ static inline void Bluetooth_ACL_Signal_ConnResp(BT_StackConfig_t* const StackSt
 	if (ACLChannel)
 	{
 		ACLChannel->RemoteNumber = ConnectionResponse->SourceChannel;
-		ACLChannel->State        = (ConnectionResponse->Result == BT_CONNECTION_SUCCESSFUL) ?
+		ACLChannel->State        = (ConnectionResponse->Result == CPU_TO_LE16(BT_CONNECTION_SUCCESSFUL)) ?
 									ACL_CHANSTATE_Config_WaitConfig : ACL_CHANSTATE_Closed;
 	}
 }
@@ -273,10 +275,10 @@ static inline void Bluetooth_ACL_Signal_ConfigReq(BT_StackConfig_t* const StackS
 	BT_Signal_ConfigurationReq_t* ConfigurationRequest = (BT_Signal_ConfigurationReq_t*)SignalCommandHeader->Data;
 
 	// Find the existing channel in the channel table if it exists
-	BT_ACL_Channel_t* ACLChannel = Bluetooth_ACL_FindChannel(StackState, HCIConnection->Handle, 0, ConfigurationRequest->DestinationChannel);
+	BT_ACL_Channel_t* ACLChannel = Bluetooth_ACL_FindChannel(StackState, HCIConnection->Handle, ConfigurationRequest->DestinationChannel, 0);
 
 	// Only look at the channel configuration options if a valid channel entry for the local channel number was found
-	if (ACLChannel != NULL)
+	if (ACLChannel)
 	{
 		// Update channel state based on the current state
 		switch (ACLChannel->State)
@@ -336,7 +338,7 @@ static inline void Bluetooth_ACL_Signal_ConfigResp(BT_StackConfig_t* const Stack
 
 	// Find the existing channel in the channel table if it exists
 	BT_ACL_Channel_t* ACLChannel = Bluetooth_ACL_FindChannel(StackState, HCIConnection->Handle, 0, ConfigurationResponse->SourceChannel);
-	
+
 	if (!(ACLChannel))
 	  return;
 

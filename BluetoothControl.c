@@ -318,7 +318,7 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
                                   uint8_t* Data)
 {
 	LCD_Clear();
-	LCD_WriteString("ACL Recv");
+	LCD_WriteFormattedString("ACL P:%04X", Channel->PSM);
 	LCD_SetCursor(2, 0);
 	LCD_WriteFormattedString("L:%04X R:%04X", Channel->LocalNumber, Channel->RemoteNumber);
 	for(;;);

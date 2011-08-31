@@ -31,6 +31,9 @@
 #ifndef _SENSORS_BMA150_H_
 #define _SENSORS_BMA150_H_
 
+	/* Includes: */
+		#include "SensorsCommon.h"
+
 	/* Macros: */
 		#define BMA150_CHIP_ID_REG             0x00
 		#define BMA150_VERSION_REG             0x01
@@ -63,6 +66,12 @@
 		#define BMA150_OFFSET_Y_REG            0x1B
 		#define BMA150_OFFSET_Z_REG            0x1C
 		#define BMA150_OFFSET_T_REG            0x1D
+		
+		#define BMA150_CHIP_ID                 0x02
+
+	/* Function Prototypes: */
+		void BMA150_Init(SensorData_t* const SensorInfo);
+		void BMA150_Update(SensorData_t* const SensorInfo);
 
 #endif
 

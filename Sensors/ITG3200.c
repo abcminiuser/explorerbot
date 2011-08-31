@@ -28,38 +28,49 @@
   this software.
 */
 
-#include "Sensors.h"
+#include "ITG3200.h"
 
-Sensor_t Sensors;
-
-/** Initializes the robot sensors mounted on the board, ready for use. This must be called before any other functions in the
- *  sensors hardware driver.
- */
-void Sensors_Init(void)
+static void ITG3200_StartConversion(SensorData_t* const SensorInfo)
 {
-	DDRB &= ~((1 << 0) | (1 << 1) | (1 << 2));
-	DDRB |=  (1 << 3);
-	DDRD &= ~(1 << 2);
+	uint8_t RegisterAddress;
+	uint8_t PacketBuffer[1];
+
+	/* Abort if Compass sensor not connected and initialized */
+	if (!(SensorInfo->Connected))
+	  return;
 	
-	PORTB |= (1 << 3);
-	
-	TWI_Init(TWI_BIT_PRESCALE_4, (F_CPU / 4 / 10000) / 2);
-	
-	memset(&Sensors, 0x00, sizeof(Sensors));
-	
-	Delay_MS(100);
-	
-	BMP085_Init(&Sensors.Pressure);
-	AK8975_Init(&Sensors.Direction);
-	BMA150_Init(&Sensors.Acceleration);
-	ITG3200_Init(&Sensors.Orientation);
+	/* TODO */
 }
 
-void Sensors_Update(void)
+void ITG3200_Init(SensorData_t* const SensorInfo)
 {
-	BMP085_Update(&Sensors.Pressure);
-	AK8975_Update(&Sensors.Direction);
-	BMA150_Update(&Sensors.Acceleration);
-	ITG3200_Update(&Sensors.Orientation);
+	uint8_t RegisterAddress;
+	uint8_t PacketBuffer[1];
+
+	/* Sensor considered not connected until it has been sucessfully initialized */
+	SensorInfo->Connected = false;
+
+	/* Attempt to read the sensor's ID register, return error if sensor cannot be communicated with */
+	RegisterAddress = ITG3200_WHO_REG;
+	if (TWI_ReadPacket(ITG3200_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1) != TWI_ERROR_NoError)
+	  return;
+
+	/* Verify the returned sensor ID against the expected sensor ID */
+	SensorInfo->Connected = (PacketBuffer[0] == ITG3200_CHIP_ID);
+
+	/* Try to trigger the first conversion in the sensor */
+	ITG3200_StartConversion(SensorInfo);
+}
+
+void ITG3200_Update(SensorData_t* const SensorInfo)
+{
+	uint8_t PacketBuffer[6];
+	uint8_t RegisterAddress;
+
+	/* Abort if Compass sensor not connected and initialized */
+	if (!(SensorInfo->Connected))
+	  return;
+
+	/* TODO */
 }
 

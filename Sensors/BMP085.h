@@ -31,29 +31,42 @@
 #ifndef _SENSORS_BMP085_H_
 #define _SENSORS_BMP085_H_
 
+	/* Includes: */
+		#include "SensorsCommon.h"
+
 	/* Macros: */
-		#define BMP085_CAL_AC1             0xAA
-		#define BMP085_CAL_AC2             0xAC
-		#define BMP085_CAL_AC3             0xAE
-		#define BMP085_CAL_AC4             0xB0
-		#define BMP085_CAL_AC5             0xB2
-		#define BMP085_CAL_AC6             0xB4
-		#define BMP085_CAL_B1              0xB6
-		#define BMP085_CAL_B2              0xB8
-		#define BMP085_CAL_MB              0xBA
-		#define BMP085_CAL_MC              0xBC
-		#define BMP085_CAL_MD              0xBE
+		#define BMP085_CHIP_ID               0x55
+	
+		#define BMP085_CONTROL_CMD_TEMP      0x2E
+		#define BMP085_CONTROL_CMD_PRESSURE  0x34
 
-		#define BMP085_CONTROL             0xF4
-		#define BMP085_TEMPDATA            0xF6
-		#define BMP085_PRESSUREDATA        0xF6
-		#define BMP085_READTEMPCMD         0x2E
-		#define BMP085_READPRESSURECMD     0x34
+		#define BMP085_CAL_AC1_REG           0xAA
+		#define BMP085_CAL_AC2_REG           0xAC
+		#define BMP085_CAL_AC3_REG           0xAE
+		#define BMP085_CAL_AC4_REG           0xB0
+		#define BMP085_CAL_AC5_REG           0xB2
+		#define BMP085_CAL_AC6_REG           0xB4
+		#define BMP085_CAL_B1_REG            0xB6
+		#define BMP085_CAL_B2_REG            0xB8
+		#define BMP085_CAL_MB_REG            0xBA
+		#define BMP085_CAL_MC_REG            0xBC
+		#define BMP085_CAL_MD_REG            0xBE
 
-		#define BMP085_ULTRALOWPOWER       0
-		#define BMP085_STANDARD            1
-		#define BMP085_HIGHRES             2
-		#define BMP085_ULTRAHIGHRES        3
+		#define BMP085_CHIP_ID_REG           0xD0
+		#define BMP085_VERSION_REG           0xD1
+		#define BMP085_CONTROL_REG           0xF4
+		#define BMP085_CONVERSION_REG_MSB    0xF6
+		#define BMP085_CONVERSION_REG_LSB    0xF7
+		#define BMP085_CONVERSION_REG_XLSB   0xF8
 
+		#define BMP085_ULTRALOWPOWER         0
+		#define BMP085_STANDARD              1
+		#define BMP085_HIGHRES               2
+		#define BMP085_ULTRAHIGHRES          3
+
+	/* Function Prototypes: */
+		void BMP085_Init(SensorData_t* const SensorInfo);
+		void BMP085_Update(SensorData_t* const SensorInfo);
+		
 #endif
 

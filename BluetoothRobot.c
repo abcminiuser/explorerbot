@@ -37,7 +37,7 @@ int main(void)
 {
 	SetupHardware();
 //	StartupSequence();
-//	CheckSensors();
+	CheckSensors();
 
 	EVENT_USB_Host_DeviceUnattached();
 	sei();
@@ -59,10 +59,10 @@ int main(void)
 		}
 
 		/* Check if the sensor update interval has elapsed */
-		if (TIFR3 & (1 << OCR3A))
+		if (TIFR3 & (1 << OCF3A))
 		{
 			/* Clear the timer compare flag */
-			TIFR3 |= (1 << OCR3A);
+			TIFR3 |= (1 << OCF3A);
 		
 			/* Update all connected sensors */
 			Sensors_Update();

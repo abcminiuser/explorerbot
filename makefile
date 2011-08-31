@@ -144,6 +144,9 @@ SRC = $(TARGET).c                                                 \
 	  Speaker.c                                                   \
 	  Sensors/Sensors.c                                           \
 	  Sensors/AK8975.c                                            \
+	  Sensors/BMA150.c                                            \
+	  Sensors/ITG3200.c                                           \
+	  Sensors/BMP085.c                                            \
 	  Bluetooth/Bluetooth.c                                       \
 	  Bluetooth/BluetoothHCI.c                                    \
 	  Bluetooth/BluetoothACL.c                                    \

@@ -31,9 +31,13 @@
 #ifndef _SENSORS_AK8975_H_
 #define _SENSORS_AK8975_H_
 
+	/* Includes: */
+		#include "SensorsCommon.h"
+
 	/* Macros: */
-		#define AK8975_REG_WIA                  0x00
 		#define AK8975_DEVICE_ID                0x48		 
+
+		#define AK8975_REG_WIA                  0x00
 		#define AK8975_REG_INFO                 0x01
 
 		#define AK8975_REG_ST1                  0x02
@@ -64,6 +68,10 @@
 		#define AK8975_REG_ASAX                 0x10
 		#define AK8975_REG_ASAY                 0x11
 		#define AK8975_REG_ASAZ                 0x12
-		
+
+	/* Function Prototypes: */
+		void AK8975_Init(SensorData_t* const SensorInfo);
+		void AK8975_Update(SensorData_t* const SensorInfo);
+
 #endif
 

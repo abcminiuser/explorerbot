@@ -226,7 +226,7 @@ void LCD_WriteString(const char* String)
  */
 void LCD_WriteFormattedString(const char* FormatString, ...)
 {
-	char LineBuffer[20];
+	char LineBuffer[25];
 
     va_list va;
     va_start(va, FormatString);

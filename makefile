@@ -143,6 +143,7 @@ SRC = $(TARGET).c                                                 \
 	  RGB.c                                                       \
 	  Speaker.c                                                   \
 	  Sensors/Sensors.c                                           \
+	  Sensors/AK8975.c                                            \
 	  Bluetooth/Bluetooth.c                                       \
 	  Bluetooth/BluetoothHCI.c                                    \
 	  Bluetooth/BluetoothACL.c                                    \

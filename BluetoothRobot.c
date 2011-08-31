@@ -57,8 +57,17 @@ int main(void)
 			wdt_enable(WDTO_15MS);
 			for(;;);
 		}
+
+		/* Check if the sensor update interval has elapsed */
+		if (TIFR3 & (1 << OCR3A))
+		{
+			/* Clear the timer compare flag */
+			TIFR3 |= (1 << OCR3A);
 		
-//		Sensors_Update();
+			/* Update all connected sensors */
+			Sensors_Update();
+		}
+		
 		Bluetooth_USBTask();
 		Joystick_USBTask();
 		USB_USBTask();
@@ -80,7 +89,11 @@ void SetupHardware(void)
 	
 	/* Disable unused peripheral modules */
 	PRR0 = ((1 << PRADC)  | (1 << PRSPI));
-	PRR1 = ((1 << PRTIM3) | (1 << PRUSART1));
+	PRR1 = (1 << PRUSART1);
+	
+	/* Enable sensor update timer */
+	TCCR3B = ((1 << WGM32) | (1 << CS31) | (1 << CS30));
+	OCR3A  = ((F_CPU / 64) / 4);
 
 	/* Hardware Initialization */
 	ExternalSRAM_Init();
@@ -121,38 +134,22 @@ void StartupSequence(void)
 /** Check the board sensors to ensure that they are attached and operating correctly. */
 void CheckSensors(void)
 {
-	uint16_t SensorError = Sensors_CheckSensors();
+	uint8_t LCDIcon_Cross[] = {0x00, 0x1B, 0x0E, 0x04, 0x0E, 0x1B, 0x00, 0x00};
+	uint8_t LCDIcon_Tick[]  = {0x00, 0x01, 0x03, 0x16, 0x1C, 0x08, 0x00, 0x00};
 	
-	if (SensorError)
-	{
-		LCD_Clear();
-		LCD_WriteString_P((SensorError == SENSOR_Pressure) ? PSTR("PRESSURE ONE ERR") : PSTR("INERTIAL ONE ERR"));
-		LCD_SetCursor(2, 0);
-		
-		switch (SensorError & ~SENSOR_ERROR_ID)
-		{
-			case SENSOR_Pressure:
-				LCD_WriteString_P(PSTR("PRS"));
-				break;
-			case SENSOR_Compass:
-				LCD_WriteString_P(PSTR("CMP"));
-				break;
-			case SENSOR_Accelerometer:
-				LCD_WriteString_P(PSTR("ACC"));
-				break;
-			case SENSOR_Gyroscope:
-				LCD_WriteString_P(PSTR("GYR"));
-				break;
-		}
-		
-		if (SensorError & SENSOR_ERROR_ID)
-		  LCD_WriteString_P(PSTR(" ID"));
-		else
-		  LCD_WriteString_P(PSTR(" NAK"));
+	LCD_SetCustomChar(1, LCDIcon_Cross);
+	LCD_SetCustomChar(2, LCDIcon_Tick);
 	
-		for (uint8_t i = 0; i < 20; i++)
-		  Delay_MS(100);
-	}
+	LCD_Clear();
+	LCD_WriteFormattedString(" CMP %c   ACC %c", (Sensors.Direction.Connected    ? 0x02 : 0x01),
+	                                             (Sensors.Acceleration.Connected ? 0x02 : 0x01));
+
+	LCD_SetCursor(2, 0);
+	LCD_WriteFormattedString(" GYR %c   PRS %c", (Sensors.Orientation.Connected  ? 0x02 : 0x01),
+	                                             (Sensors.Pressure.Connected     ? 0x02 : 0x01));
+												 
+	for (uint8_t i = 0; i < 15; i++)
+	  Delay_MS(100);
 }
 
 /** Event handler for the USB_DeviceAttached event. This indicates that a device has been attached to the host, and

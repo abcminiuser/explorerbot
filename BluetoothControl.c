@@ -158,7 +158,6 @@ bool Bluetooth_PostConfiguration(void)
 	  return true;
 	  
 	Bluetooth_Init(&Bluetooth_Module);
-
 	return true;
 }
 

@@ -28,20 +28,48 @@
   this software.
 */
 
-#ifndef _SENSORS_H_
-#define _SENSORS_H_
+#ifndef _SENSORS_COMMON_H_
+#define _SENSORS_COMMON_H_
 
 	/* Includes: */
-		#include <avr/io.h>
+		#include <stdint.h>
 		#include <stdbool.h>
-				
-		#include "AK8975.h"
-		#include "ITG3200.h"
-		#include "BMA150.h"
-		#include "BMP085.h"
 
-	/* Function Prototypes: */
-		void Sensors_Init(void);
-		void Sensors_Update(void);
+		#include <LUFA/Drivers/Peripheral/TWI.h>
 
+	/* Macros: */
+		#define AK8975_ADDRESS          (0x0C << 1)
+		#define ITG3200_ADDRESS         (0x68 << 1)
+		#define BMA150_ADDRESS          (0x38 << 1)
+		#define BMP085_ADDRESS          (0x77 << 1)
+		
+	/* Type Defines: */
+		typedef struct
+		{
+			bool Connected;
+			
+			union
+			{
+				uint16_t Value;
+			
+				struct
+				{
+					uint16_t X;
+					uint16_t Y;
+					uint16_t Z;
+				} Triplicate;
+			} Data;
+		} SensorData_t;
+		
+		typedef struct
+		{
+			SensorData_t Direction;
+			SensorData_t Acceleration;
+			SensorData_t Orientation;
+			SensorData_t Pressure;
+		} Sensor_t;
+	
+	/* External Variables: */
+		extern Sensor_t Sensors;
+		
 #endif

@@ -141,15 +141,15 @@ SRC = $(TARGET).c                                                 \
 	  LCD.c                                                       \
 	  Motors.c                                                    \
 	  RGB.c                                                       \
-	  Sensors.c                                                   \
 	  Speaker.c                                                   \
-	  $(LUFA_SRC_USB)                                             \
-	  $(LUFA_SRC_USBCLASS)                                        \
-	  $(LUFA_SRC_TWI)                                             \
+	  Sensors/Sensors.c                                           \
 	  Bluetooth/Bluetooth.c                                       \
 	  Bluetooth/BluetoothHCI.c                                    \
 	  Bluetooth/BluetoothACL.c                                    \
 	  Bluetooth/Services/BluetoothSDP.c                           \
+	  $(LUFA_SRC_USB)                                             \
+	  $(LUFA_SRC_USBCLASS)                                        \
+	  $(LUFA_SRC_TWI)                                             \
 
 # List C++ source files here. (C dependencies are automatically generated.)
 CPPSRC =

@@ -51,8 +51,9 @@
 		#include "LCD.h"
 		#include "Motors.h"
 		#include "RGB.h"
-		#include "Sensors.h"
 		#include "Speaker.h"
+
+		#include "Sensors/Sensors.h"
 
 	/* Function Prototypes: */
 		void SetupHardware(void);

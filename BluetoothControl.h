@@ -3,7 +3,7 @@
      Copyright (C) Dean Camera, 2011.
 
   dean [at] fourwalledcubicle [dot] com
-        www.fourwalledcubicle.org
+        www.fourwalledcubicle.com
 */
 
 /*
@@ -43,6 +43,7 @@
 		#include "LCD.h"
 		
 		#include "Bluetooth/Bluetooth.h"
+		#include "Bluetooth/Services/BluetoothSDP.h"
 
 	/* Macros: */
 		/** Device Class value for the Bluetooth Device class. */

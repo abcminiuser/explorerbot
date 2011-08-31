@@ -149,6 +149,7 @@ SRC = $(TARGET).c                                                 \
 	  Bluetooth/Bluetooth.c                                       \
 	  Bluetooth/BluetoothHCI.c                                    \
 	  Bluetooth/BluetoothACL.c                                    \
+	  Bluetooth/Services/BluetoothSDP.c                           \
 
 # List C++ source files here. (C dependencies are automatically generated.)
 CPPSRC =

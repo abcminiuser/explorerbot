@@ -1,1 +1,1 @@
-<pd><ViewState><e p="BluetoothRobot\LegacyBluetooth" x="true"></e><e p="BluetoothRobot" x="true"></e><e p="BluetoothRobot\Bluetooth" x="true"></e></ViewState></pd>
+<pd><ViewState><e p="BluetoothRobot\LegacyBluetooth" x="false"></e><e p="BluetoothRobot" x="true"></e><e p="BluetoothRobot\Bluetooth" x="true"></e><e p="BluetoothRobot\Bluetooth\Services" x="true"></e></ViewState></pd>

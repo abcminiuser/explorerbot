@@ -3,7 +3,7 @@
      Copyright (C) Dean Camera, 2011.
 
   dean [at] fourwalledcubicle [dot] com
-        www.fourwalledcubicle.org
+        www.fourwalledcubicle.com
 */
 
 /*
@@ -317,11 +317,26 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
                                   uint16_t Length,
                                   uint8_t* Data)
 {
-	LCD_Clear();
-	LCD_WriteFormattedString("ACL P:%04X", Channel->PSM);
-	LCD_SetCursor(2, 0);
-	LCD_WriteFormattedString("L:%04X R:%04X", Channel->LocalNumber, Channel->RemoteNumber);
-	for(;;);
+	switch (Channel->PSM)
+	{
+		case CHANNEL_PSM_SDP:
+			LCD_Clear();
+			LCD_WriteString("SDP PACKET");
+			
+			Bluetooth_SDP_ProcessPacket(StackState, Connection, Channel, Length, Data);
+			break;
+		case CHANNEL_PSM_HIDP:
+			LCD_Clear();
+			LCD_WriteString("HIDP PACKET");
+			for(;;);
+			break;
+		default:
+			LCD_Clear();
+			LCD_WriteFormattedString("ACL P:%04X", Channel->PSM);
+			LCD_SetCursor(2, 0);
+			LCD_WriteFormattedString("L:%04X R:%04X", Channel->LocalNumber, Channel->RemoteNumber);
+			break;
+	}
 }
 
 

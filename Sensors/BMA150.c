@@ -30,13 +30,13 @@
 
 #include "BMA150.h"
 
-void BMA150_Init(SensorData_t* const SensorInfo)
+void BMA150_Init(SensorData_t* const AccelSensorInfo)
 {
 	uint8_t RegisterAddress;
 	uint8_t PacketBuffer[1];
 
 	/* Sensor considered not connected until it has been sucessfully initialized */
-	SensorInfo->Connected = false;
+	AccelSensorInfo->Connected = false;
 
 	/* Attempt to read the sensor's ID register, return error if sensor cannot be communicated with */
 	RegisterAddress = BMA150_CHIP_ID_REG;
@@ -44,7 +44,11 @@ void BMA150_Init(SensorData_t* const SensorInfo)
 	  return;
 
 	/* Verify the returned sensor ID against the expected sensor ID */
-	SensorInfo->Connected = (PacketBuffer[0] == BMA150_CHIP_ID);
+	AccelSensorInfo->Connected = (PacketBuffer[0] == BMA150_CHIP_ID);
+	
+	/* Abort if sensor not connected and initialized */
+	if (!(AccelSensorInfo->Connected))
+	  return;
 
 	/* Force reset of the sensor */
 	RegisterAddress = BMA150_SMB150_CTRL_REG;
@@ -52,9 +56,9 @@ void BMA150_Init(SensorData_t* const SensorInfo)
 	if (TWI_WritePacket(BMA150_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;
 
-	/* Enable automatic wake-up of the sensor */
+	/* Enable automatic wake-up of the sensor, enable interrupt line on end of conversion */
 	RegisterAddress = BMA150_SMB150_CONF2_REG;
-	PacketBuffer[0] = 0x01;
+	PacketBuffer[0] = 0x21;
 	if (TWI_WritePacket(BMA150_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;
 	  
@@ -65,14 +69,17 @@ void BMA150_Init(SensorData_t* const SensorInfo)
 	  return;
 }
 
-void BMA150_Update(SensorData_t* const SensorInfo)
+void BMA150_Update(SensorData_t* const AccelSensorInfo)
 {	
 	uint8_t PacketBuffer[6];
 	uint8_t RegisterAddress;
 
 	/* Abort if sensor not connected and initialized */
-	if (!(SensorInfo->Connected))
+	if (!(AccelSensorInfo->Connected))
 	  return;
+
+	/* Wait for sensor interrupt line to go high to signal end of conversion */
+	while (!(PINB & (1 << 2)));
 
 	/* Read the converted sensor data as a block packet */
 	RegisterAddress = BMA150_X_AXIS_LSB_REG;
@@ -80,8 +87,8 @@ void BMA150_Update(SensorData_t* const SensorInfo)
 	  return;		  
 
 	/* Save updated sensor data */
-	SensorInfo->Data.Triplicate.X = (((uint16_t)PacketBuffer[1] << 8) | PacketBuffer[0]);
-	SensorInfo->Data.Triplicate.Y = (((uint16_t)PacketBuffer[3] << 8) | PacketBuffer[2]);
-	SensorInfo->Data.Triplicate.Z = (((uint16_t)PacketBuffer[5] << 8) | PacketBuffer[4]);
+	AccelSensorInfo->Data.Triplicate.X = (((uint16_t)PacketBuffer[1] << 8) | PacketBuffer[0]);
+	AccelSensorInfo->Data.Triplicate.Y = (((uint16_t)PacketBuffer[3] << 8) | PacketBuffer[2]);
+	AccelSensorInfo->Data.Triplicate.Z = (((uint16_t)PacketBuffer[5] << 8) | PacketBuffer[4]);
 }
 

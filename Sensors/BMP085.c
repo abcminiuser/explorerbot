@@ -30,13 +30,13 @@
 
 #include "BMP085.h"
 
-static void BMP085_StartConversion(SensorData_t* const SensorInfo)
+static void BMP085_StartConversion(SensorData_t* const PressureSensorInfo)
 {
 	uint8_t RegisterAddress;
 	uint8_t PacketBuffer[1];
 
 	/* Abort if Compass sensor not connected and initialized */
-	if (!(SensorInfo->Connected))
+	if (!(PressureSensorInfo->Connected))
 	  return;
 
 	/* Write to the control register to initiate the next single conversion */
@@ -45,13 +45,13 @@ static void BMP085_StartConversion(SensorData_t* const SensorInfo)
 	TWI_WritePacket(BMP085_ADDRESS, 100, &RegisterAddress, 1, PacketBuffer, 1);
 }
 
-void BMP085_Init(SensorData_t* const SensorInfo)
+void BMP085_Init(SensorData_t* const PressureSensorInfo)
 {
 	uint8_t RegisterAddress;
 	uint8_t PacketBuffer[1];
 
 	/* Sensor considered not connected until it has been sucessfully initialized */
-	SensorInfo->Connected = false;
+	PressureSensorInfo->Connected = false;
 
 	/* Attempt to read the sensor's ID register, return error if sensor cannot be communicated with */
 	RegisterAddress = BMP085_CHIP_ID_REG;
@@ -59,30 +59,37 @@ void BMP085_Init(SensorData_t* const SensorInfo)
 	  return;
 
 	/* Verify the returned sensor ID against the expected sensor ID */
-	SensorInfo->Connected = (PacketBuffer[0] == BMP085_CHIP_ID);
+	PressureSensorInfo->Connected = (PacketBuffer[0] == BMP085_CHIP_ID);
+
+	/* Abort if sensor not connected and initialized */
+	if (!(PressureSensorInfo->Connected))
+	  return;
 
 	/* Try to trigger the first conversion in the sensor */
-	BMP085_StartConversion(SensorInfo);
+	BMP085_StartConversion(PressureSensorInfo);
 }
 
-void BMP085_Update(SensorData_t* const SensorInfo)
+void BMP085_Update(SensorData_t* const PressureSensorInfo)
 {
 	uint8_t PacketBuffer[3];
 	uint8_t RegisterAddress;
 
 	/* Abort if sensor not connected and initialized */
-	if (!(SensorInfo->Connected))
+	if (!(PressureSensorInfo->Connected))
 	  return;
 
+	/* Wait for sensor interrupt line to go high to signal end of conversion */
+	while (!(PIND & (1 << 2)));
+	
 	/* Read the converted sensor data as a block packet */
 	RegisterAddress = BMP085_CONVERSION_REG_MSB;
-	if (TWI_ReadPacket(BMP085_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 6) != TWI_ERROR_NoError)
+	if (TWI_ReadPacket(BMP085_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 3) != TWI_ERROR_NoError)
 	  return;
 
 	/* Save updated sensor data */
-	SensorInfo->Data.Single = (((uint32_t)PacketBuffer[0] << 16) | ((uint32_t)PacketBuffer[1] << 8) | PacketBuffer[0]);
+	PressureSensorInfo->Data.Single = (((uint32_t)PacketBuffer[0] << 16) | ((uint32_t)PacketBuffer[1] << 8) | PacketBuffer[0]);
 		
 	/* Start next sensor data conversion */
-	BMP085_StartConversion(SensorInfo);
+	BMP085_StartConversion(PressureSensorInfo);
 }
 

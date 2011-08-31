@@ -60,8 +60,8 @@
 		#define BMP085_CONVERSION_REG_XLSB   0xF8
 
 	/* Function Prototypes: */
-		void BMP085_Init(SensorData_t* const SensorInfo);
-		void BMP085_Update(SensorData_t* const SensorInfo);
+		void BMP085_Init(SensorData_t* const PressureSensorInfo);
+		void BMP085_Update(SensorData_t* const PressureSensorInfo);
 		
 #endif
 

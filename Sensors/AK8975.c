@@ -30,13 +30,13 @@
 
 #include "AK8975.h"
 
-static void AK8975_StartConversion(SensorData_t* const SensorInfo)
+static void AK8975_StartConversion(SensorData_t* const CompassSensorInfo)
 {
 	uint8_t RegisterAddress;
 	uint8_t PacketBuffer[1];
 
-	/* Abort if Compass sensor not connected and initialized */
-	if (!(SensorInfo->Connected))
+	/* Abort if sensor not connected and initialized */
+	if (!(CompassSensorInfo->Connected))
 	  return;
 
 	/* Write to the control register to initiate the next single conversion */
@@ -45,13 +45,13 @@ static void AK8975_StartConversion(SensorData_t* const SensorInfo)
 	TWI_WritePacket(AK8975_ADDRESS, 100, &RegisterAddress, 1, PacketBuffer, 1);
 }
 
-void AK8975_Init(SensorData_t* const SensorInfo)
+void AK8975_Init(SensorData_t* const CompassSensorInfo)
 {
 	uint8_t RegisterAddress;
 	uint8_t PacketBuffer[1];
 
 	/* Sensor considered not connected until it has been sucessfully initialized */
-	SensorInfo->Connected = false;
+	CompassSensorInfo->Connected = false;
 
 	/* Attempt to read the sensor's ID register, return error if sensor cannot be communicated with */
 	RegisterAddress = AK8975_REG_WIA;
@@ -59,41 +59,39 @@ void AK8975_Init(SensorData_t* const SensorInfo)
 	  return;
 
 	/* Verify the returned sensor ID against the expected sensor ID */
-	SensorInfo->Connected = (PacketBuffer[0] == AK8975_DEVICE_ID);
+	CompassSensorInfo->Connected = (PacketBuffer[0] == AK8975_DEVICE_ID);
+
+	/* Abort if sensor not connected and initialized */
+	if (!(CompassSensorInfo->Connected))
+	  return;
 
 	/* Try to trigger the first conversion in the sensor */
-	AK8975_StartConversion(SensorInfo);
+	AK8975_StartConversion(CompassSensorInfo);
 }
 
-void AK8975_Update(SensorData_t* const SensorInfo)
+void AK8975_Update(SensorData_t* const CompassSensorInfo)
 {
 	uint8_t PacketBuffer[6];
 	uint8_t RegisterAddress;
 
 	/* Abort if sensor not connected and initialized */
-	if (!(SensorInfo->Connected))
+	if (!(CompassSensorInfo->Connected))
 	  return;
 	
-	/* Read the sensor's status register */
-	RegisterAddress = AK8975_REG_ST1;
-	if (TWI_ReadPacket(AK8975_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1) != TWI_ERROR_NoError)
-	  return;
-	
-	/* Check if new sensor data is ready */
-	if (PacketBuffer[0] & AK8975_REG_ST1_DRDY_MASK)
-	{
-		/* Read the converted sensor data as a block packet */
-		RegisterAddress = AK8975_REG_HXL;
-		if (TWI_ReadPacket(AK8975_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 6) != TWI_ERROR_NoError)
-		  return;
+	/* Wait for sensor interrupt line to go high to signal end of conversion */
+	while (!(PINB & (1 << 1)));
 
-		/* Save updated sensor data */
-		SensorInfo->Data.Triplicate.X = (((uint16_t)PacketBuffer[1] << 8) | PacketBuffer[0]);
-		SensorInfo->Data.Triplicate.Y = (((uint16_t)PacketBuffer[3] << 8) | PacketBuffer[2]);
-		SensorInfo->Data.Triplicate.Z = (((uint16_t)PacketBuffer[5] << 8) | PacketBuffer[4]);
+	/* Read the converted sensor data as a block packet */
+	RegisterAddress = AK8975_REG_HXL;
+	if (TWI_ReadPacket(AK8975_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 6) != TWI_ERROR_NoError)
+	  return;
+
+	/* Save updated sensor data */
+	CompassSensorInfo->Data.Triplicate.X = (((uint16_t)PacketBuffer[1] << 8) | PacketBuffer[0]);
+	CompassSensorInfo->Data.Triplicate.Y = (((uint16_t)PacketBuffer[3] << 8) | PacketBuffer[2]);
+	CompassSensorInfo->Data.Triplicate.Z = (((uint16_t)PacketBuffer[5] << 8) | PacketBuffer[4]);
 		
-		/* Start next sensor data conversion */
-		AK8975_StartConversion(SensorInfo);
-	}
+	/* Start next sensor data conversion */
+	AK8975_StartConversion(CompassSensorInfo);
 }
 

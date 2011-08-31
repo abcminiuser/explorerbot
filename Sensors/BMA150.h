@@ -70,8 +70,8 @@
 		#define BMA150_CHIP_ID                 0x02
 
 	/* Function Prototypes: */
-		void BMA150_Init(SensorData_t* const SensorInfo);
-		void BMA150_Update(SensorData_t* const SensorInfo);
+		void BMA150_Init(SensorData_t* const AccelSensorInfo);
+		void BMA150_Update(SensorData_t* const AccelSensorInfo);
 
 #endif
 

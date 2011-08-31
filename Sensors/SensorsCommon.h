@@ -67,6 +67,7 @@
 			SensorData_t Acceleration;
 			SensorData_t Orientation;
 			SensorData_t Pressure;
+			SensorData_t Temperature;
 		} Sensor_t;
 	
 	/* External Variables: */

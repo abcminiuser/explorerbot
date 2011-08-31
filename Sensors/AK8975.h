@@ -70,8 +70,9 @@
 		#define AK8975_REG_ASAZ                 0x12
 
 	/* Function Prototypes: */
-		void AK8975_Init(SensorData_t* const SensorInfo);
-		void AK8975_Update(SensorData_t* const SensorInfo);
+		void AK8975_Init(SensorData_t* const CompassSensorInfo);
+		void AK8975_ZeroCalibrate(void);
+		void AK8975_Update(SensorData_t* const CompassSensorInfo);
 
 #endif
 

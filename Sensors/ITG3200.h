@@ -37,6 +37,11 @@
 	/* Macros: */
 		#define ITG3200_CHIP_ID       0x69
 		
+		#define ITG3200_CFG_RAWRDY    (1 << 0)
+		#define ITG3200_CFG_PLLRDY    (1 << 2)
+		#define ITG3200_CFG_ANYRDCLR  (1 << 4)
+		#define ITG3200_CFG_LATCHINT  (1 << 5)
+
 		#define ITG3200_STA_RAWRDY    (1 << 0)
 		#define ITG3200_STA_PLLRDY    (1 << 2)
 	
@@ -56,8 +61,10 @@
 		#define ITG3200_PWR_M_REG     0x3E
 
 	/* Function Prototypes: */
-		void ITG3200_Init(SensorData_t* const SensorInfo);
-		void ITG3200_Update(SensorData_t* const SensorInfo);
+		void ITG3200_Init(SensorData_t* const GyroSensorInfo);
+		void ITG3200_ZeroCalibrate(void);
+		void ITG3200_Update(SensorData_t* const GyroSensorInfo,
+		                    SensorData_t* const TempSensorInfo);
 
 #endif
 

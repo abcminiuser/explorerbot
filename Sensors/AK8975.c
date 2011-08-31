@@ -82,13 +82,10 @@ void AK8975_Update(SensorData_t* const SensorInfo)
 	/* Check if new sensor data is ready */
 	if (PacketBuffer[0] & AK8975_REG_ST1_DRDY_MASK)
 	{
-		/* Read the converted sensor data a byte at a time */
-		RegisterAddress = AK8975_REG_HXL;
-
 		/* Read the converted sensor data as a block packet */
 		RegisterAddress = AK8975_REG_HXL;
 		if (TWI_ReadPacket(AK8975_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 6) != TWI_ERROR_NoError)
-		  return;		  
+		  return;
 
 		/* Save updated sensor data */
 		SensorInfo->Data.Triplicate.X = (((uint16_t)PacketBuffer[1] << 8) | PacketBuffer[0]);

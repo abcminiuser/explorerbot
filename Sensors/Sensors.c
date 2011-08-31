@@ -43,7 +43,7 @@ void Sensors_Init(void)
 	
 	PORTB |= (1 << 3);
 	
-	TWI_Init(TWI_BIT_PRESCALE_4, (F_CPU / 4 / 10000) / 2);
+	TWI_Init(TWI_BIT_PRESCALE_1, ((((F_CPU / 1) / 50000) - 16) / 2));
 	
 	memset(&Sensors, 0x00, sizeof(Sensors));
 	

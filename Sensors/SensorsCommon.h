@@ -50,13 +50,13 @@
 			
 			union
 			{
-				uint16_t Value;
+				int32_t Single;
 			
 				struct
 				{
-					uint16_t X;
-					uint16_t Y;
-					uint16_t Z;
+					int16_t X;
+					int16_t Y;
+					int16_t Z;
 				} Triplicate;
 			} Data;
 		} SensorData_t;

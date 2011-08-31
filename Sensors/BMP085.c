@@ -38,8 +38,11 @@ static void BMP085_StartConversion(SensorData_t* const SensorInfo)
 	/* Abort if Compass sensor not connected and initialized */
 	if (!(SensorInfo->Connected))
 	  return;
-	
-	/* TODO */
+
+	/* Write to the control register to initiate the next single conversion */
+	RegisterAddress = BMP085_CONTROL_REG;
+	PacketBuffer[0] = BMP085_CONTROL_CMD_PRESSURE;
+	TWI_WritePacket(BMP085_ADDRESS, 100, &RegisterAddress, 1, PacketBuffer, 1);
 }
 
 void BMP085_Init(SensorData_t* const SensorInfo)
@@ -64,13 +67,22 @@ void BMP085_Init(SensorData_t* const SensorInfo)
 
 void BMP085_Update(SensorData_t* const SensorInfo)
 {
-	uint8_t PacketBuffer[6];
+	uint8_t PacketBuffer[3];
 	uint8_t RegisterAddress;
 
-	/* Abort if Compass sensor not connected and initialized */
+	/* Abort if sensor not connected and initialized */
 	if (!(SensorInfo->Connected))
 	  return;
 
-	/* TODO */
+	/* Read the converted sensor data as a block packet */
+	RegisterAddress = BMP085_CONVERSION_REG_MSB;
+	if (TWI_ReadPacket(BMP085_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 6) != TWI_ERROR_NoError)
+	  return;
+
+	/* Save updated sensor data */
+	SensorInfo->Data.Single = (((uint32_t)PacketBuffer[0] << 16) | ((uint32_t)PacketBuffer[1] << 8) | PacketBuffer[0]);
+		
+	/* Start next sensor data conversion */
+	BMP085_StartConversion(SensorInfo);
 }
 

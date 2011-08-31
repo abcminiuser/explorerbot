@@ -70,11 +70,11 @@ void AK8975_Update(SensorData_t* const SensorInfo)
 	uint8_t PacketBuffer[6];
 	uint8_t RegisterAddress;
 
-	/* Abort if Compass sensor not connected and initialized */
+	/* Abort if sensor not connected and initialized */
 	if (!(SensorInfo->Connected))
 	  return;
 	
-	/* Read the Compass sensor's status register */
+	/* Read the sensor's status register */
 	RegisterAddress = AK8975_REG_ST1;
 	if (TWI_ReadPacket(AK8975_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;

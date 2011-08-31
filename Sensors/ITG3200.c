@@ -80,7 +80,7 @@ void ITG3200_Update(SensorData_t* const SensorInfo)
 	uint8_t PacketBuffer[6];
 	uint8_t RegisterAddress;
 
-	/* Abort if Compass sensor not connected and initialized */
+	/* Abort if sensor not connected and initialized */
 	if (!(SensorInfo->Connected))
 	  return;
 

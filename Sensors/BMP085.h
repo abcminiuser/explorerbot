@@ -59,11 +59,6 @@
 		#define BMP085_CONVERSION_REG_LSB    0xF7
 		#define BMP085_CONVERSION_REG_XLSB   0xF8
 
-		#define BMP085_ULTRALOWPOWER         0
-		#define BMP085_STANDARD              1
-		#define BMP085_HIGHRES               2
-		#define BMP085_ULTRAHIGHRES          3
-
 	/* Function Prototypes: */
 		void BMP085_Init(SensorData_t* const SensorInfo);
 		void BMP085_Update(SensorData_t* const SensorInfo);

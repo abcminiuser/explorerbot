@@ -43,23 +43,23 @@ void Sensors_Init(void)
 	
 	PORTB |= (1 << 3);
 	
-	TWI_Init(TWI_BIT_PRESCALE_1, ((((F_CPU / 1) / 50000) - 16) / 2));
+	TWI_Init(TWI_BIT_PRESCALE_1, ((((F_CPU / 1) / 100000) - 16) / 2));
 	
 	memset(&Sensors, 0x00, sizeof(Sensors));
 	
 	Delay_MS(100);
 	
-	BMP085_Init(&Sensors.Pressure);
 	AK8975_Init(&Sensors.Direction);
 	BMA150_Init(&Sensors.Acceleration);
+	BMP085_Init(&Sensors.Pressure);
 	ITG3200_Init(&Sensors.Orientation);
 }
 
 void Sensors_Update(void)
 {
-	BMP085_Update(&Sensors.Pressure);
 	AK8975_Update(&Sensors.Direction);
 	BMA150_Update(&Sensors.Acceleration);
+	BMP085_Update(&Sensors.Pressure);
 	ITG3200_Update(&Sensors.Orientation);
 }
 

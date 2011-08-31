@@ -30,18 +30,6 @@
 
 #include "BMA150.h"
 
-static void BMA150_StartConversion(SensorData_t* const SensorInfo)
-{
-	uint8_t RegisterAddress;
-	uint8_t PacketBuffer[1];
-
-	/* Abort if Compass sensor not connected and initialized */
-	if (!(SensorInfo->Connected))
-	  return;
-	
-	/* TODO */
-}
-
 void BMA150_Init(SensorData_t* const SensorInfo)
 {
 	uint8_t RegisterAddress;
@@ -58,19 +46,42 @@ void BMA150_Init(SensorData_t* const SensorInfo)
 	/* Verify the returned sensor ID against the expected sensor ID */
 	SensorInfo->Connected = (PacketBuffer[0] == BMA150_CHIP_ID);
 
-	/* Try to trigger the first conversion in the sensor */
-	BMA150_StartConversion(SensorInfo);
+	/* Force reset of the sensor */
+	RegisterAddress = BMA150_SMB150_CTRL_REG;
+	PacketBuffer[0] = 0x01;
+	if (TWI_WritePacket(BMA150_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1) != TWI_ERROR_NoError)
+	  return;
+
+	/* Enable automatic wake-up of the sensor */
+	RegisterAddress = BMA150_SMB150_CONF2_REG;
+	PacketBuffer[0] = 0x01;
+	if (TWI_WritePacket(BMA150_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1) != TWI_ERROR_NoError)
+	  return;
+	  
+	/* Set 25MHz bandwidth, 2g range */
+	RegisterAddress = BMA150_RANGE_BWIDTH_REG;
+	PacketBuffer[0] = 0;
+	if (TWI_WritePacket(BMA150_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1) != TWI_ERROR_NoError)
+	  return;
 }
 
 void BMA150_Update(SensorData_t* const SensorInfo)
-{
+{	
 	uint8_t PacketBuffer[6];
 	uint8_t RegisterAddress;
 
-	/* Abort if Compass sensor not connected and initialized */
+	/* Abort if sensor not connected and initialized */
 	if (!(SensorInfo->Connected))
 	  return;
 
-	/* TODO */
+	/* Read the converted sensor data as a block packet */
+	RegisterAddress = BMA150_X_AXIS_LSB_REG;
+	if (TWI_ReadPacket(BMA150_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 6) != TWI_ERROR_NoError)
+	  return;		  
+
+	/* Save updated sensor data */
+	SensorInfo->Data.Triplicate.X = (((uint16_t)PacketBuffer[1] << 8) | PacketBuffer[0]);
+	SensorInfo->Data.Triplicate.Y = (((uint16_t)PacketBuffer[3] << 8) | PacketBuffer[2]);
+	SensorInfo->Data.Triplicate.Z = (((uint16_t)PacketBuffer[5] << 8) | PacketBuffer[4]);
 }
 

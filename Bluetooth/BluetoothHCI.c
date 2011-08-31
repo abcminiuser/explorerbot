@@ -163,7 +163,7 @@ void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState)
 			memcpy(HCIRejectConnectionHeader->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
 			HCIRejectConnectionHeader->Reason = RejectionReason;
 			
-			// Mark the connection as free again as it was rejected
+			/* Mark the connection as free again as it was rejected */
 			if (Connection)
 			  Connection->State = HCI_CONSTATE_Free;
 		}
@@ -222,7 +222,7 @@ void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState)
 
 		BT_HCICommand_Header_t* HCICommandHeader = (BT_HCICommand_Header_t*)StackState->Config.PacketBuffer;
 		
-		// Check if a PIN code has been set of one or more characters
+		/* Check if a PIN code has been set of one or more characters */
 		if ((StackState->Config.PINCode != NULL) && strlen(StackState->Config.PINCode))
 		{
 			BT_HCICommand_PinCodeACKResp_t* PINKeyACKResponse = (BT_HCICommand_PinCodeACKResp_t*)&HCIEventHeader->Parameters;

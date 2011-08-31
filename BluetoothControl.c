@@ -174,7 +174,7 @@ void Bluetooth_USBTask(void)
 	{
 		BT_ACL_Header_t* PacketHeader = (BT_ACL_Header_t*)Bluetooth_Module.Config.PacketBuffer;
 
-		// Read in the ACL packet data from the Data IN pipe
+		/* Read in the ACL packet data from the Data IN pipe */
 		Pipe_Read_Stream_LE(PacketHeader, sizeof(BT_ACL_Header_t), NULL);
 		Pipe_Read_Stream_LE(PacketHeader->Data, PacketHeader->DataLength, NULL);
 		Pipe_ClearIN();
@@ -194,7 +194,7 @@ void Bluetooth_USBTask(void)
 	{
 		BT_HCIEvent_Header_t* EventHeader = (BT_HCIEvent_Header_t*)Bluetooth_Module.Config.PacketBuffer;
 
-		// Read in the Event packet data from the Event IN pipe
+		/* Read in the Event packet data from the Event IN pipe */
 		Pipe_Read_Stream_LE(EventHeader, sizeof(BT_HCIEvent_Header_t), NULL);
 		Pipe_Read_Stream_LE(EventHeader->Parameters, EventHeader->ParameterLength, NULL);
 		Pipe_ClearIN();
@@ -207,7 +207,7 @@ void Bluetooth_USBTask(void)
 	
 	Pipe_Freeze();
 	
-	// Keep on running the management routine until all pending packets have been sent
+	/* Keep on running the management routine until all pending packets have been sent */
 	while (Bluetooth_ManageConnections(&Bluetooth_Module)) {};
 }
 
@@ -217,7 +217,7 @@ void CALLBACK_Bluetooth_SendPacket(BT_StackConfig_t* const StackState,
 {
 	RGB_SetColour(RGB_ALIAS_Busy);
 
-	// Determine the type of packet being sent, use appropriate pipe
+	/* Determine the type of packet being sent, use appropriate pipe */
 	switch (Type)
 	{
 		case BLUETOOTH_PACKET_HCICommand:
@@ -230,7 +230,7 @@ void CALLBACK_Bluetooth_SendPacket(BT_StackConfig_t* const StackState,
 					.wLength       = Length
 				};
 
-			// HCI commands must be sent over the Control pipe
+			/* HCI commands must be sent over the Control pipe */
 			Pipe_SelectPipe(PIPE_CONTROLPIPE);
 			USB_Host_SendControlRequest(StackState->Config.PacketBuffer);
 			break;
@@ -238,7 +238,7 @@ void CALLBACK_Bluetooth_SendPacket(BT_StackConfig_t* const StackState,
 			Pipe_SelectPipe(BLUETOOTH_DATA_OUT_PIPE);
 			Pipe_Unfreeze();
 
-			// ACL packets must be sent over the Data OUT pipe
+			/* ACL packets must be sent over the Data OUT pipe */
 			Pipe_Write_Stream_LE(StackState->Config.PacketBuffer, Length, NULL);
 			Pipe_ClearOUT();
 			Pipe_Freeze();
@@ -258,7 +258,7 @@ bool CALLBACK_Bluetooth_ConnectionRequest(BT_StackConfig_t* const StackState,
 	                                                       ConnectionHandle->RemoteBDADDR[2], ConnectionHandle->RemoteBDADDR[3],
 	                                                       ConnectionHandle->RemoteBDADDR[4], ConnectionHandle->RemoteBDADDR[5]);
 
-	// Accept all requests from all devices regardless of BDADDR
+	/* Accept all requests from all devices regardless of BDADDR */
 	return true;
 }
 
@@ -288,7 +288,7 @@ bool CALLBACK_Bluetooth_ChannelRequest(BT_StackConfig_t* const StackState,
                                        BT_HCI_Connection_t* const Connection,
                                        BT_ACL_Channel_t* const Channel)
 {
-	// Accept all channel requests from all devices regardless of PSM
+	/* Accept all channel requests from all devices regardless of PSM */
 	return true;
 }
 

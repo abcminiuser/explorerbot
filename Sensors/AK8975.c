@@ -32,7 +32,6 @@
 
 static void AK8975_StartConversion(SensorData_t* const CompassSensorInfo)
 {
-	uint8_t RegisterAddress;
 	uint8_t PacketBuffer[1];
 
 	/* Abort if sensor not connected and initialized */
@@ -40,22 +39,19 @@ static void AK8975_StartConversion(SensorData_t* const CompassSensorInfo)
 	  return;
 
 	/* Write to the control register to initiate the next single conversion */
-	RegisterAddress = AK8975_REG_CNTL;
-	PacketBuffer[0] = AK8975_REG_CNTL_MODE_ONCE;
-	TWI_WritePacket(AK8975_ADDRESS, 100, &RegisterAddress, 1, PacketBuffer, 1);
+	PacketBuffer[0] = AK8975_REG_CNTL_MODE_ONCE;	
+	Sensor_WriteBytes(AK8975_ADDRESS, AK8975_REG_CNTL, PacketBuffer, 1);
 }
 
 void AK8975_Init(SensorData_t* const CompassSensorInfo)
 {
-	uint8_t RegisterAddress;
 	uint8_t PacketBuffer[1];
 
 	/* Sensor considered not connected until it has been sucessfully initialized */
 	CompassSensorInfo->Connected = false;
 
 	/* Attempt to read the sensor's ID register, return error if sensor cannot be communicated with */
-	RegisterAddress = AK8975_REG_WIA;
-	if (TWI_ReadPacket(AK8975_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1) != TWI_ERROR_NoError)
+	if (Sensor_ReadBytes(AK8975_ADDRESS, AK8975_REG_WIA, PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;
 
 	/* Verify the returned sensor ID against the expected sensor ID */
@@ -72,7 +68,6 @@ void AK8975_Init(SensorData_t* const CompassSensorInfo)
 void AK8975_Update(SensorData_t* const CompassSensorInfo)
 {
 	uint8_t PacketBuffer[6];
-	uint8_t RegisterAddress;
 
 	/* Abort if sensor not connected and initialized */
 	if (!(CompassSensorInfo->Connected))
@@ -82,8 +77,7 @@ void AK8975_Update(SensorData_t* const CompassSensorInfo)
 	while (!(PINB & (1 << 1)));
 
 	/* Read the converted sensor data as a block packet */
-	RegisterAddress = AK8975_REG_HXL;
-	if (TWI_ReadPacket(AK8975_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 6) != TWI_ERROR_NoError)
+	if (Sensor_ReadBytes(AK8975_ADDRESS, AK8975_REG_HXL, PacketBuffer, 6) != TWI_ERROR_NoError)
 	  return;
 
 	/* Save updated sensor data */

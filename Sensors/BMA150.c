@@ -32,15 +32,13 @@
 
 void BMA150_Init(SensorData_t* const AccelSensorInfo)
 {
-	uint8_t RegisterAddress;
 	uint8_t PacketBuffer[1];
 
 	/* Sensor considered not connected until it has been sucessfully initialized */
 	AccelSensorInfo->Connected = false;
 
 	/* Attempt to read the sensor's ID register, return error if sensor cannot be communicated with */
-	RegisterAddress = BMA150_CHIP_ID_REG;
-	if (TWI_ReadPacket(BMA150_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1) != TWI_ERROR_NoError)
+	if (Sensor_ReadBytes(BMA150_ADDRESS, BMA150_CHIP_ID_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;
 
 	/* Verify the returned sensor ID against the expected sensor ID */
@@ -51,28 +49,24 @@ void BMA150_Init(SensorData_t* const AccelSensorInfo)
 	  return;
 
 	/* Force reset of the sensor */
-	RegisterAddress = BMA150_SMB150_CTRL_REG;
 	PacketBuffer[0] = 0x01;
-	if (TWI_WritePacket(BMA150_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1) != TWI_ERROR_NoError)
+	if (Sensor_WriteBytes(BMA150_ADDRESS, BMA150_SMB150_CTRL_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;
 
 	/* Enable automatic wake-up of the sensor, enable interrupt line on end of conversion */
-	RegisterAddress = BMA150_SMB150_CONF2_REG;
 	PacketBuffer[0] = 0x21;
-	if (TWI_WritePacket(BMA150_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1) != TWI_ERROR_NoError)
+	if (Sensor_WriteBytes(BMA150_ADDRESS, BMA150_SMB150_CONF2_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;
 	  
 	/* Set 25MHz bandwidth, 2g range */
-	RegisterAddress = BMA150_RANGE_BWIDTH_REG;
 	PacketBuffer[0] = 0;
-	if (TWI_WritePacket(BMA150_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1) != TWI_ERROR_NoError)
+	if (Sensor_WriteBytes(BMA150_ADDRESS, BMA150_RANGE_BWIDTH_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;
 }
 
 void BMA150_Update(SensorData_t* const AccelSensorInfo)
 {	
 	uint8_t PacketBuffer[6];
-	uint8_t RegisterAddress;
 
 	/* Abort if sensor not connected and initialized */
 	if (!(AccelSensorInfo->Connected))
@@ -82,8 +76,7 @@ void BMA150_Update(SensorData_t* const AccelSensorInfo)
 	while (!(PINB & (1 << 2)));
 
 	/* Read the converted sensor data as a block packet */
-	RegisterAddress = BMA150_X_AXIS_LSB_REG;
-	if (TWI_ReadPacket(BMA150_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 6) != TWI_ERROR_NoError)
+	if (Sensor_ReadBytes(BMA150_ADDRESS, BMA150_X_AXIS_LSB_REG, PacketBuffer, 6) != TWI_ERROR_NoError)
 	  return;		  
 
 	/* Save updated sensor data */

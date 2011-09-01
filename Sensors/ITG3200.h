@@ -35,6 +35,7 @@
 		#include "SensorsCommon.h"
 
 	/* Macros: */
+		#define ITG3200_ADDRESS       (0x68 << 1)
 		#define ITG3200_CHIP_ID       0x69
 		
 		#define ITG3200_CFG_RAWRDY    (1 << 0)

@@ -32,7 +32,6 @@
 
 static void BMP085_StartConversion(SensorData_t* const PressureSensorInfo)
 {
-	uint8_t RegisterAddress;
 	uint8_t PacketBuffer[1];
 
 	/* Abort if Compass sensor not connected and initialized */
@@ -40,22 +39,19 @@ static void BMP085_StartConversion(SensorData_t* const PressureSensorInfo)
 	  return;
 
 	/* Write to the control register to initiate the next single conversion */
-	RegisterAddress = BMP085_CONTROL_REG;
 	PacketBuffer[0] = BMP085_CONTROL_CMD_PRESSURE;
-	TWI_WritePacket(BMP085_ADDRESS, 100, &RegisterAddress, 1, PacketBuffer, 1);
+	Sensor_WriteBytes(BMP085_ADDRESS, BMP085_CONTROL_REG, PacketBuffer, 1);
 }
 
 void BMP085_Init(SensorData_t* const PressureSensorInfo)
 {
-	uint8_t RegisterAddress;
 	uint8_t PacketBuffer[1];
 
 	/* Sensor considered not connected until it has been sucessfully initialized */
 	PressureSensorInfo->Connected = false;
 
 	/* Attempt to read the sensor's ID register, return error if sensor cannot be communicated with */
-	RegisterAddress = BMP085_CHIP_ID_REG;
-	if (TWI_ReadPacket(BMP085_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1) != TWI_ERROR_NoError)
+	if (Sensor_ReadBytes(BMP085_ADDRESS, BMP085_CHIP_ID_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;
 
 	/* Verify the returned sensor ID against the expected sensor ID */
@@ -77,7 +73,6 @@ void BMP085_Init(SensorData_t* const PressureSensorInfo)
 void BMP085_Update(SensorData_t* const PressureSensorInfo)
 {
 	uint8_t PacketBuffer[3];
-	uint8_t RegisterAddress;
 
 	/* Abort if sensor not connected and initialized */
 	if (!(PressureSensorInfo->Connected))
@@ -87,8 +82,7 @@ void BMP085_Update(SensorData_t* const PressureSensorInfo)
 	while (!(PIND & (1 << 2)));
 	
 	/* Read the converted sensor data as a block packet */
-	RegisterAddress = BMP085_CONVERSION_REG_MSB;
-	if (TWI_ReadPacket(BMP085_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 3) != TWI_ERROR_NoError)
+	if (Sensor_ReadBytes(BMP085_ADDRESS, BMP085_CONVERSION_REG_MSB, PacketBuffer, 3) != TWI_ERROR_NoError)
 	  return;
 
 	/* Save updated sensor data */

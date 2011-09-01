@@ -117,12 +117,14 @@ void StartupSequence(void)
 	LCD_WriteString_P(PSTR("Bluetooth  Robot\n"
 	                       " By Dean Camera "));
 
+	/* Fade in LCD backlight to half maximum brightness to save power */
 	for (uint8_t i = 0; i < (0xFF / 2); i++)
 	{
 		LCD_SetBacklight(i);
 		Delay_MS(5);
 	}
 	
+	/* Cycle through the RGB status LED colours */
 	for (uint8_t i = 0; i < sizeof(ColourMap); i++)
 	{
 		RGB_SetColour(ColourMap[i]);
@@ -133,8 +135,8 @@ void StartupSequence(void)
 /** Check the board sensors to ensure that they are attached and operating correctly. */
 void CheckSensors(void)
 {
-	uint8_t LCDIcon_Cross[] = {0x00, 0x1B, 0x0E, 0x04, 0x0E, 0x1B, 0x00, 0x00};
-	uint8_t LCDIcon_Tick[]  = {0x00, 0x01, 0x03, 0x16, 0x1C, 0x08, 0x00, 0x00};
+	static const uint8_t LCDIcon_Cross[] PROGMEM = {0x00, 0x1B, 0x0E, 0x04, 0x0E, 0x1B, 0x00, 0x00};
+	static const uint8_t LCDIcon_Tick[]  PROGMEM = {0x00, 0x01, 0x03, 0x16, 0x1C, 0x08, 0x00, 0x00};
 	
 	LCD_SetCustomChar('\1', LCDIcon_Cross);
 	LCD_SetCustomChar('\2', LCDIcon_Tick);

@@ -38,11 +38,8 @@
 		#include <LUFA/Drivers/Peripheral/TWI.h>
 
 	/* Macros: */
-		#define AK8975_ADDRESS          (0x0C << 1)
-		#define ITG3200_ADDRESS         (0x68 << 1)
-		#define BMA150_ADDRESS          (0x38 << 1)
-		#define BMP085_ADDRESS          (0x77 << 1)
-		
+		#define SENSOR_BUS_TIMEOUT_MS   100
+
 	/* Type Defines: */
 		typedef struct
 		{
@@ -69,6 +66,23 @@
 			SensorData_t Pressure;
 			SensorData_t Temperature;
 		} Sensor_t;
+	
+	/* Inline Functions */
+		static inline uint8_t Sensor_WriteBytes(const uint8_t SensorTWIAddress,
+		                                        const uint8_t RegisterAddress,
+		                                        uint8_t* const PacketBuffer,
+		                                        const uint8_t Length)
+		{
+			return TWI_WritePacket(SensorTWIAddress, SENSOR_BUS_TIMEOUT_MS, &RegisterAddress, sizeof(RegisterAddress), PacketBuffer, Length);
+		}
+
+		static inline uint8_t Sensor_ReadBytes(const uint8_t SensorTWIAddress,
+		                                       const uint8_t RegisterAddress,
+		                                       uint8_t* const PacketBuffer,
+		                                       const uint8_t Length)
+		{
+			return TWI_ReadPacket(SensorTWIAddress, SENSOR_BUS_TIMEOUT_MS, &RegisterAddress, sizeof(RegisterAddress), PacketBuffer, Length);
+		}
 	
 	/* External Variables: */
 		extern Sensor_t Sensors;

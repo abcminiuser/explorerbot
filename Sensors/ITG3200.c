@@ -35,7 +35,6 @@ static SensorData_t GyroZeroOffset;
 void ITG3200_Init(SensorData_t* const GyroSensorInfo,
 		          SensorData_t* const TempSensorInfo)
 {
-	uint8_t RegisterAddress;
 	uint8_t PacketBuffer[1];
 
 	/* Sensor considered not connected until it has been sucessfully initialized */
@@ -46,10 +45,8 @@ void ITG3200_Init(SensorData_t* const GyroSensorInfo,
 	  TempSensorInfo->Connected = false;
 
 	/* Attempt to read the sensor's ID register, return error if sensor cannot be communicated with */
-	RegisterAddress = ITG3200_WHOAMI_REG;
-	if (TWI_ReadPacket(ITG3200_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1) != TWI_ERROR_NoError)
+	if (Sensor_ReadBytes(ITG3200_ADDRESS, ITG3200_WHOAMI_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;
-	PacketBuffer[0] = ITG3200_CHIP_ID;
 
 	/* Verify the returned sensor ID against the expected sensor ID */
 	GyroSensorInfo->Connected = (PacketBuffer[0] == ITG3200_CHIP_ID);
@@ -63,33 +60,28 @@ void ITG3200_Init(SensorData_t* const GyroSensorInfo,
 	  return;
 
 	/* Force reset of the sensor */
-	RegisterAddress = ITG3200_PWR_M_REG;
 	PacketBuffer[0] = 0x80;
-	if (TWI_WritePacket(ITG3200_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1) != TWI_ERROR_NoError)
+	if (Sensor_WriteBytes(ITG3200_ADDRESS, ITG3200_PWR_M_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;
 
 	/* Set the update rate to 100Hz at an internal sampling rate of 1KHz */
-	RegisterAddress = ITG3200_SMPLRT_REG;
 	PacketBuffer[0] = ((1000 / 100) - 1);
-	if (TWI_WritePacket(ITG3200_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1) != TWI_ERROR_NoError)
+	if (Sensor_WriteBytes(ITG3200_ADDRESS, ITG3200_SMPLRT_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;
 
 	/* Set Low Pass Filter to use 20Hz bandwidth */
-	RegisterAddress = ITG3200_DLPF_FS_REG;
 	PacketBuffer[0] = ((3 << 3) | 5);
-	if (TWI_WritePacket(ITG3200_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1) != TWI_ERROR_NoError)
+	if (Sensor_WriteBytes(ITG3200_ADDRESS, ITG3200_DLPF_FS_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;
 
 	/* Enable data ready interrupt line notifications */
-	RegisterAddress = ITG3200_INT_CFG_REG;
 	PacketBuffer[0] = (ITG3200_CFG_RAWRDY | ITG3200_CFG_ANYRDCLR | ITG3200_CFG_LATCHINT);
-	if (TWI_WritePacket(ITG3200_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1) != TWI_ERROR_NoError)
+	if (Sensor_WriteBytes(ITG3200_ADDRESS, ITG3200_INT_CFG_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;
 
 	/* Set the clock reference to use the Gyroscope X axis PLL as the clock source */
-	RegisterAddress = ITG3200_PWR_M_REG;
 	PacketBuffer[0] = 0x01;
-	if (TWI_WritePacket(ITG3200_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 1) != TWI_ERROR_NoError)
+	if (Sensor_WriteBytes(ITG3200_ADDRESS, ITG3200_PWR_M_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;
 }
 
@@ -105,7 +97,6 @@ void ITG3200_Update(SensorData_t* const GyroSensorInfo,
 		            SensorData_t* const TempSensorInfo)
 {
 	uint8_t PacketBuffer[8];
-	uint8_t RegisterAddress;
 
 	/* Abort if sensor not connected and initialized */
 	if (!(GyroSensorInfo->Connected))
@@ -115,8 +106,7 @@ void ITG3200_Update(SensorData_t* const GyroSensorInfo,
 	while (!(PINB & (1 << 0)));
 
 	/* Read the converted sensor data as a block packet */
-	RegisterAddress = ITG3200_TMP_H_REG;
-	if (TWI_ReadPacket(ITG3200_ADDRESS, 100, &RegisterAddress, sizeof(uint8_t), PacketBuffer, 8) != TWI_ERROR_NoError)
+	if (Sensor_ReadBytes(ITG3200_ADDRESS, ITG3200_TMP_H_REG, PacketBuffer, 8) != TWI_ERROR_NoError)
 	  return;
 
 	/* Update temperature sensor data */

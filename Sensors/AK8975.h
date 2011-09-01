@@ -35,6 +35,7 @@
 		#include "SensorsCommon.h"
 
 	/* Macros: */
+		#define AK8975_ADDRESS                  (0x0C << 1)
 		#define AK8975_DEVICE_ID                0x48		 
 
 		#define AK8975_REG_WIA                  0x00

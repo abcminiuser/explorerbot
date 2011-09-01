@@ -35,6 +35,9 @@
 		#include "SensorsCommon.h"
 
 	/* Macros: */
+		#define BMA150_ADDRESS                 (0x38 << 1)
+		#define BMA150_CHIP_ID                 0x02
+
 		#define BMA150_CHIP_ID_REG             0x00
 		#define BMA150_VERSION_REG             0x01
 		#define BMA150_X_AXIS_LSB_REG          0x02
@@ -67,8 +70,6 @@
 		#define BMA150_OFFSET_Z_REG            0x1C
 		#define BMA150_OFFSET_T_REG            0x1D
 		
-		#define BMA150_CHIP_ID                 0x02
-
 	/* Function Prototypes: */
 		void BMA150_Init(SensorData_t* const AccelSensorInfo);
 		void BMA150_Update(SensorData_t* const AccelSensorInfo);

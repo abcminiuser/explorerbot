@@ -35,6 +35,7 @@
 		#include "SensorsCommon.h"
 
 	/* Macros: */
+		#define BMP085_ADDRESS               (0x77 << 1)
 		#define BMP085_CHIP_ID               0x55
 	
 		#define BMP085_CONTROL_CMD_TEMP      0x2E

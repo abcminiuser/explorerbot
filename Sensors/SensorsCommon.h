@@ -38,7 +38,7 @@
 		#include <LUFA/Drivers/Peripheral/TWI.h>
 
 	/* Macros: */
-		#define SENSOR_BUS_TIMEOUT_MS   100
+		#define SENSOR_BUS_TIMEOUT_MS   10
 
 	/* Type Defines: */
 		typedef struct

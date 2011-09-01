@@ -85,8 +85,12 @@ void ITG3200_Init(SensorData_t* const GyroSensorInfo,
 	  return;
 }
 
-void ITG3200_ZeroCalibrate(void)
+void ITG3200_ZeroCalibrate(SensorData_t* const GyroSensorInfo)
 {
+	/* Abort if sensor not connected and initialized */
+	if (!(GyroSensorInfo->Connected))
+	  return;
+
 	memset(&GyroZeroOffset, 0x00, sizeof(GyroZeroOffset));
 	GyroZeroOffset.Connected = true;
 	

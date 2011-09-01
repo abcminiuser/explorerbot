@@ -41,26 +41,34 @@ void Sensors_Init(void)
 	DDRB |=  (1 << 3);
 	DDRD &= ~(1 << 2);
 	
+	/* Set XCLR line high, to enable the pressure sensor */
 	PORTB |= (1 << 3);
 	
+	/* Initialize the TWI bus at 200KHz for fastest possible read time */
 	TWI_Init(TWI_BIT_PRESCALE_1, ((((F_CPU / 1) / 200000) - 16) / 2));
 	
+	/* Clear the sensor information table, reset all sensor data */
 	memset(&Sensors, 0x00, sizeof(Sensors));
 	
+	/* Pre-sensor initialization delay */
 	Delay_MS(100);
 	
+	/* Attempt to initialize all sensors */
 	AK8975_Init(&Sensors.Direction);
 	BMA150_Init(&Sensors.Acceleration);
 	BMP085_Init(&Sensors.Pressure);
 	ITG3200_Init(&Sensors.Orientation, &Sensors.Temperature);
 	
+	/* Pre-sensor calibration delay */
 	Delay_MS(100);
 	
-	ITG3200_ZeroCalibrate();
+	/* Attempt to zero-calibrate all sensors that are connected */
+	ITG3200_ZeroCalibrate(&Sensors.Orientation);
 }
 
 void Sensors_Update(void)
 {
+	/* Update all sensor table items from the new sensor values */
 	AK8975_Update(&Sensors.Direction);
 	BMA150_Update(&Sensors.Acceleration);
 	BMP085_Update(&Sensors.Pressure);

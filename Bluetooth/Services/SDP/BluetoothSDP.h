@@ -19,7 +19,7 @@
 		#include <stdbool.h>
 		#include <stdint.h>
 
-		#include "../Bluetooth.h"
+		#include "../../Bluetooth.h"
 		#include "BluetoothSDPDefinitions.h"
 		#include "BluetoothSDPTableDefinitions.h"
 

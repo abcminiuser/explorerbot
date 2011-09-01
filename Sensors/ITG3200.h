@@ -61,7 +61,8 @@
 		#define ITG3200_PWR_M_REG     0x3E
 
 	/* Function Prototypes: */
-		void ITG3200_Init(SensorData_t* const GyroSensorInfo);
+		void ITG3200_Init(SensorData_t* const GyroSensorInfo,
+		                  SensorData_t* const TempSensorInfo);
 		void ITG3200_ZeroCalibrate(void);
 		void ITG3200_Update(SensorData_t* const GyroSensorInfo,
 		                    SensorData_t* const TempSensorInfo);

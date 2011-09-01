@@ -32,13 +32,18 @@
 
 static SensorData_t GyroZeroOffset;
 
-void ITG3200_Init(SensorData_t* const GyroSensorInfo)
+void ITG3200_Init(SensorData_t* const GyroSensorInfo,
+		          SensorData_t* const TempSensorInfo)
 {
 	uint8_t RegisterAddress;
 	uint8_t PacketBuffer[1];
 
 	/* Sensor considered not connected until it has been sucessfully initialized */
 	GyroSensorInfo->Connected = false;
+
+	/* Temperature sensor connectivity should match the physical sensor connectivity */
+	if (TempSensorInfo)
+	  TempSensorInfo->Connected = false;
 
 	/* Attempt to read the sensor's ID register, return error if sensor cannot be communicated with */
 	RegisterAddress = ITG3200_WHOAMI_REG;
@@ -48,6 +53,10 @@ void ITG3200_Init(SensorData_t* const GyroSensorInfo)
 
 	/* Verify the returned sensor ID against the expected sensor ID */
 	GyroSensorInfo->Connected = (PacketBuffer[0] == ITG3200_CHIP_ID);
+	
+	/* Temperature sensor connectivity should match the physical sensor connectivity */
+	if (TempSensorInfo)
+	  TempSensorInfo->Connected = GyroSensorInfo->Connected;
 	
 	/* Abort if sensor not connected and initialized */
 	if (!(GyroSensorInfo->Connected))

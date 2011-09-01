@@ -64,6 +64,11 @@ void BMP085_Init(SensorData_t* const PressureSensorInfo)
 	/* Abort if sensor not connected and initialized */
 	if (!(PressureSensorInfo->Connected))
 	  return;
+	
+	/* Force sensor reset via the XCLR line */
+	PORTB &= ~(1 << 3);
+	Delay_MS(1);
+	PORTB |= (1 << 3);
 
 	/* Try to trigger the first conversion in the sensor */
 	BMP085_StartConversion(PressureSensorInfo);

@@ -52,7 +52,7 @@ void Sensors_Init(void)
 	AK8975_Init(&Sensors.Direction);
 	BMA150_Init(&Sensors.Acceleration);
 	BMP085_Init(&Sensors.Pressure);
-	ITG3200_Init(&Sensors.Orientation);
+	ITG3200_Init(&Sensors.Orientation, &Sensors.Temperature);
 	
 	Delay_MS(100);
 	

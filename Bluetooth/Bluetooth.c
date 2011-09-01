@@ -12,8 +12,12 @@
   All rights reserved.
 */
 
-#include "Bluetooth.h"
+/** \file
+ *
+ *  Main module for the Bluetooth stack. This module contains the main Bluetooth stack management functions.
+ */
 
+#include "Bluetooth.h"
 
 /** Initializes the Bluetooth stack ready for use. This must be called once at application startup to reset the internal
  *  stack state.

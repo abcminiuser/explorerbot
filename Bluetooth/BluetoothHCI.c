@@ -12,6 +12,15 @@
   All rights reserved.
 */
 
+/** \file
+ *
+ *  Bluetooth HCI layer management code. This module manages the overall
+ *  Bluetooth stack connection state to and from other devices, processes
+ *  received events from the Bluetooth controller, and issues commands to
+ *  modify the controller's configuration, such as the broadcast name of the
+ *  device.
+ */
+
 #include "BluetoothHCI.h"
 
 /** Creates a new Bluetooth device connection, if space is available in the given Bluetooth stack state HCI connection table.

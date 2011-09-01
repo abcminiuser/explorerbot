@@ -12,6 +12,13 @@
   All rights reserved.
 */
 
+/** \file
+ *
+ *  Bluetooth L2CAP layer management code. This module managed the creation,
+ *  configuration and teardown of L2CAP channels, and manages packet reception
+ *  and sending to and from other Bluetooth devices.
+ */
+
 #include "BluetoothACL.h"
 
 void Bluetooth_ACL_NotifyHCIDisconnection(BT_StackConfig_t* const StackState,
@@ -238,7 +245,7 @@ static inline void Bluetooth_ACL_Signal_InformationReq(BT_StackConfig_t* const S
 	uint8_t DataLen = 0;
 
 	/* Retrieve the requested information and store it in the outgoing packet, if found */
-	switch (InformationRequest->InfoType)
+	switch (le16_to_cpu(InformationRequest->InfoType))
 	{
 		case BT_INFOREQ_MTU:
 			ResponsePacket.InformationResponse.Result = CPU_TO_LE16(BT_INFORMATION_SUCCESSFUL);

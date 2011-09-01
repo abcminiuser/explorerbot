@@ -35,11 +35,11 @@
  */
 void Motors_Init(void)
 {
-	DDRD   |= ((1 << 3) | (1 << 4));
-	DDRB   |= ((1 << 5) | (1 << 6));
+	DDRD  |= ((1 << 3) | (1 << 4));
+	DDRB  |= ((1 << 5) | (1 << 6));
 
-	TCCR1A  = ((1 << WGM11) | (1 << WGM10) | (1 << COM1A1) | (1 << COM1B1));
-	TCCR1B  = (1 << CS11);
+	TCCR1A = ((1 << WGM11) | (1 << WGM10) | (1 << COM1A1) | (1 << COM1B1));
+	TCCR1B = (1 << CS11);
 	
 	Motors_SetChannelSpeed(MOTOR_CHANNEL_All, 0);
 }

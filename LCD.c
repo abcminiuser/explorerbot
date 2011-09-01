@@ -118,7 +118,6 @@ void LCD_Init(void)
 	PORTE |=  LCD_RS;
 	
 	LCD_Clear();
-	LCD_SetCursor(1, 0);
 }
 
 /** Sets the LCD backlight intensity level.
@@ -215,7 +214,11 @@ void LCD_WriteString(const char* String)
 {
 	while (*String != 0x00)
 	{
-		LCD_WriteByte(*String);
+		if (*String == '\n')
+		  LCD_SetCursor(2, 0);
+		else
+		  LCD_WriteByte(*String);
+
 		String++;
 	}
 }
@@ -226,7 +229,7 @@ void LCD_WriteString(const char* String)
  */
 void LCD_WriteFormattedString(const char* FormatString, ...)
 {
-	char LineBuffer[25];
+	char LineBuffer[50];
 
     va_list va;
     va_start(va, FormatString);
@@ -246,7 +249,11 @@ void LCD_WriteString_P(const char* String)
 
 	while ((CurrByte = pgm_read_byte(String)) != 0x00)
 	{
-		LCD_WriteByte(CurrByte);
+		if (CurrByte == '\n')
+		  LCD_SetCursor(2, 0);
+		else
+		  LCD_WriteByte(CurrByte);
+
 		String++;
 	}
 }

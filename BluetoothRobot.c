@@ -36,8 +36,8 @@
 int main(void)
 {
 	SetupHardware();
-//	StartupSequence();
-//	CheckSensors();
+	//StartupSequence();
+	CheckSensors();
 
 	EVENT_USB_Host_DeviceUnattached();
 	sei();
@@ -114,9 +114,8 @@ void StartupSequence(void)
 	                             RGB_COLOUR_Red,   RGB_COLOUR_Yellow, RGB_COLOUR_White, RGB_COLOUR_Off};
 
 	LCD_Clear();
-	LCD_WriteString_P(PSTR("Bluetooth  Robot"));
-	LCD_SetCursor(2, 0);
-	LCD_WriteString_P(PSTR(" By Dean Camera "));
+	LCD_WriteString_P(PSTR("Bluetooth  Robot\n"
+	                       " By Dean Camera "));
 
 	for (uint8_t i = 0; i < (0xFF / 2); i++)
 	{
@@ -137,16 +136,15 @@ void CheckSensors(void)
 	uint8_t LCDIcon_Cross[] = {0x00, 0x1B, 0x0E, 0x04, 0x0E, 0x1B, 0x00, 0x00};
 	uint8_t LCDIcon_Tick[]  = {0x00, 0x01, 0x03, 0x16, 0x1C, 0x08, 0x00, 0x00};
 	
-	LCD_SetCustomChar(1, LCDIcon_Cross);
-	LCD_SetCustomChar(2, LCDIcon_Tick);
+	LCD_SetCustomChar('\1', LCDIcon_Cross);
+	LCD_SetCustomChar('\2', LCDIcon_Tick);
 	
 	LCD_Clear();
-	LCD_WriteFormattedString(" CMP %c   ACC %c", (Sensors.Direction.Connected    ? 0x02 : 0x01),
-	                                             (Sensors.Acceleration.Connected ? 0x02 : 0x01));
-
-	LCD_SetCursor(2, 0);
-	LCD_WriteFormattedString(" GYR %c   PRS %c", (Sensors.Orientation.Connected  ? 0x02 : 0x01),
-	                                             (Sensors.Pressure.Connected     ? 0x02 : 0x01));
+	LCD_WriteFormattedString(" CMP %c   ACC %c\n"
+	                         " GYR %c   PRS %c", (Sensors.Direction.Connected    ? '\2' : '\1'),
+	                                             (Sensors.Acceleration.Connected ? '\2' : '\1'),
+	                                             (Sensors.Orientation.Connected  ? '\2' : '\1'),
+	                                             (Sensors.Pressure.Connected     ? '\2' : '\1'));
 												 
 	for (uint8_t i = 0; i < 15; i++)
 	  Delay_MS(100);

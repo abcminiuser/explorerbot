@@ -252,9 +252,8 @@ bool CALLBACK_Bluetooth_ConnectionRequest(BT_StackConfig_t* const StackState,
                                           BT_HCI_Connection_t* const ConnectionHandle)
 {
 	LCD_Clear();
-	LCD_WriteString("Conn Request:");
-	LCD_SetCursor(2, 0);
-	LCD_WriteFormattedString("%02X%02X:%02X%02X:%02X%02X", ConnectionHandle->RemoteBDADDR[0], ConnectionHandle->RemoteBDADDR[1],
+	LCD_WriteFormattedString("Conn Request:\n"
+	                         "%02X%02X:%02X%02X:%02X%02X", ConnectionHandle->RemoteBDADDR[0], ConnectionHandle->RemoteBDADDR[1],
 	                                                       ConnectionHandle->RemoteBDADDR[2], ConnectionHandle->RemoteBDADDR[3],
 	                                                       ConnectionHandle->RemoteBDADDR[4], ConnectionHandle->RemoteBDADDR[5]);
 
@@ -266,9 +265,8 @@ void EVENT_Bluetooth_ConnectionComplete(BT_StackConfig_t* const StackState,
                                         BT_HCI_Connection_t* const ConnectionHandle)
 {	
 	LCD_Clear();
-	LCD_WriteString("Connected:");
-	LCD_SetCursor(2, 0);
-	LCD_WriteFormattedString("%02X%02X:%02X%02X:%02X%02X", ConnectionHandle->RemoteBDADDR[0], ConnectionHandle->RemoteBDADDR[1],
+	LCD_WriteFormattedString("Connected:\n"
+	                         "%02X%02X:%02X%02X:%02X%02X", ConnectionHandle->RemoteBDADDR[0], ConnectionHandle->RemoteBDADDR[1],
 	                                                       ConnectionHandle->RemoteBDADDR[2], ConnectionHandle->RemoteBDADDR[3],
 	                                                       ConnectionHandle->RemoteBDADDR[4], ConnectionHandle->RemoteBDADDR[5]);
 }
@@ -277,9 +275,8 @@ void EVENT_Bluetooth_DisconnectionComplete(BT_StackConfig_t* const StackState,
                                            BT_HCI_Connection_t* const ConnectionHandle)
 {
 	LCD_Clear();
-	LCD_WriteString("Disconnected:");
-	LCD_SetCursor(2, 0);
-	LCD_WriteFormattedString("%02X%02X:%02X%02X:%02X%02X", ConnectionHandle->RemoteBDADDR[0], ConnectionHandle->RemoteBDADDR[1],
+	LCD_WriteFormattedString("Disconnected:\n"
+	                         "%02X%02X:%02X%02X:%02X%02X", ConnectionHandle->RemoteBDADDR[0], ConnectionHandle->RemoteBDADDR[1],
 	                                                       ConnectionHandle->RemoteBDADDR[2], ConnectionHandle->RemoteBDADDR[3],
 	                                                       ConnectionHandle->RemoteBDADDR[4], ConnectionHandle->RemoteBDADDR[5]);
 }
@@ -296,18 +293,16 @@ void EVENT_Bluetooth_ChannelOpened(BT_StackConfig_t* const StackState,
                                    BT_ACL_Channel_t* const Channel)
 {
 	LCD_Clear();
-	LCD_WriteString("ACL Open");
-	LCD_SetCursor(2, 0);
-	LCD_WriteFormattedString("L:%04X R:%04X", Channel->LocalNumber, Channel->RemoteNumber);
+	LCD_WriteFormattedString("ACL Open\n"
+	                         "L:%04X R:%04X", Channel->LocalNumber, Channel->RemoteNumber);
 }
 
 void EVENT_Bluetooth_ChannelClosed(BT_StackConfig_t* const StackState,
                                    BT_ACL_Channel_t* const Channel)
 {
 	LCD_Clear();
-	LCD_WriteString("ACL Closed");
-	LCD_SetCursor(2, 0);
-	LCD_WriteFormattedString("L:%04X R:%04X", Channel->LocalNumber, Channel->RemoteNumber);
+	LCD_WriteFormattedString("ACL Closed\n"
+	                         "L:%04X R:%04X", Channel->LocalNumber, Channel->RemoteNumber);
 }
 
 void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
@@ -331,9 +326,8 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
 			break;
 		default:
 			LCD_Clear();
-			LCD_WriteFormattedString("ACL P:%04X", Channel->PSM);
-			LCD_SetCursor(2, 0);
-			LCD_WriteFormattedString("L:%04X R:%04X", Channel->LocalNumber, Channel->RemoteNumber);
+			LCD_WriteFormattedString("ACL P:%04X\n"
+			                         "L:%04X R:%04X", Channel->PSM, Channel->LocalNumber, Channel->RemoteNumber);
 			break;
 	}
 }

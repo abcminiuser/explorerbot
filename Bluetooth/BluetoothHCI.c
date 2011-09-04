@@ -23,6 +23,43 @@
 
 #include "BluetoothHCI.h"
 
+/** Finds the corresponding Bluetooth device connection from the remote device's address or link handle.
+ *
+ *  \param[in, out] StackState    Pointer to a Bluetooth Stack state table.
+ *  \param[in]      RemoteBDADDR  Bluetooth device address of the remote device to search for, \c NULL to search by link handle.
+ *  \param[in]      Handle        If \c RemoteBDADDR is \c NULL, the link handle to search for.
+ *
+ *  \return Pointer to the device connection handle if one was found, NULL otherwise.
+ */
+BT_HCI_Connection_t* const Bluetooth_HCI_FindConnection(BT_StackConfig_t* const StackState,
+                                                        const uint8_t* const RemoteBDADDR,
+                                                        const uint16_t Handle)
+{
+	/* Search through the HCI connection table, looking for a matching connection */
+	for (uint8_t i = 0; i < MAX_DEVICE_CONNECTIONS; i++)
+	{
+		BT_HCI_Connection_t* Connection = &StackState->State.HCI.Connections[i];
+		
+		/* Free connection entries are inactive must be skipped */
+		if (Connection->State == HCI_CONSTATE_Free)
+		  continue;
+
+		/* Check search parameter; if BDADDR specified search by remote device address, otherwise by handle */
+		if (RemoteBDADDR != NULL)
+		{
+			if (memcmp(Connection->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN) == 0)
+			  return Connection;
+		}
+		else
+		{
+			if (Connection->Handle == (Handle & BT_HCI_CONNECTION_HANDLE_MASK))
+			  return Connection;		
+		}
+	}
+	
+	return NULL;
+}
+
 /** Creates a new Bluetooth device connection, if space is available in the given Bluetooth stack state HCI connection table.
  *
  *  \param[in, out] StackState    Pointer to a Bluetooth Stack state table.
@@ -31,9 +68,9 @@
  *
  *  \return Pointer to the new connection handle if one was created, NULL otherwise.
  */
-static BT_HCI_Connection_t* Bluetooth_HCI_NewConnection(BT_StackConfig_t* const StackState,
-                                                        const uint8_t* const RemoteBDADDR,
-                                                        const uint8_t LinkType)
+static BT_HCI_Connection_t* const Bluetooth_HCI_NewConnection(BT_StackConfig_t* const StackState,
+                                                              const uint8_t* const RemoteBDADDR,
+                                                              const uint8_t LinkType)
 {
 	for (uint8_t i = 0; i < MAX_DEVICE_CONNECTIONS; i++)
 	{
@@ -46,40 +83,6 @@ static BT_HCI_Connection_t* Bluetooth_HCI_NewConnection(BT_StackConfig_t* const 
 			Connection->LinkType          = LinkType;
 			Connection->CurrentIdentifier = 0x01;
 			return Connection;
-		}
-	}
-	
-	return NULL;
-}
-
-/** Finds the corresponding Bluetooth device connection from the remote device's address or link handle.
- *
- *  \param[in, out] StackState    Pointer to a Bluetooth Stack state table.
- *  \param[in]      RemoteBDADDR  Bluetooth device address of the remote device to search for, \c NULL to search by link handle.
- *  \param[in]      Handle        If \c RemoteBDADDR is \c NULL, the link handle to search for.
- *
- *  \return Pointer to the device connection handle if one was found, NULL otherwise.
- */
-BT_HCI_Connection_t* Bluetooth_HCI_FindConnection(BT_StackConfig_t* const StackState,
-                                                  const uint8_t* const RemoteBDADDR,
-                                                  const uint16_t Handle)
-{
-	for (uint8_t i = 0; i < MAX_DEVICE_CONNECTIONS; i++)
-	{
-		BT_HCI_Connection_t* Connection = &StackState->State.HCI.Connections[i];
-		
-		if (Connection->State == HCI_CONSTATE_Free)
-		  continue;
-
-		if (RemoteBDADDR != NULL)
-		{
-			if (memcmp(Connection->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN) == 0)
-			  return Connection;
-		}
-		else
-		{
-			if (Connection->Handle == (Handle & BT_HCI_CONNECTION_HANDLE_MASK))
-			  return Connection;		
 		}
 	}
 	
@@ -126,6 +129,7 @@ void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState)
 			case HCISTATE_Init_GetBDADDR:
 				if (CommandCompleteHeader->Opcode == CPU_TO_LE16(OGF_CTRLR_INFORMATIONAL | OCF_CTRLR_INFORMATIONAL_READBDADDR))
 				{
+					/* Copy over the returned local device address to the stack state buffer */
 					memcpy(StackState->State.HCI.LocalBDADDR, &CommandCompleteHeader->Parameters[1], BT_BDADDR_LEN);				
 					NextHCIState = HCISTATE_Init_SetLocalName;
 				}
@@ -165,11 +169,10 @@ void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState)
 		/* If a rejection reason was given, reject the request, otherwise send a connection request accept */
 		if (RejectionReason)
 		{
-			BT_HCICommand_RejectConnectionReq_t* HCIRejectConnectionHeader = (BT_HCICommand_RejectConnectionReq_t*)&HCICommandHeader->Parameters;
-
 			HCICommandHeader->OpCode          = CPU_TO_LE16(OGF_LINK_CONTROL | OCF_LINK_CONTROL_REJECT_CONNECTION_REQUEST),
 			HCICommandHeader->ParameterLength = sizeof(BT_HCICommand_RejectConnectionReq_t);
 			
+			BT_HCICommand_RejectConnectionReq_t* HCIRejectConnectionHeader = (BT_HCICommand_RejectConnectionReq_t*)&HCICommandHeader->Parameters;
 			memcpy(HCIRejectConnectionHeader->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
 			HCIRejectConnectionHeader->Reason = RejectionReason;
 			
@@ -179,11 +182,10 @@ void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState)
 		}
 		else
 		{
-			BT_HCICommand_AcceptConnectionReq_t* HCIAcceptConnectionHeader = (BT_HCICommand_AcceptConnectionReq_t*)&HCICommandHeader->Parameters;
-
 			HCICommandHeader->OpCode          = CPU_TO_LE16(OGF_LINK_CONTROL | OCF_LINK_CONTROL_ACCEPT_CONNECTION_REQUEST),
 			HCICommandHeader->ParameterLength = sizeof(BT_HCICommand_AcceptConnectionReq_t);
 			
+			BT_HCICommand_AcceptConnectionReq_t* HCIAcceptConnectionHeader = (BT_HCICommand_AcceptConnectionReq_t*)&HCICommandHeader->Parameters;
 			memcpy(HCIAcceptConnectionHeader->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
 			HCIAcceptConnectionHeader->SlaveRole = true;
 		}
@@ -200,7 +202,7 @@ void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState)
 		/* If the connection handle exists, store the created connection handle and change the device connection state to connected */
 		if (Connection)
 		{
-			Connection->Handle = le16_to_cpu(ConnectionCompleteEventHeader->Handle);
+			Connection->Handle = (le16_to_cpu(ConnectionCompleteEventHeader->Handle) & BT_HCI_CONNECTION_HANDLE_MASK);
 			Connection->State  = HCI_CONSTATE_Connected;
 			
 			/* Fire user application callback to signal the connection completion */
@@ -241,8 +243,8 @@ void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState)
 			
 			BT_HCICommand_PinCodeACKResp_t* PINKeyACKResponse = (BT_HCICommand_PinCodeACKResp_t*)&HCICommandHeader->Parameters;
 			memcpy(PINKeyACKResponse->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
-			PINKeyACKResponse->PINCodeLength = MIN(strlen(StackState->Config.PINCode), 16);
-			memcpy(PINKeyACKResponse->PINCode, StackState->Config.PINCode, PINKeyACKResponse->PINCodeLength);
+			PINKeyACKResponse->PINCodeLength = MIN(strlen(StackState->Config.PINCode), sizeof(PINKeyACKResponse->PINCode));
+			strlcpy((void*)PINKeyACKResponse->PINCode, StackState->Config.PINCode, sizeof(PINKeyACKResponse->PINCode));
 		}
 		else
 		{
@@ -291,8 +293,10 @@ bool Bluetooth_HCI_Manage(BT_StackConfig_t* const StackState)
 	if (!(StackState->State.HCI.StateTransition))
 	  return false;
 	
+	/* Null out the OpCode to signify no packet should be sent */
 	HCICommandHeader->OpCode = 0;
 	
+	/* Determine if a packet needs to be sent based on the current HCI state */
 	switch (StackState->State.HCI.State)
 	{
 		case HCISTATE_Init_Reset:
@@ -326,6 +330,7 @@ bool Bluetooth_HCI_Manage(BT_StackConfig_t* const StackState)
 			break;
 	}
 	
+	/* If a new OpCode has been loaded, send the Bluetooth command to the adapter */
 	if (HCICommandHeader->OpCode)
 	  CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCICommand, (sizeof(BT_HCICommand_Header_t) + HCICommandHeader->ParameterLength));
 	

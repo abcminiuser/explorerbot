@@ -40,10 +40,10 @@ void Bluetooth_ACL_NotifyHCIDisconnection(BT_StackConfig_t* const StackState,
 	}
 }
 
-BT_ACL_Channel_t* Bluetooth_ACL_FindChannel(BT_StackConfig_t* const StackState,
-                                            const uint16_t ConnectionHandle,
-                                            const uint16_t LocalChannel,
-                                            const uint16_t RemoteChannel)
+BT_ACL_Channel_t* const Bluetooth_ACL_FindChannel(BT_StackConfig_t* const StackState,
+                                                  const uint16_t ConnectionHandle,
+                                                  const uint16_t LocalChannel,
+                                                  const uint16_t RemoteChannel)
 {
 	for (uint8_t i = 0; i < MAX_LOGICAL_CHANNELS; i++)
 	{
@@ -68,10 +68,10 @@ BT_ACL_Channel_t* Bluetooth_ACL_FindChannel(BT_StackConfig_t* const StackState,
 	return NULL;
 }
 
-static BT_ACL_Channel_t* Bluetooth_ACL_NewChannel(BT_StackConfig_t* const StackState,
-                                                  const uint16_t ConnectionHandle,
-                                                  const uint16_t RemoteChannel,
-                                                  const uint16_t PSM)
+static BT_ACL_Channel_t* const Bluetooth_ACL_NewChannel(BT_StackConfig_t* const StackState,
+                                                        const uint16_t ConnectionHandle,
+                                                        const uint16_t RemoteChannel,
+                                                        const uint16_t PSM)
 {
 	for (uint8_t i = 0; i < MAX_LOGICAL_CHANNELS; i++)
 	{
@@ -97,6 +97,7 @@ static bool Bluetooth_ACL_SendSignalPacket(BT_StackConfig_t* const StackState,
                                            uint16_t Length,
                                            void* Data)
 {
+	/* Construct a temporary channel object with the signalling channel indexes */
 	BT_ACL_Channel_t SignalChannel;
 	SignalChannel.ConnectionHandle = cpu_to_le16(HCIConnection->Handle);
 	SignalChannel.State            = ACL_CHANSTATE_Open;
@@ -536,9 +537,9 @@ bool Bluetooth_ACL_SendPacket(BT_StackConfig_t* const StackState,
 	return true;
 }
 
-BT_ACL_Channel_t* Bluetooth_ACL_OpenChannel(BT_StackConfig_t* const StackState,
-                                            BT_HCI_Connection_t* const HCIConnection,
-                                            const uint16_t PSM)
+BT_ACL_Channel_t* const Bluetooth_ACL_OpenChannel(BT_StackConfig_t* const StackState,
+                                                  BT_HCI_Connection_t* const HCIConnection,
+                                                  const uint16_t PSM)
 {
 	/* Create a new channel object from the requested parameters if space exists in the connection table */
 	BT_ACL_Channel_t* ACLChannel = Bluetooth_ACL_NewChannel(StackState, HCIConnection->Handle, 0, PSM);

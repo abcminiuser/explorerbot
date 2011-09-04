@@ -41,9 +41,9 @@
 		};
 
 	/* Function Prototypes: */
-		BT_HCI_Connection_t* Bluetooth_HCI_FindConnection(BT_StackConfig_t* const StackState,
-		                                                  const uint8_t* const BDADDR,
-		                                                  const uint16_t Handle);
+		BT_HCI_Connection_t* const Bluetooth_HCI_FindConnection(BT_StackConfig_t* const StackState,
+		                                                        const uint8_t* const BDADDR,
+		                                                        const uint16_t Handle);
 
 		void Bluetooth_HCI_Init(BT_StackConfig_t* const StackState);
 		void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState);

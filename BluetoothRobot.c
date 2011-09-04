@@ -148,8 +148,7 @@ void CheckSensors(void)
 	                                             (Sensors.Orientation.Connected  ? '\2' : '\1'),
 	                                             (Sensors.Pressure.Connected     ? '\2' : '\1'));
 												 
-	for (uint8_t i = 0; i < 15; i++)
-	  Delay_MS(100);
+	Delay_MS(1500);
 }
 
 /** Event handler for the USB_DeviceAttached event. This indicates that a device has been attached to the host, and

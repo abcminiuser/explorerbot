@@ -45,7 +45,7 @@ void Sensors_Init(void)
 	PORTB |= (1 << 3);
 	
 	/* Initialize the TWI bus at 200KHz for fastest possible read time */
-	TWI_Init(TWI_BIT_PRESCALE_1, ((((F_CPU / 1) / 200000) - 16) / 2));
+	TWI_Init(TWI_BIT_PRESCALE_1, TWI_BITLENGTH_FROM_FREQ(1, 200000));
 	
 	/* Clear the sensor information table, reset all sensor data */
 	memset(&Sensors, 0x00, sizeof(Sensors));

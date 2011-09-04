@@ -70,7 +70,7 @@
 	/* Inline Functions */
 		static inline uint8_t Sensor_WriteBytes(const uint8_t SensorTWIAddress,
 		                                        const uint8_t RegisterAddress,
-		                                        uint8_t* const PacketBuffer,
+		                                        const uint8_t* const PacketBuffer,
 		                                        const uint8_t Length)
 		{
 			return TWI_WritePacket(SensorTWIAddress, SENSOR_BUS_TIMEOUT_MS, &RegisterAddress, sizeof(RegisterAddress), PacketBuffer, Length);

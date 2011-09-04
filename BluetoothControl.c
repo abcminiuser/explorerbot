@@ -207,8 +207,11 @@ void Bluetooth_USBTask(void)
 	
 	Pipe_Freeze();
 	
-	/* Keep on running the management routine until all pending packets have been sent */
-	while (Bluetooth_ManageConnections(&Bluetooth_Module)) {};
+	/* Keep on running the management routine until all pending packets have been sent */	
+	while (Bluetooth_ManageConnections(&Bluetooth_Module))
+	  RGB_SetColour(RGB_ALIAS_Busy);
+
+	RGB_SetColour(RGB_ALIAS_Connected);
 }
 
 void CALLBACK_Bluetooth_SendPacket(BT_StackConfig_t* const StackState,
@@ -253,9 +256,9 @@ bool CALLBACK_Bluetooth_ConnectionRequest(BT_StackConfig_t* const StackState,
 {
 	LCD_Clear();
 	LCD_WriteFormattedString("Conn Request:\n"
-	                         "%02X%02X:%02X%02X:%02X%02X", ConnectionHandle->RemoteBDADDR[0], ConnectionHandle->RemoteBDADDR[1],
-	                                                       ConnectionHandle->RemoteBDADDR[2], ConnectionHandle->RemoteBDADDR[3],
-	                                                       ConnectionHandle->RemoteBDADDR[4], ConnectionHandle->RemoteBDADDR[5]);
+	                         "%02X%02X:%02X%02X:%02X%02X", ConnectionHandle->RemoteBDADDR[5], ConnectionHandle->RemoteBDADDR[4],
+	                                                       ConnectionHandle->RemoteBDADDR[3], ConnectionHandle->RemoteBDADDR[2],
+	                                                       ConnectionHandle->RemoteBDADDR[1], ConnectionHandle->RemoteBDADDR[0]);
 
 	/* Accept all requests from all devices regardless of BDADDR */
 	return true;
@@ -266,9 +269,9 @@ void EVENT_Bluetooth_ConnectionComplete(BT_StackConfig_t* const StackState,
 {	
 	LCD_Clear();
 	LCD_WriteFormattedString("Connected:\n"
-	                         "%02X%02X:%02X%02X:%02X%02X", ConnectionHandle->RemoteBDADDR[0], ConnectionHandle->RemoteBDADDR[1],
-	                                                       ConnectionHandle->RemoteBDADDR[2], ConnectionHandle->RemoteBDADDR[3],
-	                                                       ConnectionHandle->RemoteBDADDR[4], ConnectionHandle->RemoteBDADDR[5]);
+	                         "%02X%02X:%02X%02X:%02X%02X", ConnectionHandle->RemoteBDADDR[5], ConnectionHandle->RemoteBDADDR[4],
+	                                                       ConnectionHandle->RemoteBDADDR[3], ConnectionHandle->RemoteBDADDR[2],
+	                                                       ConnectionHandle->RemoteBDADDR[1], ConnectionHandle->RemoteBDADDR[0]);
 }
 
 void EVENT_Bluetooth_DisconnectionComplete(BT_StackConfig_t* const StackState,
@@ -276,9 +279,9 @@ void EVENT_Bluetooth_DisconnectionComplete(BT_StackConfig_t* const StackState,
 {
 	LCD_Clear();
 	LCD_WriteFormattedString("Disconnected:\n"
-	                         "%02X%02X:%02X%02X:%02X%02X", ConnectionHandle->RemoteBDADDR[0], ConnectionHandle->RemoteBDADDR[1],
-	                                                       ConnectionHandle->RemoteBDADDR[2], ConnectionHandle->RemoteBDADDR[3],
-	                                                       ConnectionHandle->RemoteBDADDR[4], ConnectionHandle->RemoteBDADDR[5]);
+	                         "%02X%02X:%02X%02X:%02X%02X", ConnectionHandle->RemoteBDADDR[5], ConnectionHandle->RemoteBDADDR[4],
+	                                                       ConnectionHandle->RemoteBDADDR[3], ConnectionHandle->RemoteBDADDR[2],
+	                                                       ConnectionHandle->RemoteBDADDR[1], ConnectionHandle->RemoteBDADDR[0]);
 }
 
 bool CALLBACK_Bluetooth_ChannelRequest(BT_StackConfig_t* const StackState,

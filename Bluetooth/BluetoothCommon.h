@@ -26,7 +26,7 @@
 		#define MAX_DEVICE_CONNECTIONS     2
 		
 		/** Maximum number of simultaneous ACL logical channels. */
-		#define MAX_LOGICAL_CHANNELS       5
+		#define MAX_LOGICAL_CHANNELS       8
 
 		/** Default maximum transmission unit size for a ACL channel packet. */
 		#define DEFAULT_ACL_CHANNEL_MTU    1024

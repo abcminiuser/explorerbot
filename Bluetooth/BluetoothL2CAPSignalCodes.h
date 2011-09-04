@@ -12,8 +12,8 @@
   All rights reserved.
 */
 
-#ifndef __BLUETOOTH_ACLPACKET_SIGNALCODES_H_
-#define __BLUETOOTH_ACLPACKET_SIGNALCODES_H_
+#ifndef __BLUETOOTH_L2CAPPACKET_SIGNALCODES_H_
+#define __BLUETOOTH_L2CAPPACKET_SIGNALCODES_H_
 
 	/* Includes: */
 		#include "BluetoothCommon.h"

@@ -23,7 +23,7 @@
 		#include "BluetoothClassCodes.h"
 		#include "BluetoothHCIEventCodes.h"
 		#include "BluetoothHCIPacketTypes.h"
-		#include "BluetoothACL.h"
+		#include "BluetoothL2CAP.h"
 	
 	/* Macros: */
 		#define BT_HCI_CONNECTION_HANDLE_MASK     0x0FFF	

@@ -12,22 +12,22 @@
   All rights reserved.
 */
 
-#ifndef __BLUETOOTH_ACLPACKET_TYPES_H_
-#define __BLUETOOTH_ACLPACKET_TYPES_H_
+#ifndef __BLUETOOTH_L2CAPPACKET_TYPES_H_
+#define __BLUETOOTH_L2CAPPACKET_TYPES_H_
 
 	/* Includes: */
 		#include "BluetoothCommon.h"
 
 	/* Type Defines: */	
-		/** Bluetooth ACL header structure, common to all ACL data packets. */
+		/** Bluetooth L2CAP header structure, common to all L2CAP data packets. */
 		typedef struct
 		{
-			uint16_t ConnectionHandle; /**< Unique device connection handle of the ACL packet. */
+			uint16_t ConnectionHandle; /**< Unique device connection handle of the L2CAP packet. */
 			uint16_t DataLength; /**< Length of the packet payload, in bytes. */
 			uint8_t  Data[]; /**< Trailing packet data. */
-		} ATTR_PACKED BT_ACL_Header_t;
+		} ATTR_PACKED BT_L2CAP_Header_t;
 
-		/** Bluetooth ACL data packet header structure, for ACL packets containing L2CAP data. */
+		/** Bluetooth L2CAP data packet header structure, for L2CAP packets containing L2CAP data. */
 		typedef struct
 		{
 			uint16_t PayloadLength; /**< Size of the data payload, in bytes. */
@@ -35,7 +35,7 @@
 			uint8_t  Payload[]; /**< Trailing packet data. */
 		} ATTR_PACKED BT_DataPacket_Header_t;
 
-		/** Bluetooth signaling command header structure, for all ACL packets containing a signaling command. */
+		/** Bluetooth signaling command header structure, for all L2CAP packets containing a signaling command. */
 		typedef struct
 		{
 			uint8_t  Code; /**< Signal code, a \c BT_SIGNAL_* mask value. */

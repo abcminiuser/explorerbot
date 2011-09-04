@@ -20,8 +20,8 @@
 		#include <stdint.h>
 		
 		#include "BluetoothCommon.h"
-		#include "BluetoothACL.h"
 		#include "BluetoothHCI.h"
+		#include "BluetoothL2CAP.h"
 
 	/* Function Prototypes: */
 		void Bluetooth_Init(BT_StackConfig_t* const StackState);

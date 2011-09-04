@@ -150,7 +150,7 @@ SRC = $(TARGET).c                                                 \
 	  Sensors/BMP085.c                                            \
 	  Bluetooth/Bluetooth.c                                       \
 	  Bluetooth/BluetoothHCI.c                                    \
-	  Bluetooth/BluetoothACL.c                                    \
+	  Bluetooth/BluetoothL2CAP.c                                  \
 	  Bluetooth/Services/SDP/BluetoothSDP.c                       \
 	  $(LUFA_SRC_USB)                                             \
 	  $(LUFA_SRC_USBCLASS)                                        \

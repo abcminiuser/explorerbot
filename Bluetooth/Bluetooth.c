@@ -29,7 +29,7 @@ void Bluetooth_Init(BT_StackConfig_t* const StackState)
 	memset(&StackState->State, 0x00, sizeof(StackState->State));
 	
 	Bluetooth_HCI_Init(StackState);
-	Bluetooth_ACL_Init(StackState);
+	Bluetooth_L2CAP_Init(StackState);
 }
 
 /** Manages the Bluetooth connections between the local and remote Bluetooth devices. This must be called periodically to
@@ -41,7 +41,7 @@ void Bluetooth_Init(BT_StackConfig_t* const StackState)
  */
 bool Bluetooth_ManageConnections(BT_StackConfig_t* const StackState)
 {
-	return (Bluetooth_HCI_Manage(StackState) || Bluetooth_ACL_Manage(StackState));
+	return (Bluetooth_HCI_Manage(StackState) || Bluetooth_L2CAP_Manage(StackState));
 }
 
 /** Processes the Bluetooth packet of the specified type currently stored in the input packet buffer.
@@ -57,8 +57,8 @@ void Bluetooth_ProcessPacket(BT_StackConfig_t* const StackState,
 		case BLUETOOTH_PACKET_HCIEvent:
 			Bluetooth_HCI_ProcessPacket(StackState);
 			return;
-		case BLUETOOTH_PACKET_ACLData:
-			Bluetooth_ACL_ProcessPacket(StackState);
+		case BLUETOOTH_PACKET_L2CAPData:
+			Bluetooth_L2CAP_ProcessPacket(StackState);
 			return;
 	}
 }

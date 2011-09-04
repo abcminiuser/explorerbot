@@ -172,16 +172,16 @@ void Bluetooth_USBTask(void)
 	
 	if (Pipe_IsINReceived())
 	{
-		BT_ACL_Header_t* PacketHeader = (BT_ACL_Header_t*)Bluetooth_Module.Config.PacketBuffer;
+		BT_L2CAP_Header_t* PacketHeader = (BT_L2CAP_Header_t*)Bluetooth_Module.Config.PacketBuffer;
 
-		/* Read in the ACL packet data from the Data IN pipe */
-		Pipe_Read_Stream_LE(PacketHeader, sizeof(BT_ACL_Header_t), NULL);
+		/* Read in the L2CAP packet data from the Data IN pipe */
+		Pipe_Read_Stream_LE(PacketHeader, sizeof(BT_L2CAP_Header_t), NULL);
 		Pipe_Read_Stream_LE(PacketHeader->Data, PacketHeader->DataLength, NULL);
 		Pipe_ClearIN();
 		Pipe_Freeze();
 
 		RGB_SetColour(RGB_ALIAS_Busy);
-		Bluetooth_ProcessPacket(&Bluetooth_Module, BLUETOOTH_PACKET_ACLData);
+		Bluetooth_ProcessPacket(&Bluetooth_Module, BLUETOOTH_PACKET_L2CAPData);
 		RGB_SetColour(RGB_ALIAS_Connected);
 	}
 	
@@ -241,7 +241,7 @@ void CALLBACK_Bluetooth_SendPacket(BT_StackConfig_t* const StackState,
 			Pipe_SelectPipe(BLUETOOTH_DATA_OUT_PIPE);
 			Pipe_Unfreeze();
 
-			/* ACL packets must be sent over the Data OUT pipe */
+			/* L2CAP packets must be sent over the Data OUT pipe */
 			Pipe_Write_Stream_LE(StackState->Config.PacketBuffer, Length, NULL);
 			Pipe_ClearOUT();
 			Pipe_Freeze();
@@ -286,31 +286,31 @@ void EVENT_Bluetooth_DisconnectionComplete(BT_StackConfig_t* const StackState,
 
 bool CALLBACK_Bluetooth_ChannelRequest(BT_StackConfig_t* const StackState,
                                        BT_HCI_Connection_t* const Connection,
-                                       BT_ACL_Channel_t* const Channel)
+                                       BT_L2CAP_Channel_t* const Channel)
 {
 	/* Accept all channel requests from all devices regardless of PSM */
 	return true;
 }
 
 void EVENT_Bluetooth_ChannelOpened(BT_StackConfig_t* const StackState,
-                                   BT_ACL_Channel_t* const Channel)
+                                   BT_L2CAP_Channel_t* const Channel)
 {
 	LCD_Clear();
-	LCD_WriteFormattedString("ACL Opened\n"
+	LCD_WriteFormattedString("L2CAP Opened\n"
 	                         "L:%04X R:%04X", Channel->LocalNumber, Channel->RemoteNumber);
 }
 
 void EVENT_Bluetooth_ChannelClosed(BT_StackConfig_t* const StackState,
-                                   BT_ACL_Channel_t* const Channel)
+                                   BT_L2CAP_Channel_t* const Channel)
 {
 	LCD_Clear();
-	LCD_WriteFormattedString("ACL Closed\n"
+	LCD_WriteFormattedString("L2CAP Closed\n"
 	                         "L:%04X R:%04X", Channel->LocalNumber, Channel->RemoteNumber);
 }
 
 void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
                                   BT_HCI_Connection_t* const Connection,
-                                  BT_ACL_Channel_t* const Channel,
+                                  BT_L2CAP_Channel_t* const Channel,
                                   uint16_t Length,
                                   uint8_t* Data)
 {
@@ -322,12 +322,12 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
 			
 			Bluetooth_SDP_ProcessPacket(StackState, Connection, Channel, Length, Data);
 			break;
-		case CHANNEL_PSM_HIDC:
+		case CHANNEL_PSM_HIDCTL:
 			LCD_Clear();
 			LCD_WriteString("HIDC PACKET");
 			for(;;);
 			break;
-		case CHANNEL_PSM_HIDI:
+		case CHANNEL_PSM_HIDINT:
 			// TODO: FIXME
 			switch (*((uint16_t*)&Data[3]))
 			{

@@ -221,7 +221,7 @@ void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState)
 		{
 			Connection->State = HCI_CONSTATE_Free;
 			
-			Bluetooth_ACL_NotifyHCIDisconnection(StackState, Connection->Handle);			
+			Bluetooth_L2CAP_NotifyHCIDisconnection(StackState, Connection->Handle);			
 			EVENT_Bluetooth_DisconnectionComplete(StackState, Connection);
 		}
 	}

@@ -37,16 +37,6 @@
 		/** HCI connection flag to automatically flush packets to the receiver. */
 		#define BT_ACL_FIRST_AUTOFLUSH            (1 << 13)
 
-		#define CHANNEL_PSM_SDP                0x0001
-		#define CHANNEL_PSM_UDP                0x0002
-		#define CHANNEL_PSM_RFCOMM             0x0003
-		#define CHANNEL_PSM_TCP                0x0004
-		#define CHANNEL_PSM_IP                 0x0009
-		#define CHANNEL_PSM_FTP                0x000A
-		#define CHANNEL_PSM_HTTP               0x000C
-		#define CHANNEL_PSM_UPNP               0x0010
-		#define CHANNEL_PSM_HIDP               0x0011
-
 	/* Function Prototypes: */
 		void Bluetooth_ACL_NotifyHCIDisconnection(BT_StackConfig_t* const StackState,
 		                                          const uint16_t ConnectionHandle);

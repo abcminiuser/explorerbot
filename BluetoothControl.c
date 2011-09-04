@@ -296,7 +296,7 @@ void EVENT_Bluetooth_ChannelOpened(BT_StackConfig_t* const StackState,
                                    BT_ACL_Channel_t* const Channel)
 {
 	LCD_Clear();
-	LCD_WriteFormattedString("ACL Open\n"
+	LCD_WriteFormattedString("ACL Opened\n"
 	                         "L:%04X R:%04X", Channel->LocalNumber, Channel->RemoteNumber);
 }
 
@@ -322,12 +322,12 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
 			
 			Bluetooth_SDP_ProcessPacket(StackState, Connection, Channel, Length, Data);
 			break;
-		case CHANNEL_PSM_HIDP:
+		case CHANNEL_PSM_HIDC:
 			LCD_Clear();
-			LCD_WriteString("HIDP PACKET");
+			LCD_WriteString("HIDC PACKET");
 			for(;;);
 			break;
-		default:
+		case CHANNEL_PSM_HIDI:
 			// TODO: FIXME
 			switch (*((uint16_t*)&Data[3]))
 			{
@@ -349,10 +349,11 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
 					Motors_SetChannelSpeed(MOTOR_CHANNEL_Right,  0x3FF);					
 					break;
 			}
-		
-//			LCD_Clear();
-//			LCD_WriteFormattedString("P:%04X L:%04X\n"
-//			                         "LC:%04X RC:%04X", Channel->PSM, Length, Channel->LocalNumber, Channel->RemoteNumber);
+			break;
+		default:
+			LCD_Clear();
+			LCD_WriteFormattedString("P:%04X L:%04X\n"
+			                         "LC:%04X RC:%04X", Channel->PSM, Length, Channel->LocalNumber, Channel->RemoteNumber);
 			break;
 	}
 }

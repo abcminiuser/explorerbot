@@ -62,6 +62,21 @@
 			ACL_CHANSTATE_WaitDisconnect        = 10, /**< A disconnection request has been sent, but not yet acknowledged. */
 		};
 
+		/** Enum for the possible ACL channel Protocol Service Multiplexer (PSM) values. */
+		enum BT_ChannelPSM_t
+		{
+			CHANNEL_PSM_SDP                     = 0x0001,
+			CHANNEL_PSM_UDP                     = 0x0002,
+			CHANNEL_PSM_RFCOMM                  = 0x0003,
+			CHANNEL_PSM_TCP                     = 0x0004,
+			CHANNEL_PSM_IP                      = 0x0009,
+			CHANNEL_PSM_FTP                     = 0x000A,
+			CHANNEL_PSM_HTTP                    = 0x000C,
+			CHANNEL_PSM_UPNP                    = 0x0010,
+			CHANNEL_PSM_HIDC                    = 0x0011,
+			CHANNEL_PSM_HIDI                    = 0x0013,
+		};
+
 		/** Enum for the possible Bluetooth packet types. */
 		enum BT_PacketType_t
 		{

@@ -29,6 +29,7 @@
 		#define BT_HCI_CONNECTION_HANDLE_MASK     0x0FFF	
 	
 	/* Enums: */
+		/** Enum for the possible states in the Bluetooth HCI state machine. */
 		enum BT_HCIStates_t
 		{
 			HCISTATE_Init_Reset             = 0,

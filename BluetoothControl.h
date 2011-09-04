@@ -41,6 +41,7 @@
 		#include "ExternalSRAM.h"
 		#include "RGB.h"
 		#include "LCD.h"
+		#include "Motors.h"
 		
 		#include "Bluetooth/Bluetooth.h"
 		#include "Bluetooth/Services/SDP/BluetoothSDP.h"

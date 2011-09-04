@@ -328,9 +328,31 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
 			for(;;);
 			break;
 		default:
-			LCD_Clear();
-			LCD_WriteFormattedString("ACL P:%04X\n"
-			                         "L:%04X R:%04X", Channel->PSM, Channel->LocalNumber, Channel->RemoteNumber);
+			// TODO: FIXME
+			switch (*((uint16_t*)&Data[3]))
+			{
+				default:
+					Motors_SetChannelSpeed(MOTOR_CHANNEL_All, 0);
+					break;
+				case 0xF600:
+					Motors_SetChannelSpeed(MOTOR_CHANNEL_All, 0x3FF);
+					break;
+				case 0x00F6:
+					Motors_SetChannelSpeed(MOTOR_CHANNEL_Left,   0x3FF);
+					Motors_SetChannelSpeed(MOTOR_CHANNEL_Right, -0x3FF);					
+					break;
+				case 0x0A00:
+					Motors_SetChannelSpeed(MOTOR_CHANNEL_All, -0x3FF);					
+					break;
+				case 0x000A:
+					Motors_SetChannelSpeed(MOTOR_CHANNEL_Left,  -0x3FF);
+					Motors_SetChannelSpeed(MOTOR_CHANNEL_Right,  0x3FF);					
+					break;
+			}
+		
+//			LCD_Clear();
+//			LCD_WriteFormattedString("P:%04X L:%04X\n"
+//			                         "LC:%04X RC:%04X", Channel->PSM, Length, Channel->LocalNumber, Channel->RemoteNumber);
 			break;
 	}
 }

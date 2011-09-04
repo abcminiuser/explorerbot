@@ -40,7 +40,7 @@
 		#include <LUFA/Common/Common.h>
 		
 	/* Macros: */
-		#define MAX_MOTOR_POWER   0x0200
+		#define MAX_MOTOR_POWER   0x0250
 	
 	/* Enums: */
 		typedef enum

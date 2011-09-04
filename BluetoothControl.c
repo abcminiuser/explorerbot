@@ -295,6 +295,17 @@ bool CALLBACK_Bluetooth_ChannelRequest(BT_StackConfig_t* const StackState,
 void EVENT_Bluetooth_ChannelOpened(BT_StackConfig_t* const StackState,
                                    BT_L2CAP_Channel_t* const Channel)
 {
+	switch (Channel->PSM)
+	{
+		case CHANNEL_PSM_SDP:
+			Bluetooth_SDP_ChannelOpened(StackState, Channel);			
+			break;
+		case CHANNEL_PSM_HIDCTL:
+		case CHANNEL_PSM_HIDINT:
+			Bluetooth_HID_ChannelOpened(StackState, Channel);
+			break;
+	}
+
 	LCD_Clear();
 	LCD_WriteFormattedString("L2CAP Opened\n"
 	                         "L:%04X R:%04X", Channel->LocalNumber, Channel->RemoteNumber);
@@ -303,13 +314,23 @@ void EVENT_Bluetooth_ChannelOpened(BT_StackConfig_t* const StackState,
 void EVENT_Bluetooth_ChannelClosed(BT_StackConfig_t* const StackState,
                                    BT_L2CAP_Channel_t* const Channel)
 {
+	switch (Channel->PSM)
+	{
+		case CHANNEL_PSM_SDP:
+			Bluetooth_SDP_ChannelClosed(StackState, Channel);			
+			break;
+		case CHANNEL_PSM_HIDCTL:
+		case CHANNEL_PSM_HIDINT:
+			Bluetooth_HID_ChannelClosed(StackState, Channel);
+			break;
+	}
+
 	LCD_Clear();
 	LCD_WriteFormattedString("L2CAP Closed\n"
 	                         "L:%04X R:%04X", Channel->LocalNumber, Channel->RemoteNumber);
 }
 
 void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
-                                  BT_HCI_Connection_t* const Connection,
                                   BT_L2CAP_Channel_t* const Channel,
                                   uint16_t Length,
                                   uint8_t* Data)
@@ -317,38 +338,11 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
 	switch (Channel->PSM)
 	{
 		case CHANNEL_PSM_SDP:
-			LCD_Clear();
-			LCD_WriteString("SDP PACKET");
-			
-			Bluetooth_SDP_ProcessPacket(StackState, Connection, Channel, Length, Data);
+			Bluetooth_SDP_ProcessPacket(StackState, Channel, Length, Data);
 			break;
 		case CHANNEL_PSM_HIDCTL:
-			LCD_Clear();
-			LCD_WriteString("HIDC PACKET");
-			for(;;);
-			break;
 		case CHANNEL_PSM_HIDINT:
-			// TODO: FIXME
-			switch (*((uint16_t*)&Data[3]))
-			{
-				default:
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_All, 0);
-					break;
-				case 0xF600:
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_All, 0x3FF);
-					break;
-				case 0x00F6:
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_Left,   0x3FF);
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_Right, -0x3FF);					
-					break;
-				case 0x0A00:
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_All, -0x3FF);					
-					break;
-				case 0x000A:
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_Left,  -0x3FF);
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_Right,  0x3FF);					
-					break;
-			}
+			Bluetooth_HID_ProcessPacket(StackState, Channel, Length, Data);
 			break;
 		default:
 			LCD_Clear();

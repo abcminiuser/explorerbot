@@ -111,24 +111,24 @@ void Joystick_USBTask(void)
 			{
 				if ((ReportItem->Attributes.Usage.Usage == 2) && ReportItem->Value)
 				{
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_All,    0x3FF);
+					Motors_SetChannelSpeed(MOTOR_CHANNEL_All,    MAX_MOTOR_POWER);
 					Found = true;
 				}
 				else if ((ReportItem->Attributes.Usage.Usage == 1) && ReportItem->Value)
 				{
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_Left,   0x3FF);
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_Right, -0x3FF);
+					Motors_SetChannelSpeed(MOTOR_CHANNEL_Left,   MAX_MOTOR_POWER);
+					Motors_SetChannelSpeed(MOTOR_CHANNEL_Right, -MAX_MOTOR_POWER);
 					Found = true;
 				}
 				else if ((ReportItem->Attributes.Usage.Usage == 3) && ReportItem->Value)
 				{
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_All,   -0x3FF);
+					Motors_SetChannelSpeed(MOTOR_CHANNEL_All,   -MAX_MOTOR_POWER);
 					Found = true;
 				}
 				else if ((ReportItem->Attributes.Usage.Usage == 4) && ReportItem->Value)
 				{
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_Left,  -0x3FF);
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_Right,  0x3FF);
+					Motors_SetChannelSpeed(MOTOR_CHANNEL_Left,  -MAX_MOTOR_POWER);
+					Motors_SetChannelSpeed(MOTOR_CHANNEL_Right,  MAX_MOTOR_POWER);
 					Found = true;
 				}
 				

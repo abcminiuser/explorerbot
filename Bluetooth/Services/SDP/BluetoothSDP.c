@@ -14,8 +14,42 @@
 
 #include "BluetoothSDP.h"
 
+/** Retrieves the size of a Data Element container from the current input buffer, and advances the input buffer
+ *  pointer to the start of the Data Element's contents.
+ *
+ *  \param[in, out] DataElementHeader  Pointer to the start of a Data Element header
+ *
+ *  \return Size in bytes of the Data Element container's contents, minus the header
+ */
+static uint32_t Bluetooth_SDP_ReadDataElementHeader(const void** const DataElementHeader)
+{
+	/* Fetch the size of the Data Element structure from the header, increment the current buffer pos */
+	uint8_t  SizeIndex = (SDP_ReadData8(DataElementHeader) & 0x07);
+
+	uint32_t ElementValueSize;
+
+	/* Convert the Data Element size index into a size in bytes */
+	switch (SizeIndex)
+	{
+		case SDP_DATASIZE_Variable8Bit:
+			ElementValueSize = SDP_ReadData8(DataElementHeader);
+			break;
+		case SDP_DATASIZE_Variable16Bit:
+			ElementValueSize = SDP_ReadData16(DataElementHeader);
+			break;
+		case SDP_DATASIZE_Variable32Bit:
+			ElementValueSize = SDP_ReadData32(DataElementHeader);
+			break;
+		default:
+			ElementValueSize = (1 << SizeIndex);
+			break;
+	}
+
+	return ElementValueSize;
+}
+
 static void Bluetooth_SDP_ServiceSearch(BT_StackConfig_t* const StackState,
-                                        BT_ACL_Channel_t* const Channel,
+                                        BT_L2CAP_Channel_t* const Channel,
                                         BT_SDP_PDUHeader_t* const SDPHeader)
 {
 	LCD_Clear();
@@ -23,7 +57,7 @@ static void Bluetooth_SDP_ServiceSearch(BT_StackConfig_t* const StackState,
 }
 
 static void Bluetooth_SDP_ServiceAttribute(BT_StackConfig_t* const StackState,
-                                           BT_ACL_Channel_t* const Channel,
+                                           BT_L2CAP_Channel_t* const Channel,
                                            BT_SDP_PDUHeader_t* const SDPHeader)
 {
 	LCD_Clear();
@@ -31,31 +65,69 @@ static void Bluetooth_SDP_ServiceAttribute(BT_StackConfig_t* const StackState,
 }
 
 static void Bluetooth_SDP_ServiceSearchAttribute(BT_StackConfig_t* const StackState,
-                                                 BT_ACL_Channel_t* const Channel,
+                                                 BT_L2CAP_Channel_t* const Channel,
                                                  BT_SDP_PDUHeader_t* const SDPHeader)
 {
 	LCD_Clear();
 	LCD_WriteString("SDP - SSA");
+	
+	uint8_t* CurrParameter = SDPHeader->Parameters;
 
-	// TODO
-#if 0
+
+
+	struct
+	{
+		BT_SDP_PDUHeader_t SDPHeader;
+		uint16_t           AttributeListByteCount;
+		uint8_t            ResponseData[100];
+	} ResponsePacket;
+
+	/* Create a pointer to the buffer to indicate the current location for response data to be added */
+	void* CurrResponsePos = ResponsePacket.ResponseData;
+	
+	/* Add the outer Data Element Sequence header for all of the retrieved Attributes */
+	uint16_t* TotalResponseSize = SDP_AddSequence16(&CurrResponsePos);
+	
+	/* Continuation state - always zero */
+	SDP_WriteData8(&CurrResponsePos, 0);
+
+	/* Set the total response list size to the size of the outer container plus its header size and continuation state */
+	ResponsePacket.AttributeListByteCount    = SwapEndian_16(3 + *TotalResponseSize);
+
 	/* Fill in the response packet's header */
 	ResponsePacket.SDPHeader.PDU             = SDP_PDU_SERVICESEARCHATTRIBUTERESPONSE;
 	ResponsePacket.SDPHeader.TransactionID   = SDPHeader->TransactionID;
-	ResponsePacket.SDPHeader.ParameterLength = cpu_to_be16(ParamLength);
+	ResponsePacket.SDPHeader.ParameterLength = cpu_to_be16(sizeof(ResponsePacket.AttributeListByteCount) + ResponsePacket.AttributeListByteCount);
+	
+	/* Must swap the endianness of the attribute byte count before sending it */
+	ResponsePacket.AttributeListByteCount    = cpu_to_be16(ResponsePacket.AttributeListByteCount);
 
 	/* Send the completed response packet to the sender */
-	Bluetooth_ACL_SendPacket(StackState, Channel, (sizeof(ResponsePacket.SDPHeader) + ParamLength), &ResponsePacket);
-#endif
+	Bluetooth_L2CAP_SendPacket(StackState, Channel, (sizeof(ResponsePacket.SDPHeader) + be16_to_cpu(ResponsePacket.SDPHeader.ParameterLength)), &ResponsePacket);
+}
+
+void Bluetooth_SDP_ChannelOpened(BT_StackConfig_t* const StackState,
+                                 BT_L2CAP_Channel_t* const Channel)
+{
+
+}
+
+void Bluetooth_SDP_ChannelClosed(BT_StackConfig_t* const StackState,
+                                 BT_L2CAP_Channel_t* const Channel)
+{
+
 }
 
 void Bluetooth_SDP_ProcessPacket(BT_StackConfig_t* const StackState,
-                                 BT_HCI_Connection_t* const Connection,
-                                 BT_ACL_Channel_t* const Channel,
+                                 BT_L2CAP_Channel_t* const Channel,
                                  uint16_t Length,
                                  uint8_t* Data)
 {
 	BT_SDP_PDUHeader_t* SDPHeader = (BT_SDP_PDUHeader_t*)Data;
+	
+	/* Ensure correct channel PSM before processing the data */
+	if (Channel->PSM != CHANNEL_PSM_SDP)
+	  return;
 	
 	/* Dispatch to the correct processing routine for the given SDP packet type */
 	switch (SDPHeader->PDU)

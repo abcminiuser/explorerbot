@@ -45,6 +45,7 @@
 		
 		#include "Bluetooth/Bluetooth.h"
 		#include "Bluetooth/Services/SDP/BluetoothSDP.h"
+		#include "Bluetooth/Services/HID/BluetoothHID.h"
 
 	/* Macros: */
 		/** Device Class value for the Bluetooth Device class. */

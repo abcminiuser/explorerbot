@@ -217,7 +217,6 @@
 		 *  \param[in]      Data        Pointer to the start of the L2CAP packet data.
 		 */
 		void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
-		                                  BT_HCI_Connection_t* const Connection,
 		                                  BT_L2CAP_Channel_t* const Channel,
 		                                  uint16_t Length,
 		                                  uint8_t* Data);

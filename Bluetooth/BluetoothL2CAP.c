@@ -437,7 +437,7 @@ void Bluetooth_L2CAP_ProcessPacket(BT_StackConfig_t* const StackState)
 		
 		/* If the L2CAP channel was found, fire the user application callback, otherwise discard the packet */
 		if (L2CAPChannel)
-		  EVENT_Bluetooth_DataReceived(StackState, HCIConnection, L2CAPChannel, L2CAPDataHeader->PayloadLength, L2CAPDataHeader->Payload);
+		  EVENT_Bluetooth_DataReceived(StackState, L2CAPChannel, L2CAPDataHeader->PayloadLength, L2CAPDataHeader->Payload);
 	}
 }
 

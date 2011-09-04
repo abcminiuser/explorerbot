@@ -12,8 +12,8 @@
   All rights reserved.
 */
 
-#ifndef __SDP_SERVICE_TABLE_DEFS_H_
-#define __SDP_SERVICE_TABLE_DEFS_H_
+#ifndef _BLUETOOTH_SERVICE_SDP_TABLEDEFS_H_
+#define _BLUETOOTH_SERVICE_SDP_TABLEDEFS_H_
 
 	/* Macros: */
 		/** Size of a full 128 bit UUID, in bytes. */

@@ -12,8 +12,8 @@
   All rights reserved.
 */
 
-#ifndef __SDP_SERVICE_DEFS_H_
-#define __SDP_SERVICE_DEFS_H_
+#ifndef _BLUETOOTH_SERVICE_SDP_DEFS_H_
+#define _BLUETOOTH_SERVICE_SDP_DEFS_H_
 
 	/* Macros: */
 		#define SDP_PDU_ERRORRESPONSE                   0x01
@@ -65,7 +65,7 @@
 			uint8_t  PDU; /**< SDP packet type, a SDP_PDU_* mask value */
 			uint16_t TransactionID; /**< Unique transaction ID number to associate requests and responses */
 			uint16_t ParameterLength; /**< Length of the data following the SDP header */
-			uint8_t  Data[];
+			uint8_t  Parameters[];
 		} BT_SDP_PDUHeader_t;
 		
 #endif

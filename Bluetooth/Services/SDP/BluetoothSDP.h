@@ -12,8 +12,8 @@
   All rights reserved.
 */
 
-#ifndef _SERVICEDISCOVERYPROTOCOL_H_
-#define _SERVICEDISCOVERYPROTOCOL_H_
+#ifndef _BLUETOOTH_SERVICE_SDP_H_
+#define _BLUETOOTH_SERVICE_SDP_H_
 
 	/* Includes: */
 		#include <stdbool.h>
@@ -125,9 +125,12 @@
 		}
 
 	/* Function Prototypes: */
+		void Bluetooth_SDP_ChannelOpened(BT_StackConfig_t* const StackState,
+		                                 BT_L2CAP_Channel_t* const Channel);
+		void Bluetooth_SDP_ChannelClosed(BT_StackConfig_t* const StackState,
+		                                 BT_L2CAP_Channel_t* const Channel);
 		void Bluetooth_SDP_ProcessPacket(BT_StackConfig_t* const StackState,
-                                         BT_HCI_Connection_t* const Connection,
-                                         BT_ACL_Channel_t* const Channel,
+                                         BT_L2CAP_Channel_t* const Channel,
                                          uint16_t Length,
                                          uint8_t* Data);
 

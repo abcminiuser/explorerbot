@@ -20,10 +20,10 @@ void Bluetooth_HID_Init(BT_StackConfig_t* const StackState)
 {
 	for (uint8_t i = 0; i < MAX_HID_CONNECTIONS; i++)
 	{
-		HID_Service_t* CurrentHIDEntry = HIDConnections[i];
+		HID_Service_t* CurrentHIDEntry = &HIDConnections[i];
 	
 		/* Clear any HID entries in the table that are unassociated or associated with the given initialized stack */
-		if ((CurrentHIDEntry->Stack == NULL) || (CurrentHIDEntry->Stack == StackState)
+		if ((CurrentHIDEntry->Stack == NULL) || (CurrentHIDEntry->Stack == StackState))
 		{
 			memset(CurrentHIDEntry, 0x00, sizeof(HID_Service_t));
 			CurrentHIDEntry->State = HID_SSTATE_Free;
@@ -78,14 +78,14 @@ void Bluetooth_HID_ChannelOpened(BT_StackConfig_t* const StackState,
 	/* Find existing connection in the table if it exists and update the appropriate connection entry */
 	for (uint8_t i = 0; i < MAX_HID_CONNECTIONS; i++)
 	{
-		HID_Service_t* CurrentHIDEntry = HIDConnections[i];
+		HID_Service_t* CurrentHIDEntry = &HIDConnections[i];
 	
 		if ((CurrentHIDEntry->Stack == StackState) && (CurrentHIDEntry->State != HID_SSTATE_Free))
 		{
 			if (Channel->PSM == CHANNEL_PSM_HIDCTL)
-			  CurrentHIDEntry->ControlChannel = Channel;
+			  CurrentHIDEntry->ControlChannel   = Channel;
 			else
-			  CurrentHIDEntry->DataChannel    = Channel;
+			  CurrentHIDEntry->InterruptChannel = Channel;
 			
 			return;
 		}
@@ -94,7 +94,7 @@ void Bluetooth_HID_ChannelOpened(BT_StackConfig_t* const StackState,
 	/* Create a new connection entry */
 	for (uint8_t i = 0; i < MAX_HID_CONNECTIONS; i++)
 	{
-		HID_Service_t* CurrentHIDEntry = HIDConnections[i];
+		HID_Service_t* CurrentHIDEntry = &HIDConnections[i];
 	
 		/* Find a free entry and create a new HID connection from it */
 		if ((CurrentHIDEntry->Stack == NULL) || (CurrentHIDEntry->State == HID_SSTATE_Free))
@@ -104,9 +104,9 @@ void Bluetooth_HID_ChannelOpened(BT_StackConfig_t* const StackState,
 			CurrentHIDEntry->State = HID_SSTATE_New;
 
 			if (Channel->PSM == CHANNEL_PSM_HIDCTL)
-			  CurrentHIDEntry->ControlChannel = Channel;
+			  CurrentHIDEntry->ControlChannel   = Channel;
 			else
-			  CurrentHIDEntry->DataChannel    = Channel;
+			  CurrentHIDEntry->InterruptChannel = Channel;
 		}
 	}
 }
@@ -116,17 +116,17 @@ void Bluetooth_HID_ChannelClosed(BT_StackConfig_t* const StackState,
 {
 	for (uint8_t i = 0; i < MAX_HID_CONNECTIONS; i++)
 	{
-		HID_Service_t* CurrentHIDEntry = HIDConnections[i];
+		HID_Service_t* CurrentHIDEntry = &HIDConnections[i];
 	
 		/* Find the assocated HID connection and terminate it */
 		if ((CurrentHIDEntry->Stack == StackState) || (CurrentHIDEntry->State != HID_SSTATE_Free))
 		{
 			if (Channel->PSM == CHANNEL_PSM_HIDCTL)
-			  CurrentHIDEntry->ControlChannel = NULL;
+			  CurrentHIDEntry->ControlChannel   = NULL;
 			else
-			  CurrentHIDEntry->DataChannel    = NULL;
+			  CurrentHIDEntry->InterruptChannel = NULL;
 		
-			if (!(CurrentHIDEntry->ControlChannel) && !(CurrentHIDEntry->DataChannel))
+			if (!(CurrentHIDEntry->ControlChannel) && !(CurrentHIDEntry->InterruptChannel))
 			  CurrentHIDEntry->State = HID_SSTATE_Free;
 		}
 	}

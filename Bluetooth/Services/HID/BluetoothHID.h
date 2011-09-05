@@ -26,7 +26,7 @@
 		#define MAX_HID_CONNECTIONS     MIN(MAX_DEVICE_CONNECTIONS, 1)
 
 	/* Enums: */
-		enum HID_Service_States_t;
+		enum HID_Service_States_t
 		{
 			HID_SSTATE_Free             = 0,
 			HID_SSTATE_New              = 1,

@@ -349,7 +349,39 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
 			LCD_WriteFormattedString("P:%04X L:%04X\n"
 			                         "LC:%04X RC:%04X", Channel->PSM, Length, Channel->LocalNumber, Channel->RemoteNumber);
 			break;
-	}
+	}	
 }
 
+void CALLBACK_Bluetooth_HID_ReportReceived(BT_StackConfig_t* const StackState,
+                                           BT_L2CAP_Channel_t* const Channel,
+                                           uint8_t ReportType,
+                                           uint16_t Length,
+                                           uint8_t* Data)
+{
+	/* Process output reports to look for key code changes */
+	if (ReportType == HID_DATAT_Input)
+	{
+		// TODO: FIXME
+		switch (*((uint16_t*)&Data[2]))
+		{
+			default:
+				Motors_SetChannelSpeed(MOTOR_CHANNEL_All,    0);
+				break;
+			case 0xF600:
+				Motors_SetChannelSpeed(MOTOR_CHANNEL_All,    MAX_MOTOR_POWER);
+				break;
+			case 0x00F6:
+				Motors_SetChannelSpeed(MOTOR_CHANNEL_Left,   MAX_MOTOR_POWER);
+				Motors_SetChannelSpeed(MOTOR_CHANNEL_Right, -MAX_MOTOR_POWER);					
+				break;
+			case 0x0A00:
+				Motors_SetChannelSpeed(MOTOR_CHANNEL_All,   -MAX_MOTOR_POWER);					
+				break;
+			case 0x000A:
+				Motors_SetChannelSpeed(MOTOR_CHANNEL_Left,  -MAX_MOTOR_POWER);
+				Motors_SetChannelSpeed(MOTOR_CHANNEL_Right,  MAX_MOTOR_POWER);					
+				break;
+		}
+	}
+}
 

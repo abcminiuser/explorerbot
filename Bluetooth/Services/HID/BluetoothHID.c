@@ -14,19 +14,52 @@
 
 #include "BluetoothHID.h"
 
-// TODO: FIXME
-#include "../../../Motors.h"
+static void Bluetooth_HID_CtlPacket(BT_StackConfig_t* const StackState,
+                                    BT_L2CAP_Channel_t* const Channel,
+                                    uint16_t Length,
+                                    uint8_t* Data)
+{
+	uint8_t Handshake = HID_HS_ERR_UNSUPPORTED_REQUEST;
+
+	switch (Data[0] & HID_TRANSTYPE_MASK)
+	{
+		case HID_TRANS_CONTROL:
+//			Handshake = HID_HS_SUCCESSFUL;
+			break;
+		case HID_TRANS_DATA:
+		case HID_TRANS_DATAC:
+			Handshake = HID_HS_ERR_INVALID_PARAMETER;
+			break;
+	}
+
+	/* Send a handshake response to ACK/NAK the packet */
+	uint8_t Response = (HID_TRANS_HANDSHAKE | Handshake);	
+	Bluetooth_L2CAP_SendPacket(StackState, Channel, sizeof(Response), &Response);
+}
+
+static void Bluetooth_HID_IntPacket(BT_StackConfig_t* const StackState,
+                                    BT_L2CAP_Channel_t* const Channel,
+                                    uint16_t Length,
+                                    uint8_t* Data)
+{
+	switch (Data[0] & HID_TRANSTYPE_MASK)
+	{
+		case HID_TRANS_DATA:
+			CALLBACK_Bluetooth_HID_ReportReceived(StackState, Channel, (Data[0] & ~HID_TRANSTYPE_MASK), (Length - 1), &Data[1]);
+			break;
+	}
+}
 
 void Bluetooth_HID_ChannelOpened(BT_StackConfig_t* const StackState,
                                  BT_L2CAP_Channel_t* const Channel)
 {
-
+	
 }
 
 void Bluetooth_HID_ChannelClosed(BT_StackConfig_t* const StackState,
                                  BT_L2CAP_Channel_t* const Channel)
 {
-
+	
 }
 
 void Bluetooth_HID_ProcessPacket(BT_StackConfig_t* const StackState,
@@ -36,28 +69,11 @@ void Bluetooth_HID_ProcessPacket(BT_StackConfig_t* const StackState,
 {
 	switch (Channel->PSM)
 	{
+		case CHANNEL_PSM_HIDCTL:
+			Bluetooth_HID_CtlPacket(StackState, Channel, Length, Data);
+			break;
 		case CHANNEL_PSM_HIDINT:
-			// TODO: FIXME
-			switch (*((uint16_t*)&Data[3]))
-			{
-				default:
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_All,    0);
-					break;
-				case 0xF600:
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_All,    MAX_MOTOR_POWER);
-					break;
-				case 0x00F6:
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_Left,   MAX_MOTOR_POWER);
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_Right, -MAX_MOTOR_POWER);					
-					break;
-				case 0x0A00:
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_All,   -MAX_MOTOR_POWER);					
-					break;
-				case 0x000A:
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_Left,  -MAX_MOTOR_POWER);
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_Right,  MAX_MOTOR_POWER);					
-					break;
-			}
+			Bluetooth_HID_IntPacket(StackState, Channel, Length, Data);
 			break;
 	}
 }

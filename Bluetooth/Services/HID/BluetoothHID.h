@@ -20,6 +20,7 @@
 		#include <stdint.h>
 
 		#include "../../Bluetooth.h"
+		#include "BluetoothHIDDefs.h"
 
 	/* Function Prototypes: */
 		void Bluetooth_HID_ChannelOpened(BT_StackConfig_t* const StackState,
@@ -31,5 +32,11 @@
                                          uint16_t Length,
                                          uint8_t* Data);
 
-#endif
 
+		void CALLBACK_Bluetooth_HID_ReportReceived(BT_StackConfig_t* const StackState,
+                                                   BT_L2CAP_Channel_t* const Channel,
+												   uint8_t ReportType,
+                                                   uint16_t Length,
+                                                   uint8_t* Data);
+
+#endif

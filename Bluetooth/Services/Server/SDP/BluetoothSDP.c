@@ -14,9 +14,6 @@
 
 #include "BluetoothSDP.h"
 
-// TODO: FIXME
-#include "../../../LCD.h"
-
 void Bluetooth_SDP_Init(BT_StackConfig_t* const StackState)
 {
 
@@ -31,28 +28,23 @@ static void Bluetooth_SDP_ServiceSearch(BT_StackConfig_t* const StackState,
                                         BT_L2CAP_Channel_t* const Channel,
                                         BT_SDP_PDUHeader_t* const SDPHeader)
 {
-	LCD_Clear();
-	LCD_WriteString("SDP - SS");
+
 }
 
 static void Bluetooth_SDP_ServiceAttribute(BT_StackConfig_t* const StackState,
                                            BT_L2CAP_Channel_t* const Channel,
                                            BT_SDP_PDUHeader_t* const SDPHeader)
 {
-	LCD_Clear();
-	LCD_WriteString("SDP - SA");
+
 }
 
 static void Bluetooth_SDP_ServiceSearchAttribute(BT_StackConfig_t* const StackState,
                                                  BT_L2CAP_Channel_t* const Channel,
                                                  BT_SDP_PDUHeader_t* const SDPHeader)
 {
-	LCD_Clear();
-	LCD_WriteString("SDP - SSA");
-	
 	uint8_t* CurrParameter = SDPHeader->Parameters;
 
-
+	// TODO
 
 	struct
 	{

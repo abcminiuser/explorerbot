@@ -19,9 +19,9 @@
 		#include <stdbool.h>
 		#include <stdint.h>
 
-		#include "../../Bluetooth.h"
-		#include "BluetoothSDPDefinitions.h"
-		#include "BluetoothSDPTableDefinitions.h"
+		#include "../../../Bluetooth.h"
+		#include "../../Common/SDP/BluetoothSDPDefinitions.h"
+		#include "../../Common/SDP/BluetoothSDPTableDefinitions.h"
 
 	/* Inline Functions: */
 		/** Writes 8 bits of raw data to the given buffer, incrementing the buffer position afterwards.

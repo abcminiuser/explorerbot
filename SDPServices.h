@@ -37,7 +37,7 @@
 #define _SDPSERVICES_H_
 
 	/* Includes: */
-		#include "Bluetooth/Services/SDP/BluetoothSDP.h"
+		#include "Bluetooth/Services/Server/SDP/BluetoothSDP.h"
 
 	/* External Variables: */
 		extern const ServiceAttributeTable_t SDP_SerialPort_AttributeTable[];

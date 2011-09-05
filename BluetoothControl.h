@@ -42,8 +42,8 @@
 		#include "Motors.h"
 		
 		#include "Bluetooth/Bluetooth.h"
-		#include "Bluetooth/Services/SDP/BluetoothSDP.h"
-		#include "Bluetooth/Services/HID/BluetoothHID.h"
+		#include "Bluetooth/Services/Server/SDP/BluetoothSDP.h"
+		#include "Bluetooth/Services/Client/HID/BluetoothHID.h"
 
 #endif
 

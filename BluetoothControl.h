@@ -38,8 +38,6 @@
 
 		#include <LUFA/Drivers/USB/USB.h>
 		
-		#include "ExternalSRAM.h"
-		#include "RGB.h"
 		#include "LCD.h"
 		#include "Motors.h"
 		

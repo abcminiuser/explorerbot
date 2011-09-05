@@ -30,6 +30,8 @@ void Bluetooth_Init(BT_StackConfig_t* const StackState)
 	
 	Bluetooth_HCI_Init(StackState);
 	Bluetooth_L2CAP_Init(StackState);
+	
+	EVENT_Bluetooth_InitServices(StackState);
 }
 
 /** Manages the Bluetooth connections between the local and remote Bluetooth devices. This must be called periodically to
@@ -41,7 +43,11 @@ void Bluetooth_Init(BT_StackConfig_t* const StackState)
  */
 bool Bluetooth_ManageConnections(BT_StackConfig_t* const StackState)
 {
-	return (Bluetooth_HCI_Manage(StackState) || Bluetooth_L2CAP_Manage(StackState));
+	if (Bluetooth_HCI_Manage(StackState) || Bluetooth_L2CAP_Manage(StackState))
+	  return true;
+	  
+	EVENT_Bluetooth_ManageServices(StackState);
+	return false;
 }
 
 /** Processes the Bluetooth packet of the specified type currently stored in the input packet buffer.

@@ -14,38 +14,17 @@
 
 #include "BluetoothSDP.h"
 
-/** Retrieves the size of a Data Element container from the current input buffer, and advances the input buffer
- *  pointer to the start of the Data Element's contents.
- *
- *  \param[in, out] DataElementHeader  Pointer to the start of a Data Element header
- *
- *  \return Size in bytes of the Data Element container's contents, minus the header
- */
-static uint32_t Bluetooth_SDP_ReadDataElementHeader(const void** const DataElementHeader)
+// TODO: FIXME
+#include "../../../LCD.h"
+
+void Bluetooth_SDP_Init(BT_StackConfig_t* const StackState)
 {
-	/* Fetch the size of the Data Element structure from the header, increment the current buffer pos */
-	uint8_t  SizeIndex = (SDP_ReadData8(DataElementHeader) & 0x07);
 
-	uint32_t ElementValueSize;
+}
 
-	/* Convert the Data Element size index into a size in bytes */
-	switch (SizeIndex)
-	{
-		case SDP_DATASIZE_Variable8Bit:
-			ElementValueSize = SDP_ReadData8(DataElementHeader);
-			break;
-		case SDP_DATASIZE_Variable16Bit:
-			ElementValueSize = SDP_ReadData16(DataElementHeader);
-			break;
-		case SDP_DATASIZE_Variable32Bit:
-			ElementValueSize = SDP_ReadData32(DataElementHeader);
-			break;
-		default:
-			ElementValueSize = (1 << SizeIndex);
-			break;
-	}
+void Bluetooth_SDP_Manage(BT_StackConfig_t* const StackState)
+{
 
-	return ElementValueSize;
 }
 
 static void Bluetooth_SDP_ServiceSearch(BT_StackConfig_t* const StackState,
@@ -109,13 +88,13 @@ static void Bluetooth_SDP_ServiceSearchAttribute(BT_StackConfig_t* const StackSt
 void Bluetooth_SDP_ChannelOpened(BT_StackConfig_t* const StackState,
                                  BT_L2CAP_Channel_t* const Channel)
 {
-
+	
 }
 
 void Bluetooth_SDP_ChannelClosed(BT_StackConfig_t* const StackState,
                                  BT_L2CAP_Channel_t* const Channel)
 {
-
+	
 }
 
 void Bluetooth_SDP_ProcessPacket(BT_StackConfig_t* const StackState,

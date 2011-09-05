@@ -30,6 +30,18 @@
 
 #include "BluetoothControl.h"
 
+void EVENT_Bluetooth_InitServices(BT_StackConfig_t* const StackState)
+{
+	Bluetooth_SDP_Init(StackState);
+	Bluetooth_HID_Init(StackState);
+}
+
+void EVENT_Bluetooth_ManageServices(BT_StackConfig_t* const StackState)
+{
+	Bluetooth_SDP_Manage(StackState);
+	Bluetooth_HID_Manage(StackState);
+}
+
 bool CALLBACK_Bluetooth_ConnectionRequest(BT_StackConfig_t* const StackState,
                                           BT_HCI_Connection_t* const ConnectionHandle)
 {

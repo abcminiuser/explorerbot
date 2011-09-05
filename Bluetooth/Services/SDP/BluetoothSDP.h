@@ -125,6 +125,8 @@
 		}
 
 	/* Function Prototypes: */
+		void Bluetooth_SDP_Init(BT_StackConfig_t* const StackState);
+		void Bluetooth_SDP_Manage(BT_StackConfig_t* const StackState);
 		void Bluetooth_SDP_ChannelOpened(BT_StackConfig_t* const StackState,
 		                                 BT_L2CAP_Channel_t* const Channel);
 		void Bluetooth_SDP_ChannelClosed(BT_StackConfig_t* const StackState,

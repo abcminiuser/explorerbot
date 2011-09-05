@@ -42,7 +42,7 @@
 		
 		#include <LUFA/Drivers/USB/USB.h>
 		
-		#include "BluetoothControl.h"
+		#include "BluetoothAdapter.h"
 		#include "JoystickControl.h"
 
 		#include "ExternalSRAM.h"

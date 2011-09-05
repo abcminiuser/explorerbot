@@ -28,7 +28,7 @@
   this software.
 */
 
-#include "BluetoothControl.h"
+#include "BluetoothAdapter.h"
 
 /** Bluetooth stack configuration and state stable, used to configure an instance of the Bluetooth stack. */
 BT_StackConfig_t Bluetooth_Module =

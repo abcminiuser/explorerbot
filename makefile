@@ -133,7 +133,7 @@ include $(LUFA_PATH)/LUFA/makefile
 
 # List C source files here. (C dependencies are automatically generated.)
 SRC = $(TARGET).c                                                 \
-	  BluetoothControl.c                                          \
+	  BluetoothAdapter.c                                          \
 	  JoystickControl.c                                           \
 	  Buttons.c                                                   \
 	  ExternalSRAM.c                                              \

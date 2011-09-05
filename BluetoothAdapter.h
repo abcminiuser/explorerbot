@@ -28,8 +28,8 @@
   this software.
 */
 
-#ifndef _BLUETOOTH_CONTROL_H_
-#define _BLUETOOTH_CONTROL_H_
+#ifndef _BLUETOOTH_ADAPTER_H_
+#define _BLUETOOTH_ADAPTER_H_
 
 	/* Includes: */
 		#include <avr/io.h>

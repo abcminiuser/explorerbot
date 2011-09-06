@@ -326,14 +326,14 @@ static inline void Bluetooth_L2CAP_Signal_ConfigReq(BT_StackConfig_t* const Stac
 	} ResponsePacket;
 
 	/* Fill out the Signal Command header in the response packet */
-	ResponsePacket.SignalCommandHeader.Code              = BT_SIGNAL_CONFIGURATION_RESPONSE;
-	ResponsePacket.SignalCommandHeader.Identifier        = SignalCommandHeader->Identifier;
-	ResponsePacket.SignalCommandHeader.Length            = CPU_TO_LE16(sizeof(ResponsePacket.ConfigurationResponse));
+	ResponsePacket.SignalCommandHeader.Code            = BT_SIGNAL_CONFIGURATION_RESPONSE;
+	ResponsePacket.SignalCommandHeader.Identifier      = SignalCommandHeader->Identifier;
+	ResponsePacket.SignalCommandHeader.Length          = CPU_TO_LE16(sizeof(ResponsePacket.ConfigurationResponse));
 
 	/* Fill out the Configuration Response in the response packet */
-	ResponsePacket.ConfigurationResponse.SourceChannel   = cpu_to_le16(L2CAPChannel->RemoteNumber);
-	ResponsePacket.ConfigurationResponse.Flags           = 0x00;
-	ResponsePacket.ConfigurationResponse.Result          = (L2CAPChannel != NULL) ? CPU_TO_LE16(BT_CONFIGURATION_SUCCESSFUL) : CPU_TO_LE16(BT_CONFIGURATION_REJECTED);
+	ResponsePacket.ConfigurationResponse.SourceChannel = cpu_to_le16(L2CAPChannel->RemoteNumber);
+	ResponsePacket.ConfigurationResponse.Flags         = 0x00;
+	ResponsePacket.ConfigurationResponse.Result        = (L2CAPChannel != NULL) ? CPU_TO_LE16(BT_CONFIGURATION_SUCCESSFUL) : CPU_TO_LE16(BT_CONFIGURATION_REJECTED);
 
 	Bluetooth_L2CAP_SendSignalPacket(StackState, HCIConnection, sizeof(ResponsePacket), &ResponsePacket);
 }
@@ -487,17 +487,17 @@ bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 		} PacketData;
 
 		/* Fill out the Signal Command header in the response packet */
-		PacketData.SignalCommandHeader.Code            = BT_SIGNAL_CONFIGURATION_REQUEST;
-		PacketData.SignalCommandHeader.Identifier      = ++HCIConnection->CurrentIdentifier;
-		PacketData.SignalCommandHeader.Length          = CPU_TO_LE16(sizeof(PacketData.ConfigurationRequest) +
-		                                                             sizeof(PacketData.Option_LocalMTU));
+		PacketData.SignalCommandHeader.Code       = BT_SIGNAL_CONFIGURATION_REQUEST;
+		PacketData.SignalCommandHeader.Identifier = ++HCIConnection->CurrentIdentifier;
+		PacketData.SignalCommandHeader.Length     = CPU_TO_LE16(sizeof(PacketData.ConfigurationRequest) +
+		                                                        sizeof(PacketData.Option_LocalMTU));
 
 		/* Fill out the Configuration Request in the response packet, including local MTU information */
 		PacketData.ConfigurationRequest.DestinationChannel = cpu_to_le16(CurrentChannel->RemoteNumber);
-		PacketData.ConfigurationRequest.Flags          = 0;
-		PacketData.Option_LocalMTU.Header.Type         = CPU_TO_LE16(BT_CONFIG_OPTION_MTU);
-		PacketData.Option_LocalMTU.Header.Length       = sizeof(PacketData.Option_LocalMTU.Value);
-		PacketData.Option_LocalMTU.Value               = cpu_to_le16(CurrentChannel->LocalMTU);
+		PacketData.ConfigurationRequest.Flags    = 0;
+		PacketData.Option_LocalMTU.Header.Type   = CPU_TO_LE16(BT_CONFIG_OPTION_MTU);
+		PacketData.Option_LocalMTU.Header.Length = sizeof(PacketData.Option_LocalMTU.Value);
+		PacketData.Option_LocalMTU.Value         = cpu_to_le16(CurrentChannel->LocalMTU);
 
 		Bluetooth_L2CAP_SendSignalPacket(StackState, HCIConnection, sizeof(PacketData), &PacketData);
 		return true;
@@ -523,13 +523,13 @@ bool Bluetooth_L2CAP_SendPacket(BT_StackConfig_t* const StackState,
 	
 	/* TODO: Respect MTU */
 	
-	BT_L2CAP_Header_t* L2CAPPacketHeader  = (BT_L2CAP_Header_t*)StackState->Config.PacketBuffer;
-	L2CAPPacketHeader->ConnectionHandle = cpu_to_le16(HCIConnection->Handle | BT_L2CAP_FIRST_AUTOFLUSH);
-	L2CAPPacketHeader->DataLength       = cpu_to_le16(sizeof(BT_DataPacket_Header_t) + Length);
+	BT_L2CAP_Header_t* L2CAPPacketHeader = (BT_L2CAP_Header_t*)StackState->Config.PacketBuffer;
+	L2CAPPacketHeader->ConnectionHandle  = cpu_to_le16(HCIConnection->Handle | BT_L2CAP_FIRST_AUTOFLUSH);
+	L2CAPPacketHeader->DataLength        = cpu_to_le16(sizeof(BT_DataPacket_Header_t) + Length);
 
 	BT_DataPacket_Header_t* L2CAPDataHeader = (BT_DataPacket_Header_t*)L2CAPPacketHeader->Data;
-	L2CAPDataHeader->PayloadLength      = cpu_to_le16(Length);
-	L2CAPDataHeader->DestinationChannel = cpu_to_le16(L2CAPChannel->RemoteNumber);
+	L2CAPDataHeader->PayloadLength       = cpu_to_le16(Length);
+	L2CAPDataHeader->DestinationChannel  = cpu_to_le16(L2CAPChannel->RemoteNumber);
 
 	memcpy(L2CAPDataHeader->Payload, Data, Length);
 	
@@ -589,9 +589,9 @@ void Bluetooth_L2CAP_CloseChannel(BT_StackConfig_t* const StackState,
 	} PacketData;
 
 	/* Fill out the Signal Command header in the response packet */
-	PacketData.SignalCommandHeader.Code            = BT_SIGNAL_DISCONNECTION_REQUEST;
-	PacketData.SignalCommandHeader.Identifier      = ++HCIConnection->CurrentIdentifier;
-	PacketData.SignalCommandHeader.Length          = CPU_TO_LE16(sizeof(PacketData.DisconnectionRequest));
+	PacketData.SignalCommandHeader.Code       = BT_SIGNAL_DISCONNECTION_REQUEST;
+	PacketData.SignalCommandHeader.Identifier = ++HCIConnection->CurrentIdentifier;
+	PacketData.SignalCommandHeader.Length     = CPU_TO_LE16(sizeof(PacketData.DisconnectionRequest));
 
 	/* Fill out the Disconnection Request in the response packet */
 	PacketData.DisconnectionRequest.DestinationChannel = cpu_to_le16(L2CAPChannel->RemoteNumber);

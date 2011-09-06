@@ -66,6 +66,7 @@ void Sensors_Init(void)
 	ITG3200_ZeroCalibrate(&Sensors.Orientation);
 }
 
+/** Updates the current raw values for each connected sensor. */
 void Sensors_Update(void)
 {
 	/* Update all sensor table items from the new sensor values */

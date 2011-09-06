@@ -36,7 +36,7 @@
 		#define SDP_ATTRIBUTE_ID_SERVICEDESCRIPTION     0x0101
 
 		/** Terminator for a service attribute table of type \ref ServiceAttributeTable_t. */
-		#define SDP_ATTRIBUTE_TABLE_TERMINATOR      {.Data = NULL}
+		#define SDP_ATTRIBUTE_TABLE_TERMINATOR          {.Data = NULL}
 
 	/* Type Defines: */
 		/** Type define for a UUID value structure. This struct can be used to hold full 128-bit UUIDs. */

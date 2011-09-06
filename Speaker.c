@@ -38,24 +38,7 @@ void Speaker_Init(void)
 	DDRB |= (1 << 7);
 
 	TCCR0A = ((1 << COM0A0) | (1 << WGM01));
+	TCCR0B = ((1 << CS01) | (1 << CS00));	
 
 	Speaker_Tone(0);
-}
-
-/** Sets the tone generated from the speaker. This tone value does not have a defined frequency correspondance.
- *
- *  \param[in] PWMValue  PWM value to load into the speaker PWM timer (8-bit).
- */
-void Speaker_Tone(const uint8_t PWMValue)
-{
-	if (!(PWMValue))
-	{
-		TCCR0B = 0;
-		PORTB |= (1 << 7);
-	}
-	else
-	{
-		OCR0A  = PWMValue;
-		TCCR0B = ((1 << CS01) | (1 << CS00));	
-	}
 }

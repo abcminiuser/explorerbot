@@ -48,10 +48,19 @@
 		#define LCD_DATA6  (1 << 1)
 		#define LCD_DATA5  (1 << 2)
 		#define LCD_DATA4  (1 << 3)
+	
+	/* Inline Functions: */
+		/** Sets the LCD backlight intensity level.
+		 *
+		 *  \param[in] Intensity  Intensity of the backlight, a value between 0 (off) and 255 (maximum brightness).
+		 */
+		static inline void LCD_SetBacklight(const uint8_t Intensity)
+		{	
+			OCR2A = Intensity;
+		}		
 		
 	/* Function Prototypes: */
 		void    LCD_Init(void);
-		void    LCD_SetBacklight(const uint8_t Intensity);
 		void    LCD_Clear(void);
 		void    LCD_SetCursor(const uint8_t Y,
 		                      const uint8_t X);

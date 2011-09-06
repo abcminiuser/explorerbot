@@ -99,6 +99,7 @@ void LCD_Init(void)
 	DDRB |= (1 << 4);
 	
 	TCCR2A = ((1 << COM2A1) | (1 << WGM20));
+	TCCR2B = (1 << CS21);
 
 	LCD_SetBacklight(0);
 
@@ -118,24 +119,6 @@ void LCD_Init(void)
 	PORTE |=  LCD_RS;
 	
 	LCD_Clear();
-}
-
-/** Sets the LCD backlight intensity level.
- *
- *  \param[in] Intensity  Intensity of the backlight, a value between 0 (off) and 255 (maximum brightness).
- */
-void LCD_SetBacklight(const uint8_t Intensity)
-{	
-	if (!(Intensity))
-	{
-		TCCR2B = 0;
-		PORTB &= ~(1 << 4);
-	}
-	else
-	{
-		OCR2A  = Intensity;
-		TCCR2B = (1 << CS21);
-	}
 }
 
 /** Clears all text on the LCD display, moving the cursor back to the (1, 0) home position. */

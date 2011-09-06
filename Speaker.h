@@ -35,6 +35,16 @@
 		#include <avr/io.h>
 		#include <stdbool.h>
 
+	/* Inline Functions: */
+		/** Sets the tone generated from the speaker. This tone value does not have a defined frequency correspondance.
+		 *
+		 *  \param[in] PWMValue  PWM value to load into the speaker PWM timer (8-bit).
+		 */
+		static inline void Speaker_Tone(const uint8_t PWMValue)
+		{
+			OCR0A = PWMValue;
+		}
+
 	/* Function Prototypes: */
 		void Speaker_Init(void);
 		void Speaker_Tone(const uint8_t PWMValue);

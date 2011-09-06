@@ -46,12 +46,14 @@ int main(void)
 	{
 		uint8_t ButtonStatus = Buttons_GetStateMask();
 
+		/* Motor stop button */
 		if (ButtonStatus & BUTTON1_MASK)
-		  Motors_SetChannelSpeed(MOTOR_CHANNEL_All, 0);
+		  Motors_SetChannelSpeed(0, 0);
 		  
+		/* System reset button */
 		if (ButtonStatus & BUTTON2_MASK)
 		{
-			Motors_SetChannelSpeed(MOTOR_CHANNEL_All, 0);
+			Motors_SetChannelSpeed(0, 0);
 			USB_Disable();
 			
 			wdt_enable(WDTO_15MS);
@@ -166,7 +168,7 @@ void EVENT_USB_Host_DeviceAttached(void)
  */
 void EVENT_USB_Host_DeviceUnattached(void)
 {
-	Motors_SetChannelSpeed(MOTOR_CHANNEL_All, 0);
+	Motors_SetChannelSpeed(0, 0);
 
 	LCD_Clear();
 	LCD_WriteString_P(PSTR(" * Insert USB *"));
@@ -235,13 +237,12 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 /** Event handler for the USB_HostError event. This indicates that a hardware error occurred while in host mode. */
 void EVENT_USB_Host_HostError(const uint8_t ErrorCode)
 {
-	Motors_SetChannelSpeed(MOTOR_CHANNEL_All, 0);
+	Motors_SetChannelSpeed(0, 0);
+	USB_Disable();
 
 	LCD_Clear();
 	LCD_WriteString_P(PSTR("ERR: Host Error"));
 	RGB_SetColour(RGB_ALIAS_Error);
-
-	USB_Disable();
 	for(;;);
 }
 

@@ -37,7 +37,7 @@ void Speaker_Init(void)
 {
 	DDRB |= (1 << 7);
 
-	TCCR0A = ((1 << COM0A1) | (1 << WGM01) | (1 << WGM00));
+	TCCR0A = ((1 << COM0A0) | (1 << WGM01));
 
 	Speaker_Tone(0);
 }
@@ -51,7 +51,7 @@ void Speaker_Tone(const uint8_t PWMValue)
 	if (!(PWMValue))
 	{
 		TCCR0B = 0;
-		PORTB &= ~(1 << 7);
+		PORTB |= (1 << 7);
 	}
 	else
 	{

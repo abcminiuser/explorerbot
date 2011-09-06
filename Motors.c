@@ -41,59 +41,57 @@ void Motors_Init(void)
 	TCCR1A = ((1 << WGM11) | (1 << WGM10) | (1 << COM1A1) | (1 << COM1B1));
 	TCCR1B = (1 << CS11);
 	
-	Motors_SetChannelSpeed(MOTOR_CHANNEL_All, 0);
+	Motors_SetChannelSpeed(0, 0);
 }
 
 /** Sets the current speed of the robot motors.
  *
- *  \param[in] Channel  Motor channel whose speed is to be altered, a value from the \ref Motor_Channel_t enum.
- *  \param[in] Power    Motor power to set the given channel(s) to, a value between 0 (off) and \ref MAX_MOTOR_POWER.
+ *  \param[in] LeftPower   Motor power to set the left channel to, a value between 0 (off) and \ref MAX_MOTOR_POWER.
+ *  \param[in] RightPower  Motor power to set the left channel to, a value between 0 (off) and \ref MAX_MOTOR_POWER.
  */
-void Motors_SetChannelSpeed(const uint8_t Channel, const int16_t Power)
+void Motors_SetChannelSpeed(const int16_t LeftPower, const int16_t RightPower)
 {
-	uint16_t MotorPWMValue = abs(Power);
+	uint16_t LeftPWMValue  = abs(LeftPower);
+	uint16_t RightPWMValue = abs(RightPower);
 	
-	/* DANGER: DO NOT REMOVE SPEED LIMITER BELOW - PREVENTS OVERCURRENT/OVERVOLTAGE OF MOTORS */
-	if (MotorPWMValue > MAX_MOTOR_POWER)
-	  MotorPWMValue = MAX_MOTOR_POWER;
+	/* DANGER: DO NOT REMOVE SPEED LIMITERS BELOW - PREVENTS OVERCURRENT/OVERVOLTAGE OF MOTORS */
+	if (LeftPWMValue > MAX_MOTOR_POWER)
+	  LeftPWMValue = MAX_MOTOR_POWER;
 
-	if (Channel & MOTOR_CHANNEL_Left)
-	{
-		if (Power <= 0)
-		  PORTD &= ~(1 << 3);
-		else
-		  PORTD |=  (1 << 3);
+	if (RightPWMValue > MAX_MOTOR_POWER)
+	  RightPWMValue = MAX_MOTOR_POWER;
+
+	if (LeftPower <= 0)
+	  PORTD &= ~(1 << 3);
+	else
+	  PORTD |=  (1 << 3);
 		
-		if (Power == 0)
-		{
-			TCCR1A &= ~(1 << COM1B1);
-			PORTB  &= ~(1 << 5);
-		}
-		else
-		{
-			TCCR1A |=  (1 << COM1B1);
-		}
-
-		OCR1B = MotorPWMValue;
-	}
-	
-	if (Channel & MOTOR_CHANNEL_Right)
+	if (LeftPower == 0)
 	{
-		if (Power <= 0)
-		  PORTD &= ~(1 << 4);
-		else
-		  PORTD |=  (1 << 4);
-
-		if (Power == 0)
-		{
-			TCCR1A &= ~(1 << COM1A1);
-			PORTB  &= ~(1 << 6);
-		}
-		else
-		{
-			TCCR1A |=  (1 << COM1A1);
-		}
-	
-		OCR1A = MotorPWMValue;
+		TCCR1A &= ~(1 << COM1B1);
+		PORTB  &= ~(1 << 5);
 	}
+	else
+	{
+		TCCR1A |=  (1 << COM1B1);
+	}
+
+	OCR1B = LeftPWMValue;
+	
+	if (RightPower <= 0)
+	  PORTD &= ~(1 << 4);
+	else
+	  PORTD |=  (1 << 4);
+
+	if (RightPower == 0)
+	{
+		TCCR1A &= ~(1 << COM1A1);
+		PORTB  &= ~(1 << 6);
+	}
+	else
+	{
+		TCCR1A |=  (1 << COM1A1);
+	}
+	
+	OCR1A = RightPWMValue;
 }

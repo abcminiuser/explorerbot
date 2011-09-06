@@ -42,18 +42,9 @@
 	/* Macros: */
 		#define MAX_MOTOR_POWER   0x0250
 	
-	/* Enums: */
-		typedef enum
-		{
-			MOTOR_CHANNEL_Left  = (1 << 0),
-			MOTOR_CHANNEL_Right = (1 << 1),
-			MOTOR_CHANNEL_All   = (MOTOR_CHANNEL_Left | MOTOR_CHANNEL_Right),
-		} Motor_Channel_t;
-	
 	/* Function Prototypes: */
 		void Motors_Init(void);
-		void Motors_SetChannelSpeed(const uint8_t Channel,
-		                            const int16_t Power);
+		void Motors_SetChannelSpeed(const int16_t LeftPower, const int16_t RightPower);
 
 #endif
 

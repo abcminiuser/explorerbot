@@ -40,4 +40,6 @@ void ExternalSRAM_Init(void)
 	
 	XMCRA |= (1 << SRE);
 	XMCRB  = 0;
+	
+	ExternalSRAM_SetBank(0);
 }

@@ -111,34 +111,35 @@ void Joystick_USBTask(void)
 			{
 				if ((ReportItem->Attributes.Usage.Usage == 2) && ReportItem->Value)
 				{
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_All,    MAX_MOTOR_POWER);
+					Motors_SetChannelSpeed(MAX_MOTOR_POWER, MAX_MOTOR_POWER);
 					Found = true;
 				}
 				else if ((ReportItem->Attributes.Usage.Usage == 1) && ReportItem->Value)
 				{
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_Left,   MAX_MOTOR_POWER);
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_Right, -MAX_MOTOR_POWER);
+					Motors_SetChannelSpeed(MAX_MOTOR_POWER, -MAX_MOTOR_POWER);
 					Found = true;
 				}
 				else if ((ReportItem->Attributes.Usage.Usage == 3) && ReportItem->Value)
 				{
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_All,   -MAX_MOTOR_POWER);
+					Motors_SetChannelSpeed(-MAX_MOTOR_POWER, -MAX_MOTOR_POWER);
 					Found = true;
 				}
 				else if ((ReportItem->Attributes.Usage.Usage == 4) && ReportItem->Value)
 				{
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_Left,  -MAX_MOTOR_POWER);
-					Motors_SetChannelSpeed(MOTOR_CHANNEL_Right,  MAX_MOTOR_POWER);
+					Motors_SetChannelSpeed(-MAX_MOTOR_POWER, MAX_MOTOR_POWER);
 					Found = true;
 				}
 				
 				if (ReportItem->Attributes.Usage.Usage == 5)
 				  Headlights_SetState(ReportItem->Value != 0);
+
+				if (ReportItem->Attributes.Usage.Usage == 6)
+				  Speaker_Tone((ReportItem->Value) ? 250 : 0);
 			}
 		}
 
 		if (!(Found))
-		  Motors_SetChannelSpeed(MOTOR_CHANNEL_All, 0);
+		  Motors_SetChannelSpeed(0, 0);
 	}
 	
 	/* Run the HID Class Driver service task on the HID Joystick interface */

@@ -156,23 +156,24 @@ void CALLBACK_Bluetooth_HID_ReportReceived(BT_StackConfig_t* const StackState,
 		switch (*((uint16_t*)&Data[2]))
 		{
 			default:
-				Motors_SetChannelSpeed(MOTOR_CHANNEL_All,    0);
+				Motors_SetChannelSpeed(0, 0);
 				break;
 			case 0xF600:
-				Motors_SetChannelSpeed(MOTOR_CHANNEL_All,    MAX_MOTOR_POWER);
+				Motors_SetChannelSpeed(MAX_MOTOR_POWER, MAX_MOTOR_POWER);
 				break;
 			case 0x00F6:
-				Motors_SetChannelSpeed(MOTOR_CHANNEL_Left,   MAX_MOTOR_POWER);
-				Motors_SetChannelSpeed(MOTOR_CHANNEL_Right, -MAX_MOTOR_POWER);					
+				Motors_SetChannelSpeed(MAX_MOTOR_POWER, -MAX_MOTOR_POWER);
 				break;
 			case 0x0A00:
-				Motors_SetChannelSpeed(MOTOR_CHANNEL_All,   -MAX_MOTOR_POWER);					
+				Motors_SetChannelSpeed(-MAX_MOTOR_POWER, -MAX_MOTOR_POWER);					
 				break;
 			case 0x000A:
-				Motors_SetChannelSpeed(MOTOR_CHANNEL_Left,  -MAX_MOTOR_POWER);
-				Motors_SetChannelSpeed(MOTOR_CHANNEL_Right,  MAX_MOTOR_POWER);					
+				Motors_SetChannelSpeed(-MAX_MOTOR_POWER, MAX_MOTOR_POWER);					
 				break;
 		}
+		
+		Headlights_SetState(Data[1] & 0x01);
+		Speaker_Tone((Data[1] & 0x02) ? 250 : 0);
 	}
 }
 

@@ -43,8 +43,9 @@
 		#include "../RGB.h"
 		#include "../Speaker.h"
 		
-		#include "PS3Controller.h"
-
+		#include "BluetoothAdapter.h"
+		#include "../Bluetooth/Bluetooth.h"
+		
 	/* Macros: */
 		/** HID Report Descriptor Usage Page value for a toggle button. */
 		#define USAGE_PAGE_BUTTON           0x09
@@ -60,6 +61,12 @@
 
 		/** HID Report Descriptor Usage value for a Y axis movement. */
 		#define USAGE_Y                     0x31
+
+		/** Device Vendor ID value for the PS3 Controller. */
+		#define PS3CONTROLLER_VID           0x054C
+
+		/** Device Product ID value for the PS3 Controller. */
+		#define PS3CONTROLLER_PID           0x0268
 		
 	/* External Variables: */
 		extern USB_ClassInfo_HID_Host_t Joystick_HID_Interface;

@@ -164,7 +164,27 @@ void Joystick_USBTask(void)
 		/* For PS3 controllers, the PS3 button initiated a pairing with the last inserted Bluetooth adapter */
 		if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.PS3Button) && Joystick_HIDReportItemMappings.PS3Button->Value)
 		{
-			PS3Controller_PairLastAdapter();
+			/* Copy over the address of the last inserted USB Bluetooth adapter */
+			uint8_t PS3AdapterPairRequest[2 + BT_BDADDR_LEN];
+			
+			PS3AdapterPairRequest[0] = 0x01;
+			PS3AdapterPairRequest[1] = 0x00;
+			eeprom_read_block(&PS3AdapterPairRequest[2], BluetoothAdapter_LastLocalBDADDR, BT_BDADDR_LEN);
+			
+			USB_ControlRequest = (USB_Request_Header_t)
+				{
+					.bmRequestType = (REQDIR_HOSTTODEVICE | REQTYPE_CLASS | REQREC_INTERFACE),
+					.bRequest      = HID_REQ_SetReport,
+					.wValue        = 0x03F5,
+					.wIndex        = Joystick_HID_Interface.State.InterfaceNumber,
+					.wLength       = sizeof(PS3AdapterPairRequest)
+				};
+
+			/* Request that the controller re-pair with the last connected Bluetooth adapter BDADDR */
+			Pipe_SelectPipe(PIPE_CONTROLPIPE);
+			USB_Host_SendControlRequest(PS3AdapterPairRequest);	
+
+			/* One-time operation for each connection, remove PS3 button mapping */
 			Joystick_HIDReportItemMappings.PS3Button = NULL;
 		}
 	}

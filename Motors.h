@@ -40,7 +40,7 @@
 		#include <LUFA/Common/Common.h>
 		
 	/* Macros: */
-		#define MAX_MOTOR_POWER   0x0250
+		#define MAX_MOTOR_POWER   0x0EEE
 	
 	/* Function Prototypes: */
 		void Motors_Init(void);

@@ -143,7 +143,6 @@ SRC = $(TARGET).c                                                 \
 	  Motors.c                                                    \
 	  RGB.c                                                       \
 	  Speaker.c                                                   \
-	  SDPServices.c                                               \
 	  Sensors/Sensors.c                                           \
 	  Sensors/AK8975.c                                            \
 	  Sensors/BMA150.c                                            \

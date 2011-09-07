@@ -37,7 +37,7 @@ int main(void)
 {
 	SetupHardware();
 	//StartupSequence();
-	CheckSensors();
+	//CheckSensors();
 
 	EVENT_USB_Host_DeviceUnattached();
 	sei();

@@ -129,9 +129,10 @@ void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState)
 			case HCISTATE_Init_GetBDADDR:
 				if (CommandCompleteHeader->Opcode == CPU_TO_LE16(OGF_CTRLR_INFORMATIONAL | OCF_CTRLR_INFORMATIONAL_READBDADDR))
 				{
+					NextHCIState = HCISTATE_Init_SetLocalName;
+
 					/* Copy over the returned local device address to the stack state buffer */
 					memcpy(StackState->State.HCI.LocalBDADDR, &CommandCompleteHeader->Parameters[1], BT_BDADDR_LEN);				
-					NextHCIState = HCISTATE_Init_SetLocalName;
 				}
 				break;
 			case HCISTATE_Init_SetLocalName:
@@ -144,7 +145,11 @@ void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState)
 				break;
 			case HCISTATE_Init_SetScanEnable:
 				if (CommandCompleteHeader->Opcode == CPU_TO_LE16(OGF_CTRLR_BASEBAND | OCF_CTRLR_BASEBAND_WRITE_SCAN_ENABLE))
-				  NextHCIState = HCISTATE_Idle;
+				{
+					NextHCIState = HCISTATE_Idle;
+
+					EVENT_Bluetooth_InitComplete(StackState);
+				}
 				break;
 		}
 	}

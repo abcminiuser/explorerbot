@@ -70,7 +70,7 @@ int main(void)
 			Sensors_Update();
 		}
 		
-		Bluetooth_USBTask();
+		BluetoothAdapter_USBTask();
 		Joystick_USBTask();
 		USB_USBTask();
 	}
@@ -202,7 +202,7 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 	}
 
 	if (!(Joystick_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData)) &&
-	    !(Bluetooth_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData)))
+	    !(BluetoothAdapter_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData)))
 	{
 		LCD_Clear();
 		LCD_WriteString_P(PSTR("ERR: Unknown USB"));
@@ -218,7 +218,7 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 		return;
 	}
 	
-	if (!(Joystick_PostConfiguration()) || !(Bluetooth_PostConfiguration()))
+	if (!(Joystick_PostConfiguration()) || !(BluetoothAdapter_PostConfiguration()))
 	{
 		LCD_Clear();
 		LCD_WriteString_P(PSTR("ERR: Post Config"));

@@ -133,7 +133,7 @@
 				
 				struct
 				{
-					BT_L2CAP_Channel_t    Channels[MAX_LOGICAL_CHANNELS];
+					BT_L2CAP_Channel_t  Channels[MAX_LOGICAL_CHANNELS];
 				} L2CAP;
 			} State;
 		} BT_StackConfig_t;
@@ -175,7 +175,10 @@
 		                                       BT_L2CAP_Channel_t* const Channel);
 	
 	/* User Implemented Callback Event Functions: */
-		/** User application event callback, fired when the Bluetooth stack is initialized, so that the user services may be initialized. */
+		/** User application event callback, fired when the Bluetooth stack initialization has completed. */
+		void EVENT_Bluetooth_InitComplete(BT_StackConfig_t* const StackState);
+
+		/** User application event callback, fired when the Bluetooth stack initialization process has started, so that the user services may be initialized. */
 		void EVENT_Bluetooth_InitServices(BT_StackConfig_t* const StackState);
 
 		/** User application event callback, fired when the Bluetooth stack management routine has been run, and the user services may be managed. */

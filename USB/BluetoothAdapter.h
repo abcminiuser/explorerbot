@@ -33,15 +33,16 @@
 
 	/* Includes: */
 		#include <avr/io.h>
+		#include <avr/eeprom.h>
 		#include <stdbool.h>
 		#include <stdlib.h>
 
 		#include <LUFA/Drivers/USB/USB.h>
 		
-		#include "ExternalSRAM.h"
-		#include "RGB.h"
+		#include "../ExternalSRAM.h"
+		#include "../RGB.h"
 		
-		#include "Bluetooth/Bluetooth.h"
+		#include "../Bluetooth/Bluetooth.h"
 
 	/* Macros: */
 		/** Device Class value for the Bluetooth Device class. */
@@ -57,12 +58,16 @@
 		#define BLUETOOTH_DATA_OUT_PIPE          2
 		#define BLUETOOTH_EVENTS_PIPE            3
 
+	/* External Variables: */
+		extern bool BluetoothAdapter_IsActive;
+		extern uint8_t BluetoothAdapter_LastLocalBDADDR[BT_BDADDR_LEN] EEMEM;
+
 	/* Function Prototypes: */
-		bool Bluetooth_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
-		                              uint16_t ConfigDescriptorSize,
-		                              void* ConfigDescriptorData);
-		bool Bluetooth_PostConfiguration(void);
-		void Bluetooth_USBTask(void);
+		bool BluetoothAdapter_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
+		                                     uint16_t ConfigDescriptorSize,
+		                                     void* ConfigDescriptorData);
+		bool BluetoothAdapter_PostConfiguration(void);
+		void BluetoothAdapter_USBTask(void);
 
 		uint8_t DComp_NextInterfaceBluetoothDataEndpoint(void* CurrentDescriptor);
 

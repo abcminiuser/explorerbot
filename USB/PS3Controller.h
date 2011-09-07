@@ -28,8 +28,8 @@
   this software.
 */
 
-#ifndef _JOYSTICK_CONTROL_H_
-#define _JOYSTICK_CONTROL_H_
+#ifndef _PS3_CONTROLLER_H_
+#define _PS3_CONTROLLER_H_
 
 	/* Includes: */
 		#include <avr/io.h>
@@ -37,41 +37,40 @@
 		#include <stdlib.h>
 
 		#include <LUFA/Drivers/USB/USB.h>
-		
-		#include "../Headlights.h"
-		#include "../Motors.h"
-		#include "../RGB.h"
-		#include "../Speaker.h"
-		
-		#include "PS3Controller.h"
+
+		#include "BluetoothAdapter.h"
+		#include "../Bluetooth/Bluetooth.h"
 
 	/* Macros: */
-		/** HID Report Descriptor Usage Page value for a toggle button. */
-		#define USAGE_PAGE_BUTTON           0x09
+		/** Device Vendor ID value for the PS3 Controller. */
+		#define PS3CONTROLLER_VID           0x054C
 
-		/** HID Report Descriptor Usage Page value for a Generic Desktop Control. */
-		#define USAGE_PAGE_GENERIC_DCTRL    0x01
-
-		/** HID Report Descriptor Usage for a Joystick. */
-		#define USAGE_JOYSTICK              0x04
-
-		/** HID Report Descriptor Usage value for a X axis movement. */
-		#define USAGE_X                     0x30
-
-		/** HID Report Descriptor Usage value for a Y axis movement. */
-		#define USAGE_Y                     0x31
-		
-	/* External Variables: */
-		extern USB_ClassInfo_HID_Host_t Joystick_HID_Interface;
+		/** Device Product ID value for the PS3 Controller. */
+		#define PS3CONTROLLER_PID           0x0268
 
 	/* Function Prototypes: */
-		bool Joystick_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
-		                             uint16_t ConfigDescriptorSize,
-		                             void* ConfigDescriptorData);
-		bool Joystick_PostConfiguration(void);
-		void Joystick_USBTask(void);
+		static inline void PS3Controller_PairLastAdapter(void)
+		{
+			/* Copy over the address of the last inserted USB Bluetooth adapter */
+			uint8_t PS3AdapterPairRequest[2 + BT_BDADDR_LEN];
+			
+			PS3AdapterPairRequest[0] = 0x01;
+			PS3AdapterPairRequest[1] = 0x00;
+			eeprom_read_block(&PS3AdapterPairRequest[2], BluetoothAdapter_LastLocalBDADDR, BT_BDADDR_LEN);
+			
+			USB_ControlRequest = (USB_Request_Header_t)
+				{
+					.bmRequestType = (REQDIR_HOSTTODEVICE | REQTYPE_CLASS | REQREC_INTERFACE),
+					.bRequest      = HID_REQ_SetReport,
+					.wValue        = 0x03F5,
+					.wIndex        = 0,
+					.wLength       = sizeof(PS3AdapterPairRequest)
+				};
 
-		bool CALLBACK_HIDParser_FilterHIDReportItem(HID_ReportItem_t* const CurrentItem);
+			/* Request that the controller re-pair with the last connected Bluetooth adapter BDADDR */
+			Pipe_SelectPipe(PIPE_CONTROLPIPE);
+			USB_Host_SendControlRequest(PS3AdapterPairRequest);	
+		}
 
 #endif
 

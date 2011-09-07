@@ -31,7 +31,7 @@
 #include "BluetoothAdapter.h"
 
 /** Bluetooth stack configuration and state stable, used to configure an instance of the Bluetooth stack. */
-BT_StackConfig_t Bluetooth_Module =
+BT_StackConfig_t BluetoothAdapter_Stack =
 	{
 		.Config = 
 			{
@@ -44,7 +44,10 @@ BT_StackConfig_t Bluetooth_Module =
 	};
 
 /** Indicates if the Bluetooth control mode is currently active or not */
-bool IsActive;
+bool BluetoothAdapter_IsActive;
+
+/** Last connected Bluetooth adapter BDADDR, stored in EEPROM */
+uint8_t BluetoothAdapter_LastLocalBDADDR[BT_BDADDR_LEN] EEMEM;
 
 
 /** Attempts to configure the system pipes for the attached Bluetooth adapter.
@@ -55,15 +58,15 @@ bool IsActive;
  *
  *  \return  Boolean true if a valid Bluetooth interface was found, false otherwise.
  */
-bool Bluetooth_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
-                              uint16_t ConfigDescriptorSize,
-                              void* ConfigDescriptorData)
+bool BluetoothAdapter_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
+                                     uint16_t ConfigDescriptorSize,
+                                     void* ConfigDescriptorData)
 {
 	USB_Descriptor_Endpoint_t* DataINEndpoint  = NULL;
 	USB_Descriptor_Endpoint_t* DataOUTEndpoint = NULL;
 	USB_Descriptor_Endpoint_t* EventsEndpoint  = NULL;
 	
-	IsActive = false;
+	BluetoothAdapter_IsActive = false;
 
 	/* Validate returned device Class, SubClass and Protocol values against the Bluetooth spec values */
 	if ((DeviceDescriptor->Class    != BLUETOOTH_DEVICE_CLASS)    ||
@@ -122,7 +125,7 @@ bool Bluetooth_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
 					   EventsEndpoint->EndpointAddress, EventsEndpoint->EndpointSize, PIPE_BANK_SINGLE);
 	Pipe_SetInterruptPeriod(EventsEndpoint->PollingIntervalMS);
 
-	IsActive = true;
+	BluetoothAdapter_IsActive = true;
 	return true;
 }
 
@@ -152,19 +155,19 @@ uint8_t DComp_NextInterfaceBluetoothDataEndpoint(void* CurrentDescriptor)
  *
  *  \return Boolean true if no Bluetooth adapter attached or if all post-configuration tasks complete without error, false otherwise
  */
-bool Bluetooth_PostConfiguration(void)
+bool BluetoothAdapter_PostConfiguration(void)
 {
-	if (!IsActive)
+	if (!(BluetoothAdapter_IsActive))
 	  return true;
 	  
-	Bluetooth_Init(&Bluetooth_Module);
+	Bluetooth_Init(&BluetoothAdapter_Stack);
 	return true;
 }
 
 /** Task to manage an enumerated USB Bluetooth adapter once connected, to display movement data as it is received. */
-void Bluetooth_USBTask(void)
+void BluetoothAdapter_USBTask(void)
 {
-	if ((USB_HostState != HOST_STATE_Configured) || !IsActive)
+	if ((USB_HostState != HOST_STATE_Configured) || !(BluetoothAdapter_IsActive))
 	  return;
 
 	Pipe_SelectPipe(BLUETOOTH_DATA_IN_PIPE);
@@ -172,7 +175,7 @@ void Bluetooth_USBTask(void)
 	
 	if (Pipe_IsINReceived())
 	{
-		BT_L2CAP_Header_t* PacketHeader = (BT_L2CAP_Header_t*)Bluetooth_Module.Config.PacketBuffer;
+		BT_L2CAP_Header_t* PacketHeader = (BT_L2CAP_Header_t*)BluetoothAdapter_Stack.Config.PacketBuffer;
 
 		/* Read in the L2CAP packet data from the Data IN pipe */
 		Pipe_Read_Stream_LE(PacketHeader, sizeof(BT_L2CAP_Header_t), NULL);
@@ -181,7 +184,7 @@ void Bluetooth_USBTask(void)
 		Pipe_Freeze();
 
 		RGB_SetColour(RGB_ALIAS_Busy);
-		Bluetooth_ProcessPacket(&Bluetooth_Module, BLUETOOTH_PACKET_L2CAPData);
+		Bluetooth_ProcessPacket(&BluetoothAdapter_Stack, BLUETOOTH_PACKET_L2CAPData);
 		RGB_SetColour(RGB_ALIAS_Connected);
 	}
 	
@@ -192,7 +195,7 @@ void Bluetooth_USBTask(void)
 	
 	if (Pipe_IsINReceived())
 	{
-		BT_HCIEvent_Header_t* EventHeader = (BT_HCIEvent_Header_t*)Bluetooth_Module.Config.PacketBuffer;
+		BT_HCIEvent_Header_t* EventHeader = (BT_HCIEvent_Header_t*)BluetoothAdapter_Stack.Config.PacketBuffer;
 
 		/* Read in the Event packet data from the Event IN pipe */
 		Pipe_Read_Stream_LE(EventHeader, sizeof(BT_HCIEvent_Header_t), NULL);
@@ -201,14 +204,14 @@ void Bluetooth_USBTask(void)
 		Pipe_Freeze();
 
 		RGB_SetColour(RGB_ALIAS_Busy);
-		Bluetooth_ProcessPacket(&Bluetooth_Module, BLUETOOTH_PACKET_HCIEvent);
+		Bluetooth_ProcessPacket(&BluetoothAdapter_Stack, BLUETOOTH_PACKET_HCIEvent);
 		RGB_SetColour(RGB_ALIAS_Connected);
 	}
 	
 	Pipe_Freeze();
 	
 	/* Keep on running the management routine until all pending packets have been sent */	
-	while (Bluetooth_ManageConnections(&Bluetooth_Module))
+	while (Bluetooth_ManageConnections(&BluetoothAdapter_Stack))
 	  RGB_SetColour(RGB_ALIAS_Busy);
 
 	RGB_SetColour(RGB_ALIAS_Connected);
@@ -249,5 +252,11 @@ void CALLBACK_Bluetooth_SendPacket(BT_StackConfig_t* const StackState,
 	}
 
 	RGB_SetColour(RGB_ALIAS_Connected);
+}
+
+void EVENT_Bluetooth_InitComplete(BT_StackConfig_t* const StackState)
+{
+	/* Save the local BDADDR of the connected Bluetooth adapter for later use */
+	eeprom_update_block(BluetoothAdapter_LastLocalBDADDR, BluetoothAdapter_Stack.State.HCI.LocalBDADDR, BT_BDADDR_LEN);
 }
 

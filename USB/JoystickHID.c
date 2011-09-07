@@ -28,7 +28,7 @@
   this software.
 */
 
-#include "JoystickControl.h"
+#include "JoystickHID.h"
 
 /** Processed HID report descriptor items structure, containing information on each HID report element */
 static HID_ReportInfo_t HIDReportInfo;

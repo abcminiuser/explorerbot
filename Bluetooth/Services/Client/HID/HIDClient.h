@@ -12,8 +12,8 @@
   All rights reserved.
 */
 
-#ifndef _BLUETOOTH_SERVICE_HID_H_
-#define _BLUETOOTH_SERVICE_HID_H_
+#ifndef _HID_CLIENT_SERVICE_H_
+#define _HID_CLIENT_SERVICE_H_
 
 	/* Includes: */
 		#include <stdbool.h>
@@ -44,22 +44,21 @@
 		} HID_Service_t;
 
 	/* Function Prototypes: */
-		void Bluetooth_HID_Init(BT_StackConfig_t* const StackState);
-		void Bluetooth_HID_Manage(BT_StackConfig_t* const StackState);
-		void Bluetooth_HID_ChannelOpened(BT_StackConfig_t* const StackState,
-		                                 BT_L2CAP_Channel_t* const Channel);
-		void Bluetooth_HID_ChannelClosed(BT_StackConfig_t* const StackState,
-		                                 BT_L2CAP_Channel_t* const Channel);
-		void Bluetooth_HID_ProcessPacket(BT_StackConfig_t* const StackState,
-                                         BT_L2CAP_Channel_t* const Channel,
-                                         uint16_t Length,
-                                         uint8_t* Data);
+		void HID_Client_Init(BT_StackConfig_t* const StackState);
+		void HID_Client_Manage(BT_StackConfig_t* const StackState);
+		void HID_Client_ChannelOpened(BT_StackConfig_t* const StackState,
+		                              BT_L2CAP_Channel_t* const Channel);
+		void HID_Client_ChannelClosed(BT_StackConfig_t* const StackState,
+		                              BT_L2CAP_Channel_t* const Channel);
+		void HID_Client_ProcessPacket(BT_StackConfig_t* const StackState,
+                                      BT_L2CAP_Channel_t* const Channel,
+                                      uint16_t Length,
+                                      uint8_t* Data);
 
-
-		void CALLBACK_Bluetooth_HID_ReportReceived(BT_StackConfig_t* const StackState,
-                                                   BT_L2CAP_Channel_t* const Channel,
-												   uint8_t ReportType,
-                                                   uint16_t Length,
-                                                   uint8_t* Data);
+		void CALLBACK_HID_Client_ReportReceived(BT_StackConfig_t* const StackState,
+                                                BT_L2CAP_Channel_t* const Channel,
+		                                        uint8_t ReportType,
+		                                        uint16_t Length,
+		                                        uint8_t* Data);
 
 #endif

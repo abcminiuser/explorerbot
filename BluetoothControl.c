@@ -32,14 +32,14 @@
 
 void EVENT_Bluetooth_InitServices(BT_StackConfig_t* const StackState)
 {
-	Bluetooth_SDP_Init(StackState);
-	Bluetooth_HID_Init(StackState);
+	SDP_Server_Init(StackState);
+	HID_Client_Init(StackState);
 }
 
 void EVENT_Bluetooth_ManageServices(BT_StackConfig_t* const StackState)
 {
-	Bluetooth_SDP_Manage(StackState);
-	Bluetooth_HID_Manage(StackState);
+	SDP_Server_Manage(StackState);
+	HID_Client_Manage(StackState);
 }
 
 bool CALLBACK_Bluetooth_ConnectionRequest(BT_StackConfig_t* const StackState,
@@ -89,11 +89,11 @@ void EVENT_Bluetooth_ChannelOpened(BT_StackConfig_t* const StackState,
 	switch (Channel->PSM)
 	{
 		case CHANNEL_PSM_SDP:
-			Bluetooth_SDP_ChannelOpened(StackState, Channel);			
+			SDP_Server_ChannelOpened(StackState, Channel);			
 			break;
 		case CHANNEL_PSM_HIDCTL:
 		case CHANNEL_PSM_HIDINT:
-			Bluetooth_HID_ChannelOpened(StackState, Channel);
+			HID_Client_ChannelOpened(StackState, Channel);
 			break;
 	}
 
@@ -108,11 +108,11 @@ void EVENT_Bluetooth_ChannelClosed(BT_StackConfig_t* const StackState,
 	switch (Channel->PSM)
 	{
 		case CHANNEL_PSM_SDP:
-			Bluetooth_SDP_ChannelClosed(StackState, Channel);			
+			SDP_Server_ChannelClosed(StackState, Channel);			
 			break;
 		case CHANNEL_PSM_HIDCTL:
 		case CHANNEL_PSM_HIDINT:
-			Bluetooth_HID_ChannelClosed(StackState, Channel);
+			HID_Client_ChannelClosed(StackState, Channel);
 			break;
 	}
 
@@ -129,11 +129,11 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
 	switch (Channel->PSM)
 	{
 		case CHANNEL_PSM_SDP:
-			Bluetooth_SDP_ProcessPacket(StackState, Channel, Length, Data);
+			SDP_Server_ProcessPacket(StackState, Channel, Length, Data);
 			break;
 		case CHANNEL_PSM_HIDCTL:
 		case CHANNEL_PSM_HIDINT:
-			Bluetooth_HID_ProcessPacket(StackState, Channel, Length, Data);
+			HID_Client_ProcessPacket(StackState, Channel, Length, Data);
 			break;
 		default:
 			LCD_Clear();
@@ -143,11 +143,11 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
 	}	
 }
 
-void CALLBACK_Bluetooth_HID_ReportReceived(BT_StackConfig_t* const StackState,
-                                           BT_L2CAP_Channel_t* const Channel,
-                                           uint8_t ReportType,
-                                           uint16_t Length,
-                                           uint8_t* Data)
+void CALLBACK_HID_Client_ReportReceived(BT_StackConfig_t* const StackState,
+                                        BT_L2CAP_Channel_t* const Channel,
+                                        uint8_t ReportType,
+                                        uint16_t Length,
+                                        uint8_t* Data)
 {
 	/* Process output reports to look for key code changes */
 	if (ReportType == HID_DATAT_Input)

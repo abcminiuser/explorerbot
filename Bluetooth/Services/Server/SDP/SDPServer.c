@@ -42,9 +42,23 @@ static void SDP_Server_ServiceSearchAttribute(BT_StackConfig_t* const StackState
                                               BT_L2CAP_Channel_t* const Channel,
                                               BT_SDP_PDUHeader_t* const SDPHeader)
 {
-	uint8_t* CurrParameter = SDPHeader->Parameters;
+	const void* CurrParameter = SDPHeader->Parameters;
 
-	// TODO
+	/* Read search UUID list sequence header and obtain its data size and a pointer to start of the data */
+	uint16_t    UUIDListSize;
+	const void* UUIDList          = SDP_ReadSequenceHeader(&CurrParameter, &UUIDListSize);
+
+	/* Read maximum attribute size byte count for the response */
+	uint16_t    MaximumAttributeSize = SDP_ReadData16(&CurrParameter);
+	
+	/* Read search Attribute list sequence header and obtain its data size and a pointer to start of the data */
+	uint16_t    AttributeListSize;
+	const void* AttributeList     = SDP_ReadSequenceHeader(&CurrParameter, &AttributeListSize);
+	
+	/* Read continuation state value from the client */
+	uint8_t     ContinuationState = SDP_ReadData8(&CurrParameter);
+
+	// TODO - PROCESS
 
 	struct
 	{
@@ -53,25 +67,20 @@ static void SDP_Server_ServiceSearchAttribute(BT_StackConfig_t* const StackState
 		uint8_t            ResponseData[100];
 	} ResponsePacket;
 
-	/* Create a pointer to the buffer to indicate the current location for response data to be added */
 	void* CurrResponsePos = ResponsePacket.ResponseData;
 	
-	/* Add the outer Data Element Sequence header for all of the retrieved Attributes */
-	uint16_t* TotalResponseSize = SDP_AddSequence16(&CurrResponsePos);
+	uint16_t* TotalResponseSize = SDP_WriteSequenceHeader16(&CurrResponsePos);
 	
 	/* Continuation state - always zero */
 	SDP_WriteData8(&CurrResponsePos, 0);
 
 	/* Set the total response list size to the size of the outer container plus its header size and continuation state */
-	ResponsePacket.AttributeListByteCount    = SwapEndian_16(3 + *TotalResponseSize);
+	ResponsePacket.AttributeListByteCount    = cpu_to_be16(3 + *TotalResponseSize);
 
 	/* Fill in the response packet's header */
 	ResponsePacket.SDPHeader.PDU             = SDP_PDU_SERVICESEARCHATTRIBUTERESPONSE;
 	ResponsePacket.SDPHeader.TransactionID   = SDPHeader->TransactionID;
-	ResponsePacket.SDPHeader.ParameterLength = cpu_to_be16(sizeof(ResponsePacket.AttributeListByteCount) + ResponsePacket.AttributeListByteCount);
-	
-	/* Must swap the endianness of the attribute byte count before sending it */
-	ResponsePacket.AttributeListByteCount    = cpu_to_be16(ResponsePacket.AttributeListByteCount);
+	ResponsePacket.SDPHeader.ParameterLength = cpu_to_be16(sizeof(ResponsePacket.AttributeListByteCount) + be16_to_cpu(ResponsePacket.AttributeListByteCount));
 
 	/* Send the completed response packet to the sender */
 	Bluetooth_L2CAP_SendPacket(StackState, Channel, (sizeof(ResponsePacket.SDPHeader) + be16_to_cpu(ResponsePacket.SDPHeader.ParameterLength)), &ResponsePacket);

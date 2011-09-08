@@ -149,6 +149,40 @@
 			return Data;
 		}
 
+		static inline const void* SDP_ReadSequenceHeader(const void** BufferPos,
+		                                                 uint16_t* ContentsSize)
+		{
+			/* Fetch the size of the Data Element structure from the header, increment the current buffer pos */
+			uint8_t SizeIndex = (SDP_ReadData8(BufferPos) & 0x07);
+			
+			const void* SequenceDataStart;
+
+			/* Convert the Data Element size index into a size in bytes */
+			switch (SizeIndex)
+			{
+				case SDP_DATASIZE_Variable8Bit:
+					*ContentsSize     = SDP_ReadData8(BufferPos);
+					SequenceDataStart = (*BufferPos + sizeof(uint8_t));
+					break;
+				case SDP_DATASIZE_Variable16Bit:
+					*ContentsSize     = SDP_ReadData16(BufferPos);
+					SequenceDataStart = (*BufferPos + sizeof(uint16_t));
+					break;
+				case SDP_DATASIZE_Variable32Bit:
+					*ContentsSize     = SDP_ReadData32(BufferPos);
+					SequenceDataStart = (*BufferPos + sizeof(uint32_t));
+					break;
+				default:
+					*ContentsSize     = (1 << SizeIndex);
+					SequenceDataStart = *BufferPos;
+					break;
+			}
+
+			*BufferPos = (SequenceDataStart + *ContentsSize);
+
+			return SequenceDataStart;
+		}
+
 		/** Adds a new Data Element Sequence container with a 16-bit size header to the buffer. The buffer
 		 *  pointer's position is advanced past the added header once the element has been added. The returned
 		 *  size header value is pre-zeroed out so that it can be incremented as data is placed into the Data
@@ -161,7 +195,7 @@
 		 *
 		 *  \return Pointer to the 16-bit size value of the container header, which has been pre-zeroed
 		 */
-		static inline uint16_t* SDP_AddSequence16(void** BufferPos)
+		static inline uint16_t* SDP_WriteSequenceHeader16(void** BufferPos)
 		{
 			SDP_WriteData8(BufferPos, (SDP_DATASIZE_Variable16Bit | SDP_DATATYPE_Sequence));
 

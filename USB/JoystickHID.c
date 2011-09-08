@@ -161,7 +161,7 @@ void Joystick_USBTask(void)
 		if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.Speaker))
 		  Speaker_Tone((Joystick_HIDReportItemMappings.Speaker->Value) ? 250 : 0);
 
-		/* For PS3 controllers, the PS3 button initiated a pairing with the last inserted Bluetooth adapter */
+		/* For PS3 controllers, the PS3 button initiates a pairing with the last inserted Bluetooth adapter */
 		if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.PS3Button) && Joystick_HIDReportItemMappings.PS3Button->Value)
 		{
 			/* Copy over the address of the last inserted USB Bluetooth adapter */
@@ -175,7 +175,7 @@ void Joystick_USBTask(void)
 				{
 					.bmRequestType = (REQDIR_HOSTTODEVICE | REQTYPE_CLASS | REQREC_INTERFACE),
 					.bRequest      = HID_REQ_SetReport,
-					.wValue        = 0x03F5,
+					.wValue        = ((3 << 8) | 0xF5),
 					.wIndex        = Joystick_HID_Interface.State.InterfaceNumber,
 					.wLength       = sizeof(PS3AdapterPairRequest)
 				};

@@ -257,6 +257,6 @@ void CALLBACK_Bluetooth_SendPacket(BT_StackConfig_t* const StackState,
 void EVENT_Bluetooth_InitComplete(BT_StackConfig_t* const StackState)
 {
 	/* Save the local BDADDR of the connected Bluetooth adapter for later use */
-	eeprom_update_block(BluetoothAdapter_LastLocalBDADDR, BluetoothAdapter_Stack.State.HCI.LocalBDADDR, BT_BDADDR_LEN);
+	eeprom_update_block(BluetoothAdapter_Stack.State.HCI.LocalBDADDR, BluetoothAdapter_LastLocalBDADDR, BT_BDADDR_LEN);
 }
 

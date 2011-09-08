@@ -12,7 +12,7 @@
   All rights reserved.
 */
 
-#include "BluetoothSDP.h"
+#include "SDPServer.h"
 
 void Bluetooth_SDP_Init(BT_StackConfig_t* const StackState)
 {

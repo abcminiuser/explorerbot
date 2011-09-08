@@ -12,7 +12,7 @@
   All rights reserved.
 */
 
-#include "BluetoothHID.h"
+#include "HIDClient.h"
 
 static HID_Service_t HIDConnections[MAX_HID_CONNECTIONS];
 

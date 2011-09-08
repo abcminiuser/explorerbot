@@ -20,7 +20,7 @@
 		#include <stdint.h>
 
 		#include "../../../Bluetooth.h"
-		#include "../../Common/HID/BluetoothHIDDefs.h"
+		#include "../../Common/HID/HIDService.h"
 	
 	/* Macros: */
 		#define MAX_HID_CONNECTIONS     MIN(MAX_DEVICE_CONNECTIONS, 1)

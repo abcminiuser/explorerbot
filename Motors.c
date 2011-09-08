@@ -53,23 +53,23 @@ void Motors_Init(void)
  */
 void Motors_SetChannelSpeed(const int16_t LeftPower, const int16_t RightPower)
 {
-	bool LeftDirChange  = (LeftPower  <= 0) ? (PORTD & (1 << 3)) : !(PORTD & (1 << 3));
-	bool RightDirChange = (RightPower <= 0) ? (PORTD & (1 << 4)) : !(PORTD & (1 << 4));
+	bool LeftDirChange  = (LeftPower  <= 0) ? (PORTD & (1 << 4)) : !(PORTD & (1 << 4));
+	bool RightDirChange = (RightPower <= 0) ? (PORTD & (1 << 3)) : !(PORTD & (1 << 3));
 
 	if (LeftDirChange || !(LeftPower))
-	{
-		TCCR1A &= ~(1 << COM1B1);
-		PORTB  &= ~(1 << 5);	
-	}
-	
-	if (RightDirChange || !(RightPower))
 	{
 		TCCR1A &= ~(1 << COM1A1);
 		PORTB  &= ~(1 << 6);	
 	}
 	
+	if (RightDirChange || !(RightPower))
+	{
+		TCCR1A &= ~(1 << COM1B1);
+		PORTB  &= ~(1 << 5);	
+	}
+	
 	if (LeftDirChange || RightDirChange)
-	  Delay_MS(50);
+	  Delay_MS(20);
 
 	uint16_t LeftPWMValue  = abs(LeftPower);
 	uint16_t RightPWMValue = abs(RightPower);
@@ -82,22 +82,22 @@ void Motors_SetChannelSpeed(const int16_t LeftPower, const int16_t RightPower)
 	  RightPWMValue = MAX_MOTOR_POWER;
 
 	if (LeftPower <= 0)
-	  PORTD &= ~(1 << 3);
-	else
-	  PORTD |=  (1 << 3);
-		
-	if (LeftPower != 0)
-	  TCCR1A |= (1 << COM1B1);
-
-	OCR1B = LeftPWMValue;
-	
-	if (RightPower <= 0)
 	  PORTD &= ~(1 << 4);
 	else
 	  PORTD |=  (1 << 4);
+		
+	if (LeftPower != 0)
+	  TCCR1A |= (1 << COM1A1);
+
+	OCR1A = LeftPWMValue;
+	
+	if (RightPower <= 0)
+	  PORTD &= ~(1 << 3);
+	else
+	  PORTD |=  (1 << 3);
 
 	if (RightPower != 0)
-	  TCCR1A |= (1 << COM1A1);
+	  TCCR1A |= (1 << COM1B1);
 	
-	OCR1A = RightPWMValue;
+	OCR1B = RightPWMValue;
 }

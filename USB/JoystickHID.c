@@ -142,13 +142,13 @@ void Joystick_USBTask(void)
 		HID_Host_ReceiveReport(&Joystick_HID_Interface, &JoystickReport);
 
 		/* Determine direction being pressed on the joystick */
-		if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.Forward) && Joystick_HIDReportItemMappings.Forward->Value)
+		if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.Forward)       && Joystick_HIDReportItemMappings.Forward->Value)
 		  Motors_SetChannelSpeed( MAX_MOTOR_POWER,  MAX_MOTOR_POWER);
 		else if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.Backward) && Joystick_HIDReportItemMappings.Backward->Value)
 		  Motors_SetChannelSpeed(-MAX_MOTOR_POWER, -MAX_MOTOR_POWER);
-		else if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.Left) && Joystick_HIDReportItemMappings.Left->Value)
+		else if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.Left)     && Joystick_HIDReportItemMappings.Left->Value)
 		  Motors_SetChannelSpeed(-MAX_MOTOR_POWER,  MAX_MOTOR_POWER);
-		else if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.Right) && Joystick_HIDReportItemMappings.Right->Value)
+		else if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.Right)    && Joystick_HIDReportItemMappings.Right->Value)
 		  Motors_SetChannelSpeed( MAX_MOTOR_POWER, -MAX_MOTOR_POWER);
 		else
 		  Motors_SetChannelSpeed(0, 0);
@@ -207,8 +207,7 @@ bool CALLBACK_HIDParser_FilterHIDReportItem(HID_ReportItem_t* const CurrentItem)
 	bool IsJoystick = false;
 
 	/* Iterate through the item's collection path, until either the root collection node or a collection with the
-	 * Joystick Usage is found - this prevents Mice, which use identical descriptors except for the Joystick usage
-	 * parent node, from being erroneously treated as a joystick by the demo
+	 * Joystick Usage is found - this distinguishes joystick HID devices from mouse devices
 	 */
 	for (HID_CollectionPath_t* CurrPath = CurrentItem->CollectionPath; CurrPath != NULL; CurrPath = CurrPath->Parent)
 	{
@@ -219,10 +218,6 @@ bool CALLBACK_HIDParser_FilterHIDReportItem(HID_ReportItem_t* const CurrentItem)
 			break;
 		}
 	}
-
-	/* If a collection with the joystick usage was not found, indicate that we are not interested in this item */
-	if (!IsJoystick)
-	  return false;
 
 	/* Check the attributes of the current item - see if we are interested in it or not */
 	if (CurrentItem->Attributes.Usage.Page == USAGE_PAGE_BUTTON)
@@ -256,7 +251,7 @@ bool CALLBACK_HIDParser_FilterHIDReportItem(HID_ReportItem_t* const CurrentItem)
 					return true;
 			}
 		}
-		else
+		else if (IsJoystick)
 		{
 			/* Map button usages to functions suitable for a generic joystick */
 			switch (CurrentItem->Attributes.Usage.Usage)
@@ -280,7 +275,23 @@ bool CALLBACK_HIDParser_FilterHIDReportItem(HID_ReportItem_t* const CurrentItem)
 					Joystick_HIDReportItemMappings.Speaker    = CurrentItem;
 					return true;
 			}
-		}	
+		}
+		else
+		{
+			/* Map button usages to functions suitable for a generic mouse */
+			switch (CurrentItem->Attributes.Usage.Usage)
+			{
+				case 1:
+					Joystick_HIDReportItemMappings.Left       = CurrentItem;
+					return true;
+				case 3:
+					Joystick_HIDReportItemMappings.Forward    = CurrentItem;
+					return true;
+				case 2:
+					Joystick_HIDReportItemMappings.Right      = CurrentItem;
+					return true;
+			}		
+		}
 	}
 
 	return false;

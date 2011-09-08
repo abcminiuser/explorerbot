@@ -53,49 +53,56 @@ void Motors_Init(void)
  */
 void Motors_SetChannelSpeed(const int16_t LeftPower, const int16_t RightPower)
 {
-	bool LeftDirChange  = (LeftPower  <= 0) ? (PORTD & (1 << 4)) : !(PORTD & (1 << 4));
-	bool RightDirChange = (RightPower <= 0) ? (PORTD & (1 << 3)) : !(PORTD & (1 << 3));
+	bool     LeftDirChange  = (LeftPower  <= 0) ? (PORTD & (1 << 4)) : !(PORTD & (1 << 4));
+	bool     RightDirChange = (RightPower <= 0) ? (PORTD & (1 << 3)) : !(PORTD & (1 << 3));
+	uint16_t LeftPWMValue   = abs(LeftPower);
+	uint16_t RightPWMValue  = abs(RightPower);
 
+	/* If motor channel off or direction switching, disable the PWM output completely */
 	if (LeftDirChange || !(LeftPower))
 	{
 		TCCR1A &= ~(1 << COM1A1);
 		PORTB  &= ~(1 << 6);	
 	}
 	
+	/* If motor channel off or direction switching, disable the PWM output completely */
 	if (RightDirChange || !(RightPower))
 	{
 		TCCR1A &= ~(1 << COM1B1);
 		PORTB  &= ~(1 << 5);	
 	}
 	
+	/* Delay on direction change to wait until slow inverter transistors have finished switching to prevent voltage rail dips */
 	if (LeftDirChange || RightDirChange)
-	  Delay_MS(20);
-
-	uint16_t LeftPWMValue  = abs(LeftPower);
-	uint16_t RightPWMValue = abs(RightPower);
+	  Delay_MS(2);
 	
-	/* DANGER: DO NOT REMOVE SPEED LIMITERS BELOW - PREVENTS OVERCURRENT/OVERVOLTAGE OF MOTORS */
+	/* DANGER: DO NOT REMOVE SPEED LIMITER BELOW - PREVENTS OVERCURRENT/OVERVOLTAGE OF MOTOR */
 	if (LeftPWMValue > MAX_MOTOR_POWER)
 	  LeftPWMValue = MAX_MOTOR_POWER;
 
+	/* DANGER: DO NOT REMOVE SPEED LIMITER BELOW - PREVENTS OVERCURRENT/OVERVOLTAGE OF MOTOR */
 	if (RightPWMValue > MAX_MOTOR_POWER)
 	  RightPWMValue = MAX_MOTOR_POWER;
 
+	/* Set direction pin for left motor channel */
 	if (LeftPower <= 0)
 	  PORTD &= ~(1 << 4);
 	else
 	  PORTD |=  (1 << 4);
 		
+	/* If channel power non-zero, re-activate the PWM output */
 	if (LeftPower != 0)
 	  TCCR1A |= (1 << COM1A1);
 
 	OCR1A = LeftPWMValue;
 	
+	/* Set direction pin for right motor channel */
 	if (RightPower <= 0)
 	  PORTD &= ~(1 << 3);
 	else
 	  PORTD |=  (1 << 3);
 
+	/* If channel power non-zero, re-activate the PWM output */
 	if (RightPower != 0)
 	  TCCR1A |= (1 << COM1B1);
 	

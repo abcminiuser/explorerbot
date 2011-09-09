@@ -25,7 +25,7 @@ const struct
 } PROGMEM SerialPort_Attribute_ServiceHandle =
 	{
 		(SDP_DATATYPE_UnsignedInt | SDP_DATASIZE_32Bit),
-		SWAPENDIAN_32(0x00010001),
+		CPU_TO_BE32(0x00010001),
 	};
 
 /** Serial Port Profile attribute, listing the implemented Service Class UUIDs of the Serial Port service
@@ -148,16 +148,16 @@ const struct
  */
 const ServiceAttributeTable_t PROGMEM SerialPort_Attribute_Table[] =
 	{
-		{.AttributeID = SDP_ATTRIBUTE_ID_SERVICERECORDHANDLE,    .Data = &SerialPort_Attribute_ServiceHandle       },
-		{.AttributeID = SDP_ATTRIBUTE_ID_SERVICECLASSIDS,        .Data = &SerialPort_Attribute_ServiceClassIDs     },
-		{.AttributeID = SDP_ATTRIBUTE_ID_PROTOCOLDESCRIPTORLIST, .Data = &SerialPort_Attribute_ProtocolDescriptor  },
-		{.AttributeID = SDP_ATTRIBUTE_ID_BROWSEGROUPLIST,        .Data = &SerialPort_Attribute_BrowseGroupList     },
-		{.AttributeID = SDP_ATTRIBUTE_ID_LANGUAGEBASEATTROFFSET, .Data = &SerialPort_Attribute_LanguageBaseIDOffset},
-		{.AttributeID = SDP_ATTRIBUTE_ID_SERVICENAME,            .Data = &SerialPort_Attribute_ServiceName         },
-		{.AttributeID = SDP_ATTRIBUTE_ID_SERVICEDESCRIPTION,     .Data = &SerialPort_Attribute_ServiceDescription  },
+		{SDP_ATTRIBUTE_ID_SERVICERECORDHANDLE,    &SerialPort_Attribute_ServiceHandle       },
+		{SDP_ATTRIBUTE_ID_SERVICECLASSIDS,        &SerialPort_Attribute_ServiceClassIDs     },
+		{SDP_ATTRIBUTE_ID_PROTOCOLDESCRIPTORLIST, &SerialPort_Attribute_ProtocolDescriptor  },
+		{SDP_ATTRIBUTE_ID_BROWSEGROUPLIST,        &SerialPort_Attribute_BrowseGroupList     },
+		{SDP_ATTRIBUTE_ID_LANGUAGEBASEATTROFFSET, &SerialPort_Attribute_LanguageBaseIDOffset},
+		{SDP_ATTRIBUTE_ID_SERVICENAME,            &SerialPort_Attribute_ServiceName         },
+		{SDP_ATTRIBUTE_ID_SERVICEDESCRIPTION,     &SerialPort_Attribute_ServiceDescription  },
 
 		SDP_ATTRIBUTE_TABLE_TERMINATOR
 	};
 
 /** Service entry node, used to register the attribute table with the SDP service */
-ServiceEntry_t ServiceEntry_RFCOMMSerialPort = {SerialPort_Attribute_Table, NULL};
+ServiceEntry_t ServiceEntry_RFCOMMSerialPort = {SerialPort_Attribute_Table};

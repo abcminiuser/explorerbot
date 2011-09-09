@@ -14,7 +14,9 @@
 
 #include "SDP.h"
 
+/** Linked list of service attribute tables registered with the SDP service. */
 static ServiceEntry_t* RegisteredServices;
+
 
 void SDP_RegisterService(ServiceEntry_t* const ServiceEntry)
 {
@@ -51,7 +53,7 @@ void SDP_UnregisterService(ServiceEntry_t* const ServiceEntry)
 	}
 
 	/* Transverse service linked list to find the inserted node */
-	while ((CurrentService->NextService != ServiceEntry) && CurrentService->NextService)
+	while ((CurrentService->NextService != NULL) && (CurrentService->NextService != ServiceEntry))
 	  CurrentService = CurrentService->NextService;
 
 	/* Remove service if found */
@@ -61,12 +63,25 @@ void SDP_UnregisterService(ServiceEntry_t* const ServiceEntry)
 
 void SDP_Init(BT_StackConfig_t* const StackState)
 {
+	/* Reset list of registered service attribute tables */
 	RegisteredServices = NULL;
 }
 
 void SDP_Manage(BT_StackConfig_t* const StackState)
 {
 
+}
+
+void SDP_ChannelOpened(BT_StackConfig_t* const StackState,
+                       BT_L2CAP_Channel_t* const Channel)
+{
+	
+}
+
+void SDP_ChannelClosed(BT_StackConfig_t* const StackState,
+                       BT_L2CAP_Channel_t* const Channel)
+{
+	
 }
 
 static void SDP_ServiceSearch(BT_StackConfig_t* const StackState,
@@ -155,7 +170,7 @@ static void SDP_ServiceAttribute(BT_StackConfig_t* const StackState,
 	/* Write out response sequence header */
 	uint16_t* RespAttributeListSize = SDP_WriteSequenceHeader16(&CurrResponsePos);
 	ResponseSize += 2;
-	
+		
 	// TODO - PROCESS AND ADD RESPONSE DATA
 	
 	ResponseSize += be16_to_cpu(*RespAttributeListSize);
@@ -228,18 +243,6 @@ static void SDP_ServiceSearchAttribute(BT_StackConfig_t* const StackState,
 
 	/* Send the completed response packet to the sender */
 	Bluetooth_L2CAP_SendPacket(StackState, Channel, (sizeof(ResponsePacket.SDPHeader) + be16_to_cpu(ResponsePacket.SDPHeader.ParameterLength)), &ResponsePacket);
-}
-
-void SDP_ChannelOpened(BT_StackConfig_t* const StackState,
-                       BT_L2CAP_Channel_t* const Channel)
-{
-	
-}
-
-void SDP_ChannelClosed(BT_StackConfig_t* const StackState,
-                       BT_L2CAP_Channel_t* const Channel)
-{
-	
 }
 
 void SDP_ProcessPacket(BT_StackConfig_t* const StackState,

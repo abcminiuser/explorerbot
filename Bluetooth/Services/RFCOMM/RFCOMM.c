@@ -16,7 +16,8 @@
 
 void RFCOMM_Init(BT_StackConfig_t* const StackState)
 {
-	SDP_RegisterService(ServiceEntry_RFCOMMSerialPort);
+	/* Register the RFCOMM virtual serial port service with the SDP service */
+	SDP_RegisterService(&ServiceEntry_RFCOMMSerialPort);
 }
 
 void RFCOMM_Manage(BT_StackConfig_t* const StackState)

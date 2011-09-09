@@ -46,6 +46,7 @@
 		#include "Bluetooth/Bluetooth.h"
 		#include "Bluetooth/Services/Server/SDP/SDPServer.h"
 		#include "Bluetooth/Services/Client/HID/HIDClient.h"
+		#include "Bluetooth/Services/Client/RFCOMM/RFCOMMClient.h"
 
 #endif
 

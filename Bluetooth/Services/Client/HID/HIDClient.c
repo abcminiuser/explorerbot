@@ -68,6 +68,7 @@ static void HID_Client_IntPacket(BT_StackConfig_t* const StackState,
 	switch (Data[0] & HID_TRANSTYPE_MASK)
 	{
 		case HID_TRANS_DATA:
+		case HID_TRANS_DATAC:
 			CALLBACK_HID_Client_ReportReceived(StackState, Channel, (Data[0] & ~HID_TRANSTYPE_MASK), (Length - 1), &Data[1]);
 			break;
 	}

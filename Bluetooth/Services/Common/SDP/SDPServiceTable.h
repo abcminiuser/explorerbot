@@ -20,7 +20,7 @@
 		#define UUID_SIZE_BYTES                         16
 
 		/** First 80 bits common to all standardized Bluetooth services. */
-		#define BASE_80BIT_UUID                         0x0000, 0x0010, 0x0080, {0x00, 0x80, 0x5F, 0x9B, 0x34, 0xFB}
+		#define BASE_80BIT_UUID                         CPU_TO_BE16(0x0000), CPU_TO_BE16(0x0010), CPU_TO_BE16(0x0080), {0x00, 0x80, 0x5F, 0x9B, 0x34, 0xFB}
 
 		#define RFCOMM_UUID                             {CPU_TO_BE32(0x00000003), BASE_80BIT_UUID}
 		#define L2CAP_UUID                              {CPU_TO_BE32(0x00000100), BASE_80BIT_UUID}

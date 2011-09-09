@@ -34,12 +34,14 @@ void EVENT_Bluetooth_InitServices(BT_StackConfig_t* const StackState)
 {
 	SDP_Server_Init(StackState);
 	HID_Client_Init(StackState);
+	RFCOMM_Client_Init(StackState);
 }
 
 void EVENT_Bluetooth_ManageServices(BT_StackConfig_t* const StackState)
 {
 	SDP_Server_Manage(StackState);
 	HID_Client_Manage(StackState);
+	RFCOMM_Client_Manage(StackState);
 }
 
 bool CALLBACK_Bluetooth_ConnectionRequest(BT_StackConfig_t* const StackState,
@@ -95,6 +97,9 @@ void EVENT_Bluetooth_ChannelOpened(BT_StackConfig_t* const StackState,
 		case CHANNEL_PSM_HIDINT:
 			HID_Client_ChannelOpened(StackState, Channel);
 			break;
+		case CHANNEL_PSM_RFCOMM:
+			RFCOMM_Client_ChannelOpened(StackState, Channel);
+			break;			
 	}
 
 	LCD_Clear();
@@ -113,6 +118,9 @@ void EVENT_Bluetooth_ChannelClosed(BT_StackConfig_t* const StackState,
 		case CHANNEL_PSM_HIDCTL:
 		case CHANNEL_PSM_HIDINT:
 			HID_Client_ChannelClosed(StackState, Channel);
+			break;
+		case CHANNEL_PSM_RFCOMM:
+			RFCOMM_Client_ChannelClosed(StackState, Channel);
 			break;
 	}
 
@@ -135,6 +143,9 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
 		case CHANNEL_PSM_HIDINT:
 			HID_Client_ProcessPacket(StackState, Channel, Length, Data);
 			break;
+		case CHANNEL_PSM_RFCOMM:
+			RFCOMM_Client_ProcessPacket(StackState, Channel, Length, Data);
+			break;		
 		default:
 			LCD_Clear();
 			LCD_WriteFormattedString("P:%04X L:%04X\n"

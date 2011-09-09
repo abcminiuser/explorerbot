@@ -18,7 +18,45 @@ static ServiceEntry_t* RegisteredServices;
 
 void SDP_RegisterService(ServiceEntry_t* const ServiceEntry)
 {
+	ServiceEntry_t* CurrentService = RegisteredServices;
 
+	/* No service currently registered, save new service as the root node */
+	if (!(CurrentService))
+	{
+		RegisteredServices = ServiceEntry;
+		return;
+	}
+
+	/* Transverse service linked list to find the tail node */
+	while (CurrentService->NextService != NULL)
+	  CurrentService = CurrentService->NextService;
+
+	/* Insert new service as the new tail node */
+	CurrentService->NextService = ServiceEntry;
+}
+
+void SDP_UnregisterService(ServiceEntry_t* const ServiceEntry)
+{
+	ServiceEntry_t* CurrentService = RegisteredServices;
+
+	/* No service currently registered, abort */
+	if (CurrentService == NULL)
+	  return;
+
+	/* Root registered service is the service to remove */
+	if (CurrentService == ServiceEntry)
+	{
+		RegisteredServices = CurrentService->NextService;
+		return;
+	}
+
+	/* Transverse service linked list to find the inserted node */
+	while ((CurrentService->NextService != ServiceEntry) && CurrentService->NextService)
+	  CurrentService = CurrentService->NextService;
+
+	/* Remove service if found */
+	if (CurrentService->NextService)
+	  CurrentService->NextService = CurrentService->NextService->NextService;
 }
 
 void SDP_Init(BT_StackConfig_t* const StackState)

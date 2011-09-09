@@ -60,10 +60,10 @@
 			const void* Data; /**< Pointer to the attribute data, located in PROGMEM memory space */
 		} ServiceAttributeTable_t;
 
-		typedef struct
+		typedef struct ServiceEntry_t
 		{
-			ServiceAttributeTable_t AttributeTable;
-			struct ServiceEntry_t*  NextEntry;
+			const ServiceAttributeTable_t* AttributeTable;
+			struct ServiceEntry_t*         NextService;
 		} ServiceEntry_t;
 
 		/** Structure for a list of Data Elements containing 8-bit integers, for service attributes requiring such lists. */

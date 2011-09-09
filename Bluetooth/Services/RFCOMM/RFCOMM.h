@@ -20,9 +20,9 @@
 		#include <stdint.h>
 
 		#include "../../Bluetooth.h"
-		#include "RFCOMMService.h"
+		#include "../SDP/SDP.h"
 		#include "RFCOMMServiceTable.h"
-
+		
 	/* Function Prototypes: */
 		void RFCOMM_Init(BT_StackConfig_t* const StackState);
 		void RFCOMM_Manage(BT_StackConfig_t* const StackState);

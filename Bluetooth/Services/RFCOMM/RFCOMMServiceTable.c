@@ -159,5 +159,5 @@ const ServiceAttributeTable_t PROGMEM SerialPort_Attribute_Table[] =
 		SDP_ATTRIBUTE_TABLE_TERMINATOR
 	};
 
-
-ServiceEntry_t ServiceEntry_RFCOMMSerialPort = {SerialPort_Attribute_Table};
+/** Service entry node, used to register the attribute table with the SDP service */
+ServiceEntry_t ServiceEntry_RFCOMMSerialPort = {SerialPort_Attribute_Table, NULL};

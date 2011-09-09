@@ -48,7 +48,7 @@
 			uint16_t D; /**< Bits 64-79 of the UUID. */
 			uint8_t  E[6]; /**< Bits 80-127 of the UUID. */
 		} UUID_t;
-
+		
 		/** Structure for the association of attribute ID values to an attribute value in FLASH. A table of these
 		 *  structures can then be built up for each supported UUID service within the device.
 		 *
@@ -59,6 +59,12 @@
 			uint16_t    AttributeID; /**< Attribute ID of the table element which the UUID service supports */
 			const void* Data; /**< Pointer to the attribute data, located in PROGMEM memory space */
 		} ServiceAttributeTable_t;
+
+		typedef struct
+		{
+			ServiceAttributeTable_t AttributeTable;
+			struct ServiceEntry_t*  NextEntry;
+		} ServiceEntry_t;
 
 		/** Structure for a list of Data Elements containing 8-bit integers, for service attributes requiring such lists. */
 		typedef struct

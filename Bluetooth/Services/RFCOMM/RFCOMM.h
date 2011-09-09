@@ -21,6 +21,7 @@
 
 		#include "../../Bluetooth.h"
 		#include "RFCOMMService.h"
+		#include "RFCOMMServiceTable.h"
 
 	/* Function Prototypes: */
 		void RFCOMM_Init(BT_StackConfig_t* const StackState);

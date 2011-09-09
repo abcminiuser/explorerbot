@@ -44,7 +44,7 @@
 		#include "Speaker.h"
 		
 		#include "Bluetooth/Bluetooth.h"
-		#include "Bluetooth/Services/SDP/SDPServer.h"
+		#include "Bluetooth/Services/SDP/SDP.h"
 		#include "Bluetooth/Services/HID/HIDClient.h"
 		#include "Bluetooth/Services/RFCOMM/RFCOMM.h"
 

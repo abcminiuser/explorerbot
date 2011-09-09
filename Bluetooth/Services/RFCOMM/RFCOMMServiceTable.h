@@ -21,5 +21,8 @@
 
 		#include "../../Bluetooth.h"
 		#include "../SDP/SDPService.h"
+		
+	/* External Variables: */
+		extern ServiceEntry_t ServiceEntry_RFCOMMSerialPort;
 
 #endif

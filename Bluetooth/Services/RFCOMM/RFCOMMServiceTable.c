@@ -159,3 +159,5 @@ const ServiceAttributeTable_t PROGMEM SerialPort_Attribute_Table[] =
 		SDP_ATTRIBUTE_TABLE_TERMINATOR
 	};
 
+
+ServiceEntry_t ServiceEntry_RFCOMMSerialPort = {SerialPort_Attribute_Table};

@@ -12,21 +12,28 @@
   All rights reserved.
 */
 
-#include "SDPServer.h"
+#include "SDP.h"
 
-void SDP_Server_Init(BT_StackConfig_t* const StackState)
+static ServiceEntry_t* RegisteredServices;
+
+void SDP_RegisterService(ServiceEntry_t* const ServiceEntry)
 {
 
 }
 
-void SDP_Server_Manage(BT_StackConfig_t* const StackState)
+void SDP_Init(BT_StackConfig_t* const StackState)
+{
+	RegisteredServices = NULL;
+}
+
+void SDP_Manage(BT_StackConfig_t* const StackState)
 {
 
 }
 
-static void SDP_Server_ServiceSearch(BT_StackConfig_t* const StackState,
-                                     BT_L2CAP_Channel_t* const Channel,
-                                     BT_SDP_PDUHeader_t* const SDPHeader)
+static void SDP_ServiceSearch(BT_StackConfig_t* const StackState,
+                              BT_L2CAP_Channel_t* const Channel,
+                              BT_SDP_PDUHeader_t* const SDPHeader)
 {
 	const void* CurrParameterPos = SDPHeader->Parameters;
 
@@ -78,9 +85,9 @@ static void SDP_Server_ServiceSearch(BT_StackConfig_t* const StackState,
 	Bluetooth_L2CAP_SendPacket(StackState, Channel, (sizeof(ResponsePacket.SDPHeader) + be16_to_cpu(ResponsePacket.SDPHeader.ParameterLength)), &ResponsePacket);
 }
 
-static void SDP_Server_ServiceAttribute(BT_StackConfig_t* const StackState,
-                                        BT_L2CAP_Channel_t* const Channel,
-                                        BT_SDP_PDUHeader_t* const SDPHeader)
+static void SDP_ServiceAttribute(BT_StackConfig_t* const StackState,
+                                 BT_L2CAP_Channel_t* const Channel,
+                                 BT_SDP_PDUHeader_t* const SDPHeader)
 {
 	const void* CurrParameterPos = SDPHeader->Parameters;
 
@@ -131,9 +138,9 @@ static void SDP_Server_ServiceAttribute(BT_StackConfig_t* const StackState,
 	Bluetooth_L2CAP_SendPacket(StackState, Channel, (sizeof(ResponsePacket.SDPHeader) + be16_to_cpu(ResponsePacket.SDPHeader.ParameterLength)), &ResponsePacket);
 }
 
-static void SDP_Server_ServiceSearchAttribute(BT_StackConfig_t* const StackState,
-                                              BT_L2CAP_Channel_t* const Channel,
-                                              BT_SDP_PDUHeader_t* const SDPHeader)
+static void SDP_ServiceSearchAttribute(BT_StackConfig_t* const StackState,
+                                       BT_L2CAP_Channel_t* const Channel,
+                                       BT_SDP_PDUHeader_t* const SDPHeader)
 {
 	const void* CurrParameterPos = SDPHeader->Parameters;
 
@@ -185,22 +192,22 @@ static void SDP_Server_ServiceSearchAttribute(BT_StackConfig_t* const StackState
 	Bluetooth_L2CAP_SendPacket(StackState, Channel, (sizeof(ResponsePacket.SDPHeader) + be16_to_cpu(ResponsePacket.SDPHeader.ParameterLength)), &ResponsePacket);
 }
 
-void SDP_Server_ChannelOpened(BT_StackConfig_t* const StackState,
-                              BT_L2CAP_Channel_t* const Channel)
+void SDP_ChannelOpened(BT_StackConfig_t* const StackState,
+                       BT_L2CAP_Channel_t* const Channel)
 {
 	
 }
 
-void SDP_Server_ChannelClosed(BT_StackConfig_t* const StackState,
-                              BT_L2CAP_Channel_t* const Channel)
+void SDP_ChannelClosed(BT_StackConfig_t* const StackState,
+                       BT_L2CAP_Channel_t* const Channel)
 {
 	
 }
 
-void SDP_Server_ProcessPacket(BT_StackConfig_t* const StackState,
-                              BT_L2CAP_Channel_t* const Channel,
-                              uint16_t Length,
-                              uint8_t* Data)
+void SDP_ProcessPacket(BT_StackConfig_t* const StackState,
+                       BT_L2CAP_Channel_t* const Channel,
+                       uint16_t Length,
+                       uint8_t* Data)
 {
 	BT_SDP_PDUHeader_t* SDPHeader = (BT_SDP_PDUHeader_t*)Data;
 	
@@ -212,13 +219,14 @@ void SDP_Server_ProcessPacket(BT_StackConfig_t* const StackState,
 	switch (SDPHeader->PDU)
 	{
 		case SDP_PDU_SERVICESEARCHREQUEST:
-			SDP_Server_ServiceSearch(StackState, Channel, SDPHeader);
+			SDP_ServiceSearch(StackState, Channel, SDPHeader);
 			break;
 		case SDP_PDU_SERVICEATTRIBUTEREQUEST:
-			SDP_Server_ServiceAttribute(StackState, Channel, SDPHeader);
+			SDP_ServiceAttribute(StackState, Channel, SDPHeader);
 			break;
 		case SDP_PDU_SERVICESEARCHATTRIBUTEREQUEST:
-			SDP_Server_ServiceSearchAttribute(StackState, Channel, SDPHeader);
+			SDP_ServiceSearchAttribute(StackState, Channel, SDPHeader);
 			break;
 	}
 }
+

@@ -149,7 +149,7 @@ SRC = $(TARGET).c                                                 \
 	  Bluetooth/Bluetooth.c                                       \
 	  Bluetooth/BluetoothHCI.c                                    \
 	  Bluetooth/BluetoothL2CAP.c                                  \
-	  Bluetooth/Services/SDP/SDPServer.c                          \
+	  Bluetooth/Services/SDP/SDP.c                                \
 	  Bluetooth/Services/HID/HIDClient.c                          \
 	  Bluetooth/Services/RFCOMM/RFCOMM.c                          \
 	  Bluetooth/Services/RFCOMM/RFCOMMServiceTable.c              \

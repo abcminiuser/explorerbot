@@ -32,14 +32,14 @@
 
 void EVENT_Bluetooth_InitServices(BT_StackConfig_t* const StackState)
 {
-	SDP_Server_Init(StackState);
+	SDP_Init(StackState);
 	HID_Client_Init(StackState);
 	RFCOMM_Init(StackState);
 }
 
 void EVENT_Bluetooth_ManageServices(BT_StackConfig_t* const StackState)
 {
-	SDP_Server_Manage(StackState);
+	SDP_Manage(StackState);
 	HID_Client_Manage(StackState);
 	RFCOMM_Manage(StackState);
 }
@@ -91,7 +91,7 @@ void EVENT_Bluetooth_ChannelOpened(BT_StackConfig_t* const StackState,
 	switch (Channel->PSM)
 	{
 		case CHANNEL_PSM_SDP:
-			SDP_Server_ChannelOpened(StackState, Channel);			
+			SDP_ChannelOpened(StackState, Channel);			
 			break;
 		case CHANNEL_PSM_HIDCTL:
 		case CHANNEL_PSM_HIDINT:
@@ -113,7 +113,7 @@ void EVENT_Bluetooth_ChannelClosed(BT_StackConfig_t* const StackState,
 	switch (Channel->PSM)
 	{
 		case CHANNEL_PSM_SDP:
-			SDP_Server_ChannelClosed(StackState, Channel);			
+			SDP_ChannelClosed(StackState, Channel);			
 			break;
 		case CHANNEL_PSM_HIDCTL:
 		case CHANNEL_PSM_HIDINT:
@@ -137,7 +137,7 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
 	switch (Channel->PSM)
 	{
 		case CHANNEL_PSM_SDP:
-			SDP_Server_ProcessPacket(StackState, Channel, Length, Data);
+			SDP_ProcessPacket(StackState, Channel, Length, Data);
 			break;
 		case CHANNEL_PSM_HIDCTL:
 		case CHANNEL_PSM_HIDINT:

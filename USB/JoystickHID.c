@@ -211,8 +211,7 @@ bool CALLBACK_HIDParser_FilterHIDReportItem(HID_ReportItem_t* const CurrentItem)
 	 */
 	for (HID_CollectionPath_t* CurrPath = CurrentItem->CollectionPath; CurrPath != NULL; CurrPath = CurrPath->Parent)
 	{
-		if ((CurrPath->Usage.Page  == USAGE_PAGE_GENERIC_DCTRL) &&
-		    (CurrPath->Usage.Usage == USAGE_JOYSTICK))
+		if (CurrPath->Usage.Usage == USAGE_JOYSTICK)
 		{
 			IsJoystick = true;
 			break;

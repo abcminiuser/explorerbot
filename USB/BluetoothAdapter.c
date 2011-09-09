@@ -226,7 +226,7 @@ void CALLBACK_Bluetooth_SendPacket(BT_StackConfig_t* const StackState,
 	/* Determine the type of packet being sent, use appropriate pipe */
 	switch (Type)
 	{
-		case BLUETOOTH_PACKET_HCICommand:
+		case BLUETOOTH_PACKET_HCICommand:		
 			USB_ControlRequest = (USB_Request_Header_t)
 				{
 					.bmRequestType = (REQDIR_HOSTTODEVICE | REQTYPE_CLASS | REQREC_DEVICE),
@@ -240,11 +240,11 @@ void CALLBACK_Bluetooth_SendPacket(BT_StackConfig_t* const StackState,
 			Pipe_SelectPipe(PIPE_CONTROLPIPE);
 			USB_Host_SendControlRequest(StackState->Config.PacketBuffer);
 			break;
-		default:
+		case BLUETOOTH_PACKET_L2CAPData:
 			Pipe_SelectPipe(BLUETOOTH_DATA_OUT_PIPE);
-			Pipe_Unfreeze();
 
 			/* L2CAP packets must be sent over the Data OUT pipe */
+			Pipe_Unfreeze();
 			Pipe_Write_Stream_LE(StackState->Config.PacketBuffer, Length, NULL);
 			Pipe_ClearOUT();
 			Pipe_Freeze();

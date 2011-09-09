@@ -19,8 +19,8 @@
 		#include <stdbool.h>
 		#include <stdint.h>
 
-		#include "../../../Bluetooth.h"
-		#include "../../Common/HID/HIDService.h"
+		#include "../../Bluetooth.h"
+		#include "HIDService.h"
 	
 	/* Macros: */
 		#define MAX_HID_CONNECTIONS     MIN(MAX_DEVICE_CONNECTIONS, 1)

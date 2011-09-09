@@ -19,8 +19,8 @@
 		#include <stdbool.h>
 		#include <stdint.h>
 
-		#include "../../../Bluetooth.h"
-		#include "../../Common/RFCOMM/RFCOMMService.h"
+		#include "../../Bluetooth.h"
+		#include "RFCOMMService.h"
 
 	/* Function Prototypes: */
 		void RFCOMM_Client_Init(BT_StackConfig_t* const StackState);

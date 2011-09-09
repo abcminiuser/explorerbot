@@ -12,35 +12,35 @@
   All rights reserved.
 */
 
-#include "RFCOMMClient.h"
+#include "RFCOMM.h"
 
-void RFCOMM_Client_Init(BT_StackConfig_t* const StackState)
+void RFCOMM_Init(BT_StackConfig_t* const StackState)
 {
 
 }
 
-void RFCOMM_Client_Manage(BT_StackConfig_t* const StackState)
+void RFCOMM_Manage(BT_StackConfig_t* const StackState)
 {
 
 }
 
-void RFCOMM_Client_ChannelOpened(BT_StackConfig_t* const StackState,
-                                 BT_L2CAP_Channel_t* const Channel)
+void RFCOMM_ChannelOpened(BT_StackConfig_t* const StackState,
+                          BT_L2CAP_Channel_t* const Channel)
 {
 
 }
 
-void RFCOMM_Client_ChannelClosed(BT_StackConfig_t* const StackState,
-                                 BT_L2CAP_Channel_t* const Channel)
+void RFCOMM_ChannelClosed(BT_StackConfig_t* const StackState,
+                          BT_L2CAP_Channel_t* const Channel)
 {
 
 }
 
-#include "../../../../LCD.h"
-void RFCOMM_Client_ProcessPacket(BT_StackConfig_t* const StackState,
-                                 BT_L2CAP_Channel_t* const Channel,
-                                 uint16_t Length,
-                                 uint8_t* Data)
+#include "../../../LCD.h"
+void RFCOMM_ProcessPacket(BT_StackConfig_t* const StackState,
+                          BT_L2CAP_Channel_t* const Channel,
+                          uint16_t Length,
+                          uint8_t* Data)
 {
 	LCD_Clear();
 	LCD_WriteString("RFCOMM");

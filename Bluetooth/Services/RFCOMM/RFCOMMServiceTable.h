@@ -19,7 +19,7 @@
 		#include <stdbool.h>
 		#include <stdint.h>
 
-		#include "../../../Bluetooth.h"
-		#include "../../Common/SDP/SDPService.h"
+		#include "../../Bluetooth.h"
+		#include "../SDP/SDPService.h"
 
 #endif

@@ -15,6 +15,9 @@
 #ifndef _BLUETOOTH_SERVICE_SDP_DEFS_H_
 #define _BLUETOOTH_SERVICE_SDP_DEFS_H_
 
+	/* Includes: */
+		#include "SDPServiceTable.h"
+
 	/* Enums: */
 		enum ServiceDiscovery_PDU_t
 		{

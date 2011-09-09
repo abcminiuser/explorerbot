@@ -152,6 +152,7 @@ SRC = $(TARGET).c                                                 \
 	  Bluetooth/Services/Server/SDP/SDPServer.c                   \
 	  Bluetooth/Services/Client/HID/HIDClient.c                   \
 	  Bluetooth/Services/Client/RFCOMM/RFCOMMClient.c             \
+	  Bluetooth/Services/Client/RFCOMM/RFCOMMServiceTable.c       \
 	  USB/BluetoothAdapter.c                                      \
 	  USB/JoystickHID.c                                           \
 	  $(LUFA_SRC_USB)                                             \

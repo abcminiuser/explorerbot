@@ -21,7 +21,6 @@
 
 		#include "../../../Bluetooth.h"
 		#include "../../Common/SDP/SDPService.h"
-		#include "../../Common/SDP/SDPServiceTable.h"
 
 	/* Function Prototypes: */
 		void SDP_Server_Init(BT_StackConfig_t* const StackState);

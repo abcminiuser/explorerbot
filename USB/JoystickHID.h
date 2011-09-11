@@ -38,10 +38,10 @@
 
 		#include <LUFA/Drivers/USB/USB.h>
 		
-		#include "../Headlights.h"
-		#include "../Motors.h"
-		#include "../RGB.h"
-		#include "../Speaker.h"
+		#include "../Hardware/Headlights.h"
+		#include "../Hardware/Motors.h"
+		#include "../Hardware/RGB.h"
+		#include "../Hardware/Speaker.h"
 		
 		#include "BluetoothAdapter.h"
 		#include "../Bluetooth/Bluetooth.h"

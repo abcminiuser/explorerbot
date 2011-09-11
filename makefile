@@ -134,13 +134,13 @@ include $(LUFA_PATH)/LUFA/makefile
 # List C source files here. (C dependencies are automatically generated.)
 SRC = $(TARGET).c                                                 \
 	  BluetoothControl.c                                          \
-	  Buttons.c                                                   \
-	  ExternalSRAM.c                                              \
-	  Headlights.c                                                \
-	  LCD.c                                                       \
-	  Motors.c                                                    \
-	  RGB.c                                                       \
-	  Speaker.c                                                   \
+	  Hardware/Buttons.c                                          \
+	  Hardware/ExternalSRAM.c                                     \
+	  Hardware/Headlights.c                                       \
+	  Hardware/LCD.c                                              \
+	  Hardware/Motors.c                                           \
+	  Hardware/RGB.c                                              \
+	  Hardware/Speaker.c                                          \
 	  Sensors/Sensors.c                                           \
 	  Sensors/AK8975.c                                            \
 	  Sensors/BMA150.c                                            \

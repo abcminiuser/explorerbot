@@ -30,6 +30,8 @@
 
 #include "AK8975.h"
 
+static const char* SensorName PROGMEM = "Compass";
+
 static void AK8975_StartConversion(SensorData_t* const CompassSensorInfo)
 {
 	uint8_t PacketBuffer[1];
@@ -49,6 +51,10 @@ void AK8975_Init(SensorData_t* const CompassSensorInfo)
 
 	/* Sensor considered not connected until it has been sucessfully initialized */
 	CompassSensorInfo->Connected = false;
+
+	/* Configure sensor information settings */
+	CompassSensorInfo->SingleAxis = false;
+	CompassSensorInfo->Name       = SensorName;
 
 	/* Attempt to read the sensor's ID register, return error if sensor cannot be communicated with */
 	if (Sensor_ReadBytes(AK8975_ADDRESS, AK8975_REG_WIA, PacketBuffer, 1) != TWI_ERROR_NoError)

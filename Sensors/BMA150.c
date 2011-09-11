@@ -30,12 +30,18 @@
 
 #include "BMA150.h"
 
+static const char* SensorName PROGMEM = "Accelerometer";
+
 void BMA150_Init(SensorData_t* const AccelSensorInfo)
 {
 	uint8_t PacketBuffer[1];
 
 	/* Sensor considered not connected until it has been sucessfully initialized */
 	AccelSensorInfo->Connected = false;
+
+	/* Configure sensor information settings */
+	AccelSensorInfo->SingleAxis = false;
+	AccelSensorInfo->Name       = SensorName;
 
 	/* Attempt to read the sensor's ID register, return error if sensor cannot be communicated with */
 	if (Sensor_ReadBytes(BMA150_ADDRESS, BMA150_CHIP_ID_REG, PacketBuffer, 1) != TWI_ERROR_NoError)

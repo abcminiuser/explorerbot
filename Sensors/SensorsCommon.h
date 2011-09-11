@@ -32,6 +32,8 @@
 #define _SENSORS_COMMON_H_
 
 	/* Includes: */
+		#include <avr/pgmspace.h>
+	
 		#include <stdint.h>
 		#include <stdbool.h>
 
@@ -43,7 +45,10 @@
 	/* Type Defines: */
 		typedef struct
 		{
-			bool Connected;
+			bool  Connected;
+			const char* Name;
+			
+			bool SingleAxis;
 			
 			union
 			{

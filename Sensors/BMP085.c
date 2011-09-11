@@ -30,6 +30,8 @@
 
 #include "BMP085.h"
 
+static const char* SensorName PROGMEM = "Pressure";
+
 static void BMP085_StartConversion(SensorData_t* const PressureSensorInfo)
 {
 	uint8_t PacketBuffer[1];
@@ -49,6 +51,10 @@ void BMP085_Init(SensorData_t* const PressureSensorInfo)
 
 	/* Sensor considered not connected until it has been sucessfully initialized */
 	PressureSensorInfo->Connected = false;
+
+	/* Configure sensor information settings */
+	PressureSensorInfo->SingleAxis = true;
+	PressureSensorInfo->Name       = SensorName;
 
 	/* Attempt to read the sensor's ID register, return error if sensor cannot be communicated with */
 	if (Sensor_ReadBytes(BMP085_ADDRESS, BMP085_CHIP_ID_REG, PacketBuffer, 1) != TWI_ERROR_NoError)

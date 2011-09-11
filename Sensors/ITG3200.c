@@ -30,6 +30,8 @@
 
 #include "ITG3200.h"
 
+static const char* SensorNameGyro PROGMEM = "Gyroscope";
+static const char* SensorNameTemp PROGMEM = "Temperature";
 static SensorData_t GyroZeroOffset;
 
 void ITG3200_Init(SensorData_t* const GyroSensorInfo,
@@ -40,9 +42,19 @@ void ITG3200_Init(SensorData_t* const GyroSensorInfo,
 	/* Sensor considered not connected until it has been sucessfully initialized */
 	GyroSensorInfo->Connected = false;
 
-	/* Temperature sensor connectivity should match the physical sensor connectivity */
+	/* Configure sensor information settings */
+	GyroSensorInfo->SingleAxis = false;
+	GyroSensorInfo->Name       = SensorNameGyro;
+
 	if (TempSensorInfo)
-	  TempSensorInfo->Connected = false;
+	{
+		/* Temperature sensor connectivity should match the physical sensor connectivity */
+		TempSensorInfo->Connected = false;
+
+		/* Configure sensor information settings */
+		TempSensorInfo->SingleAxis = true;
+		TempSensorInfo->Name       = SensorNameTemp;
+	}
 
 	/* Attempt to read the sensor's ID register, return error if sensor cannot be communicated with */
 	if (Sensor_ReadBytes(ITG3200_ADDRESS, ITG3200_WHOAMI_REG, PacketBuffer, 1) != TWI_ERROR_NoError)

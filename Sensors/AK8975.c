@@ -30,7 +30,7 @@
 
 #include "AK8975.h"
 
-static const char* SensorName PROGMEM = "Compass";
+static const char* SensorName = "Compass";
 
 static void AK8975_StartConversion(SensorData_t* const CompassSensorInfo)
 {

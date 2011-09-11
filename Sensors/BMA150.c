@@ -30,7 +30,7 @@
 
 #include "BMA150.h"
 
-static const char* SensorName PROGMEM = "Accelerometer";
+static const char* SensorName = "Accelerometer";
 
 void BMA150_Init(SensorData_t* const AccelSensorInfo)
 {

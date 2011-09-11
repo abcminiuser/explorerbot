@@ -28,45 +28,32 @@
   this software.
 */
 
-#ifndef _BLUETOOTH_ROBOT_H_
-#define _BLUETOOTH_ROBOT_H_
+#ifndef _DATA_LOGGER_H_
+#define _DATA_LOGGER_H_
 
 	/* Includes: */
 		#include <avr/io.h>
-		#include <avr/wdt.h>
-		#include <avr/power.h>
-		#include <avr/interrupt.h>
-		#include <avr/pgmspace.h>
-		#include <util/delay.h>
 		#include <stdbool.h>
-		
+		#include <stdlib.h>
+
 		#include <LUFA/Drivers/USB/USB.h>
 		
-		#include "USB/BluetoothAdapter.h"
-		#include "USB/JoystickHID.h"
-		#include "USB/DataloggerMS.h"
-
-		#include "ExternalSRAM.h"
-		#include "Buttons.h"
-		#include "Headlights.h"
-		#include "LCD.h"
-		#include "Motors.h"
-		#include "RGB.h"
-		#include "Speaker.h"
-
-		#include "Sensors/Sensors.h"
+		#include "../RGB.h"
+		
+		#include "../Sensors/SensorsCommon.h"
+		#include "../FatFS/ff.h"
+		
+	/* External Variables: */
+		extern USB_ClassInfo_MS_Host_t Datalogger_MS_Interface;
 
 	/* Function Prototypes: */
-		void SetupHardware(void);
-		void StartupSequence(void);
-		void CheckSensors(void);
-
-		void EVENT_USB_Host_HostError(const uint8_t ErrorCode);
-		void EVENT_USB_Host_DeviceAttached(void);
-		void EVENT_USB_Host_DeviceUnattached(void);
-		void EVENT_USB_Host_DeviceEnumerationFailed(const uint8_t ErrorCode,
-		                                            const uint8_t SubErrorCode);
-		void EVENT_USB_Host_DeviceEnumerationComplete(void);
+		bool Datalogger_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
+		                               uint16_t ConfigDescriptorSize,
+		                               void* ConfigDescriptorData);
+		bool Datalogger_PostConfiguration(void);
+		void Datalogger_USBTask(void);
+		
+		void Datalogger_LogSensors(void);
 
 #endif
 

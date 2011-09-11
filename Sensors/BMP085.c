@@ -30,7 +30,7 @@
 
 #include "BMP085.h"
 
-static const char* SensorName PROGMEM = "Pressure";
+static const char* SensorName = "Pressure";
 
 static void BMP085_StartConversion(SensorData_t* const PressureSensorInfo)
 {

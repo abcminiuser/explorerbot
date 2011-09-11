@@ -30,8 +30,8 @@
 
 #include "ITG3200.h"
 
-static const char* SensorNameGyro PROGMEM = "Gyroscope";
-static const char* SensorNameTemp PROGMEM = "Temperature";
+static const char* SensorNameGyro = "Gyroscope";
+static const char* SensorNameTemp = "Temperature";
 static SensorData_t GyroZeroOffset;
 
 void ITG3200_Init(SensorData_t* const GyroSensorInfo,

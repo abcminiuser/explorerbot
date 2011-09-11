@@ -66,12 +66,17 @@ int main(void)
 			/* Clear the timer compare flag */
 			TIFR3 |= (1 << OCF3A);
 		
-			/* Update all connected sensors */
+			/* Update all connected sensors' values */
 			Sensors_Update();
+			
+			/* Log sensors to attached mass storage disk if available */
+			if (Datalogger_MS_Interface.State.IsActive)
+			  Datalogger_LogSensors();
 		}
 		
 		BluetoothAdapter_USBTask();
 		Joystick_USBTask();
+		Datalogger_USBTask();
 		USB_USBTask();
 	}
 }
@@ -202,7 +207,8 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 	}
 
 	if (!(Joystick_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData)) &&
-	    !(BluetoothAdapter_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData)))
+	    !(BluetoothAdapter_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData)) &&
+	    !(Datalogger_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData)))
 	{
 		LCD_Clear();
 		LCD_WriteString_P(PSTR("ERR: Unknown USB"));
@@ -218,7 +224,7 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 		return;
 	}
 	
-	if (!(Joystick_PostConfiguration()) || !(BluetoothAdapter_PostConfiguration()))
+	if (!(Joystick_PostConfiguration()) || !(BluetoothAdapter_PostConfiguration()) || !(Datalogger_PostConfiguration()))
 	{
 		LCD_Clear();
 		LCD_WriteString_P(PSTR("ERR: Post Config"));
@@ -229,7 +235,13 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 	LCD_Clear();
 	LCD_WriteString_P(PSTR("* System Ready *"));
 	LCD_SetCursor(2, 0);
-	LCD_WriteString_P(Joystick_HID_Interface.State.IsActive ? PSTR("   (HID Mode)") : PSTR("(Bluetooth Mode)"));
+	
+	if (Joystick_HID_Interface.State.IsActive)
+	  LCD_WriteString_P(PSTR("   (HID Mode)"));
+	else if (Datalogger_MS_Interface.State.IsActive)
+	  LCD_WriteString_P(PSTR("    (MS Mode)"));
+	else
+	  LCD_WriteString_P(PSTR("(Bluetooth Mode)"));
 	
 	RGB_SetColour(RGB_ALIAS_Ready);
 }

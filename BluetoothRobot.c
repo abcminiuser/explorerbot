@@ -237,10 +237,10 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 	LCD_SetCursor(2, 0);
 	
 	if (Joystick_HID_Interface.State.IsActive)
-	  LCD_WriteString_P(PSTR("   (HID Mode)"));
+	  LCD_WriteString_P(PSTR("   (HID Mode)   "));
 	else if (Datalogger_MS_Interface.State.IsActive)
-	  LCD_WriteString_P(PSTR("    (MS Mode)"));
-	else
+	  LCD_WriteString_P(PSTR("(Sens. Log Mode)"));
+	else if (BluetoothAdapter_IsActive)
 	  LCD_WriteString_P(PSTR("(Bluetooth Mode)"));
 	
 	RGB_SetColour(RGB_ALIAS_Ready);

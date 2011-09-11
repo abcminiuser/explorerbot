@@ -81,7 +81,7 @@ bool Datalogger_PostConfiguration(void)
 	uint8_t ErrorCode;
 	
 	f_mount(0, &DiskFATState);
-	ErrorCode = f_open(&DiskLogFile, "ExplrBot.txt", FA_OPEN_ALWAYS | FA_WRITE);
+	ErrorCode = f_open(&DiskLogFile, "ExplrBot.txt", (FA_OPEN_ALWAYS | FA_WRITE));
 
 	/* See if the existing log was created sucessfully */
 	if (ErrorCode == FR_OK)
@@ -132,7 +132,7 @@ void Datalogger_USBTask(void)
 	MS_Host_USBTask(&Datalogger_MS_Interface);
 }
 
-
+/** Writes the current sensor values out to the attached Mass Storage device. */
 void Datalogger_LogSensors(void)
 {
 	if ((USB_HostState != HOST_STATE_Configured) || !(Datalogger_MS_Interface.State.IsActive))
@@ -147,9 +147,10 @@ void Datalogger_LogSensors(void)
 		if (SensorIndex)
 		  f_write(&DiskLogFile, ", ", strlen(", "), &BytesWritten);
 
-		char    TempBuffer[50];
+		char    TempBuffer[25];
 		uint8_t TempBufferLen;
 		
+		/* Print the current sensor data into the temporary buffer */
 		if (CurrSensor->SingleAxis)
 		  TempBufferLen = sprintf(TempBuffer, "%ld", CurrSensor->Data.Single);
 		else

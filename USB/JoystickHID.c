@@ -102,10 +102,7 @@ bool Joystick_PostConfiguration(void)
 	  return true;
 
 	/* Switch the attached HID device into report protocol mode and parse the HID report descriptor */
-	HID_Host_SetReportProtocol(&Joystick_HID_Interface);
-	
-	/* Abort if parser failed to find any HID report items */
-	if (!(HIDReportInfo.TotalReportItems))
+	if (HID_Host_SetReportProtocol(&Joystick_HID_Interface) || !(HIDReportInfo.TotalReportItems))
 	  return false;
 
 	/* Need to send a special packet to PS3 Controllers to start reports */

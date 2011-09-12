@@ -38,7 +38,7 @@
 
 		#include <LUFA/Drivers/USB/USB.h>
 		
-		#include "../Hardware/RGB.h"
+		#include "../Drivers/RGB.h"
 		
 		#include "../Sensors/SensorsCommon.h"
 		#include "../FatFS/ff.h"

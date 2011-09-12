@@ -46,13 +46,13 @@
 		#include "USB/JoystickHID.h"
 		#include "USB/DataloggerMS.h"
 
-		#include "Hardware/ExternalSRAM.h"
-		#include "Hardware/Buttons.h"
-		#include "Hardware/Headlights.h"
-		#include "Hardware/LCD.h"
-		#include "Hardware/Motors.h"
-		#include "Hardware/RGB.h"
-		#include "Hardware/Speaker.h"
+		#include "Drivers/ExternalSRAM.h"
+		#include "Drivers/Buttons.h"
+		#include "Drivers/Headlights.h"
+		#include "Drivers/LCD.h"
+		#include "Drivers/Motors.h"
+		#include "Drivers/RGB.h"
+		#include "Drivers/Speaker.h"
 
 		#include "Sensors/Sensors.h"
 

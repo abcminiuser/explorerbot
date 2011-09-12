@@ -39,8 +39,8 @@
 
 		#include <LUFA/Drivers/USB/USB.h>
 		
-		#include "../Hardware/ExternalSRAM.h"
-		#include "../Hardware/RGB.h"
+		#include "../Drivers/ExternalSRAM.h"
+		#include "../Drivers/RGB.h"
 		
 		#include "../Bluetooth/Bluetooth.h"
 

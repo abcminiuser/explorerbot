@@ -37,7 +37,7 @@ void RFCOMM_ChannelClosed(BT_StackConfig_t* const StackState,
 
 }
 
-#include "../../../Hardware/LCD.h"
+#include "../../../Drivers/LCD.h"
 void RFCOMM_ProcessPacket(BT_StackConfig_t* const StackState,
                           BT_L2CAP_Channel_t* const Channel,
                           uint16_t Length,

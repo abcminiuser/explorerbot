@@ -102,10 +102,7 @@ bool Datalogger_PostConfiguration(void)
 			
 			/* If the sensor is a triplicate, need to add in seperators to keep values aligned properly */
 			if (!(CurrSensor->SingleAxis))
-			{
-				f_write(&DiskLogFile, ",", strlen(","), &BytesWritten);
-				f_write(&DiskLogFile, ",", strlen(","), &BytesWritten);			
-			}
+			  f_write(&DiskLogFile, ",,", strlen(",,"), &BytesWritten);
 			
 			/* Advance pointer to next sensor entry in the sensor structure */
 			CurrSensor++;

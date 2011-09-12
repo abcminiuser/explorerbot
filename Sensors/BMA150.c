@@ -64,7 +64,7 @@ void BMA150_Init(SensorData_t* const AccelSensorInfo)
 	if (Sensor_WriteBytes(BMA150_ADDRESS, BMA150_SMB150_CONF2_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;
 	  
-	/* Set 25MHz bandwidth, 2g range */
+	/* Set 25Hz bandwidth, 2g range */
 	PacketBuffer[0] = 0;
 	if (Sensor_WriteBytes(BMA150_ADDRESS, BMA150_RANGE_BWIDTH_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;
@@ -83,11 +83,11 @@ void BMA150_Update(SensorData_t* const AccelSensorInfo)
 
 	/* Read the converted sensor data as a block packet */
 	if (Sensor_ReadBytes(BMA150_ADDRESS, BMA150_X_AXIS_LSB_REG, PacketBuffer, 6) != TWI_ERROR_NoError)
-	  return;		  
+	  return;
 
 	/* Save updated sensor data */
-	AccelSensorInfo->Data.Triplicate.X = (((uint16_t)PacketBuffer[1] << 8) | PacketBuffer[0]);
-	AccelSensorInfo->Data.Triplicate.Y = (((uint16_t)PacketBuffer[3] << 8) | PacketBuffer[2]);
-	AccelSensorInfo->Data.Triplicate.Z = (((uint16_t)PacketBuffer[5] << 8) | PacketBuffer[4]);
+	AccelSensorInfo->Data.Triplicate.X = (((uint16_t)PacketBuffer[1] << 2) | (PacketBuffer[0] >> 6));
+	AccelSensorInfo->Data.Triplicate.Y = (((uint16_t)PacketBuffer[3] << 2) | (PacketBuffer[2] >> 6));
+	AccelSensorInfo->Data.Triplicate.Z = (((uint16_t)PacketBuffer[5] << 2) | (PacketBuffer[4] >> 6));
 }
 

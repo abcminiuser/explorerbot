@@ -77,11 +77,11 @@ bool Datalogger_PostConfiguration(void)
 {
 	if (!(Datalogger_MS_Interface.State.IsActive))
 	  return true;
-	  
+
 	uint8_t ErrorCode;
 	
 	f_mount(0, &DiskFATState);
-	ErrorCode = f_open(&DiskLogFile, "ExplrBot.txt", (FA_OPEN_ALWAYS | FA_WRITE));
+	ErrorCode = f_open(&DiskLogFile, DATALOG_FILENAME, (FA_CREATE_NEW | FA_WRITE));
 
 	/* See if the existing log was created sucessfully */
 	if (ErrorCode == FR_OK)
@@ -109,6 +109,9 @@ bool Datalogger_PostConfiguration(void)
 	}
 	else if (ErrorCode == FR_EXIST)
 	{
+		/* Open the already existing file on the disk */
+		f_open(&DiskLogFile, DATALOG_FILENAME, (FA_OPEN_EXISTING | FA_WRITE));
+	
 		/* Seek to the end of the existing log file */
 		f_lseek(&DiskLogFile, DiskLogFile.fsize);	
 	}

@@ -43,6 +43,9 @@
 		#include "../Sensors/SensorsCommon.h"
 		#include "../FatFS/ff.h"
 		
+	/* Macros: */
+		#define DATALOG_FILENAME   "ExplrBot.txt"
+		
 	/* External Variables: */
 		extern USB_ClassInfo_MS_Host_t Datalogger_MS_Interface;
 

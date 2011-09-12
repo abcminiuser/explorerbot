@@ -65,8 +65,6 @@ static struct
 	HID_ReportItem_t* Backward;
 	HID_ReportItem_t* Headlights;
 	HID_ReportItem_t* Speaker;
-	
-	HID_ReportItem_t* PS3Button;
 } Joystick_HIDReportItemMappings;
 
 
@@ -105,22 +103,23 @@ bool Joystick_PostConfiguration(void)
 	if (HID_Host_SetReportProtocol(&Joystick_HID_Interface) || !(HIDReportInfo.TotalReportItems))
 	  return false;
 
-	/* Need to send a special packet to PS3 Controllers to start reports */
+	/* Need to pair PS3 controllers to the last inserted Bluetooth adapter, and send a special packet to start reports */
 	if (Joystick_IsPS3Controller)
 	{
-		uint8_t DummyPS3ReportData[17];
-		USB_ControlRequest = (USB_Request_Header_t)
-			{
-				.bmRequestType = (REQDIR_DEVICETOHOST | REQTYPE_CLASS | REQREC_INTERFACE),
-				.bRequest      = HID_REQ_GetReport,
-				.wValue        = ((3 << 8) | 0xF2),
-				.wIndex        = Joystick_HID_Interface.State.InterfaceNumber,
-				.wLength       = sizeof(DummyPS3ReportData)
-			};
+		/* Copy over the address of the last inserted USB Bluetooth adapter */
+		uint8_t PS3AdapterPairRequest[2 + BT_BDADDR_LEN];
+		
+		/* Construct special pair report request for the PS3 controller */
+		PS3AdapterPairRequest[0] = 0x01;
+		PS3AdapterPairRequest[1] = 0x00;
+		eeprom_read_block(&PS3AdapterPairRequest[2], BluetoothAdapter_LastLocalBDADDR, BT_BDADDR_LEN);
 
-		/* Send magic report request to the PS3 Controller to start HID reporting */
-		Pipe_SelectPipe(PIPE_CONTROLPIPE);
-		USB_Host_SendControlRequest(DummyPS3ReportData);			
+		/* Send PS3 bluetooth host pair request report to the adapter */
+		HID_Host_SendReportByID(&Joystick_HID_Interface, 0xF5, HID_REPORT_ITEM_Feature, PS3AdapterPairRequest, sizeof(PS3AdapterPairRequest));
+
+		/* Instruct the PS3 controller to send reports via the HID data IN endpoint */
+		uint8_t PS3StartReportingRequest[4] = {0x42, 0x0C, 0x00, 0x00};
+		HID_Host_SendReportByID(&Joystick_HID_Interface, 0xF4, HID_REPORT_ITEM_Feature, PS3StartReportingRequest, sizeof(PS3StartReportingRequest));			
 	}
 	
 	RGB_SetColour(RGB_ALIAS_Connected);
@@ -157,33 +156,6 @@ void Joystick_USBTask(void)
 		/* Determine if speaker button is currently pressed or not */
 		if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.Speaker))
 		  Speaker_Tone((Joystick_HIDReportItemMappings.Speaker->Value) ? 250 : 0);
-
-		/* For PS3 controllers, the PS3 button initiates a pairing with the last inserted Bluetooth adapter */
-		if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.PS3Button) && Joystick_HIDReportItemMappings.PS3Button->Value)
-		{
-			/* Copy over the address of the last inserted USB Bluetooth adapter */
-			uint8_t PS3AdapterPairRequest[2 + BT_BDADDR_LEN];
-			
-			PS3AdapterPairRequest[0] = 0x01;
-			PS3AdapterPairRequest[1] = 0x00;
-			eeprom_read_block(&PS3AdapterPairRequest[2], BluetoothAdapter_LastLocalBDADDR, BT_BDADDR_LEN);
-			
-			USB_ControlRequest = (USB_Request_Header_t)
-				{
-					.bmRequestType = (REQDIR_HOSTTODEVICE | REQTYPE_CLASS | REQREC_INTERFACE),
-					.bRequest      = HID_REQ_SetReport,
-					.wValue        = ((3 << 8) | 0xF5),
-					.wIndex        = Joystick_HID_Interface.State.InterfaceNumber,
-					.wLength       = sizeof(PS3AdapterPairRequest)
-				};
-
-			/* Request that the controller re-pair with the last connected Bluetooth adapter BDADDR */
-			Pipe_SelectPipe(PIPE_CONTROLPIPE);
-			USB_Host_SendControlRequest(PS3AdapterPairRequest);	
-
-			/* One-time operation for each connection, remove PS3 button mapping */
-			Joystick_HIDReportItemMappings.PS3Button = NULL;
-		}
 	}
 	
 	/* Run the HID Class Driver service task on the HID Joystick interface */
@@ -241,9 +213,6 @@ bool CALLBACK_HIDParser_FilterHIDReportItem(HID_ReportItem_t* const CurrentItem)
 					return true;
 				case 11:
 					Joystick_HIDReportItemMappings.Speaker    = CurrentItem;
-					return true;
-				case 16:
-					Joystick_HIDReportItemMappings.PS3Button  = CurrentItem;
 					return true;
 			}
 		}

@@ -1,0 +1,5 @@
+Record=SheetSymbol|SourceDocument=Project.SchDoc|Designator=Motor Control|SchDesignator=Motor Control|FileName=MotorControl.SCHDOC|SymbolType=Normal|RawFileName=MotorControl.SCHDOC|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol
+Record=SheetSymbol|SourceDocument=Project.SchDoc|Designator=Power Management|SchDesignator=Power Management|FileName=PowerSupplies.SCHDOC|SymbolType=Normal|RawFileName=PowerSupplies.SCHDOC|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol
+Record=SheetSymbol|SourceDocument=Project.SchDoc|Designator=Sensor Modules|SchDesignator=Sensor Modules|FileName=Sensors.SCHDOC|SymbolType=Normal|RawFileName=Sensors.SCHDOC|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol
+Record=SheetSymbol|SourceDocument=Project.SchDoc|Designator=System Control|SchDesignator=System Control|FileName=AVRController.SCHDOC|SymbolType=Normal|RawFileName=AVRController.SCHDOC|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol
+Record=TopLevelDocument|FileName=Project.SchDoc

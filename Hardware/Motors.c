@@ -74,7 +74,7 @@ void Motors_SetChannelSpeed(const int16_t LeftPower, const int16_t RightPower)
 	
 	/* Delay on direction change to wait until slow inverter transistors have finished switching to prevent voltage rail dips */
 	if (LeftDirChange || RightDirChange)
-	  Delay_MS(2);
+	  Delay_MS(10);
 	
 	/* DANGER: DO NOT REMOVE SPEED LIMITER BELOW - PREVENTS OVERCURRENT/OVERVOLTAGE OF MOTOR */
 	if (LeftPWMValue > MAX_MOTOR_POWER)

@@ -65,7 +65,9 @@ void BMA150_Init(SensorData_t* const AccelSensorInfo)
 	  return;
 	  
 	/* Set 25Hz bandwidth, 2g range */
-	PacketBuffer[0] = 0;
+	if (Sensor_ReadBytes(BMA150_ADDRESS, BMA150_RANGE_BWIDTH_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
+	  return;
+	PacketBuffer[0] &= 0xE0;
 	if (Sensor_WriteBytes(BMA150_ADDRESS, BMA150_RANGE_BWIDTH_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;
 }

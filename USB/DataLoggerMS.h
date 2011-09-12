@@ -44,7 +44,8 @@
 		#include "../FatFS/ff.h"
 		
 	/* Macros: */
-		#define DATALOG_FILENAME   "ExplrBot.txt"
+		/** Name of the data log file created on the attached disk, in 8.3 naming format. */
+		#define DATALOG_FILENAME   "EXPLRBOT.CSV"
 		
 	/* External Variables: */
 		extern USB_ClassInfo_MS_Host_t Datalogger_MS_Interface;

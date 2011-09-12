@@ -87,25 +87,51 @@ bool Datalogger_PostConfiguration(void)
 	if (ErrorCode == FR_OK)
 	{
 		uint16_t      BytesWritten = 0;
-		SensorData_t* CurrSensor   = (SensorData_t*)&Sensors;
+		SensorData_t* CurrSensor;
 	
 		/* Log file created, print out sensor names */
+		CurrSensor = (SensorData_t*)&Sensors;
 		for (uint8_t SensorIndex = 0; SensorIndex < (sizeof(Sensors) / sizeof(SensorData_t)); SensorIndex++)
 		{
 			/* Add seperator between sensor names as they are written to the log file */
 			if (SensorIndex)
-			  f_write(&DiskLogFile, ", ", strlen(", "), &BytesWritten);
+			  f_write(&DiskLogFile, ",", strlen(","), &BytesWritten);
 
 			/* Output sensor name to the log file */
-			f_write(&DiskLogFile, CurrSensor->Name, strlen(CurrSensor->Name), &BytesWritten);			
+			f_write(&DiskLogFile, CurrSensor->Name, strlen(CurrSensor->Name), &BytesWritten);
+			
+			/* If the sensor is a triplicate, need to add in seperators to keep values aligned properly */
+			if (!(CurrSensor->SingleAxis))
+			{
+				f_write(&DiskLogFile, ",", strlen(","), &BytesWritten);
+				f_write(&DiskLogFile, ",", strlen(","), &BytesWritten);			
+			}
+			
+			/* Advance pointer to next sensor entry in the sensor structure */
+			CurrSensor++;
+		}
+
+		/* Add end of line terminator */
+		f_write(&DiskLogFile, "\r\n", strlen("\r\n"), &BytesWritten);
+
+		/* Print out sensor axis */
+		CurrSensor = (SensorData_t*)&Sensors;
+		for (uint8_t SensorIndex = 0; SensorIndex < (sizeof(Sensors) / sizeof(SensorData_t)); SensorIndex++)
+		{
+			/* Add seperator between sensor names as they are written to the log file */
+			if (SensorIndex)
+			  f_write(&DiskLogFile, ",", strlen(","), &BytesWritten);
+
+			/* If the sensor is a triplicate, need to add in seperators to keep values aligned properly */
+			if (!(CurrSensor->SingleAxis))
+			  f_write(&DiskLogFile, "X,Y,Z", strlen("X,Y,Z"), &BytesWritten);
 			
 			/* Advance pointer to next sensor entry in the sensor structure */
 			CurrSensor++;
 		}
 		
-		/* Add end of line terminator to the log file and commit all buffered data */
+		/* Add end of line terminator */
 		f_write(&DiskLogFile, "\r\n", strlen("\r\n"), &BytesWritten);
-		f_sync(&DiskLogFile);
 	}
 	else if (ErrorCode == FR_EXIST)
 	{
@@ -157,7 +183,7 @@ void Datalogger_LogSensors(void)
 		if (CurrSensor->SingleAxis)
 		  TempBufferLen = sprintf(TempBuffer, "%ld", CurrSensor->Data.Single);
 		else
-		  TempBufferLen = sprintf(TempBuffer, "(%d, %d, %d)", CurrSensor->Data.Triplicate.X, CurrSensor->Data.Triplicate.Y, CurrSensor->Data.Triplicate.Z);
+		  TempBufferLen = sprintf(TempBuffer, "%d, %d, %d", CurrSensor->Data.Triplicate.X, CurrSensor->Data.Triplicate.Y, CurrSensor->Data.Triplicate.Z);
 
 		/* Output sensor name to the log file */
 		f_write(&DiskLogFile, TempBuffer, TempBufferLen, &BytesWritten);			

@@ -90,6 +90,8 @@ bool Joystick_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
 	return (HID_Host_ConfigurePipes(&Joystick_HID_Interface, ConfigDescriptorSize, ConfigDescriptorData) == HID_ENUMERROR_NoError);
 }
 
+#include "../Drivers/LCD.h"
+
 /** Performs any post configuration tasks after the attached HID joystick has been successfully enumerated.
  *
  *  \return Boolean true if no HID Joystick attached or if all post-configuration tasks complete without error, false otherwise
@@ -121,7 +123,7 @@ bool Joystick_PostConfiguration(void)
 		uint8_t PS3StartReportingRequest[4] = {0x42, 0x0C, 0x00, 0x00};
 		HID_Host_SendReportByID(&Joystick_HID_Interface, 0xF4, HID_REPORT_ITEM_Feature, PS3StartReportingRequest, sizeof(PS3StartReportingRequest));			
 	}
-	
+
 	RGB_SetColour(RGB_ALIAS_Connected);
 	return true;
 }
@@ -134,7 +136,7 @@ void Joystick_USBTask(void)
 
 	if (HID_Host_IsReportReceived(&Joystick_HID_Interface))
 	{
-		uint8_t JoystickReport[Joystick_HID_Interface.State.LargestReportSize];
+		uint8_t JoystickReport[64];
 		HID_Host_ReceiveReport(&Joystick_HID_Interface, &JoystickReport);
 
 		/* Determine direction being pressed on the joystick */
@@ -157,7 +159,7 @@ void Joystick_USBTask(void)
 		if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.Speaker))
 		  Speaker_Tone((Joystick_HIDReportItemMappings.Speaker->Value) ? 250 : 0);
 	}
-	
+
 	/* Run the HID Class Driver service task on the HID Joystick interface */
 	HID_Host_USBTask(&Joystick_HID_Interface);
 }
@@ -197,22 +199,22 @@ bool CALLBACK_HIDParser_FilterHIDReportItem(HID_ReportItem_t* const CurrentItem)
 			switch (CurrentItem->Attributes.Usage.Usage)
 			{
 				case 5:
-					Joystick_HIDReportItemMappings.Right      = CurrentItem;
-					return true;
-				case 4:
 					Joystick_HIDReportItemMappings.Forward    = CurrentItem;
 					return true;
 				case 6:
-					Joystick_HIDReportItemMappings.Backward   = CurrentItem;
+					Joystick_HIDReportItemMappings.Right      = CurrentItem;
 					return true;
 				case 7:
-					Joystick_HIDReportItemMappings.Left       = CurrentItem;
+					Joystick_HIDReportItemMappings.Backward   = CurrentItem;
 					return true;
-				case 10:
-					Joystick_HIDReportItemMappings.Headlights = CurrentItem;
+				case 8:
+					Joystick_HIDReportItemMappings.Left       = CurrentItem;
 					return true;
 				case 11:
 					Joystick_HIDReportItemMappings.Speaker    = CurrentItem;
+					return true;
+				case 12:
+					Joystick_HIDReportItemMappings.Headlights = CurrentItem;
 					return true;
 			}
 		}

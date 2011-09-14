@@ -44,9 +44,14 @@ DRESULT disk_read (
 	uint8_t ErrorCode = RES_OK;
 
 	if (USB_HostState != HOST_STATE_Configured)
-	  ErrorCode = RES_NOTRDY;
+	{
+		ErrorCode = RES_NOTRDY;
+	}
 	else if (MS_Host_ReadDeviceBlocks(&Datalogger_MS_Interface, 0, sector, count, 512, buff))
-	  ErrorCode = RES_ERROR;
+	{
+		MS_Host_ResetMSInterface(&Datalogger_MS_Interface);
+		ErrorCode = RES_ERROR;
+	}
 
 	return ErrorCode;
 }
@@ -67,10 +72,15 @@ DRESULT disk_write (
 	uint8_t ErrorCode = RES_OK;
 
 	if (USB_HostState != HOST_STATE_Configured)
-	  ErrorCode = RES_NOTRDY;
+	{
+		ErrorCode = RES_NOTRDY;
+	}
 	else if (MS_Host_WriteDeviceBlocks(&Datalogger_MS_Interface, 0, sector, count, 512, buff))
-	  ErrorCode = RES_ERROR;
-
+	{
+		MS_Host_ResetMSInterface(&Datalogger_MS_Interface);
+		ErrorCode = RES_ERROR;
+	}
+	
 	return RES_OK;
 }
 #endif /* _READONLY */

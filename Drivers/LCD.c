@@ -214,10 +214,10 @@ void LCD_WriteFormattedString(const char* FormatString, ...)
 {
 	char LineBuffer[50];
 
-    va_list va;
-    va_start(va, FormatString);
-    vsprintf(LineBuffer, FormatString, va);
-    va_end(va);
+	va_list va;
+	va_start(va, FormatString);
+	vsprintf(LineBuffer, FormatString, va);
+	va_end(va);
 
 	LCD_WriteString(LineBuffer);
 }

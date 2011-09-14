@@ -164,27 +164,55 @@ void CALLBACK_HID_Client_ReportReceived(BT_StackConfig_t* const StackState,
 	if (ReportType == HID_DATAT_Input)
 	{
 		// TODO: FIXME
-		switch (*((uint16_t*)&Data[2]))
+		if (Length < 25) // Sony Ericson Z550i Phone
 		{
-			default:
-				Motors_SetChannelSpeed(0, 0);
-				break;
-			case 0xF600:
-				Motors_SetChannelSpeed( MAX_MOTOR_POWER,  MAX_MOTOR_POWER);
-				break;
-			case 0x0A00:
-				Motors_SetChannelSpeed(-MAX_MOTOR_POWER, -MAX_MOTOR_POWER);					
-				break;
-			case 0x00F6:
-				Motors_SetChannelSpeed(-MAX_MOTOR_POWER,  MAX_MOTOR_POWER);
-				break;
-			case 0x000A:
-				Motors_SetChannelSpeed( MAX_MOTOR_POWER, -MAX_MOTOR_POWER);					
-				break;
+			// TODO: FIXME
+			switch (*((uint16_t*)&Data[2]))
+			{
+				default:
+					Motors_SetChannelSpeed(0, 0);
+					break;
+				case 0xF600:
+					Motors_SetChannelSpeed( MAX_MOTOR_POWER,  MAX_MOTOR_POWER);
+					break;
+				case 0x0A00:
+					Motors_SetChannelSpeed(-MAX_MOTOR_POWER, -MAX_MOTOR_POWER);					
+					break;
+				case 0x00F6:
+					Motors_SetChannelSpeed(-MAX_MOTOR_POWER,  MAX_MOTOR_POWER);
+					break;
+				case 0x000A:
+					Motors_SetChannelSpeed( MAX_MOTOR_POWER, -MAX_MOTOR_POWER);					
+					break;
+			}
+			
+			Headlights_SetState(Data[1] & 0x01);
+			Speaker_Tone((Data[1] & 0x02) ? 250 : 0);
 		}
-		
-		Headlights_SetState(Data[1] & 0x01);
-		Speaker_Tone((Data[1] & 0x02) ? 250 : 0);
+		else // PS3 Controller
+		{
+			switch (*((uint16_t*)&Data[2]))
+			{
+				default:
+					Motors_SetChannelSpeed(0, 0);
+					break;
+				case 0x0010:
+					Motors_SetChannelSpeed( MAX_MOTOR_POWER,  MAX_MOTOR_POWER);
+					break;
+				case 0x0040:
+					Motors_SetChannelSpeed(-MAX_MOTOR_POWER, -MAX_MOTOR_POWER);					
+					break;
+				case 0x0080:
+					Motors_SetChannelSpeed(-MAX_MOTOR_POWER,  MAX_MOTOR_POWER);
+					break;
+				case 0x0020:
+					Motors_SetChannelSpeed( MAX_MOTOR_POWER, -MAX_MOTOR_POWER);					
+					break;
+			}
+			
+			Headlights_SetState(*((uint16_t*)&Data[2]) & 0x0100);
+			Speaker_Tone((*((uint16_t*)&Data[2]) & 0x0200) ? 250 : 0);
+		}
 	}
 }
 

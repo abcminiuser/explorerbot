@@ -198,22 +198,22 @@ bool CALLBACK_HIDParser_FilterHIDReportItem(HID_ReportItem_t* const CurrentItem)
 			/* Map button usages to functions suitable for a PS3 Controller */
 			switch (CurrentItem->Attributes.Usage.Usage)
 			{
-				case 5:
+				case PS3CONTROLLER_BUTTON_Up:
 					Joystick_HIDReportItemMappings.Forward    = CurrentItem;
 					return true;
-				case 6:
+				case PS3CONTROLLER_BUTTON_Right:
 					Joystick_HIDReportItemMappings.Right      = CurrentItem;
 					return true;
-				case 7:
+				case PS3CONTROLLER_BUTTON_Down:
 					Joystick_HIDReportItemMappings.Backward   = CurrentItem;
 					return true;
-				case 8:
+				case PS3CONTROLLER_BUTTON_Left:
 					Joystick_HIDReportItemMappings.Left       = CurrentItem;
 					return true;
-				case 11:
+				case PS3CONTROLLER_BUTTON_L1:
 					Joystick_HIDReportItemMappings.Speaker    = CurrentItem;
 					return true;
-				case 12:
+				case PS3CONTROLLER_BUTTON_R1:
 					Joystick_HIDReportItemMappings.Headlights = CurrentItem;
 					return true;
 			}
@@ -242,22 +242,6 @@ bool CALLBACK_HIDParser_FilterHIDReportItem(HID_ReportItem_t* const CurrentItem)
 					Joystick_HIDReportItemMappings.Speaker    = CurrentItem;
 					return true;
 			}
-		}
-		else
-		{
-			/* Map button usages to functions suitable for a generic mouse */
-			switch (CurrentItem->Attributes.Usage.Usage)
-			{
-				case 1:
-					Joystick_HIDReportItemMappings.Left       = CurrentItem;
-					return true;
-				case 3:
-					Joystick_HIDReportItemMappings.Forward    = CurrentItem;
-					return true;
-				case 2:
-					Joystick_HIDReportItemMappings.Right      = CurrentItem;
-					return true;
-			}		
 		}
 	}
 

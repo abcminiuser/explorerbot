@@ -67,6 +67,28 @@
 
 		/** Device Product ID value for the PS3 Controller. */
 		#define PS3CONTROLLER_PID           0x0268
+	
+	/* Enums: */
+		enum PS3Controller_ButtonUsages_t
+		{
+			PS3CONTROLLER_BUTTON_Select   = 1,
+			PS3CONTROLLER_BUTTON_LAnalog  = 2,
+			PS3CONTROLLER_BUTTON_RAnalog  = 3,
+			PS3CONTROLLER_BUTTON_Start    = 4,
+			PS3CONTROLLER_BUTTON_Up       = 5,
+			PS3CONTROLLER_BUTTON_Right    = 6,
+			PS3CONTROLLER_BUTTON_Down     = 7,
+			PS3CONTROLLER_BUTTON_Left     = 8,
+			PS3CONTROLLER_BUTTON_L2       = 9,
+			PS3CONTROLLER_BUTTON_R2       = 10,
+			PS3CONTROLLER_BUTTON_L1       = 11,
+			PS3CONTROLLER_BUTTON_R1       = 12,
+			PS3CONTROLLER_BUTTON_Triangle = 13,
+			PS3CONTROLLER_BUTTON_Circle   = 14,
+			PS3CONTROLLER_BUTTON_Cross    = 15,
+			PS3CONTROLLER_BUTTON_Square   = 16,
+			PS3CONTROLLER_BUTTON_PS       = 17,
+		};
 		
 	/* External Variables: */
 		extern USB_ClassInfo_HID_Host_t Joystick_HID_Interface;

@@ -59,7 +59,7 @@
 		#define BLUETOOTH_EVENTS_PIPE            3
 
 	/* External Variables: */
-		extern bool BluetoothAdapter_IsActive;
+		extern bool    BluetoothAdapter_IsActive;
 		extern uint8_t BluetoothAdapter_LastLocalBDADDR[BT_BDADDR_LEN] EEMEM;
 
 	/* Function Prototypes: */

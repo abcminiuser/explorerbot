@@ -131,7 +131,7 @@ void Joystick_USBTask(void)
 
 	if (HID_Host_IsReportReceived(&Joystick_HID_Interface))
 	{
-		uint8_t JoystickReport[64];
+		uint8_t JoystickReport[Joystick_HID_Interface.State.LargestReportSize];
 		HID_Host_ReceiveReport(&Joystick_HID_Interface, &JoystickReport);
 
 		/* Determine direction being pressed on the joystick */

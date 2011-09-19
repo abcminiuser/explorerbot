@@ -19,14 +19,14 @@
 		#include <LUFA/Common/Common.h>
 
 	/* Defines: */
-		/** Length of a bluetooth device address in bytes. */
-		#define BT_BDADDR_LEN              6
+		/** Length of a Bluetooth device address in bytes. */
+		#define BT_BDADDR_LEN                6
 		
 		/** Maximum number of simultaneous device connections. */
-		#define MAX_DEVICE_CONNECTIONS     2
+		#define MAX_DEVICE_CONNECTIONS       2
 		
 		/** Maximum number of simultaneous L2CAP logical channels. */
-		#define MAX_LOGICAL_CHANNELS       8
+		#define MAX_LOGICAL_CHANNELS         8
 
 		/** Default maximum transmission unit size for a L2CAP channel packet. */
 		#define DEFAULT_L2CAP_CHANNEL_MTU    1024

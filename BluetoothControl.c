@@ -45,36 +45,36 @@ void EVENT_Bluetooth_ManageServices(BT_StackConfig_t* const StackState)
 }
 
 bool CALLBACK_Bluetooth_ConnectionRequest(BT_StackConfig_t* const StackState,
-                                          BT_HCI_Connection_t* const ConnectionHandle)
+                                          BT_HCI_Connection_t* const Connection)
 {
 	LCD_Clear();
 	LCD_WriteFormattedString("Conn Request:\n"
-	                         "%02X%02X:%02X%02X:%02X%02X", ConnectionHandle->RemoteBDADDR[5], ConnectionHandle->RemoteBDADDR[4],
-	                                                       ConnectionHandle->RemoteBDADDR[3], ConnectionHandle->RemoteBDADDR[2],
-	                                                       ConnectionHandle->RemoteBDADDR[1], ConnectionHandle->RemoteBDADDR[0]);
+	                         "%02X%02X:%02X%02X:%02X%02X", Connection->RemoteBDADDR[5], Connection->RemoteBDADDR[4],
+	                                                       Connection->RemoteBDADDR[3], Connection->RemoteBDADDR[2],
+	                                                       Connection->RemoteBDADDR[1], Connection->RemoteBDADDR[0]);
 
 	/* Accept all requests from all devices regardless of BDADDR */
 	return true;
 }
 
 void EVENT_Bluetooth_ConnectionComplete(BT_StackConfig_t* const StackState,
-                                        BT_HCI_Connection_t* const ConnectionHandle)
+                                        BT_HCI_Connection_t* const Connection)
 {	
 	LCD_Clear();
 	LCD_WriteFormattedString("Connected:\n"
-	                         "%02X%02X:%02X%02X:%02X%02X", ConnectionHandle->RemoteBDADDR[5], ConnectionHandle->RemoteBDADDR[4],
-	                                                       ConnectionHandle->RemoteBDADDR[3], ConnectionHandle->RemoteBDADDR[2],
-	                                                       ConnectionHandle->RemoteBDADDR[1], ConnectionHandle->RemoteBDADDR[0]);
+	                         "%02X%02X:%02X%02X:%02X%02X", Connection->RemoteBDADDR[5], Connection->RemoteBDADDR[4],
+	                                                       Connection->RemoteBDADDR[3], Connection->RemoteBDADDR[2],
+	                                                       Connection->RemoteBDADDR[1], Connection->RemoteBDADDR[0]);
 }
 
 void EVENT_Bluetooth_DisconnectionComplete(BT_StackConfig_t* const StackState,
-                                           BT_HCI_Connection_t* const ConnectionHandle)
+                                           BT_HCI_Connection_t* const Connection)
 {
 	LCD_Clear();
 	LCD_WriteFormattedString("Disconnected:\n"
-	                         "%02X%02X:%02X%02X:%02X%02X", ConnectionHandle->RemoteBDADDR[5], ConnectionHandle->RemoteBDADDR[4],
-	                                                       ConnectionHandle->RemoteBDADDR[3], ConnectionHandle->RemoteBDADDR[2],
-	                                                       ConnectionHandle->RemoteBDADDR[1], ConnectionHandle->RemoteBDADDR[0]);
+	                         "%02X%02X:%02X%02X:%02X%02X", Connection->RemoteBDADDR[5], Connection->RemoteBDADDR[4],
+	                                                       Connection->RemoteBDADDR[3], Connection->RemoteBDADDR[2],
+	                                                       Connection->RemoteBDADDR[1], Connection->RemoteBDADDR[0]);
 }
 
 bool CALLBACK_Bluetooth_ChannelRequest(BT_StackConfig_t* const StackState,

@@ -35,7 +35,7 @@
 		#define BT_CHANNEL_CONNECTIONLESS         0x0002
 		
 		/** HCI connection flag to automatically flush packets to the receiver. */
-		#define BT_L2CAP_FIRST_AUTOFLUSH            (1 << 13)
+		#define BT_L2CAP_FIRST_AUTOFLUSH          (1 << 13)
 
 	/* Function Prototypes: */
 		void Bluetooth_L2CAP_NotifyHCIDisconnection(BT_StackConfig_t* const StackState,

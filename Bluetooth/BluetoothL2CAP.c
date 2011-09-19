@@ -114,8 +114,8 @@ static inline void Bluetooth_L2CAP_Signal_ConnRequest(BT_StackConfig_t* const St
 	BT_Signal_ConnectionReq_t* ConnectionRequest = (BT_Signal_ConnectionReq_t*)SignalCommandHeader->Data;
 				
 	/* Create a new channel from the given connection request data */
-	BT_L2CAP_Channel_t* L2CAPChannel      = Bluetooth_L2CAP_NewChannel(StackState, HCIConnection->Handle, le16_to_cpu(ConnectionRequest->SourceChannel), le16_to_cpu(ConnectionRequest->PSM));
-	uint8_t           RejectionReason = BT_CONNECTION_REFUSED_RESOURCES;
+	BT_L2CAP_Channel_t* L2CAPChannel    = Bluetooth_L2CAP_NewChannel(StackState, HCIConnection->Handle, le16_to_cpu(ConnectionRequest->SourceChannel), le16_to_cpu(ConnectionRequest->PSM));
+	uint8_t             RejectionReason = BT_CONNECTION_REFUSED_RESOURCES;
 	
 	/* If there was space in the channel table, request action from the user to accept/reject the connection */
 	if (L2CAPChannel)
@@ -334,7 +334,7 @@ static inline void Bluetooth_L2CAP_Signal_ConfigReq(BT_StackConfig_t* const Stac
 	ResponsePacket.ConfigurationResponse.SourceChannel = cpu_to_le16(L2CAPChannel->RemoteNumber);
 	ResponsePacket.ConfigurationResponse.Flags         = 0x00;
 	ResponsePacket.ConfigurationResponse.Result        = (L2CAPChannel != NULL) ? CPU_TO_LE16(BT_CONFIGURATION_SUCCESSFUL) : CPU_TO_LE16(BT_CONFIGURATION_REJECTED);
-
+	
 	Bluetooth_L2CAP_SendSignalPacket(StackState, HCIConnection, sizeof(ResponsePacket), &ResponsePacket);
 }
 
@@ -345,7 +345,7 @@ static inline void Bluetooth_L2CAP_Signal_ConfigResp(BT_StackConfig_t* const Sta
 	BT_Signal_ConfigurationResp_t* ConfigurationResponse = (BT_Signal_ConfigurationResp_t*)SignalCommandHeader->Data;
 
 	/* Find the existing channel in the channel table if it exists */
-	BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, HCIConnection->Handle, 0, le16_to_cpu(ConfigurationResponse->SourceChannel));
+	BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, HCIConnection->Handle, le16_to_cpu(ConfigurationResponse->SourceChannel), 0);
 
 	if (!(L2CAPChannel))
 	  return;

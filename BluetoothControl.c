@@ -81,6 +81,10 @@ bool CALLBACK_Bluetooth_ChannelRequest(BT_StackConfig_t* const StackState,
                                        BT_HCI_Connection_t* const Connection,
                                        BT_L2CAP_Channel_t* const Channel)
 {
+	LCD_Clear();
+	LCD_WriteFormattedString("L2CAP Request\n"
+	                         "PSM:%04X", Channel->PSM);
+
 	/* Accept all channel requests from all devices regardless of PSM */
 	return true;
 }

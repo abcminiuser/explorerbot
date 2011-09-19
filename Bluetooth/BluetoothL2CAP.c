@@ -523,13 +523,13 @@ bool Bluetooth_L2CAP_SendPacket(BT_StackConfig_t* const StackState,
 	
 	/* TODO: Respect MTU */
 	
-	BT_L2CAP_Header_t* L2CAPPacketHeader = (BT_L2CAP_Header_t*)StackState->Config.PacketBuffer;
-	L2CAPPacketHeader->ConnectionHandle  = cpu_to_le16(HCIConnection->Handle | BT_L2CAP_FIRST_AUTOFLUSH);
-	L2CAPPacketHeader->DataLength        = cpu_to_le16(sizeof(BT_DataPacket_Header_t) + Length);
+	BT_L2CAP_Header_t* L2CAPPacketHeader    = (BT_L2CAP_Header_t*)StackState->Config.PacketBuffer;
+	L2CAPPacketHeader->ConnectionHandle     = cpu_to_le16(HCIConnection->Handle | BT_L2CAP_FIRST_AUTOFLUSH);
+	L2CAPPacketHeader->DataLength           = cpu_to_le16(sizeof(BT_DataPacket_Header_t) + Length);
 
 	BT_DataPacket_Header_t* L2CAPDataHeader = (BT_DataPacket_Header_t*)L2CAPPacketHeader->Data;
-	L2CAPDataHeader->PayloadLength       = cpu_to_le16(Length);
-	L2CAPDataHeader->DestinationChannel  = cpu_to_le16(L2CAPChannel->RemoteNumber);
+	L2CAPDataHeader->PayloadLength          = cpu_to_le16(Length);
+	L2CAPDataHeader->DestinationChannel     = cpu_to_le16(L2CAPChannel->RemoteNumber);
 
 	memcpy(L2CAPDataHeader->Payload, Data, Length);
 	

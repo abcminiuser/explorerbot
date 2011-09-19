@@ -14,22 +14,9 @@
 
 #include "HIDClient.h"
 
-static HID_Service_t HIDConnections[MAX_HID_CONNECTIONS];
-
-
 void HID_Client_Init(BT_StackConfig_t* const StackState)
 {
-	for (uint8_t i = 0; i < MAX_HID_CONNECTIONS; i++)
-	{
-		HID_Service_t* CurrentHIDEntry = &HIDConnections[i];
-	
-		/* Clear any HID entries in the table that are unassociated or associated with the given initialized stack */
-		if ((CurrentHIDEntry->Stack == NULL) || (CurrentHIDEntry->Stack == StackState))
-		{
-			memset(CurrentHIDEntry, 0x00, sizeof(HID_Service_t));
-			CurrentHIDEntry->State = HID_SSTATE_Free;
-		}
-	}
+
 }
 
 void HID_Client_Manage(BT_StackConfig_t* const StackState)
@@ -76,62 +63,31 @@ static void HID_Client_IntPacket(BT_StackConfig_t* const StackState,
 
 void HID_Client_ChannelOpened(BT_StackConfig_t* const StackState,
                               BT_L2CAP_Channel_t* const Channel)
-{
-	/* Find existing connection in the table if it exists and update the appropriate connection entry */
-	for (uint8_t i = 0; i < MAX_HID_CONNECTIONS; i++)
+{	
+	static BT_L2CAP_Channel_t* CChannel = NULL;
+	static BT_L2CAP_Channel_t* DChannel = NULL;
+
+	switch (Channel->PSM)
 	{
-		HID_Service_t* CurrentHIDEntry = &HIDConnections[i];
-	
-		if ((CurrentHIDEntry->Stack == StackState) && (CurrentHIDEntry->State != HID_SSTATE_Free))
-		{
-			if (Channel->PSM == CHANNEL_PSM_HIDCTL)
-			  CurrentHIDEntry->ControlChannel   = Channel;
-			else
-			  CurrentHIDEntry->InterruptChannel = Channel;
-			
-			return;
-		}
+		case CHANNEL_PSM_HIDCTL:
+			CChannel = Channel;
+			break;
+		case CHANNEL_PSM_HIDINT:
+			DChannel = Channel;
+			break;
 	}
 
-	/* Create a new connection entry */
-	for (uint8_t i = 0; i < MAX_HID_CONNECTIONS; i++)
+	if (CChannel && DChannel)
 	{
-		HID_Service_t* CurrentHIDEntry = &HIDConnections[i];
-	
-		/* Find a free entry and create a new HID connection from it */
-		if ((CurrentHIDEntry->Stack == NULL) || (CurrentHIDEntry->State == HID_SSTATE_Free))
-		{
-			memset(CurrentHIDEntry, 0x00, sizeof(HID_Service_t));
-			CurrentHIDEntry->Stack = StackState;
-			CurrentHIDEntry->State = HID_SSTATE_New;
-
-			if (Channel->PSM == CHANNEL_PSM_HIDCTL)
-			  CurrentHIDEntry->ControlChannel   = Channel;
-			else
-			  CurrentHIDEntry->InterruptChannel = Channel;
-		}
+		uint8_t PS3_StartReport[] = {HID_TRANS_SET_REPORT | 0x03, 0xF4, 0x42, 0x03, 0x00, 0x00};
+		Bluetooth_L2CAP_SendPacket(StackState, CChannel, sizeof(PS3_StartReport), PS3_StartReport);
 	}
 }
 
 void HID_Client_ChannelClosed(BT_StackConfig_t* const StackState,
                               BT_L2CAP_Channel_t* const Channel)
 {
-	for (uint8_t i = 0; i < MAX_HID_CONNECTIONS; i++)
-	{
-		HID_Service_t* CurrentHIDEntry = &HIDConnections[i];
-	
-		/* Find the assocated HID connection and terminate it */
-		if ((CurrentHIDEntry->Stack == StackState) || (CurrentHIDEntry->State != HID_SSTATE_Free))
-		{
-			if (Channel->PSM == CHANNEL_PSM_HIDCTL)
-			  CurrentHIDEntry->ControlChannel   = NULL;
-			else
-			  CurrentHIDEntry->InterruptChannel = NULL;
-		
-			if (!(CurrentHIDEntry->ControlChannel) && !(CurrentHIDEntry->InterruptChannel))
-			  CurrentHIDEntry->State = HID_SSTATE_Free;
-		}
-	}
+
 }
 
 void HID_Client_ProcessPacket(BT_StackConfig_t* const StackState,

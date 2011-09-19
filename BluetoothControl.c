@@ -92,6 +92,10 @@ bool CALLBACK_Bluetooth_ChannelRequest(BT_StackConfig_t* const StackState,
 void EVENT_Bluetooth_ChannelOpened(BT_StackConfig_t* const StackState,
                                    BT_L2CAP_Channel_t* const Channel)
 {
+	LCD_Clear();
+	LCD_WriteFormattedString("L2CAP Opened\n"
+	                         "L:%04X R:%04X", Channel->LocalNumber, Channel->RemoteNumber);
+
 	switch (Channel->PSM)
 	{
 		case CHANNEL_PSM_SDP:
@@ -105,15 +109,15 @@ void EVENT_Bluetooth_ChannelOpened(BT_StackConfig_t* const StackState,
 			RFCOMM_ChannelOpened(StackState, Channel);
 			break;			
 	}
-
-	LCD_Clear();
-	LCD_WriteFormattedString("L2CAP Opened\n"
-	                         "L:%04X R:%04X", Channel->LocalNumber, Channel->RemoteNumber);
 }
 
 void EVENT_Bluetooth_ChannelClosed(BT_StackConfig_t* const StackState,
                                    BT_L2CAP_Channel_t* const Channel)
 {
+	LCD_Clear();
+	LCD_WriteFormattedString("L2CAP Closed\n"
+	                         "L:%04X R:%04X", Channel->LocalNumber, Channel->RemoteNumber);
+
 	switch (Channel->PSM)
 	{
 		case CHANNEL_PSM_SDP:
@@ -127,10 +131,6 @@ void EVENT_Bluetooth_ChannelClosed(BT_StackConfig_t* const StackState,
 			RFCOMM_ChannelClosed(StackState, Channel);
 			break;
 	}
-
-	LCD_Clear();
-	LCD_WriteFormattedString("L2CAP Closed\n"
-	                         "L:%04X R:%04X", Channel->LocalNumber, Channel->RemoteNumber);
 }
 
 void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
@@ -168,7 +168,7 @@ void CALLBACK_HID_Client_ReportReceived(BT_StackConfig_t* const StackState,
 	if (ReportType == HID_DATAT_Input)
 	{
 		// TODO: FIXME
-		if (Length < 25) // Sony Ericson Z550i Phone
+		if (Length < 12) // Sony Ericson Z550i Phone
 		{
 			// TODO: FIXME
 			switch (*((uint16_t*)&Data[2]))
@@ -194,7 +194,7 @@ void CALLBACK_HID_Client_ReportReceived(BT_StackConfig_t* const StackState,
 			Speaker_Tone((Data[1] & 0x02) ? 250 : 0);
 		}
 		else // PS3 Controller
-		{
+		{		
 			switch (*((uint16_t*)&Data[2]))
 			{
 				default:

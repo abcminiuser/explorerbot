@@ -71,23 +71,6 @@
 			HID_DATAT_Feature              = 0x03,
 		};
 
-		enum HID_Service_States_t
-		{
-			HID_SSTATE_Free             = 0,
-			HID_SSTATE_New              = 1,
-			HID_SSTATE_ReportRequested  = 2,
-			HID_SSTATE_Connected        = 3,
-		};
-
-	/* Type Defines: */
-		typedef struct
-		{
-			BT_StackConfig_t*   Stack;
-			BT_L2CAP_Channel_t* ControlChannel;
-			BT_L2CAP_Channel_t* InterruptChannel;
-			uint8_t State;
-		} HID_Service_t;
-
 	/* Function Prototypes: */
 		void HID_Client_Init(BT_StackConfig_t* const StackState);
 		void HID_Client_Manage(BT_StackConfig_t* const StackState);

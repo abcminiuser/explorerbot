@@ -111,11 +111,11 @@ bool Joystick_PostConfiguration(void)
 		eeprom_read_block(TempAddress, BluetoothAdapter_LastLocalBDADDR, sizeof(TempAddress));
 
 		/* Send PS3 bluetooth host pair request report to the adapter */
-		uint8_t PS3AdapterPairRequest[8]    = {0x01, 0x00, TempAddress[5], TempAddress[4], TempAddress[3], TempAddress[2], TempAddress[1], TempAddress[0]};
+		uint8_t PS3AdapterPairRequest[]    = {0x01, 0x00, TempAddress[5], TempAddress[4], TempAddress[3], TempAddress[2], TempAddress[1], TempAddress[0]};
 		HID_Host_SendReportByID(&Joystick_HID_Interface, 0xF5, HID_REPORT_ITEM_Feature, PS3AdapterPairRequest, sizeof(PS3AdapterPairRequest));
 
 		/* Instruct the PS3 controller to send reports via the HID data IN endpoint */
-		uint8_t PS3StartReportingRequest[4] = {0x42, 0x0C, 0x00, 0x00};
+		uint8_t PS3StartReportingRequest[] = {0x42, 0x0C, 0x00, 0x00};
 		HID_Host_SendReportByID(&Joystick_HID_Interface, 0xF4, HID_REPORT_ITEM_Feature, PS3StartReportingRequest, sizeof(PS3StartReportingRequest));			
 	}
 

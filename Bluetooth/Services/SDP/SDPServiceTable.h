@@ -35,9 +35,6 @@
 		#define SDP_ATTRIBUTE_ID_SERVICENAME            0x0100
 		#define SDP_ATTRIBUTE_ID_SERVICEDESCRIPTION     0x0101
 
-		/** Terminator for a service attribute table of type \ref ServiceAttributeTable_t. */
-		#define SDP_ATTRIBUTE_TABLE_TERMINATOR          {.Data = NULL}
-
 	/* Type Defines: */
 		/** Type define for a UUID value structure. This struct can be used to hold full 128-bit UUIDs. */
 		typedef struct
@@ -51,8 +48,6 @@
 		
 		/** Structure for the association of attribute ID values to an attribute value in FLASH. A table of these
 		 *  structures can then be built up for each supported UUID service within the device.
-		 *
-		 *  \note This table must be terminated with a \ref SDP_ATTRIBUTE_TABLE_TERMINATOR element.
 		 */
 		typedef struct
 		{
@@ -62,6 +57,7 @@
 
 		typedef struct ServiceEntry_t
 		{
+			const uint8_t                  TotalTableAttributes;
 			const ServiceAttributeTable_t* AttributeTable;
 			struct ServiceEntry_t*         NextService;
 		} ServiceEntry_t;

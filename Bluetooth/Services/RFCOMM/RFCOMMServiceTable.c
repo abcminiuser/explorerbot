@@ -155,9 +155,7 @@ const ServiceAttributeTable_t PROGMEM SerialPort_Attribute_Table[] =
 		{SDP_ATTRIBUTE_ID_LANGUAGEBASEATTROFFSET, &SerialPort_Attribute_LanguageBaseIDOffset},
 		{SDP_ATTRIBUTE_ID_SERVICENAME,            &SerialPort_Attribute_ServiceName         },
 		{SDP_ATTRIBUTE_ID_SERVICEDESCRIPTION,     &SerialPort_Attribute_ServiceDescription  },
-
-		SDP_ATTRIBUTE_TABLE_TERMINATOR
 	};
 
 /** Service entry node, used to register the attribute table with the SDP service */
-ServiceEntry_t ServiceEntry_RFCOMMSerialPort = {SerialPort_Attribute_Table};
+ServiceEntry_t ServiceEntry_RFCOMMSerialPort = {(sizeof(SerialPort_Attribute_Table) / sizeof(SerialPort_Attribute_Table[0])), SerialPort_Attribute_Table};

@@ -63,7 +63,7 @@ static void HID_Client_IntPacket(BT_StackConfig_t* const StackState,
 
 void HID_Client_ChannelOpened(BT_StackConfig_t* const StackState,
                               BT_L2CAP_Channel_t* const Channel)
-{	
+{
 	static BT_L2CAP_Channel_t* CChannel = NULL;
 	static BT_L2CAP_Channel_t* DChannel = NULL;
 
@@ -77,10 +77,14 @@ void HID_Client_ChannelOpened(BT_StackConfig_t* const StackState,
 			break;
 	}
 
+	/* Send special SET REPORT request to start PS3 controller reporting over Bluetooth */
 	if (CChannel && DChannel)
 	{
 		uint8_t PS3_StartReport[] = {HID_TRANS_SET_REPORT | 0x03, 0xF4, 0x42, 0x03, 0x00, 0x00};
 		Bluetooth_L2CAP_SendPacket(StackState, CChannel, sizeof(PS3_StartReport), PS3_StartReport);
+		
+		CChannel = NULL;
+		DChannel = NULL;
 	}
 }
 

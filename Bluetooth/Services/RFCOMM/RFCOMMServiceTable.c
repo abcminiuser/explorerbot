@@ -34,13 +34,13 @@ const struct
  */
 const struct
 {
-	uint8_t    Header;
-	uint8_t    Size;
-	ItemUUID_t UUIDList[];
+	uint8_t        Header;
+	uint8_t        Size;
+	SDP_ItemUUID_t UUIDList[];
 } PROGMEM SerialPort_Attribute_ServiceClassIDs =
 	{
 		(SDP_DATATYPE_Sequence | SDP_DATASIZE_Variable8Bit),
-		(sizeof(ItemUUID_t) * 1),
+		(sizeof(SDP_ItemUUID_t) * 1),
 		{
 			{(SDP_DATATYPE_UUID | SDP_DATASIZE_128Bit), SP_CLASS_UUID},
 		},
@@ -52,25 +52,25 @@ const struct
  */
 const struct
 {
-	uint8_t                  Header;
-	uint8_t                  Size;
+	uint8_t                      Header;
+	uint8_t                      Size;
 
-	ItemProtocol_t           L2CAP;
-	ItemProtocol_8BitParam_t RFCOMM;
+	SDP_ItemProtocol_t           L2CAP;
+	SDP_ItemProtocol_8BitParam_t RFCOMM;
 } PROGMEM SerialPort_Attribute_ProtocolDescriptor =
 	{
 		(SDP_DATATYPE_Sequence | SDP_DATASIZE_Variable8Bit),
-		(sizeof(ItemProtocol_t) + sizeof(ItemProtocol_8BitParam_t)),
+		(sizeof(SDP_ItemProtocol_t) + sizeof(SDP_ItemProtocol_8BitParam_t)),
 		{
 			(SDP_DATATYPE_Sequence | SDP_DATASIZE_Variable8Bit),
-			sizeof(ItemUUID_t),
+			sizeof(SDP_ItemUUID_t),
 			{
 				{(SDP_DATATYPE_UUID | SDP_DATASIZE_128Bit), L2CAP_UUID},
 			},
 		},
 		{
 			(SDP_DATATYPE_Sequence | SDP_DATASIZE_Variable8Bit),
-			(sizeof(ItemUUID_t) + sizeof(Item8Bit_t)),
+			(sizeof(SDP_ItemUUID_t) + sizeof(SDP_Item8Bit_t)),
 			{
 				{(SDP_DATATYPE_UUID | SDP_DATASIZE_128Bit), RFCOMM_UUID},
 				{(SDP_DATATYPE_UnsignedInt | SDP_DATASIZE_8Bit), 0x03},
@@ -84,13 +84,13 @@ const struct
  */
 const struct
 {
-	uint8_t    Header;
-	uint8_t    Size;
-	ItemUUID_t UUIDList[];
+	uint8_t        Header;
+	uint8_t        Size;
+	SDP_ItemUUID_t UUIDList[];
 } PROGMEM SerialPort_Attribute_BrowseGroupList =
 	{
 		(SDP_DATATYPE_Sequence | SDP_DATASIZE_Variable8Bit),
-		(sizeof(ItemUUID_t) * 1),
+		(sizeof(SDP_ItemUUID_t) * 1),
 		{
 			{(SDP_DATATYPE_UUID | SDP_DATASIZE_128Bit), PUBLICBROWSEGROUP_CLASS_UUID},
 		},
@@ -101,13 +101,13 @@ const struct
  */
 const struct
 {
-	uint8_t            Header;
-	uint8_t            Size;
-	ItemLangEncoding_t LanguageEncodings[];
+	uint8_t                Header;
+	uint8_t                Size;
+	SDP_ItemLangEncoding_t LanguageEncodings[];
 } PROGMEM SerialPort_Attribute_LanguageBaseIDOffset =
 	{
 		(SDP_DATATYPE_Sequence | SDP_DATASIZE_Variable8Bit),
-		(sizeof(ItemLangEncoding_t) * 1),
+		(sizeof(SDP_ItemLangEncoding_t) * 1),
 		{
 			{
 				{(SDP_DATATYPE_UnsignedInt | SDP_DATASIZE_16Bit), SWAPENDIAN_16(0x454E)},
@@ -146,7 +146,7 @@ const struct
 /** Service Attribute Table for the Serial Port service, linking each supported attribute ID to its data, so that
  *  the SDP server can retrieve it for transmission back to a SDP client upon request.
  */
-const ServiceAttributeTable_t PROGMEM SerialPort_Attribute_Table[] =
+const SDP_ServiceAttributeTable_t PROGMEM SerialPort_Attribute_Table[] =
 	{
 		{SDP_ATTRIBUTE_ID_SERVICERECORDHANDLE,    &SerialPort_Attribute_ServiceHandle       },
 		{SDP_ATTRIBUTE_ID_SERVICECLASSIDS,        &SerialPort_Attribute_ServiceClassIDs     },
@@ -158,4 +158,4 @@ const ServiceAttributeTable_t PROGMEM SerialPort_Attribute_Table[] =
 	};
 
 /** Service entry node, used to register the attribute table with the SDP service */
-ServiceEntry_t ServiceEntry_RFCOMMSerialPort = {(sizeof(SerialPort_Attribute_Table) / sizeof(SerialPort_Attribute_Table[0])), SerialPort_Attribute_Table};
+SDP_ServiceEntry_t ServiceEntry_RFCOMMSerialPort = {(sizeof(SerialPort_Attribute_Table) / sizeof(SerialPort_Attribute_Table[0])), SerialPort_Attribute_Table};

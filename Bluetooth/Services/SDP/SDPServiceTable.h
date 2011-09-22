@@ -53,42 +53,42 @@
 		{
 			uint16_t    AttributeID; /**< Attribute ID of the table element which the UUID service supports */
 			const void* Data; /**< Pointer to the attribute data, located in PROGMEM memory space */
-		} ServiceAttributeTable_t;
+		} SDP_ServiceAttributeTable_t;
 
-		typedef struct ServiceEntry_t
+		typedef struct SDP_ServiceEntry_t
 		{
 			const uint8_t                  TotalTableAttributes;
-			const ServiceAttributeTable_t* AttributeTable;
-			struct ServiceEntry_t*         NextService;
-		} ServiceEntry_t;
+			const SDP_ServiceAttributeTable_t* AttributeTable;
+			struct SDP_ServiceEntry_t*         NextService;
+		} SDP_ServiceEntry_t;
 
 		/** Structure for a list of Data Elements containing 8-bit integers, for service attributes requiring such lists. */
 		typedef struct
 		{
 			uint8_t Header; /**< Data Element header, should be (SDP_DATATYPE_UnsignedInt | SDP_DATASIZE_8Bit) */
 			uint8_t Value; /**< Value to store in the list Data Element */
-		} Item8Bit_t;
+		} SDP_Item8Bit_t;
 
 		/** Structure for a list of Data Elements containing 16-bit integers, for service attributes requiring such lists. */
 		typedef struct
 		{
 			uint8_t  Header; /**< Data Element header, should be (SDP_DATATYPE_UnsignedInt | SDP_DATASIZE_16Bit) */
 			uint16_t Value; /**< Value to store in the list Data Element */
-		} Item16Bit_t;
+		} SDP_Item16Bit_t;
 
 		/** Structure for a list of Data Elements containing 32-bit integers, for service attributes requiring such lists. */
 		typedef struct
 		{
 			uint8_t  Header; /**< Data Element header, should be (SDP_DATATYPE_UnsignedInt | SDP_DATASIZE_32Bit) */
 			uint32_t Value; /**< Value to store in the list Data Element */
-		} Item32Bit_t;
+		} SDP_Item32Bit_t;
 
 		/** Structure for a list of Data Elements containing UUIDs, for service attributes requiring UUID lists. */
 		typedef struct
 		{
 			uint8_t Header; /**< Data Element header, should be (SDP_DATATYPE_UUID | SDP_DATASIZE_128Bit) */
 			UUID_t  UUID; /**< UUID to store in the list Data Element */
-		} ItemUUID_t;
+		} SDP_ItemUUID_t;
 
 		/** Structure for a list of Data Elements Sequences containing UUID Data Elements, for service attributes requiring
 		 *  protocol lists.
@@ -100,9 +100,9 @@
 
 			struct
 			{
-				ItemUUID_t UUID; /**< UUID to store in the protocol list Data Element sequence */
+				SDP_ItemUUID_t UUID; /**< UUID to store in the protocol list Data Element sequence */
 			} Protocol;
-		} ItemProtocol_t;
+		} SDP_ItemProtocol_t;
 
 		/** Structure for a list of Data Elements Sequences containing UUID Data Elements and an 8-bit param value, for service
 		 *  attributes requiring extended protocol lists containing an 8-bit value.
@@ -114,10 +114,10 @@
 
 			struct
 			{
-				ItemUUID_t UUID; /**< UUID to store in the protocol list Data Element sequence */
-				Item8Bit_t Param; /**< 8-Bit Parameter associated with the service */
+				SDP_ItemUUID_t UUID; /**< UUID to store in the protocol list Data Element sequence */
+				SDP_Item8Bit_t Param; /**< 8-Bit Parameter associated with the service */
 			} Protocol;
-		} ItemProtocol_8BitParam_t;
+		} SDP_ItemProtocol_8BitParam_t;
 
 		/** Structure for a list of Data Elements Sequences containing UUID Data Elements and an 16-bit param value, for service
 		 *  attributes requiring extended protocol lists containing an 16-bit value.
@@ -129,19 +129,19 @@
 
 			struct
 			{
-				ItemUUID_t UUID; /**< UUID to store in the protocol list Data Element sequence */
-				Item16Bit_t Channel; /**< 16-Bit Parameter associated with the service */
+				SDP_ItemUUID_t UUID; /**< UUID to store in the protocol list Data Element sequence */
+				SDP_Item16Bit_t Channel; /**< 16-Bit Parameter associated with the service */
 			} Protocol;
-		} ItemProtocol_16BitParam_t;
+		} SDP_ItemProtocol_16BitParam_t;
 
 		/** Structure for a list of Data Elements containing language encodings, including the language ID, Encoding ID and
 		 *  Attribute base offset.
 		 */
 		typedef struct
 		{
-			Item16Bit_t LanguageID; /**< Language ID for the current language */
-			Item16Bit_t EncodingID; /**< Encoding used for the current language */
-			Item16Bit_t OffsetID; /**< Attribute offset added to all strings using this language within the service */
-		} ItemLangEncoding_t;
+			SDP_Item16Bit_t LanguageID; /**< Language ID for the current language */
+			SDP_Item16Bit_t EncodingID; /**< Encoding used for the current language */
+			SDP_Item16Bit_t OffsetID; /**< Attribute offset added to all strings using this language within the service */
+		} SDP_ItemLangEncoding_t;
 		
 #endif

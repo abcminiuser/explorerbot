@@ -102,7 +102,7 @@
 		typedef struct
 		{
 			uint16_t ConnectionHandle; /** HCI connection handle for the channel. */
-			uint8_t  State; /**< Current channel state, a value from the \ref BT_ChannelStates_t enum. */
+			uint8_t  State; /**< Current channel state, a value from the \ref BT_L2CAP_ChannelStates_t enum. */
 			uint16_t LocalNumber; /**< Local channel number on the device. */
 			uint16_t RemoteNumber; /**< Remote channel number on the connected device. */
 			uint16_t PSM; /**< Protocol used on the channel. */
@@ -144,7 +144,6 @@
 		 *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.
 		 *  \param[in]      Type        Packet type, a value from the \ref BT_PacketType_t enum.
 		 *  \param[in]      Length      Length of the packet to send, in bytes.
-		 *  \param[in]      Data        Pointer to the start of the packet to send.
 		 */
 		void CALLBACK_Bluetooth_SendPacket(BT_StackConfig_t* const StackState,
 		                                   const uint8_t Type,
@@ -220,7 +219,6 @@
 		/** User application callback, fired when the Bluetooth stack has received data on an open connection.
 		 *
 		 *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.
-		 *  \param[in, out] Connection  Pointer to the HCI connection information.
 		 *  \param[in, out] Channel     Pointer to the L2CAP channel information.
 		 *  \param[in]      Length      Length of the L2CAP packet data.
 		 *  \param[in]      Data        Pointer to the start of the L2CAP packet data.

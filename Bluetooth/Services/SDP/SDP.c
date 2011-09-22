@@ -15,15 +15,15 @@
 #include "SDP.h"
 
 /** Linked list of service attribute tables registered with the SDP service. */
-static ServiceEntry_t* RegisteredServices = NULL;
+static SDP_ServiceEntry_t* RegisteredServices = NULL;
 
 /** Base UUID value common to all standardized Bluetooth services */
 const UUID_t BaseUUID PROGMEM = {0x00000000, BASE_80BIT_UUID};
 
 
-void SDP_RegisterService(ServiceEntry_t* const ServiceEntry)
+void SDP_RegisterService(SDP_ServiceEntry_t* const ServiceEntry)
 {
-	ServiceEntry_t* CurrentService = RegisteredServices;
+	SDP_ServiceEntry_t* CurrentService = RegisteredServices;
 
 	/* No service currently registered, save new service as the root node */
 	if (!(CurrentService))
@@ -43,9 +43,9 @@ void SDP_RegisterService(ServiceEntry_t* const ServiceEntry)
 	ServiceEntry->NextService   = NULL;
 }
 
-void SDP_UnregisterService(ServiceEntry_t* const ServiceEntry)
+void SDP_UnregisterService(SDP_ServiceEntry_t* const ServiceEntry)
 {
-	ServiceEntry_t* CurrentService = RegisteredServices;
+	SDP_ServiceEntry_t* CurrentService = RegisteredServices;
 
 	/* No service currently registered, abort */
 	if (CurrentService == NULL)
@@ -321,7 +321,7 @@ static uint8_t SDP_GetUUIDList(uint8_t UUIDList[][UUID_SIZE_BYTES],
  *
  *  \return True if all the UUIDs given in the UUID list appear in the given attribute table, false otherwise
  */
-static bool SDP_SearchServiceTable(const ServiceEntry_t* const ServiceEntry,
+static bool SDP_SearchServiceTable(const SDP_ServiceEntry_t* const ServiceEntry,
 								   uint8_t UUIDList[][UUID_SIZE_BYTES],
                                    const uint8_t TotalUUIDs)
 {
@@ -379,7 +379,7 @@ static uint16_t SDP_AddAttributeToResponse(const uint16_t AttributeID,
  *
  *  \return Pointer to the start of the Attribute's value if found within the table, NULL otherwise
  */
-static void* SDP_GetAttributeValue(const ServiceEntry_t* const ServiceEntry,
+static void* SDP_GetAttributeValue(const SDP_ServiceEntry_t* const ServiceEntry,
                                    const uint16_t AttributeID)
 {
 	/* Search through the current Attribute table, abort when the terminator item has been reached */
@@ -401,7 +401,7 @@ static void* SDP_GetAttributeValue(const ServiceEntry_t* const ServiceEntry,
  *
  *  \return Number of bytes added to the output buffer
  */
-static uint16_t SDP_AddListedAttributesToResponse(const ServiceEntry_t* const ServiceEntry,
+static uint16_t SDP_AddListedAttributesToResponse(const SDP_ServiceEntry_t* const ServiceEntry,
                                                   uint16_t AttributeList[][2],
                                                   const uint8_t TotalAttributes,
                                                   void** const BufferPos)
@@ -472,7 +472,7 @@ static void SDP_ServiceSearch(BT_StackConfig_t* const StackState,
 	void* CurrResponsePos = ResponsePacket.ResponseData;
 
 	/* Search through all registered services, looking for UUID matches */
-	ServiceEntry_t* CurrentService = RegisteredServices;
+	SDP_ServiceEntry_t* CurrentService = RegisteredServices;
 	while (CurrentService != NULL)
 	{
 		/* Search the current SDP service attribute table for the given UUIDs */
@@ -549,7 +549,7 @@ static void SDP_ServiceAttribute(BT_StackConfig_t* const StackState,
 	  MaximumAttributeSize = sizeof(ResponsePacket.ResponseData);
 
 	/* Search through all registered services, looking for UUID matches */
-	ServiceEntry_t* CurrentService = RegisteredServices;
+	SDP_ServiceEntry_t* CurrentService = RegisteredServices;
 	while (CurrentService != NULL)
 	{
 		/* Retrieve a PROGMEM pointer to the value of the Service Record Handle */
@@ -632,7 +632,7 @@ static void SDP_ServiceSearchAttribute(BT_StackConfig_t* const StackState,
 	uint16_t* RespAttributeListSize = SDP_WriteSequenceHeader16(&CurrResponsePos);
 
 	/* Search through all registered services, looking for UUID matches */
-	ServiceEntry_t* CurrentService = RegisteredServices;
+	SDP_ServiceEntry_t* CurrentService = RegisteredServices;
 	while (CurrentService != NULL)
 	{
 		/* Search the current SDP service attribute table for the given UUIDs */

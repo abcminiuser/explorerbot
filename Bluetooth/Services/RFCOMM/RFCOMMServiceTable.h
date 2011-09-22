@@ -23,6 +23,6 @@
 		#include "../SDP/SDP.h"
 		
 	/* External Variables: */
-		extern ServiceEntry_t ServiceEntry_RFCOMMSerialPort;
+		extern SDP_ServiceEntry_t ServiceEntry_RFCOMMSerialPort;
 
 #endif

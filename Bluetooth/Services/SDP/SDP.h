@@ -23,7 +23,7 @@
 		#include "SDPServiceTable.h"
 
 	/* Enums: */
-		enum ServiceDiscovery_PDU_t
+		enum SDP_PDU_t
 		{
 			SDP_PDU_ERRORRESPONSE                  = 0x01,
 			SDP_PDU_SERVICESEARCHREQUEST           = 0x02,
@@ -35,9 +35,9 @@
 		};
 	
 		/** Data sizes for SDP Data Element headers, to indicate the size of the data contained in the element. When creating
-		 *  a Data Element, a value from this enum should be ORed with a value from the \ref ServiceDiscovery_DataTypes_t enum.
+		 *  a Data Element, a value from this enum should be ORed with a value from the \ref SDP_Element_DataTypes_t enum.
 		 */
-		enum ServiceDiscovery_DataSizes_t
+		enum SDP_Element_DataSizes_t
 		{
 			SDP_DATASIZE_8Bit                      = 0, /**< Contained data is 8 bits in length. */
 			SDP_DATASIZE_16Bit                     = 1, /**< Contained data is 16 bits in length. */
@@ -50,9 +50,9 @@
 		};
 
 		/** Data types for SDP Data Element headers, to indicate the type of data contained in the element. When creating
-		 *  a Data Element, a value from this enum should be ORed with a value from the \ref ServiceDiscovery_DataSizes_t enum.
+		 *  a Data Element, a value from this enum should be ORed with a value from the \ref SDP_Element_DataSizes_t enum.
 		 */
-		enum ServiceDiscovery_DataTypes_t
+		enum SDP_Element_DataTypes_t
 		{
 			SDP_DATATYPE_Nill                     = (0 << 3), /**< Indicates the container data is a Nill (null) type. */
 			SDP_DATATYPE_UnsignedInt              = (1 << 3), /**< Indicates the container data is an unsigned integer. */
@@ -179,8 +179,8 @@
 		}
 		
 	/* Function Prototypes: */
-		void SDP_RegisterService(ServiceEntry_t* const ServiceEntry);
-		void SDP_UnregisterService(ServiceEntry_t* const ServiceEntry);
+		void SDP_RegisterService(SDP_ServiceEntry_t* const ServiceEntry);
+		void SDP_UnregisterService(SDP_ServiceEntry_t* const ServiceEntry);
 
 		void SDP_Init(BT_StackConfig_t* const StackState);
 		void SDP_Manage(BT_StackConfig_t* const StackState);

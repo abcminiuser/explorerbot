@@ -33,9 +33,6 @@ static void HID_Client_CtlPacket(BT_StackConfig_t* const StackState,
 
 	switch (Data[0] & HID_TRANSTYPE_MASK)
 	{
-		case HID_TRANS_CONTROL:
-//			Handshake = HID_HS_SUCCESSFUL;
-			break;
 		case HID_TRANS_DATA:
 		case HID_TRANS_DATAC:
 			Handshake = HID_HS_ERR_INVALID_PARAMETER;
@@ -56,6 +53,7 @@ static void HID_Client_IntPacket(BT_StackConfig_t* const StackState,
 	{
 		case HID_TRANS_DATA:
 		case HID_TRANS_DATAC:
+			/* HID report data received, pass it to the client */
 			CALLBACK_HID_Client_ReportReceived(StackState, Channel, (Data[0] & ~HID_TRANSTYPE_MASK), (Length - 1), &Data[1]);
 			break;
 	}

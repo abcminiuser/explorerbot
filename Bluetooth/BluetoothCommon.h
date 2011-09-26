@@ -37,7 +37,8 @@
 		{
 			HCI_CONSTATE_Free                   = 0,
 			HCI_CONSTATE_New                    = 1,
-			HCI_CONSTATE_Connected              = 2,
+			HCI_CONSTATE_Connecting             = 2,
+			HCI_CONSTATE_Connected              = 3,
 		};
 
 		/** Enum for the possible states for a Bluetooth L2CAP channel. */
@@ -84,6 +85,14 @@
 			BLUETOOTH_PACKET_L2CAPData          = 0x02,
 			BLUETOOTH_PACKET_SynchData          = 0x03,
 			BLUETOOTH_PACKET_HCIEvent           = 0x04,
+		};
+		
+		/** Enum for the possible Bluetooth link types. */
+		enum BT_LinkTypes_t
+		{
+			LINK_TYPE_SCO                       = 0x00,
+			LINK_TYPE_ACL                       = 0x01,
+			LINK_TYPE_eSCO                      = 0x02,
 		};
 
 	/* Type Defines: */

@@ -49,5 +49,8 @@
 		void Bluetooth_HCI_Init(BT_StackConfig_t* const StackState);
 		void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState);
 		bool Bluetooth_HCI_Manage(BT_StackConfig_t* const StackState);
+		BT_HCI_Connection_t* Bluetooth_HCI_Connect(BT_StackConfig_t* const StackState,
+		                                           const uint8_t* const RemoteBDADDR,
+		                                           const uint8_t LinkType);
 
 #endif

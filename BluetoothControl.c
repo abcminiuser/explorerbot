@@ -194,7 +194,7 @@ void CALLBACK_HID_Client_ReportReceived(BT_StackConfig_t* const StackState,
 			Speaker_Tone((Data[1] & 0x02) ? 250 : 0);
 		}
 		else // PS3 Controller
-		{		
+		{
 			switch (*((uint16_t*)&Data[2]))
 			{
 				default:

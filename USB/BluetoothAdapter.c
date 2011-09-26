@@ -31,7 +31,7 @@
 #include "BluetoothAdapter.h"
 
 /** Bluetooth stack configuration and state stable, used to configure an instance of the Bluetooth stack. */
-BT_StackConfig_t BluetoothAdapter_Stack =
+static BT_StackConfig_t BluetoothAdapter_Stack =
 	{
 		.Config = 
 			{
@@ -160,7 +160,7 @@ bool BluetoothAdapter_PostConfiguration(void)
 	if (!(BluetoothAdapter_IsActive))
 	  return true;
 	  
-	Bluetooth_Init(&BluetoothAdapter_Stack);
+	Bluetooth_Init(&BluetoothAdapter_Stack);	
 	return true;
 }
 
@@ -258,5 +258,11 @@ void EVENT_Bluetooth_InitComplete(BT_StackConfig_t* const StackState)
 {
 	/* Save the local BDADDR of the connected Bluetooth adapter for later use */
 	eeprom_update_block(BluetoothAdapter_Stack.State.HCI.LocalBDADDR, BluetoothAdapter_LastLocalBDADDR, BT_BDADDR_LEN);
+}
+
+BT_HCI_Connection_t* BluetoothAdapter_ConnectToRemoteDevice(void)
+{
+	uint8_t Address2[] = {0xef, 0x83, 0xf5, 0x51, 0xe7, 0xe0};
+	return Bluetooth_HCI_Connect(&BluetoothAdapter_Stack, Address2, LINK_TYPE_ACL);
 }
 

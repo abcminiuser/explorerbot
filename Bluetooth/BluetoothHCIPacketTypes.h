@@ -26,13 +26,6 @@
 			BT_SCANMODE_PageScanOnly         = 2,
 			BT_SCANMODE_InquiryAndPageScans  = 3,
 		};
-		
-		enum BT_LinkTypes_t
-		{
-			BT_LINKTYPE_SCO                  = 0,
-			BT_LINKTYPE_ACL                  = 1,
-			BT_LINKTYPE_eSCO                 = 2,
-		};
 
 	/* Type Defines: */
 		typedef struct
@@ -70,6 +63,16 @@
 			uint16_t ClassOfDevice_MajorMinor;
 			uint8_t  LinkType;
 		} ATTR_PACKED BT_HCIEvent_ConnectionRequest_t;
+
+		typedef struct
+		{
+			uint8_t  RemoteBDADDR[BT_BDADDR_LEN];
+			uint16_t PacketType;
+			uint8_t  PageScanMode;
+			uint8_t  Reserved;
+			uint16_t ClockOffset;
+			uint8_t  AllowRoleSwitch;
+		} ATTR_PACKED BT_HCIEvent_CreateConnection_t;
 
 		typedef struct
 		{

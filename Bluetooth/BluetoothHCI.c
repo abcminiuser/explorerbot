@@ -108,8 +108,8 @@ void Bluetooth_HCI_Init(BT_StackConfig_t* const StackState)
  */
 void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState)
 {
-	BT_HCIEvent_Header_t*   HCIEventHeader = (BT_HCIEvent_Header_t*)StackState->Config.PacketBuffer;
-	uint8_t                 NextHCIState   = StackState->State.HCI.State;
+	BT_HCIEvent_Header_t* HCIEventHeader = (BT_HCIEvent_Header_t*)StackState->Config.PacketBuffer;
+	uint8_t               NextHCIState   = StackState->State.HCI.State;
 
 	if (HCIEventHeader->EventCode == EVENT_COMMAND_COMPLETE)
 	{
@@ -145,11 +145,7 @@ void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState)
 				break;
 			case HCISTATE_Init_SetScanEnable:
 				if (CommandCompleteHeader->Opcode == CPU_TO_LE16(OGF_CTRLR_BASEBAND | OCF_CTRLR_BASEBAND_WRITE_SCAN_ENABLE))
-				{
-					NextHCIState = HCISTATE_Idle;
-
-					EVENT_Bluetooth_InitComplete(StackState);
-				}
+				  NextHCIState = HCISTATE_Idle;
 				break;
 		}
 	}
@@ -208,10 +204,11 @@ void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState)
 		if (Connection)
 		{
 			Connection->Handle = (le16_to_cpu(ConnectionCompleteEventHeader->Handle) & BT_HCI_CONNECTION_HANDLE_MASK);
-			Connection->State  = HCI_CONSTATE_Connected;
+			Connection->State  = (ConnectionCompleteEventHeader->Status == 0x00) ? HCI_CONSTATE_Connected : HCI_CONSTATE_Free;
 			
 			/* Fire user application callback to signal the connection completion */
-			EVENT_Bluetooth_ConnectionComplete(StackState, Connection);
+			if (Connection->State == HCI_CONSTATE_Connected)
+			  EVENT_Bluetooth_ConnectionComplete(StackState, Connection);			
 		}
 	}
 	else if (HCIEventHeader->EventCode == EVENT_DISCONNECTION_COMPLETE)
@@ -333,12 +330,49 @@ bool Bluetooth_HCI_Manage(BT_StackConfig_t* const StackState)
 			HCICommandHeader->ParameterLength = 1;
 			HCICommandHeader->Parameters[0]   = (StackState->Config.Discoverable ? BT_SCANMODE_InquiryAndPageScans : BT_SCANMODE_NoScansEnabled);
 			break;
+		case HCISTATE_Idle:
+			EVENT_Bluetooth_InitComplete(StackState);
+			break;
 	}
 	
-	/* If a new OpCode has been loaded, send the Bluetooth command to the adapter */
+	/* If a new OpCode has been loaded, send the Bluetooth command to the transciever */
 	if (HCICommandHeader->OpCode)
 	  CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCICommand, (sizeof(BT_HCICommand_Header_t) + HCICommandHeader->ParameterLength));
 	
 	StackState->State.HCI.StateTransition = false;
 	return true;
+}
+
+BT_HCI_Connection_t* Bluetooth_HCI_Connect(BT_StackConfig_t* const StackState,
+                                           const uint8_t* const RemoteBDADDR,
+                                           const uint8_t LinkType)
+{
+	if (StackState->State.HCI.State != HCISTATE_Idle)
+	  return NULL;
+	
+	/* Create a new HCI connection entry in the stack's HCI connection table */
+	BT_HCI_Connection_t* HCIConnection = Bluetooth_HCI_NewConnection(StackState, RemoteBDADDR, LinkType);
+	
+	if (!(HCIConnection))
+	  return NULL;
+	
+	/* Indicate that the connection is currently attempting a connection to the remote device */
+	HCIConnection->State = HCI_CONSTATE_Connecting;
+	
+	BT_HCICommand_Header_t* HCICommandHeader = (BT_HCICommand_Header_t*)StackState->Config.PacketBuffer;
+	HCICommandHeader->OpCode             = CPU_TO_LE16(OGF_LINK_CONTROL | OCF_LINK_CONTROL_CREATE_CONNECTION),
+	HCICommandHeader->ParameterLength    = sizeof(BT_HCIEvent_CreateConnection_t);
+	
+	/* Fill out HCI connection parameters - assume role switch allowed for now, and all packet types supported */
+	BT_HCIEvent_CreateConnection_t* CreateConnectHeader = (BT_HCIEvent_CreateConnection_t*)&HCICommandHeader->Parameters;
+	memcpy(CreateConnectHeader->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
+	CreateConnectHeader->PacketType      = CPU_TO_LE16(0xCC18);
+	CreateConnectHeader->PageScanMode    = 1;
+	CreateConnectHeader->Reserved        = 0;
+	CreateConnectHeader->ClockOffset     = CPU_TO_LE16(0);
+	CreateConnectHeader->AllowRoleSwitch = false;
+	
+	CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCICommand, (sizeof(BT_HCICommand_Header_t) + HCICommandHeader->ParameterLength));
+	
+	return HCIConnection;
 }

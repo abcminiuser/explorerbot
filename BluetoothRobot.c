@@ -46,9 +46,14 @@ int main(void)
 	{
 		uint8_t ButtonStatus = Buttons_GetStateMask();
 
-		/* Motor stop button */
+		/* Initiate connection button */
 		if (ButtonStatus & BUTTON1_MASK)
-		  Motors_SetChannelSpeed(0, 0);
+		{
+			static BT_HCI_Connection_t* RemoteConnection = NULL;
+			
+			if (!(RemoteConnection) || (RemoteConnection->State == HCI_CONSTATE_Free))
+			  RemoteConnection = BluetoothAdapter_ConnectToRemoteDevice();
+		}
 		  
 		/* System reset button */
 		if (ButtonStatus & BUTTON2_MASK)

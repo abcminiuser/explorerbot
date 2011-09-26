@@ -30,6 +30,8 @@
 
 #include "Headlights.h"
 
+static bool Headlights_LatchedState = false;
+
 /** Initializes the Headlights hardware driver ready for use. This must be called
  *  before any other functions in the Headlights driver.
  */
@@ -46,8 +48,16 @@ void Headlights_Init(void)
  */
 void Headlights_SetState(const bool HeadlightsOn)
 {
-	if (HeadlightsOn)
+	if (HeadlightsOn || Headlights_LatchedState)
 	  PORTD |=  (1 << 5);
 	else
 	  PORTD &= ~(1 << 5);
+}
+
+/** Toggles on or off the robot Headlights.
+ */
+void Headlights_ToggleState(void)
+{
+	Headlights_LatchedState = !Headlights_LatchedState;
+	PORTD ^= (1 << 5);
 }

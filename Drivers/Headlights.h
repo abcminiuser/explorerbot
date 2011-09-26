@@ -38,6 +38,7 @@
 	/* Function Prototypes: */
 		void Headlights_Init(void);
 		void Headlights_SetState(const bool HeadlightsOn);
+		void Headlights_ToggleState(void);
 
 #endif
 

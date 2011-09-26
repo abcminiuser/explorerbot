@@ -30,6 +30,18 @@
 
 #include "Speaker.h"
 
+const uint8_t Sequence_LaCucaracha[]   = {SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 5,
+                                          SPEAKER_HZ(261.63), 0, SPEAKER_HZ(261.63), 0, SPEAKER_HZ(261.63), 0,
+                                          SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 10,
+                                          SPEAKER_HZ(349.23), 0, SPEAKER_HZ(440.0), 0,
+                                          SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_EndOfSequence};
+
+const uint8_t* Sequence_Table[]        = {Sequence_LaCucaracha};
+
+static const uint8_t* SequencePosition = NULL;
+static uint8_t SequenceTicksElapsed    = 0;
+static uint8_t SequenceTickDuration    = 0;
+
 /** Initializes the Speaker hardware driver ready for use. This must be called before any other
  *  functions in the Speaker hardware driver.
  */
@@ -38,7 +50,49 @@ void Speaker_Init(void)
 	DDRB |= (1 << 7);
 
 	TCCR0A = ((1 << COM0A0) | (1 << WGM01));
-	TCCR0B = ((1 << CS01) | (1 << CS00));	
 
-	Speaker_Tone(0);
+	Speaker_SetPWM(0);
 }
+
+void Speaker_NextSequenceTone(void)
+{
+	if (!(SequencePosition))
+	  return;
+	
+	if (SequenceTicksElapsed++ >= SequenceTickDuration)
+	{
+		SequenceTicksElapsed = 0;
+		
+		uint8_t NextTone;
+		
+		while ((NextTone = *(SequencePosition++)) == SPEAKER_SEQESCAPE)
+		{
+			switch (*(SequencePosition++))
+			{
+				case SPEAKER_ESCCMD_EndOfSequence:
+					SequencePosition = NULL;
+					Speaker_SetPWM(0);
+					return;
+				case SPEAKER_ESCCMD_ToneDuration:
+					SequenceTickDuration = *(SequencePosition++);
+					break;
+			}
+		}
+		
+		Speaker_SetPWM(NextTone);
+	}
+}
+
+void Speaker_PlaySequence(const uint8_t SequenceID)
+{
+	SequencePosition     = Sequence_Table[SequenceID];
+	SequenceTicksElapsed = 0;
+	SequenceTickDuration = 10;
+}
+
+void Speaker_Tone(const uint8_t PWMValue)
+{
+	if (!(SequencePosition))
+	  Speaker_SetPWM(PWMValue);
+}
+

@@ -262,6 +262,7 @@ void EVENT_Bluetooth_InitComplete(BT_StackConfig_t* const StackState)
 
 BT_HCI_Connection_t* BluetoothAdapter_ConnectToRemoteDevice(void)
 {
+	// Wiimote - TODO: pull from memory stick
 	uint8_t Address2[] = {0xef, 0x83, 0xf5, 0x51, 0xe7, 0xe0};
 	return Bluetooth_HCI_Connect(&BluetoothAdapter_Stack, Address2, LINK_TYPE_ACL);
 }

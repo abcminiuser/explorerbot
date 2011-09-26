@@ -103,6 +103,7 @@
 			uint16_t Handle;
 			uint8_t  LinkType;
 			uint8_t  CurrentIdentifier;
+			bool     LocallyInitiated;
 		} BT_HCI_Connection_t;
 	
 		/** Type define for a Bluetooth L2CAP channel information structure. This structure contains all the relevant

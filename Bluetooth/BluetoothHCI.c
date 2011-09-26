@@ -82,6 +82,7 @@ static BT_HCI_Connection_t* const Bluetooth_HCI_NewConnection(BT_StackConfig_t* 
 			Connection->State             = HCI_CONSTATE_New;
 			Connection->LinkType          = LinkType;
 			Connection->CurrentIdentifier = 0x01;
+			Connection->LocallyInitiated  = false;
 			return Connection;
 		}
 	}
@@ -357,7 +358,8 @@ BT_HCI_Connection_t* Bluetooth_HCI_Connect(BT_StackConfig_t* const StackState,
 	  return NULL;
 	
 	/* Indicate that the connection is currently attempting a connection to the remote device */
-	HCIConnection->State = HCI_CONSTATE_Connecting;
+	HCIConnection->State                 = HCI_CONSTATE_Connecting;
+	HCIConnection->LocallyInitiated      = true;
 	
 	BT_HCICommand_Header_t* HCICommandHeader = (BT_HCICommand_Header_t*)StackState->Config.PacketBuffer;
 	HCICommandHeader->OpCode             = CPU_TO_LE16(OGF_LINK_CONTROL | OCF_LINK_CONTROL_CREATE_CONNECTION),
@@ -370,9 +372,41 @@ BT_HCI_Connection_t* Bluetooth_HCI_Connect(BT_StackConfig_t* const StackState,
 	CreateConnectHeader->PageScanMode    = 1;
 	CreateConnectHeader->Reserved        = 0;
 	CreateConnectHeader->ClockOffset     = CPU_TO_LE16(0);
-	CreateConnectHeader->AllowRoleSwitch = false;
+	CreateConnectHeader->AllowRoleSwitch = true;
 	
 	CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCICommand, (sizeof(BT_HCICommand_Header_t) + HCICommandHeader->ParameterLength));
 	
 	return HCIConnection;
+}
+
+bool Bluetooth_HCI_Disconnect(BT_StackConfig_t* const StackState,
+                              BT_HCI_Connection_t* const HCIConnection)
+{
+	if (StackState->State.HCI.State != HCISTATE_Idle)
+	  return false;
+	
+	if (!(HCIConnection))
+	  return false;
+	  
+	BT_HCICommand_Header_t* HCICommandHeader = (BT_HCICommand_Header_t*)StackState->Config.PacketBuffer;
+
+	switch (HCIConnection->State)
+	{
+		case HCI_CONSTATE_Connecting:
+			HCICommandHeader->OpCode           = CPU_TO_LE16(OGF_LINK_CONTROL | OCF_LINK_CONTROL_CREATE_CONNECTION_CANCEL),
+			HCICommandHeader->ParameterLength  = sizeof(BT_BDADDR_LEN);
+			memcpy(&HCICommandHeader->Parameters[0], HCIConnection->RemoteBDADDR, BT_BDADDR_LEN);
+			break;
+		case HCI_CONSTATE_Connected:
+			HCICommandHeader->OpCode           = CPU_TO_LE16(OGF_LINK_CONTROL | OCF_LINK_CONTROL_DISCONNECT),
+			HCICommandHeader->ParameterLength  = 3;
+			HCICommandHeader->Parameters[0]    = (HCIConnection->Handle & 0xFF);		
+			HCICommandHeader->Parameters[1]    = (HCIConnection->Handle >> 8);		
+			HCICommandHeader->Parameters[2]    = 0x00;		
+		default:
+			return false;			
+	}
+	
+	CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCICommand, (sizeof(BT_HCICommand_Header_t) + HCICommandHeader->ParameterLength));
+	return true;
 }

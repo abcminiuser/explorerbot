@@ -52,5 +52,7 @@
 		BT_HCI_Connection_t* Bluetooth_HCI_Connect(BT_StackConfig_t* const StackState,
 		                                           const uint8_t* const RemoteBDADDR,
 		                                           const uint8_t LinkType);
+		bool Bluetooth_HCI_Disconnect(BT_StackConfig_t* const StackState,
+		                              BT_HCI_Connection_t* const HCIConnection);
 
 #endif

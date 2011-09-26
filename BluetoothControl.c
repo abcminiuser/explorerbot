@@ -214,8 +214,18 @@ void CALLBACK_HID_Client_ReportReceived(BT_StackConfig_t* const StackState,
 					break;
 			}
 			
-			Headlights_SetState(*((uint16_t*)&Data[2]) & 0x0100);
-			Speaker_Tone((*((uint16_t*)&Data[2]) & 0x0200) ? 250 : 0);
+			Headlights_SetState(*((uint16_t*)&Data[2]) & (1 << (PS3CONTROLLER_BUTTON_R2 - 1)));
+			Speaker_Tone((*((uint16_t*)&Data[2]) & (1 << (PS3CONTROLLER_BUTTON_L2 - 1))) ? 30 : 0);
+			
+			static uint16_t PrevButtons = 0;
+
+			if (!(PrevButtons & (1 << (PS3CONTROLLER_BUTTON_R1 - 1))) && (*((uint16_t*)&Data[2]) & (1 << (PS3CONTROLLER_BUTTON_R1 - 1))))
+			  Headlights_ToggleState();
+			
+			if (!(PrevButtons & (1 << (PS3CONTROLLER_BUTTON_L1 - 1))) && (*((uint16_t*)&Data[2]) & (1 << (PS3CONTROLLER_BUTTON_L1 - 1))))
+			  Speaker_PlaySequence(SPEAKER_SEQUENCE_LaCucaracha);
+			
+			PrevButtons = *((uint16_t*)&Data[2]);
 		}
 	}
 }

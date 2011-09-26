@@ -48,5 +48,7 @@
 		#include "Bluetooth/Services/HID/HIDClient.h"
 		#include "Bluetooth/Services/RFCOMM/RFCOMM.h"
 
+		#include "USB/JoystickHID.h"
+
 #endif
 

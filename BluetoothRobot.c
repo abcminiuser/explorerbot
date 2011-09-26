@@ -60,18 +60,29 @@ int main(void)
 			for(;;);
 		}
 
-		/* Check if the sensor update interval has elapsed */
+		/* Check if the system update interval has elapsed */
 		if (TIFR3 & (1 << OCF3A))
 		{
 			/* Clear the timer compare flag */
 			TIFR3 |= (1 << OCF3A);
 		
-			/* Update all connected sensors' values */
-			Sensors_Update();
+			static uint8_t SensorTicksElapsed = 0;
 			
-			/* Log sensors to attached mass storage disk if available */
-			if (Datalogger_MS_Interface.State.IsActive)
-			  Datalogger_LogSensors();
+			/* Update sensors every 250ms and log to disk */
+			if (SensorTicksElapsed++ == 25)
+			{
+				SensorTicksElapsed = 0;
+				
+				/* Update all connected sensors' values */
+				Sensors_Update();
+				
+				/* Log sensors to attached mass storage disk if available */
+				if (Datalogger_MS_Interface.State.IsActive)
+				  Datalogger_LogSensors();
+			}
+			
+			/* Update the currently playing tone through the speaker (if one is playing) */
+			Speaker_NextSequenceTone();
 		}
 		
 		BluetoothAdapter_USBTask();
@@ -98,9 +109,9 @@ void SetupHardware(void)
 	PRR0 = ((1 << PRADC)  | (1 << PRSPI));
 	PRR1 = (1 << PRUSART1);
 	
-	/* Enable sensor update timer */
+	/* Enable system update tick timer (10ms) */
 	TCCR3B = ((1 << WGM32) | (1 << CS31) | (1 << CS30));
-	OCR3A  = ((F_CPU / 64) / 4);
+	OCR3A  = ((F_CPU / 64) / 100);
 
 	/* Hardware Initialization */
 	ExternalSRAM_Init();

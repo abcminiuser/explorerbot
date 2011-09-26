@@ -64,7 +64,9 @@ static struct
 	HID_ReportItem_t* Right;
 	HID_ReportItem_t* Backward;
 	HID_ReportItem_t* Headlights;
-	HID_ReportItem_t* Speaker;
+	HID_ReportItem_t* HeadlightToggle;
+	HID_ReportItem_t* Horn;
+	HID_ReportItem_t* NoveltyHorn;
 } Joystick_HIDReportItemMappings;
 
 
@@ -150,9 +152,25 @@ void Joystick_USBTask(void)
 		if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.Headlights))
 		  Headlights_SetState(Joystick_HIDReportItemMappings.Headlights->Value != 0);
 
-		/* Determine if speaker button is currently pressed or not */
-		if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.Speaker))
-		  Speaker_Tone((Joystick_HIDReportItemMappings.Speaker->Value) ? 250 : 0);
+		/* Determine if headlight toggle button is currently pressed or not */
+		if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.HeadlightToggle))
+		{
+			/* Toggle on rising button edge */
+			if ((Joystick_HIDReportItemMappings.HeadlightToggle->PreviousValue == 0) && Joystick_HIDReportItemMappings.HeadlightToggle->Value)
+			  Headlights_ToggleState();
+		}
+
+		/* Determine if horn button is currently pressed or not */
+		if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.Horn))
+		  Speaker_Tone((Joystick_HIDReportItemMappings.Horn->Value) ? 30 : 0);
+
+		/* Determine if novelty horn button is currently pressed or not */
+		if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.NoveltyHorn))
+		{
+			/* Activate on rising button edge */
+			if ((Joystick_HIDReportItemMappings.NoveltyHorn->PreviousValue == 0) && Joystick_HIDReportItemMappings.NoveltyHorn->Value)
+			  Speaker_PlaySequence(SPEAKER_SEQUENCE_LaCucaracha);
+		}
 	}
 
 	/* Run the HID Class Driver service task on the HID Joystick interface */
@@ -194,22 +212,28 @@ bool CALLBACK_HIDParser_FilterHIDReportItem(HID_ReportItem_t* const CurrentItem)
 			switch (CurrentItem->Attributes.Usage.Usage)
 			{
 				case PS3CONTROLLER_BUTTON_Up:
-					Joystick_HIDReportItemMappings.Forward    = CurrentItem;
+					Joystick_HIDReportItemMappings.Forward     = CurrentItem;
 					return true;
 				case PS3CONTROLLER_BUTTON_Right:
-					Joystick_HIDReportItemMappings.Right      = CurrentItem;
+					Joystick_HIDReportItemMappings.Right       = CurrentItem;
 					return true;
 				case PS3CONTROLLER_BUTTON_Down:
-					Joystick_HIDReportItemMappings.Backward   = CurrentItem;
+					Joystick_HIDReportItemMappings.Backward    = CurrentItem;
 					return true;
 				case PS3CONTROLLER_BUTTON_Left:
-					Joystick_HIDReportItemMappings.Left       = CurrentItem;
+					Joystick_HIDReportItemMappings.Left        = CurrentItem;
 					return true;
 				case PS3CONTROLLER_BUTTON_L1:
-					Joystick_HIDReportItemMappings.Speaker    = CurrentItem;
+					Joystick_HIDReportItemMappings.NoveltyHorn = CurrentItem;
+					return true;
+				case PS3CONTROLLER_BUTTON_L2:
+					Joystick_HIDReportItemMappings.Horn        = CurrentItem;
 					return true;
 				case PS3CONTROLLER_BUTTON_R1:
-					Joystick_HIDReportItemMappings.Headlights = CurrentItem;
+					Joystick_HIDReportItemMappings.HeadlightToggle = CurrentItem;
+					return true;
+				case PS3CONTROLLER_BUTTON_R2:
+					Joystick_HIDReportItemMappings.Headlights  = CurrentItem;
 					return true;
 			}
 		}
@@ -234,7 +258,7 @@ bool CALLBACK_HIDParser_FilterHIDReportItem(HID_ReportItem_t* const CurrentItem)
 					Joystick_HIDReportItemMappings.Headlights = CurrentItem;
 					return true;
 				case 7:
-					Joystick_HIDReportItemMappings.Speaker    = CurrentItem;
+					Joystick_HIDReportItemMappings.Horn       = CurrentItem;
 					return true;
 			}
 		}

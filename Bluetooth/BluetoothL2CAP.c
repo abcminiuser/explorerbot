@@ -120,7 +120,7 @@ static inline void Bluetooth_L2CAP_Signal_ConnRequest(BT_StackConfig_t* const St
 	/* If there was space in the channel table, request action from the user to accept/reject the connection */
 	if (L2CAPChannel)
 	{
-		RejectionReason   = CALLBACK_Bluetooth_ChannelRequest(StackState, HCIConnection, L2CAPChannel) ? BT_CONNECTION_SUCCESSFUL : BT_CONNECTION_REFUSED_PSM;
+		RejectionReason     = CALLBACK_Bluetooth_ChannelRequest(StackState, HCIConnection, L2CAPChannel) ? BT_CONNECTION_SUCCESSFUL : BT_CONNECTION_REFUSED_PSM;
 		L2CAPChannel->State = (RejectionReason == BT_CONNECTION_SUCCESSFUL) ? L2CAP_CHANSTATE_Config_WaitConfig : L2CAP_CHANSTATE_Closed;
 	}
 	
@@ -152,13 +152,16 @@ static inline void Bluetooth_L2CAP_Signal_ConnResp(BT_StackConfig_t* const Stack
 	BT_Signal_ConnectionResp_t* ConnectionResponse = (BT_Signal_ConnectionResp_t*)SignalCommandHeader->Data;
 		
 	/* Find the existing channel in the channel table if it exists */
-	BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, HCIConnection->Handle, 0, le16_to_cpu(ConnectionResponse->SourceChannel));
+	BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, HCIConnection->Handle, le16_to_cpu(ConnectionResponse->SourceChannel), 0);
 
 	if (L2CAPChannel)
 	{
-		L2CAPChannel->RemoteNumber = le16_to_cpu(ConnectionResponse->SourceChannel);
-		L2CAPChannel->State        = (ConnectionResponse->Result == CPU_TO_LE16(BT_CONNECTION_SUCCESSFUL)) ?
-									L2CAP_CHANSTATE_Config_WaitConfig : L2CAP_CHANSTATE_Closed;
+		L2CAPChannel->RemoteNumber = le16_to_cpu(ConnectionResponse->DestinationChannel);
+		
+		if (ConnectionResponse->Result == CPU_TO_LE16(BT_CONNECTION_SUCCESSFUL))
+		  L2CAPChannel->State = L2CAP_CHANSTATE_Config_WaitConfig;
+		else if (ConnectionResponse->Result != CPU_TO_LE16(BT_CONNECTION_PENDING))
+		  L2CAPChannel->State = L2CAP_CHANSTATE_Closed;
 	}
 }
 
@@ -565,7 +568,7 @@ BT_L2CAP_Channel_t* const Bluetooth_L2CAP_OpenChannel(BT_StackConfig_t* const St
 	/* Fill out the Connection Request in the response packet */
 	PacketData.ConnectionRequest.PSM           = cpu_to_le16(PSM);
 	PacketData.ConnectionRequest.SourceChannel = cpu_to_le16(L2CAPChannel->LocalNumber);
-
+		
 	Bluetooth_L2CAP_SendSignalPacket(StackState, HCIConnection, sizeof(PacketData), &PacketData);
 	return L2CAPChannel;
 }

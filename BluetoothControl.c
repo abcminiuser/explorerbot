@@ -65,6 +65,15 @@ void EVENT_Bluetooth_ConnectionComplete(BT_StackConfig_t* const StackState,
 	                         "%02X%02X:%02X%02X:%02X%02X", Connection->RemoteBDADDR[5], Connection->RemoteBDADDR[4],
 	                                                       Connection->RemoteBDADDR[3], Connection->RemoteBDADDR[2],
 	                                                       Connection->RemoteBDADDR[1], Connection->RemoteBDADDR[0]);
+
+	/* If connection was locally initiated, open the HID control L2CAP channels */
+	if (Connection->LocallyInitiated)
+	{
+		Bluetooth_L2CAP_OpenChannel(StackState, Connection, CHANNEL_PSM_HIDCTL);
+		Bluetooth_L2CAP_OpenChannel(StackState, Connection, CHANNEL_PSM_HIDINT);
+	}
+
+	Speaker_PlaySequence(SPEAKER_SEQUENCE_Connected);
 }
 
 void EVENT_Bluetooth_DisconnectionComplete(BT_StackConfig_t* const StackState,
@@ -75,6 +84,8 @@ void EVENT_Bluetooth_DisconnectionComplete(BT_StackConfig_t* const StackState,
 	                         "%02X%02X:%02X%02X:%02X%02X", Connection->RemoteBDADDR[5], Connection->RemoteBDADDR[4],
 	                                                       Connection->RemoteBDADDR[3], Connection->RemoteBDADDR[2],
 	                                                       Connection->RemoteBDADDR[1], Connection->RemoteBDADDR[0]);
+
+	Speaker_PlaySequence(SPEAKER_SEQUENCE_Disconnected);
 }
 
 bool CALLBACK_Bluetooth_ChannelRequest(BT_StackConfig_t* const StackState,
@@ -168,7 +179,41 @@ void CALLBACK_HID_Client_ReportReceived(BT_StackConfig_t* const StackState,
 	if (ReportType == HID_DATAT_Input)
 	{
 		// TODO: FIXME
-		if (Length < 12) // Sony Ericson Z550i Phone
+		if (Length < 4) // Wiimote
+		{
+			switch (*((uint16_t*)&Data[1]) & 0x000F)
+			{
+				default:
+					Motors_SetChannelSpeed(0, 0);
+					break;
+				case 0x0008:
+					Motors_SetChannelSpeed( MAX_MOTOR_POWER,  MAX_MOTOR_POWER);
+					break;
+				case 0x0004:
+					Motors_SetChannelSpeed(-MAX_MOTOR_POWER, -MAX_MOTOR_POWER);					
+					break;
+				case 0x0001:
+					Motors_SetChannelSpeed(-MAX_MOTOR_POWER,  MAX_MOTOR_POWER);
+					break;
+				case 0x0002:
+					Motors_SetChannelSpeed( MAX_MOTOR_POWER, -MAX_MOTOR_POWER);					
+					break;
+			}
+			
+			Headlights_SetState(Data[2] & 0x04);
+			Speaker_Tone((Data[2] & 0x08) ? 30 : 0);
+			
+			static uint16_t PrevButtons = 0;
+			
+			if (!(PrevButtons & 0x0010) && (*((uint16_t*)&Data[1]) & 0x0010))
+			  Headlights_ToggleState();
+			
+			if (!(PrevButtons & 0x1000) && (*((uint16_t*)&Data[1]) & 0x1000))
+			  Speaker_PlaySequence(SPEAKER_SEQUENCE_LaCucaracha);
+
+			PrevButtons = *((uint16_t*)&Data[1]);
+		}
+		else if (Length < 12) // Sony Ericson Z550i Phone
 		{
 			// TODO: FIXME
 			switch (*((uint16_t*)&Data[2]))
@@ -191,7 +236,7 @@ void CALLBACK_HID_Client_ReportReceived(BT_StackConfig_t* const StackState,
 			}
 			
 			Headlights_SetState(Data[1] & 0x01);
-			Speaker_Tone((Data[1] & 0x02) ? 250 : 0);
+			Speaker_Tone((Data[1] & 0x02) ? 30 : 0);
 		}
 		else // PS3 Controller
 		{

@@ -127,7 +127,7 @@ static bool Datalogger_OpenSensorLogFile(void)
 	return true;
 }
 
-static void Datalogger_ParseRemoteBDADDRFile(void)
+static bool Datalogger_ParseRemoteBDADDRFile(void)
 {
 	uint8_t ErrorCode;
 	FIL     DiskRemAddrFile;
@@ -152,6 +152,29 @@ static void Datalogger_ParseRemoteBDADDRFile(void)
 
 		f_close(&DiskRemAddrFile);
 	}
+	else if (ErrorCode == FR_NO_FILE)
+	{
+		uint8_t  RemoteBDADDR[BT_BDADDR_LEN];
+		char     LineBuffer[50];
+		uint16_t BytesWritten = 0;
+
+		/* Retrieve the remote device's BDADDR saved in EEPROM, attempt a connection */
+		eeprom_read_block(RemoteBDADDR, BluetoothAdapter_RemoteBDADDR, BT_BDADDR_LEN);
+
+		ErrorCode = f_open(&DiskRemAddrFile, REMADDR_FILENAME, (FA_CREATE_NEW | FA_WRITE));
+		
+		/* Write the saved remote device address to the created file on the attached disk */
+		sprintf(LineBuffer, "%02X:%02X:%02X:%02X:%02X:%02X", RemoteBDADDR[0], RemoteBDADDR[1], RemoteBDADDR[2], RemoteBDADDR[3], RemoteBDADDR[4], RemoteBDADDR[5]);		
+		f_write(&DiskRemAddrFile, LineBuffer, strlen(LineBuffer), &BytesWritten);
+		
+		f_close(&DiskRemAddrFile);
+	}
+	else
+	{
+		return false;
+	}
+	
+	return true;
 }
 
 /** Attempts to configure the system pipes for the attached Mass Storage device.
@@ -184,7 +207,8 @@ bool Datalogger_PostConfiguration(void)
 	f_mount(0, &DiskFATState);	
 
 	/* Try to read in the data file containing the remote Bluetooth device address to connect to on demand */
-	Datalogger_ParseRemoteBDADDRFile();
+	if (!(Datalogger_ParseRemoteBDADDRFile()))
+	  return false;
 
 	/* Abort if the sensor log file could not be opened */
 	if (!(Datalogger_OpenSensorLogFile()))

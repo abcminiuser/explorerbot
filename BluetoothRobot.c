@@ -54,7 +54,8 @@ int main(void)
 				Datalogger_SensorLoggingEnabled = true;
 			
 				LCD_Clear();
-				LCD_WriteString("  Disk Sensor\nLogging Enabled");
+				LCD_WriteString("  Disk Sensor\n"
+				                "Logging Enabled");
 			}
 			else if (BluetoothAdapter_IsActive)
 			{
@@ -222,6 +223,9 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 	USB_Descriptor_Device_t DeviceDescriptor;
 	uint16_t ConfigDescriptorSize;
 	uint8_t  ConfigDescriptorData[512];
+
+	LCD_Clear();
+	LCD_WriteString_P(PSTR("* Configuring *"));
 
 	if (USB_Host_GetDeviceDescriptor(&DeviceDescriptor) != HOST_SENDCONTROL_Successful)
 	{

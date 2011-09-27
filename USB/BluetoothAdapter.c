@@ -49,6 +49,9 @@ bool BluetoothAdapter_IsActive;
 /** Last connected Bluetooth adapter BDADDR, stored in EEPROM */
 uint8_t BluetoothAdapter_LastLocalBDADDR[BT_BDADDR_LEN] EEMEM;
 
+/** Bluetooth BDADDR of a device to connect to on demand, stored in EEPROM */
+uint8_t BluetoothAdapter_RemoteBDADDR[BT_BDADDR_LEN] EEMEM;
+
 
 /** Attempts to configure the system pipes for the attached Bluetooth adapter.
  *
@@ -262,8 +265,10 @@ void EVENT_Bluetooth_InitComplete(BT_StackConfig_t* const StackState)
 
 BT_HCI_Connection_t* BluetoothAdapter_ConnectToRemoteDevice(void)
 {
-	// Wiimote - TODO: pull from memory stick
-	uint8_t Address2[] = {0xef, 0x83, 0xf5, 0x51, 0xe7, 0xe0};
-	return Bluetooth_HCI_Connect(&BluetoothAdapter_Stack, Address2, LINK_TYPE_ACL);
+	uint8_t RemoteBDADDR[BT_BDADDR_LEN];
+	
+	/* Retrieve the remote device's BDADDR saved in EEPROM, attempt a connection */
+	eeprom_read_block(RemoteBDADDR, BluetoothAdapter_RemoteBDADDR, BT_BDADDR_LEN);
+	return Bluetooth_HCI_Connect(&BluetoothAdapter_Stack, RemoteBDADDR, LINK_TYPE_ACL);
 }
 

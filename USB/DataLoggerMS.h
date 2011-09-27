@@ -40,15 +40,23 @@
 		
 		#include "../Drivers/RGB.h"
 		
+		#include "BluetoothAdapter.h"
+		#include "../Bluetooth/Bluetooth.h"
+
 		#include "../Sensors/SensorsCommon.h"
+
 		#include "../FatFS/ff.h"
 		
 	/* Macros: */
+		/* Name of the remote bluetooth device address file on the attached disk, in 8.3 naming format. */
+		#define REMADDR_FILENAME   "REMADDR.TXT"
+	
 		/** Name of the data log file created on the attached disk, in 8.3 naming format. */
-		#define DATALOG_FILENAME   "EXPLRBOT.CSV"
+		#define DATALOG_FILENAME   "SENSLOG.CSV"
 		
 	/* External Variables: */
 		extern USB_ClassInfo_MS_Host_t Datalogger_MS_Interface;
+		extern bool Datalogger_SensorLoggingEnabled;
 
 	/* Function Prototypes: */
 		bool Datalogger_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,

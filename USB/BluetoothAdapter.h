@@ -60,7 +60,9 @@
 
 	/* External Variables: */
 		extern bool    BluetoothAdapter_IsActive;
+
 		extern uint8_t BluetoothAdapter_LastLocalBDADDR[BT_BDADDR_LEN] EEMEM;
+		extern uint8_t BluetoothAdapter_RemoteBDADDR[BT_BDADDR_LEN] EEMEM;
 
 	/* Function Prototypes: */
 		bool BluetoothAdapter_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,

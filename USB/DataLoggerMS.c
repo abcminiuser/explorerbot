@@ -52,35 +52,15 @@ static FATFS DiskFATState;
 /** FAT Fs structure to hold a FAT file handle for the log data write destination. */
 static FIL DiskLogFile;
 
+/** Flag to indicate if sensor logging to disk is currently enabled or not. */
+bool Datalogger_SensorLoggingEnabled = false;
 
-/** Attempts to configure the system pipes for the attached Mass Storage device.
- *
- *  \param[in] DeviceDescriptor      Pointer to the Device Descriptor read from the attached device
- *  \param[in] ConfigDescriptorSize  Size of the retrieved Configuration Descriptor from the device
- *  \param[in] ConfigDescriptorData  Pointer to the Configuration Descriptor read from the attached device
- *
- *  \return  Boolean true if a valid Mass Storage interface was found, false otherwise.
- */
-bool Datalogger_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
-                               uint16_t ConfigDescriptorSize,
-                               void* ConfigDescriptorData)
+
+static bool Datalogger_OpenSensorLogFile(void)
 {
-	/* Attempt to bind to the attached device as a Mass Storage class interface */
-	return (MS_Host_ConfigurePipes(&Datalogger_MS_Interface, ConfigDescriptorSize, ConfigDescriptorData) == HID_ENUMERROR_NoError);
-}
-
-/** Performs any post configuration tasks after the attached Mass Storage device has been successfully enumerated.
- *
- *  \return Boolean true if no Mass Storage device attached or if all post-configuration tasks complete without error, false otherwise
- */
-bool Datalogger_PostConfiguration(void)
-{
-	if (!(Datalogger_MS_Interface.State.IsActive))
-	  return true;
-
 	uint8_t ErrorCode;
 	
-	f_mount(0, &DiskFATState);
+	/* Create a new file on the disk to log the sensor data to, fail if one already exists */
 	ErrorCode = f_open(&DiskLogFile, DATALOG_FILENAME, (FA_CREATE_NEW | FA_WRITE));
 
 	/* See if the existing log was created sucessfully */
@@ -144,6 +124,72 @@ bool Datalogger_PostConfiguration(void)
 		return false;
 	}
 	
+	return true;
+}
+
+static void Datalogger_ParseRemoteBDADDRFile(void)
+{
+	uint8_t ErrorCode;
+	FIL     DiskRemAddrFile;
+
+	ErrorCode = f_open(&DiskRemAddrFile, REMADDR_FILENAME, (FA_OPEN_EXISTING | FA_READ));
+
+	if (ErrorCode == FR_OK)
+	{
+		uint16_t BytesRead = 0;
+		char     LineBuffer[50];
+		
+		/* Fetch the remote device's BDADDR from the text file */
+		f_read(&DiskRemAddrFile, LineBuffer, sizeof(LineBuffer), &BytesRead);
+		
+		/* Parse the file's hexadecimal data to retrieve the address octets */
+		int RemoteBDADDR[BT_BDADDR_LEN];
+		sscanf(LineBuffer, "%x:%x:%x:%x:%x:%x", &RemoteBDADDR[0], &RemoteBDADDR[1], &RemoteBDADDR[2], &RemoteBDADDR[3], &RemoteBDADDR[4], &RemoteBDADDR[5]);
+
+		/* Save the remote device address to EEPROM for later use - note, must loop per address octet, to discard upper byte from each 16-bit integer */
+		for (uint8_t i = 0; i < BT_BDADDR_LEN; i++)
+		  eeprom_update_byte(&BluetoothAdapter_RemoteBDADDR[i], RemoteBDADDR[i]);
+
+		f_close(&DiskRemAddrFile);
+	}
+}
+
+/** Attempts to configure the system pipes for the attached Mass Storage device.
+ *
+ *  \param[in] DeviceDescriptor      Pointer to the Device Descriptor read from the attached device
+ *  \param[in] ConfigDescriptorSize  Size of the retrieved Configuration Descriptor from the device
+ *  \param[in] ConfigDescriptorData  Pointer to the Configuration Descriptor read from the attached device
+ *
+ *  \return  Boolean true if a valid Mass Storage interface was found, false otherwise.
+ */
+bool Datalogger_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
+                               uint16_t ConfigDescriptorSize,
+                               void* ConfigDescriptorData)
+{
+	/* Attempt to bind to the attached device as a Mass Storage class interface */
+	return (MS_Host_ConfigurePipes(&Datalogger_MS_Interface, ConfigDescriptorSize, ConfigDescriptorData) == HID_ENUMERROR_NoError);
+}
+
+/** Performs any post configuration tasks after the attached Mass Storage device has been successfully enumerated.
+ *
+ *  \return Boolean true if no Mass Storage device attached or if all post-configuration tasks complete without error, false otherwise
+ */
+bool Datalogger_PostConfiguration(void)
+{
+	if (!(Datalogger_MS_Interface.State.IsActive))
+	  return true;
+
+	Datalogger_SensorLoggingEnabled = false;
+
+	f_mount(0, &DiskFATState);	
+
+	/* Try to read in the data file containing the remote Bluetooth device address to connect to on demand */
+	Datalogger_ParseRemoteBDADDRFile();
+
+	/* Abort if the sensor log file could not be opened */
+	if (!(Datalogger_OpenSensorLogFile()))
+	  return false;
+
 	RGB_SetColour(RGB_ALIAS_Connected);
 	return true;
 }
@@ -161,7 +207,7 @@ void Datalogger_USBTask(void)
 /** Writes the current sensor values out to the attached Mass Storage device. */
 void Datalogger_LogSensors(void)
 {
-	if ((USB_HostState != HOST_STATE_Configured) || !(Datalogger_MS_Interface.State.IsActive))
+	if ((USB_HostState != HOST_STATE_Configured) || !(Datalogger_MS_Interface.State.IsActive) || !(Datalogger_SensorLoggingEnabled))
 	  return;
 
 	uint16_t      BytesWritten = 0;

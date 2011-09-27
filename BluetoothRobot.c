@@ -46,13 +46,31 @@ int main(void)
 	{
 		uint8_t ButtonStatus = Buttons_GetStateMask();
 
-		/* Initiate connection button */
+		/* Mode action button */
 		if (ButtonStatus & BUTTON1_MASK)
 		{
-			static BT_HCI_Connection_t* RemoteConnection = NULL;
+			if (Datalogger_MS_Interface.State.IsActive)
+			{
+				Datalogger_SensorLoggingEnabled = true;
 			
-			if (!(RemoteConnection) || (RemoteConnection->State == HCI_CONSTATE_Free))
-			  RemoteConnection = BluetoothAdapter_ConnectToRemoteDevice();
+				LCD_Clear();
+				LCD_WriteString("  Disk Sensor\nLogging Enabled");
+			}
+			else if (BluetoothAdapter_IsActive)
+			{
+				static BT_HCI_Connection_t* RemoteConnection = NULL;
+				
+				if (!(RemoteConnection) || (RemoteConnection->State == HCI_CONSTATE_Free))
+				{
+					RemoteConnection = BluetoothAdapter_ConnectToRemoteDevice();
+					
+					LCD_Clear();
+					LCD_WriteFormattedString("Connecting to:\n"
+											 "%02X%02X:%02X%02X:%02X%02X", RemoteConnection->RemoteBDADDR[5], RemoteConnection->RemoteBDADDR[4],
+																		   RemoteConnection->RemoteBDADDR[3], RemoteConnection->RemoteBDADDR[2],
+																		   RemoteConnection->RemoteBDADDR[1], RemoteConnection->RemoteBDADDR[0]);					
+				}
+			}
 		}
 		  
 		/* System reset button */
@@ -82,7 +100,7 @@ int main(void)
 				Sensors_Update();
 				
 				/* Log sensors to attached mass storage disk if available */
-				if (Datalogger_MS_Interface.State.IsActive)
+				if (Datalogger_MS_Interface.State.IsActive && Datalogger_SensorLoggingEnabled)
 				  Datalogger_LogSensors();
 			}
 			
@@ -255,7 +273,7 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 	if (Joystick_HID_Interface.State.IsActive)
 	  LCD_WriteString_P(PSTR("   (HID Mode)   "));
 	else if (Datalogger_MS_Interface.State.IsActive)
-	  LCD_WriteString_P(PSTR("(Sens. Log Mode)"));
+	  LCD_WriteString_P(PSTR("(USB Disk Mode) "));
 	else if (BluetoothAdapter_IsActive)
 	  LCD_WriteString_P(PSTR("(Bluetooth Mode)"));
 	

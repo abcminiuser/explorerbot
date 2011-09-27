@@ -48,11 +48,9 @@ bool CALLBACK_Bluetooth_ConnectionRequest(BT_StackConfig_t* const StackState,
                                           BT_HCI_Connection_t* const Connection)
 {
 	LCD_Clear();
-	LCD_WriteFormattedString("Conn Request:\n"
-	                         "%02X%02X:%02X%02X:%02X%02X", Connection->RemoteBDADDR[5], Connection->RemoteBDADDR[4],
-	                                                       Connection->RemoteBDADDR[3], Connection->RemoteBDADDR[2],
-	                                                       Connection->RemoteBDADDR[1], Connection->RemoteBDADDR[0]);
-
+	LCD_WriteString("Conn Request:\n");
+	LCD_WriteBDADDR(Connection->RemoteBDADDR);
+	
 	/* Accept all requests from all devices regardless of BDADDR */
 	return true;
 }
@@ -61,10 +59,8 @@ void EVENT_Bluetooth_ConnectionComplete(BT_StackConfig_t* const StackState,
                                         BT_HCI_Connection_t* const Connection)
 {	
 	LCD_Clear();
-	LCD_WriteFormattedString("Connected:\n"
-	                         "%02X%02X:%02X%02X:%02X%02X", Connection->RemoteBDADDR[5], Connection->RemoteBDADDR[4],
-	                                                       Connection->RemoteBDADDR[3], Connection->RemoteBDADDR[2],
-	                                                       Connection->RemoteBDADDR[1], Connection->RemoteBDADDR[0]);
+	LCD_WriteString("Connect:\n");
+	LCD_WriteBDADDR(Connection->RemoteBDADDR);
 
 	/* If connection was locally initiated, open the HID control L2CAP channels */
 	if (Connection->LocallyInitiated)
@@ -76,14 +72,22 @@ void EVENT_Bluetooth_ConnectionComplete(BT_StackConfig_t* const StackState,
 	Speaker_PlaySequence(SPEAKER_SEQUENCE_Connected);
 }
 
+void EVENT_Bluetooth_ConnectionFailed(BT_StackConfig_t* const StackState,
+                                      BT_HCI_Connection_t* const Connection)
+{	
+	LCD_Clear();
+	LCD_WriteString("Connect Fail:\n");
+	LCD_WriteBDADDR(Connection->RemoteBDADDR);
+
+	Speaker_PlaySequence(SPEAKER_SEQUENCE_ConnectFailed);
+}
+
 void EVENT_Bluetooth_DisconnectionComplete(BT_StackConfig_t* const StackState,
                                            BT_HCI_Connection_t* const Connection)
 {
 	LCD_Clear();
-	LCD_WriteFormattedString("Disconnected:\n"
-	                         "%02X%02X:%02X%02X:%02X%02X", Connection->RemoteBDADDR[5], Connection->RemoteBDADDR[4],
-	                                                       Connection->RemoteBDADDR[3], Connection->RemoteBDADDR[2],
-	                                                       Connection->RemoteBDADDR[1], Connection->RemoteBDADDR[0]);
+	LCD_WriteString("Disconnected:\n");
+	LCD_WriteBDADDR(Connection->RemoteBDADDR);
 
 	Speaker_PlaySequence(SPEAKER_SEQUENCE_Disconnected);
 }

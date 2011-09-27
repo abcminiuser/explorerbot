@@ -30,21 +30,29 @@
 
 #include "Speaker.h"
 
-const uint8_t Sequence_Connected[]     = {SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 6,
-                                          SPEAKER_HZ(349.23), 0, SPEAKER_HZ(440.0), 0,
-                                          SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_EndOfSequence};
+const uint8_t Sequence_Connecting[]     = {SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 12,
+                                           SPEAKER_HZ(440.0), 0,
+                                           SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_EndOfSequence};
 
-const uint8_t Sequence_Disconnected[]  = {SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 6,
-                                          SPEAKER_HZ(440.0), 0, SPEAKER_HZ(349.23), 0,
-                                          SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_EndOfSequence};
+const uint8_t Sequence_Connected[]      = {SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 8,
+                                           SPEAKER_HZ(349.23), 0, SPEAKER_HZ(440.0), 0,
+                                           SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_EndOfSequence};
+
+const uint8_t Sequence_Disconnected[]   = {SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 8,
+                                           SPEAKER_HZ(440.0), 0, SPEAKER_HZ(349.23), 0,
+                                           SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_EndOfSequence};
+
+const uint8_t Sequence_ConnectFailed[]  = {SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 15,
+                                           SPEAKER_HZ(349.23), 0, SPEAKER_HZ(349.23), 0,
+                                           SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_EndOfSequence};
 										  
-const uint8_t Sequence_LaCucaracha[]   = {SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 5,
-                                          SPEAKER_HZ(261.63), 0, SPEAKER_HZ(261.63), 0, SPEAKER_HZ(261.63), 0,
-                                          SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 10,
-                                          SPEAKER_HZ(349.23), 0, SPEAKER_HZ(440.0), 0,
-                                          SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_EndOfSequence};
+const uint8_t Sequence_LaCucaracha[]    = {SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 5,
+                                           SPEAKER_HZ(261.63), 0, SPEAKER_HZ(261.63), 0, SPEAKER_HZ(261.63), 0,
+                                           SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 10,
+                                           SPEAKER_HZ(349.23), 0, SPEAKER_HZ(440.0), 0,
+                                           SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_EndOfSequence};
 
-const uint8_t* Sequence_Table[]        = {Sequence_Connected, Sequence_Disconnected, Sequence_LaCucaracha};
+const uint8_t* Sequence_Table[]         = {Sequence_Connecting, Sequence_Connected, Sequence_Disconnected, Sequence_ConnectFailed, Sequence_LaCucaracha};
 
 static const uint8_t* SequencePosition = NULL;
 static uint8_t SequenceTicksElapsed    = 0;

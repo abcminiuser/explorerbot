@@ -240,3 +240,15 @@ void LCD_WriteString_P(const char* String)
 		String++;
 	}
 }
+
+/** Writes the given Bluetooth BDADDR to the LCD display at the current LCD DRAM address, in
+ *  Hexadecimal format seperated by colons.
+ *
+ *  \param[in] BDADDRR  Pointer to a buffer containing the BDADDR to print, in binary format
+ */
+void LCD_WriteBDADDR(const uint8_t* const BDADDR)
+{
+	/* Print the given Bluetooth BDADDR to the LCD at the current cursor position */
+	LCD_WriteFormattedString("%02X%02X:%02X%02X:%02X%02X", BDADDR[5], BDADDR[4], BDADDR[3], BDADDR[2], BDADDR[1], BDADDR[0]);	
+}
+

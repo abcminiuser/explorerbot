@@ -65,10 +65,10 @@ int main(void)
 					RemoteConnection = BluetoothAdapter_ConnectToRemoteDevice();
 					
 					LCD_Clear();
-					LCD_WriteFormattedString("Connecting to:\n"
-											 "%02X%02X:%02X%02X:%02X%02X", RemoteConnection->RemoteBDADDR[5], RemoteConnection->RemoteBDADDR[4],
-																		   RemoteConnection->RemoteBDADDR[3], RemoteConnection->RemoteBDADDR[2],
-																		   RemoteConnection->RemoteBDADDR[1], RemoteConnection->RemoteBDADDR[0]);					
+					LCD_WriteString("Connecting to:\n");
+					LCD_WriteBDADDR(RemoteConnection->RemoteBDADDR);
+					
+					Speaker_PlaySequence(SPEAKER_SEQUENCE_Connecting);
 				}
 			}
 		}

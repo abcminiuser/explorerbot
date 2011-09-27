@@ -209,7 +209,9 @@ void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState)
 			
 			/* Fire user application callback to signal the connection completion */
 			if (Connection->State == HCI_CONSTATE_Connected)
-			  EVENT_Bluetooth_ConnectionComplete(StackState, Connection);			
+			  EVENT_Bluetooth_ConnectionComplete(StackState, Connection);
+			else
+			  EVENT_Bluetooth_ConnectionFailed(StackState, Connection);
 		}
 	}
 	else if (HCIEventHeader->EventCode == EVENT_DISCONNECTION_COMPLETE)
@@ -317,7 +319,7 @@ bool Bluetooth_HCI_Manage(BT_StackConfig_t* const StackState)
 		case HCISTATE_Init_SetLocalName:
 			HCICommandHeader->OpCode          = CPU_TO_LE16(OGF_CTRLR_BASEBAND | OCF_CTRLR_BASEBAND_WRITE_LOCAL_NAME),
 			HCICommandHeader->ParameterLength = 248;	
-			strlcpy((void*)HCICommandHeader->Parameters, StackState->Config.Name, HCICommandHeader->ParameterLength);
+			strlcpy((void*)&HCICommandHeader->Parameters, StackState->Config.Name, HCICommandHeader->ParameterLength);
 			break;
 		case HCISTATE_Init_SetDeviceClass:
 			HCICommandHeader->OpCode          = CPU_TO_LE16(OGF_CTRLR_BASEBAND | OCF_CTRLR_BASEBAND_WRITE_CLASS_OF_DEVICE),
@@ -348,12 +350,14 @@ BT_HCI_Connection_t* Bluetooth_HCI_Connect(BT_StackConfig_t* const StackState,
                                            const uint8_t* const RemoteBDADDR,
                                            const uint8_t LinkType)
 {
+	/* Disallow connections until the stack is ready */
 	if (StackState->State.HCI.State != HCISTATE_Idle)
 	  return NULL;
 	
 	/* Create a new HCI connection entry in the stack's HCI connection table */
 	BT_HCI_Connection_t* HCIConnection = Bluetooth_HCI_NewConnection(StackState, RemoteBDADDR, LinkType);
-	
+
+	/* Abort if no space was found in the HCI connection table */
 	if (!(HCIConnection))
 	  return NULL;
 	
@@ -375,7 +379,6 @@ BT_HCI_Connection_t* Bluetooth_HCI_Connect(BT_StackConfig_t* const StackState,
 	CreateConnectHeader->AllowRoleSwitch = true;
 	
 	CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCICommand, (sizeof(BT_HCICommand_Header_t) + HCICommandHeader->ParameterLength));
-	
 	return HCIConnection;
 }
 

@@ -50,9 +50,11 @@
 		
 		enum Speaker_SequenceIDs_t
 		{
-			SPEAKER_SEQUENCE_Connected    = 0,
-			SPEAKER_SEQUENCE_Disconnected = 1,
-			SPEAKER_SEQUENCE_LaCucaracha  = 2,
+			SPEAKER_SEQUENCE_Connecting    = 0,
+			SPEAKER_SEQUENCE_Connected     = 1,
+			SPEAKER_SEQUENCE_Disconnected  = 2,
+			SPEAKER_SEQUENCE_ConnectFailed = 3,
+			SPEAKER_SEQUENCE_LaCucaracha   = 4,
 		};
 		
 	/* Inline Functions: */

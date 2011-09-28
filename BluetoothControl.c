@@ -48,7 +48,7 @@ bool CALLBACK_Bluetooth_ConnectionRequest(BT_StackConfig_t* const StackState,
                                           BT_HCI_Connection_t* const Connection)
 {
 	LCD_Clear();
-	LCD_WriteString("Conn Request:\n");
+	LCD_WriteString_P(PSTR("Conn Request:\n"));
 	LCD_WriteBDADDR(Connection->RemoteBDADDR);
 	
 	/* Accept all requests from all devices regardless of BDADDR */
@@ -59,7 +59,7 @@ void EVENT_Bluetooth_ConnectionComplete(BT_StackConfig_t* const StackState,
                                         BT_HCI_Connection_t* const Connection)
 {	
 	LCD_Clear();
-	LCD_WriteString("Connect:\n");
+	LCD_WriteString_P(PSTR("Connect:\n"));
 	LCD_WriteBDADDR(Connection->RemoteBDADDR);
 
 	/* If connection was locally initiated, open the HID control L2CAP channels */
@@ -76,7 +76,7 @@ void EVENT_Bluetooth_ConnectionFailed(BT_StackConfig_t* const StackState,
                                       BT_HCI_Connection_t* const Connection)
 {	
 	LCD_Clear();
-	LCD_WriteString("Connect Fail:\n");
+	LCD_WriteString_P(PSTR("Connect Fail:\n"));
 	LCD_WriteBDADDR(Connection->RemoteBDADDR);
 
 	Speaker_PlaySequence(SPEAKER_SEQUENCE_ConnectFailed);
@@ -86,7 +86,7 @@ void EVENT_Bluetooth_DisconnectionComplete(BT_StackConfig_t* const StackState,
                                            BT_HCI_Connection_t* const Connection)
 {
 	LCD_Clear();
-	LCD_WriteString("Disconnected:\n");
+	LCD_WriteString_P(PSTR("Disconnected:\n"));
 	LCD_WriteBDADDR(Connection->RemoteBDADDR);
 
 	Speaker_PlaySequence(SPEAKER_SEQUENCE_Disconnected);
@@ -97,8 +97,8 @@ bool CALLBACK_Bluetooth_ChannelRequest(BT_StackConfig_t* const StackState,
                                        BT_L2CAP_Channel_t* const Channel)
 {
 	LCD_Clear();
-	LCD_WriteFormattedString("L2CAP Request\n"
-	                         "PSM:%04X", Channel->PSM);
+	LCD_WriteFormattedString_P(PSTR("L2CAP Request\n"
+	                                "PSM:%04X"), Channel->PSM);
 
 	/* Accept all channel requests from all devices regardless of PSM */
 	return true;
@@ -108,44 +108,24 @@ void EVENT_Bluetooth_ChannelOpened(BT_StackConfig_t* const StackState,
                                    BT_L2CAP_Channel_t* const Channel)
 {
 	LCD_Clear();
-	LCD_WriteFormattedString("L2CAP Opened\n"
-	                         "L:%04X R:%04X", Channel->LocalNumber, Channel->RemoteNumber);
+	LCD_WriteFormattedString_P(PSTR("L2CAP Opened\n"
+	                                "L:%04X R:%04X"), Channel->LocalNumber, Channel->RemoteNumber);
 
-	switch (Channel->PSM)
-	{
-		case CHANNEL_PSM_SDP:
-			SDP_ChannelOpened(StackState, Channel);			
-			break;
-		case CHANNEL_PSM_HIDCTL:
-		case CHANNEL_PSM_HIDINT:
-			HID_Client_ChannelOpened(StackState, Channel);
-			break;
-		case CHANNEL_PSM_RFCOMM:
-			RFCOMM_ChannelOpened(StackState, Channel);
-			break;			
-	}
+	SDP_ChannelOpened(StackState, Channel);			
+	HID_Client_ChannelOpened(StackState, Channel);
+	RFCOMM_ChannelOpened(StackState, Channel);
 }
 
 void EVENT_Bluetooth_ChannelClosed(BT_StackConfig_t* const StackState,
                                    BT_L2CAP_Channel_t* const Channel)
 {
 	LCD_Clear();
-	LCD_WriteFormattedString("L2CAP Closed\n"
-	                         "L:%04X R:%04X", Channel->LocalNumber, Channel->RemoteNumber);
+	LCD_WriteFormattedString_P(PSTR("L2CAP Closed\n"
+	                                "L:%04X R:%04X"), Channel->LocalNumber, Channel->RemoteNumber);
 
-	switch (Channel->PSM)
-	{
-		case CHANNEL_PSM_SDP:
-			SDP_ChannelClosed(StackState, Channel);			
-			break;
-		case CHANNEL_PSM_HIDCTL:
-		case CHANNEL_PSM_HIDINT:
-			HID_Client_ChannelClosed(StackState, Channel);
-			break;
-		case CHANNEL_PSM_RFCOMM:
-			RFCOMM_ChannelClosed(StackState, Channel);
-			break;
-	}
+	SDP_ChannelClosed(StackState, Channel);			
+	HID_Client_ChannelClosed(StackState, Channel);
+	RFCOMM_ChannelClosed(StackState, Channel);
 }
 
 void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
@@ -156,19 +136,17 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
 	switch (Channel->PSM)
 	{
 		case CHANNEL_PSM_SDP:
-			SDP_ProcessPacket(StackState, Channel, Length, Data);
-			break;
 		case CHANNEL_PSM_HIDCTL:
 		case CHANNEL_PSM_HIDINT:
-			HID_Client_ProcessPacket(StackState, Channel, Length, Data);
-			break;
 		case CHANNEL_PSM_RFCOMM:
+			SDP_ProcessPacket(StackState, Channel, Length, Data);
+			HID_Client_ProcessPacket(StackState, Channel, Length, Data);
 			RFCOMM_ProcessPacket(StackState, Channel, Length, Data);
 			break;		
 		default:
 			LCD_Clear();
-			LCD_WriteFormattedString("P:%04X L:%04X\n"
-			                         "LC:%04X RC:%04X", Channel->PSM, Length, Channel->LocalNumber, Channel->RemoteNumber);
+			LCD_WriteFormattedString_P(PSTR("P:%04X L:%04X\n"
+			                                "LC:%04X RC:%04X"), Channel->PSM, Length, Channel->LocalNumber, Channel->RemoteNumber);
 			break;
 	}	
 }

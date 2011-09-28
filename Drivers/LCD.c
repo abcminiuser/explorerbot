@@ -206,22 +206,6 @@ void LCD_WriteString(const char* String)
 	}
 }
 
-/** Writes a formatted string to the LCD display, starting from the current LCD DRAM address.
- *
- *  \param[in] FormatString  Pointer to the start of a \c printf() format string, stored in SRAM.
- */
-void LCD_WriteFormattedString(const char* FormatString, ...)
-{
-	char LineBuffer[50];
-
-	va_list va;
-	va_start(va, FormatString);
-	vsprintf(LineBuffer, FormatString, va);
-	va_end(va);
-
-	LCD_WriteString(LineBuffer);
-}
-
 /** Writes a NUL terminated string to the LCD bus, starting from the current LCD DRAM address.
  *
  *  \param[in] String  Pointer to the start of a string to write to the LCD, stored in FLASH.
@@ -241,6 +225,38 @@ void LCD_WriteString_P(const char* String)
 	}
 }
 
+/** Writes a formatted string to the LCD display, starting from the current LCD DRAM address.
+ *
+ *  \param[in] FormatString  Pointer to the start of a \c printf() format string, stored in SRAM.
+ */
+void LCD_WriteFormattedString(const char* FormatString, ...)
+{
+	char LineBuffer[50];
+
+	va_list va;
+	va_start(va, FormatString);
+	vsprintf(LineBuffer, FormatString, va);
+	va_end(va);
+
+	LCD_WriteString(LineBuffer);
+}
+
+/** Writes a formatted string to the LCD display, starting from the current LCD DRAM address.
+ *
+ *  \param[in] FormatString  Pointer to the start of a \c printf() format string, stored in FLASH.
+ */
+void LCD_WriteFormattedString_P(const char* FormatString, ...)
+{
+	char LineBuffer[50];
+
+	va_list va;
+	va_start(va, FormatString);
+	vsprintf_P(LineBuffer, FormatString, va);
+	va_end(va);
+
+	LCD_WriteString(LineBuffer);
+}
+
 /** Writes the given Bluetooth BDADDR to the LCD display at the current LCD DRAM address, in
  *  Hexadecimal format seperated by colons.
  *
@@ -249,6 +265,6 @@ void LCD_WriteString_P(const char* String)
 void LCD_WriteBDADDR(const uint8_t* const BDADDR)
 {
 	/* Print the given Bluetooth BDADDR to the LCD at the current cursor position */
-	LCD_WriteFormattedString("%02X%02X:%02X%02X:%02X%02X", BDADDR[5], BDADDR[4], BDADDR[3], BDADDR[2], BDADDR[1], BDADDR[0]);	
+	LCD_WriteFormattedString_P(PSTR("%02X%02X:%02X%02X:%02X%02X"), BDADDR[5], BDADDR[4], BDADDR[3], BDADDR[2], BDADDR[1], BDADDR[0]);	
 }
 

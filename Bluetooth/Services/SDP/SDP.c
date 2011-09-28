@@ -668,11 +668,11 @@ void SDP_ProcessPacket(BT_StackConfig_t* const StackState,
                        uint16_t Length,
                        uint8_t* Data)
 {
-	BT_SDP_PDUHeader_t* SDPHeader = (BT_SDP_PDUHeader_t*)Data;
-	
 	/* Ensure correct channel PSM before processing the data */
 	if (Channel->PSM != CHANNEL_PSM_SDP)
 	  return;
+	
+	BT_SDP_PDUHeader_t* SDPHeader = (BT_SDP_PDUHeader_t*)Data;
 	
 	/* Dispatch to the correct processing routine for the given SDP packet type */
 	switch (SDPHeader->PDU)

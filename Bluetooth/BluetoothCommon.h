@@ -201,6 +201,14 @@
 		void EVENT_Bluetooth_ConnectionComplete(BT_StackConfig_t* const StackState,
 		                                        BT_HCI_Connection_t* const Connection);
 
+		/** User application event callback, fired when the Bluetooth stack has failed to complete a connection to a remote device.
+		 *
+		 *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.
+		 *  \param[in, out] Connection  Pointer to the failed device connection information.
+		 */
+		void EVENT_Bluetooth_ConnectionFailed(BT_StackConfig_t* const StackState,
+		                                      BT_HCI_Connection_t* const Connection);
+
 		/** User application event callback, fired when the Bluetooth stack has completed a disconnection from a remote device.
 		 *
 		 *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.

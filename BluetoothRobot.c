@@ -54,8 +54,8 @@ int main(void)
 				Datalogger_SensorLoggingEnabled = true;
 			
 				LCD_Clear();
-				LCD_WriteString("  Disk Sensor\n"
-				                "Logging Enabled");
+				LCD_WriteString_P(PSTR("  Disk Sensor\n"
+				                       "Logging Enabled"));
 			}
 			else if (BluetoothAdapter_IsActive)
 			{
@@ -66,7 +66,7 @@ int main(void)
 					RemoteConnection = BluetoothAdapter_ConnectToRemoteDevice();
 					
 					LCD_Clear();
-					LCD_WriteString("Connecting to:\n");
+					LCD_WriteString_P(PSTR("Connecting to:\n"));
 					LCD_WriteBDADDR(RemoteConnection->RemoteBDADDR);
 					
 					Speaker_PlaySequence(SPEAKER_SEQUENCE_Connecting);
@@ -184,11 +184,11 @@ void CheckSensors(void)
 	LCD_SetCustomChar('\2', LCDIcon_Tick);
 	
 	LCD_Clear();
-	LCD_WriteFormattedString(" CMP %c   ACC %c\n"
-	                         " GYR %c   PRS %c", (Sensors.Direction.Connected    ? '\2' : '\1'),
-	                                             (Sensors.Acceleration.Connected ? '\2' : '\1'),
-	                                             (Sensors.Orientation.Connected  ? '\2' : '\1'),
-	                                             (Sensors.Pressure.Connected     ? '\2' : '\1'));
+	LCD_WriteFormattedString_P(PSTR(" CMP %c   ACC %c\n"
+	                                " GYR %c   PRS %c"), (Sensors.Direction.Connected    ? '\2' : '\1'),
+	                                                     (Sensors.Acceleration.Connected ? '\2' : '\1'),
+	                                                     (Sensors.Orientation.Connected  ? '\2' : '\1'),
+	                                                     (Sensors.Pressure.Connected     ? '\2' : '\1'));
 												 
 	Delay_MS(1500);
 }

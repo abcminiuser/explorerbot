@@ -69,8 +69,9 @@
 		void    LCD_WriteByte(const uint8_t Byte);
 		uint8_t LCD_ReadByte(void);
 		void    LCD_WriteString(const char* String);
-		void    LCD_WriteFormattedString(const char* FormatString, ...);
 		void    LCD_WriteString_P(const char* String);
+		void    LCD_WriteFormattedString(const char* FormatString, ...);
+		void    LCD_WriteFormattedString_P(const char* FormatString, ...);
 		void    LCD_WriteBDADDR(const uint8_t* const BDADDR);
 
 #endif

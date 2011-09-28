@@ -107,7 +107,6 @@ static uint8_t RFCOMM_GetFCSValue(const void* FrameStart,
 static void RFCOMM_SendFrame(BT_StackConfig_t* const StackState,
                              BT_L2CAP_Channel_t* const ACLChannel,
                              uint8_t DLCI,
-                             const bool CommandResponse,
                              const uint8_t Control,
                              const uint16_t DataLen,
                              const void* Data)
@@ -115,17 +114,29 @@ static void RFCOMM_SendFrame(BT_StackConfig_t* const StackState,
 	struct
 	{
 		RFCOMM_Header_t FrameHeader;
-		uint16_t        Length;
+		uint8_t         Length[(DataLen < 128) ? 1 : 2];
 		uint8_t         Data[DataLen];
 		uint8_t         FCS;
 	} ResponsePacket;
 
-	/* Set the frame header values to the specified address and frame type */
-	ResponsePacket.FrameHeader.Control = Control;
-	ResponsePacket.FrameHeader.Address = (RFCOMM_Address_t){.DLCI = DLCI, .EA = true, .CR = CommandResponse};
+	BT_HCI_Connection_t* Connection  = Bluetooth_HCI_FindConnection(StackState, NULL, ACLChannel->ConnectionHandle);
+	bool                 CommandResp = Connection->LocallyInitiated;
 
-	/* Indicate length extension to 16-bits via zero LSB */
-	ResponsePacket.Length = cpu_to_le16(DataLen << 1);
+	if ((Control == RFCOMM_Frame_UA) || (Control == RFCOMM_Frame_DM))
+	  CommandResp = !(Connection->LocallyInitiated);
+
+	/* Set the frame header values to the specified address and frame type */
+	ResponsePacket.FrameHeader.Control = (Control | FRAME_POLL_FINAL);
+	ResponsePacket.FrameHeader.Address = (RFCOMM_Address_t){.DLCI = DLCI, .EA = true, .CR = CommandResp};
+
+	/* Set lower 7 bits of the length field - LSB reserved for 16-bit field extension */
+	ResponsePacket.Length[0] = (DataLen << 1);
+	
+	/* If length extension not required, set terminator bit, otherwise add upper length bits */
+	if (DataLen < 128)
+	  ResponsePacket.Length[0] |= 0x01;
+	else
+	  ResponsePacket.Length[1]  = (DataLen >> 7);
 
 	/* Copy over the packet data from the source buffer to the response packet buffer */
 	memcpy(ResponsePacket.Data, Data, DataLen);
@@ -134,7 +145,7 @@ static void RFCOMM_SendFrame(BT_StackConfig_t* const StackState,
 	uint8_t CRCLength = sizeof(ResponsePacket.FrameHeader);
 
 	/* UIH frames do not have the CRC calculated on the Size field in the response, all other frames do */
-	if ((Control & ~FRAME_POLL_FINAL) != RFCOMM_Frame_UIH)
+	if (Control != RFCOMM_Frame_UIH)
 	  CRCLength += sizeof(ResponsePacket.Length);
 
 	/* Calculate the frame checksum from the appropriate fields */
@@ -192,7 +203,7 @@ void RFCOMM_ChannelOpened(BT_StackConfig_t* const StackState,
 
 	/* If the RFCOMM session was initiated by the local device, attempt to reset the remote multiplexer ready for new channels */
 	if (Connection && Connection->LocallyInitiated)
-	  RFCOMM_SendFrame(StackState, Channel, RFCOMM_CONTROL_DLCI, true, (RFCOMM_Frame_SABM | FRAME_POLL_FINAL), 0, NULL);
+	  RFCOMM_SendFrame(StackState, Channel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_SABM, 0, NULL);
 }
 
 void RFCOMM_ChannelClosed(BT_StackConfig_t* const StackState,
@@ -205,17 +216,17 @@ static void RFCOMM_ProcessSABM(BT_StackConfig_t* const StackState,
                                BT_L2CAP_Channel_t* const ACLChannel,
                                RFCOMM_Header_t* FrameHeader)
 {
-	uint8_t ResponseFrameType = (RFCOMM_Frame_DM | FRAME_POLL_FINAL);
+	uint8_t ResponseFrameType = RFCOMM_Frame_DM;
 	
 	/* If the destination channel is the control channel, if the channel exists or if it was created successfully, accept the request */
 	if ((FrameHeader->Address.DLCI == RFCOMM_CONTROL_DLCI) ||
 	    RFCOMM_FindChannel(StackState, ACLChannel, FrameHeader->Address.DLCI) ||
 	    RFCOMM_NewChannel(StackState, ACLChannel, FrameHeader->Address.DLCI))
 	{
-		ResponseFrameType = (RFCOMM_Frame_UA | FRAME_POLL_FINAL);
+		ResponseFrameType = RFCOMM_Frame_UA;
 	}
 	
-	RFCOMM_SendFrame(StackState, ACLChannel, FrameHeader->Address.DLCI, false, ResponseFrameType, 0, NULL);
+	RFCOMM_SendFrame(StackState, ACLChannel, FrameHeader->Address.DLCI, ResponseFrameType, 0, NULL);
 }
 
 static void RFCOMM_ProcessUA(BT_StackConfig_t* const StackState,

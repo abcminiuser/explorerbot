@@ -61,7 +61,7 @@ int main(void)
 			{
 				static BT_HCI_Connection_t* RemoteConnection = NULL;
 				
-				if (!(RemoteConnection) || (RemoteConnection->State == HCI_CONSTATE_Free))
+				if (!(RemoteConnection) || (RemoteConnection->State == HCI_CONSTATE_Closed))
 				{
 					RemoteConnection = BluetoothAdapter_ConnectToRemoteDevice();
 					

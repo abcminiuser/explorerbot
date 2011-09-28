@@ -73,7 +73,7 @@ const struct
 			(sizeof(SDP_ItemUUID_t) + sizeof(SDP_Item8Bit_t)),
 			{
 				{(SDP_DATATYPE_UUID | SDP_DATASIZE_128Bit), RFCOMM_UUID},
-				{(SDP_DATATYPE_UnsignedInt | SDP_DATASIZE_8Bit), 0x03},
+				{(SDP_DATATYPE_UnsignedInt | SDP_DATASIZE_8Bit), 0x01},
 			},
 		},
 	};

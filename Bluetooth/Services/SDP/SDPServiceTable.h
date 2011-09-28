@@ -57,7 +57,7 @@
 
 		typedef struct SDP_ServiceEntry_t
 		{
-			const uint8_t                  TotalTableAttributes;
+			const uint8_t                      TotalTableAttributes;
 			const SDP_ServiceAttributeTable_t* AttributeTable;
 			struct SDP_ServiceEntry_t*         NextService;
 		} SDP_ServiceEntry_t;

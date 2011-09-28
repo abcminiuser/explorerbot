@@ -35,7 +35,7 @@
 		/** Enum for the possible device connection states. */
 		enum BT_HCI_ConnectionStates_t
 		{
-			HCI_CONSTATE_Free                   = 0,
+			HCI_CONSTATE_Closed                 = 0,
 			HCI_CONSTATE_New                    = 1,
 			HCI_CONSTATE_Connecting             = 2,
 			HCI_CONSTATE_Connected              = 3,

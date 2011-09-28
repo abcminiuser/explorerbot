@@ -34,6 +34,17 @@
 		#define RFCOMM_CONFIG_LOCALSIGNALSSENT (1 << 2)
 		#define RFCOMM_CONFIG_ABMMODESET       (1 << 3)
 
+		#define RFCOMM_SIGNAL_FC               (1 << 1)
+		#define RFCOMM_SIGNAL_RTC              (1 << 2)
+		#define RFCOMM_SIGNAL_RTR              (1 << 3)
+		#define RFCOMM_SIGNAL_IC               (1 << 6)
+		#define RFCOMM_SIGNAL_DV               (1 << 7)
+
+		#define RFCOMM_CONFIG_REMOTESIGNALS    (1 << 0)
+		#define RFCOMM_CONFIG_LOCALSIGNALS     (1 << 1)
+		#define RFCOMM_CONFIG_LOCALSIGNALSSENT (1 << 2)
+		#define RFCOMM_CONFIG_ABMMODESET       (1 << 3)
+
 	/* Enums: */
 		/** Enum for the types of RFCOMM frames which can be exchanged on a Bluetooth channel. */
 		enum RFCOMM_Frame_Types_t
@@ -43,6 +54,18 @@
 			RFCOMM_Frame_SABM          = 0x2F, /**< Set Asynchronous Balance Mode Field */
 			RFCOMM_Frame_UA            = 0x63, /**< Unnumbered Acknowledgement Field */
 			RFCOMM_Frame_UIH           = 0xEF, /**< Unnumbered Information with Header check Field */
+		};
+
+		enum RFCOMM_Control_Commands_t
+		{
+			RFCOMM_Control_Test                    = (0x20 >> 2),
+			RFCOMM_Control_FlowControlEnable       = (0xA0 >> 2),
+			RFCOMM_Control_FlowControlDisable      = (0x60 >> 2),
+			RFCOMM_Control_ModemStatus             = (0xE0 >> 2),
+			RFCOMM_Control_RemotePortNegotiation   = (0x90 >> 2),
+			RFCOMM_Control_RemoteLineStatus        = (0x50 >> 2),
+			RFCOMM_Control_DLCParameterNegotiation = (0x80 >> 2),
+			RFCOMM_Control_NonSupportedCommand     = (0x10 >> 2),
 		};
 
 		enum RFCOMM_Channel_States_t
@@ -75,7 +98,8 @@
 
 		typedef struct
 		{
-			BT_L2CAP_Channel_t* ACLChannel;
+			BT_StackConfig_t* Stack;
+			uint16_t ConnectionHandle;
 		
 			uint8_t  DLCI;
 			uint8_t  State;
@@ -85,12 +109,10 @@
 			struct
 			{
 				uint8_t Signals;
-				uint8_t BreakSignal;
 			} Remote;
 			struct
 			{
 				uint8_t Signals;
-				uint8_t BreakSignal;
 			} Local;
 		} RFCOMM_Channel_t;
 

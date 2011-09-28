@@ -41,7 +41,7 @@ BT_HCI_Connection_t* const Bluetooth_HCI_FindConnection(BT_StackConfig_t* const 
 		BT_HCI_Connection_t* Connection = &StackState->State.HCI.Connections[i];
 		
 		/* Free connection entries are inactive must be skipped */
-		if (Connection->State == HCI_CONSTATE_Free)
+		if (Connection->State == HCI_CONSTATE_Closed)
 		  continue;
 
 		/* Check search parameter; if BDADDR specified search by remote device address, otherwise by handle */
@@ -76,7 +76,7 @@ static BT_HCI_Connection_t* const Bluetooth_HCI_NewConnection(BT_StackConfig_t* 
 	{
 		BT_HCI_Connection_t* Connection = &StackState->State.HCI.Connections[i];
 
-		if (Connection->State == HCI_CONSTATE_Free)
+		if (Connection->State == HCI_CONSTATE_Closed)
 		{
 			memcpy(Connection->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
 			Connection->State             = HCI_CONSTATE_New;
@@ -100,7 +100,7 @@ void Bluetooth_HCI_Init(BT_StackConfig_t* const StackState)
 	StackState->State.HCI.StateTransition = true;
 
 	for (uint8_t i = 0; i < MAX_DEVICE_CONNECTIONS; i++)
-	  StackState->State.HCI.Connections[i].State = HCI_CONSTATE_Free;
+	  StackState->State.HCI.Connections[i].State = HCI_CONSTATE_Closed;
 }
 
 /** Processes a recieved Bluetooth HCI packet from a Bluetooth adapter.
@@ -180,7 +180,7 @@ void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState)
 			
 			/* Mark the connection as free again as it was rejected */
 			if (Connection)
-			  Connection->State = HCI_CONSTATE_Free;
+			  Connection->State = HCI_CONSTATE_Closed;
 		}
 		else
 		{
@@ -205,7 +205,7 @@ void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState)
 		if (Connection)
 		{
 			Connection->Handle = (le16_to_cpu(ConnectionCompleteEventHeader->Handle) & BT_HCI_CONNECTION_HANDLE_MASK);
-			Connection->State  = (ConnectionCompleteEventHeader->Status == 0x00) ? HCI_CONSTATE_Connected : HCI_CONSTATE_Free;
+			Connection->State  = (ConnectionCompleteEventHeader->Status == 0x00) ? HCI_CONSTATE_Connected : HCI_CONSTATE_Closed;
 			
 			/* Fire user application callback to signal the connection completion */
 			if (Connection->State == HCI_CONSTATE_Connected)
@@ -224,7 +224,7 @@ void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState)
 		/* If an existing connection was found, close it and fire user application callback to signal the disconnection completion */
 		if (Connection)
 		{
-			Connection->State = HCI_CONSTATE_Free;
+			Connection->State = HCI_CONSTATE_Closed;
 			
 			Bluetooth_L2CAP_NotifyHCIDisconnection(StackState, Connection->Handle);			
 			EVENT_Bluetooth_DisconnectionComplete(StackState, Connection);

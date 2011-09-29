@@ -329,6 +329,10 @@ static void RFCOMM_ProcessMSCCommand(BT_StackConfig_t* const StackState,
 	}
 	else
 	{
+		/* Channel not found, abort */
+		if (!(RFCOMMChannel))
+		  return;
+
 		/* Save the local signals ACK from the remote device */
 		RFCOMMChannel->ConfigFlags |= RFCOMM_CONFIG_LOCALSIGNALS;
 	}
@@ -489,7 +493,6 @@ static void RFCOMM_ProcessUA(BT_StackConfig_t* const StackState,
                              RFCOMM_Header_t* FrameHeader)
 {
 	// TODO
-	for(;;);
 }
 
 static void RFCOMM_ProcessDM(BT_StackConfig_t* const StackState,
@@ -497,7 +500,6 @@ static void RFCOMM_ProcessDM(BT_StackConfig_t* const StackState,
                              RFCOMM_Header_t* FrameHeader)
 {
 	// TODO
-	for(;;);
 }
 
 static void RFCOMM_ProcessDISC(BT_StackConfig_t* const StackState,
@@ -603,14 +605,17 @@ void RFCOMM_ProcessPacket(BT_StackConfig_t* const StackState,
 	}
 }
 
-void RFCOMM_SendData(BT_StackConfig_t* const StackState,
-                     RFCOMM_Channel_t* const RFCOMMChannel,
+bool RFCOMM_SendData(RFCOMM_Channel_t* const RFCOMMChannel,
                      const uint16_t DataLen,
                      const void* Data)
 {
-	if (RFCOMMChannel->State != RFCOMM_Channel_Open)
-	  return;
+	if (!(RFCOMMChannel) || (RFCOMMChannel->State != RFCOMM_Channel_Open))
+	  return false;
+
+	Delay_MS(100); // TEMP - REMOVE
 
 	/* Send the channel data to the remote device */
-	RFCOMM_SendFrame(StackState, RFCOMMChannel->ACLChannel, RFCOMMChannel->DLCI, RFCOMM_Frame_UIH, DataLen, Data);
+	RFCOMM_SendFrame(RFCOMMChannel->Stack, RFCOMMChannel->ACLChannel, RFCOMMChannel->DLCI, RFCOMM_Frame_UIH, DataLen, Data);
+	
+	return true;
 }

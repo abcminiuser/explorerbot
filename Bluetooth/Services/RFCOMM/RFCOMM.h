@@ -140,8 +140,7 @@
                                   BT_L2CAP_Channel_t* const Channel,
                                   uint16_t Length,
                                   uint8_t* Data);
-		void RFCOMM_SendData(BT_StackConfig_t* const StackState,
-                             RFCOMM_Channel_t* const RFCOMMChannel,
+		bool RFCOMM_SendData(RFCOMM_Channel_t* const RFCOMMChannel,
                              const uint16_t DataLen,
                              const void* Data);
 

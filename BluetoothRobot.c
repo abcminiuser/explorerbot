@@ -49,9 +49,9 @@ int main(void)
 		/* Mode action button */
 		if (ButtonStatus & BUTTON1_MASK)
 		{
-			if (Datalogger_MS_Interface.State.IsActive)
+			if (Disk_MS_Interface.State.IsActive)
 			{
-				Datalogger_SensorLoggingEnabled = true;
+				MassStorage_SensorLoggingEnabled = true;
 			
 				LCD_Clear();
 				LCD_WriteString_P(PSTR("  Disk Sensor\n"
@@ -101,8 +101,10 @@ int main(void)
 				Sensors_Update();
 				
 				/* Log sensors to attached mass storage disk if available */
-				if (Datalogger_MS_Interface.State.IsActive && Datalogger_SensorLoggingEnabled)
-				  Datalogger_LogSensors();
+				MassStorage_LogSensors();
+			
+				/* Log sensors to Bluetooth serial port if available */
+				LogSensors();
 			}
 			
 			/* Update the currently playing tone through the speaker (if one is playing) */
@@ -111,7 +113,7 @@ int main(void)
 		
 		BluetoothAdapter_USBTask();
 		Joystick_USBTask();
-		Datalogger_USBTask();
+		MassStorage_USBTask();
 		USB_USBTask();
 	}
 }
@@ -193,6 +195,87 @@ void CheckSensors(void)
 	Delay_MS(1500);
 }
 
+void WriteSensorHeaders(void)
+{
+	if (!(RFCOMM_SensorStream))
+	  return;
+
+	SensorData_t* CurrSensor;
+
+	/* Log file created, print out sensor names */
+	CurrSensor = (SensorData_t*)&Sensors;
+	for (uint8_t SensorIndex = 0; SensorIndex < (sizeof(Sensors) / sizeof(SensorData_t)); SensorIndex++)
+	{
+		/* Add seperator between sensor names as they are written out */
+		if (SensorIndex)
+		  RFCOMM_SendData(RFCOMM_SensorStream, strlen(","), ",");
+
+		/* Output sensor name to the log file */
+		RFCOMM_SendData(RFCOMM_SensorStream, strlen(CurrSensor->Name), CurrSensor->Name);
+		
+		/* If the sensor is a triplicate, need to add in seperators to keep values aligned properly */
+		if (!(CurrSensor->SingleAxis))
+		  RFCOMM_SendData(RFCOMM_SensorStream, strlen(",,"), ",,");
+
+		/* Advance pointer to next sensor entry in the sensor structure */
+		CurrSensor++;
+	}
+
+	/* Add end of line terminator */
+	RFCOMM_SendData(RFCOMM_SensorStream, strlen("\r\n"), "\r\n");
+
+	/* Print out sensor axis */
+	CurrSensor = (SensorData_t*)&Sensors;
+	for (uint8_t SensorIndex = 0; SensorIndex < (sizeof(Sensors) / sizeof(SensorData_t)); SensorIndex++)
+	{
+		/* Add seperator between sensor names as they are written out */
+		if (SensorIndex)
+		  RFCOMM_SendData(RFCOMM_SensorStream, strlen(","), ",");
+
+		/* If the sensor is a triplicate, need to add in seperators to keep values aligned properly */
+		if (!(CurrSensor->SingleAxis))
+		  RFCOMM_SendData(RFCOMM_SensorStream, strlen("X,Y,Z"), "X,Y,Z");
+
+		/* Advance pointer to next sensor entry in the sensor structure */
+		CurrSensor++;
+	}
+
+	/* Add end of line terminator */
+	RFCOMM_SendData(RFCOMM_SensorStream, strlen("\r\n"), "\r\n");
+}
+
+void LogSensors(void)
+{
+	if (!(RFCOMM_SensorStream))
+	  return;
+
+	SensorData_t* CurrSensor = (SensorData_t*)&Sensors;
+	
+	for (uint8_t SensorIndex = 0; SensorIndex < (sizeof(Sensors) / sizeof(SensorData_t)); SensorIndex++)
+	{
+		/* Add seperator between sensor values as they are written */
+		if (SensorIndex)
+		  RFCOMM_SendData(RFCOMM_SensorStream, strlen(", "), ", ");
+
+		char    TempBuffer[25];
+		uint8_t TempBufferLen;
+		
+		/* Print the current sensor data into the temporary buffer */
+		if (CurrSensor->SingleAxis)
+		  TempBufferLen = sprintf(TempBuffer, "%ld", CurrSensor->Data.Single);
+		else
+		  TempBufferLen = sprintf(TempBuffer, "%d, %d, %d", CurrSensor->Data.Triplicate.X, CurrSensor->Data.Triplicate.Y, CurrSensor->Data.Triplicate.Z);
+
+		/* Output sensor value to the stream */
+		RFCOMM_SendData(RFCOMM_SensorStream, TempBufferLen, TempBuffer);
+		
+		/* Advance pointer to next sensor entry in the sensor structure */
+		CurrSensor++;
+	}
+
+	RFCOMM_SendData(RFCOMM_SensorStream, strlen("\r\n"), "\r\n");
+}
+
 /** Event handler for the USB_DeviceAttached event. This indicates that a device has been attached to the host, and
  *  starts the library USB task to begin the enumeration and USB management process.
  */
@@ -246,7 +329,7 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 
 	if (!(Joystick_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData)) &&
 	    !(BluetoothAdapter_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData)) &&
-	    !(Datalogger_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData)))
+	    !(MassStorage_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData)))
 	{
 		LCD_Clear();
 		LCD_WriteString_P(PSTR("ERR: Unknown USB"));
@@ -262,7 +345,7 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 		return;
 	}
 	
-	if (!(Joystick_PostConfiguration()) || !(BluetoothAdapter_PostConfiguration()) || !(Datalogger_PostConfiguration()))
+	if (!(Joystick_PostConfiguration()) || !(BluetoothAdapter_PostConfiguration()) || !(MassStorage_PostConfiguration()))
 	{
 		LCD_Clear();
 		LCD_WriteString_P(PSTR("ERR: Post Config"));
@@ -276,8 +359,8 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 	
 	if (Joystick_HID_Interface.State.IsActive)
 	  LCD_WriteString_P(PSTR("   (HID Mode)   "));
-	else if (Datalogger_MS_Interface.State.IsActive)
-	  LCD_WriteString_P(PSTR("(USB Disk Mode) "));
+	else if (Disk_MS_Interface.State.IsActive)
+	  LCD_WriteString_P(PSTR(" (MS Disk Mode) "));
 	else if (BluetoothAdapter_IsActive)
 	  LCD_WriteString_P(PSTR("(Bluetooth Mode)"));
 	

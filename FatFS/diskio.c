@@ -47,9 +47,9 @@ DRESULT disk_read (
 	{
 		ErrorCode = RES_NOTRDY;
 	}
-	else if (MS_Host_ReadDeviceBlocks(&Datalogger_MS_Interface, 0, sector, count, 512, buff))
+	else if (MS_Host_ReadDeviceBlocks(&Disk_MS_Interface, 0, sector, count, 512, buff))
 	{
-		MS_Host_ResetMSInterface(&Datalogger_MS_Interface);
+		MS_Host_ResetMSInterface(&Disk_MS_Interface);
 		ErrorCode = RES_ERROR;
 	}
 
@@ -75,9 +75,9 @@ DRESULT disk_write (
 	{
 		ErrorCode = RES_NOTRDY;
 	}
-	else if (MS_Host_WriteDeviceBlocks(&Datalogger_MS_Interface, 0, sector, count, 512, buff))
+	else if (MS_Host_WriteDeviceBlocks(&Disk_MS_Interface, 0, sector, count, 512, buff))
 	{
-		MS_Host_ResetMSInterface(&Datalogger_MS_Interface);
+		MS_Host_ResetMSInterface(&Disk_MS_Interface);
 		ErrorCode = RES_ERROR;
 	}
 	

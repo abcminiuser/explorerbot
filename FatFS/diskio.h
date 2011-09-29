@@ -10,7 +10,7 @@
 #include "integer.h"
 #include "ff.h"
 
-#include "../USB/DataLoggerMS.h"
+#include "../USB/MassStorageDisk.h"
 
 #include <stdint.h>
 #include <stdbool.h>

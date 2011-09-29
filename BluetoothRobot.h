@@ -44,7 +44,7 @@
 		
 		#include "USB/BluetoothAdapter.h"
 		#include "USB/JoystickHID.h"
-		#include "USB/DataloggerMS.h"
+		#include "USB/MassStorageDisk.h"
 
 		#include "Drivers/ExternalSRAM.h"
 		#include "Drivers/Buttons.h"
@@ -55,11 +55,15 @@
 		#include "Drivers/Speaker.h"
 
 		#include "Sensors/Sensors.h"
+		
+		#include "BluetoothControl.h"
 
 	/* Function Prototypes: */
 		void SetupHardware(void);
 		void StartupSequence(void);
 		void CheckSensors(void);
+		void WriteSensorHeaders(void);
+		void LogSensors(void);
 
 		void EVENT_USB_Host_HostError(const uint8_t ErrorCode);
 		void EVENT_USB_Host_DeviceAttached(void);

@@ -158,7 +158,7 @@ void EVENT_RFCOMM_ChannelOpened(BT_StackConfig_t* const StackState,
 {
 	RFCOMM_SensorStream = Channel;
 	
-	RFCOMM_SendData(StackState, Channel, strlen("ExplorerBot"), "ExplorerBot");
+	WriteSensorHeaders();
 }
 
 void EVENT_RFCOMM_ChannelClosed(BT_StackConfig_t* const StackState,

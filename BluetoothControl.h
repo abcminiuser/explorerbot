@@ -50,6 +50,8 @@
 
 		#include "USB/JoystickHID.h"
 		
+		#include "BluetoothRobot.h"
+		
 	/* External Variables: */
 		extern RFCOMM_Channel_t* RFCOMM_SensorStream;
 

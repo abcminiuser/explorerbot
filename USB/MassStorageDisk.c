@@ -239,7 +239,7 @@ void MassStorage_LogSensors(void)
 
 	for (uint8_t SensorIndex = 0; SensorIndex < (sizeof(Sensors) / sizeof(SensorData_t)); SensorIndex++)
 	{
-		/* Add seperator between sensor names as they are written to the log file */
+		/* Add seperator between sensor values as they are written to the log file */
 		if (SensorIndex)
 		  f_write(&DiskLogFile, ", ", strlen(", "), &BytesWritten);
 
@@ -252,7 +252,7 @@ void MassStorage_LogSensors(void)
 		else
 		  TempBufferLen = sprintf(TempBuffer, "%d, %d, %d", CurrSensor->Data.Triplicate.X, CurrSensor->Data.Triplicate.Y, CurrSensor->Data.Triplicate.Z);
 
-		/* Output sensor name to the log file */
+		/* Output sensor value to the log file */
 		f_write(&DiskLogFile, TempBuffer, TempBufferLen, &BytesWritten);			
 		
 		/* Advance pointer to next sensor entry in the sensor structure */

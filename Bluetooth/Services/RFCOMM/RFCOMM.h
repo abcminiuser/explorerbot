@@ -93,7 +93,7 @@
 
 		typedef struct
 		{
-			RFCOMM_Address_t Address;
+			uint8_t          DLCI;
 			unsigned         FrameType        : 4;
 			unsigned         ConvergenceLayer : 4;
 			uint8_t          Priority;
@@ -140,5 +140,18 @@
                                   BT_L2CAP_Channel_t* const Channel,
                                   uint16_t Length,
                                   uint8_t* Data);
+		void RFCOMM_SendData(BT_StackConfig_t* const StackState,
+                             RFCOMM_Channel_t* const RFCOMMChannel,
+                             const uint16_t DataLen,
+                             const void* Data);
 
+		void EVENT_RFCOMM_ChannelOpened(BT_StackConfig_t* const StackState,
+		                                RFCOMM_Channel_t* const Channel);
+
+		void EVENT_RFCOMM_ChannelClosed(BT_StackConfig_t* const StackState,
+		                                RFCOMM_Channel_t* const Channel);
+		void CALLBACK_RFCOMM_DataReceived(BT_StackConfig_t* const StackState,
+		                                  RFCOMM_Channel_t* const Channel,
+		                                  uint16_t Length,
+		                                  uint8_t* Data);
 #endif

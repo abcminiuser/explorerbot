@@ -30,6 +30,8 @@
 
 #include "BluetoothControl.h"
 
+RFCOMM_Channel_t* RFCOMM_SensorStream = NULL;
+
 void EVENT_Bluetooth_InitServices(BT_StackConfig_t* const StackState)
 {
 	SDP_Init(StackState);
@@ -149,6 +151,30 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
 			                                "LC:%04X RC:%04X"), Channel->PSM, Length, Channel->LocalNumber, Channel->RemoteNumber);
 			break;
 	}	
+}
+
+void EVENT_RFCOMM_ChannelOpened(BT_StackConfig_t* const StackState,
+                                RFCOMM_Channel_t* const Channel)
+{
+	RFCOMM_SensorStream = Channel;
+	
+	RFCOMM_SendData(StackState, Channel, strlen("ExplorerBot"), "ExplorerBot");
+}
+
+void EVENT_RFCOMM_ChannelClosed(BT_StackConfig_t* const StackState,
+                                RFCOMM_Channel_t* const Channel)
+{
+	RFCOMM_SensorStream = NULL;
+}
+
+void CALLBACK_RFCOMM_DataReceived(BT_StackConfig_t* const StackState,
+                                  RFCOMM_Channel_t* const Channel,
+                                  uint16_t Length,
+                                  uint8_t* Data)
+{
+	LCD_Clear();
+	LCD_WriteFormattedString_P(PSTR("RFCOMM DAT\n"
+	                                "C:%02X L:%04X"), Channel->DLCI, Length);
 }
 
 void CALLBACK_HID_ReportReceived(BT_StackConfig_t* const StackState,

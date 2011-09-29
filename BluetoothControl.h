@@ -49,6 +49,9 @@
 		#include "Bluetooth/Services/RFCOMM/RFCOMM.h"
 
 		#include "USB/JoystickHID.h"
+		
+	/* External Variables: */
+		extern RFCOMM_Channel_t* RFCOMM_SensorStream;
 
 #endif
 

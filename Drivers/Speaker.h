@@ -33,8 +33,11 @@
 
 	/* Includes: */
 		#include <avr/io.h>
+		#include <avr/pgmspace.h>
 		#include <stdbool.h>
 		#include <stddef.h>
+		
+		#include <LUFA/Common/Common.h>
 	
 	/* Macros: */
 		#define SPEAKER_SEQESCAPE    0xFF

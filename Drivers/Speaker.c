@@ -30,29 +30,29 @@
 
 #include "Speaker.h"
 
-const uint8_t Sequence_Connecting[]     = {SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 12,
-                                           SPEAKER_HZ(440.0), 0,
-                                           SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_EndOfSequence};
+static const uint8_t Sequence_Connecting[]    PROGMEM = {SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 12,
+                                                         SPEAKER_HZ(440.0), 0,
+                                                         SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_EndOfSequence};
 
-const uint8_t Sequence_Connected[]      = {SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 8,
-                                           SPEAKER_HZ(349.23), 0, SPEAKER_HZ(440.0), 0,
-                                           SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_EndOfSequence};
+static const uint8_t Sequence_Connected[]     PROGMEM = {SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 8,
+                                                         SPEAKER_HZ(349.23), 0, SPEAKER_HZ(440.0), 0,
+                                                         SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_EndOfSequence};
 
-const uint8_t Sequence_Disconnected[]   = {SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 8,
-                                           SPEAKER_HZ(440.0), 0, SPEAKER_HZ(349.23), 0,
-                                           SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_EndOfSequence};
+static const uint8_t Sequence_Disconnected[]  PROGMEM = {SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 8,
+                                                         SPEAKER_HZ(440.0), 0, SPEAKER_HZ(349.23), 0,
+                                                         SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_EndOfSequence};
 
-const uint8_t Sequence_ConnectFailed[]  = {SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 15,
-                                           SPEAKER_HZ(349.23), 0, SPEAKER_HZ(349.23), 0,
-                                           SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_EndOfSequence};
+static const uint8_t Sequence_ConnectFailed[] PROGMEM = {SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 15,
+                                                         SPEAKER_HZ(349.23), 0, SPEAKER_HZ(349.23), 0,
+                                                         SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_EndOfSequence};
 										  
-const uint8_t Sequence_LaCucaracha[]    = {SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 5,
-                                           SPEAKER_HZ(261.63), 0, SPEAKER_HZ(261.63), 0, SPEAKER_HZ(261.63), 0,
-                                           SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 10,
-                                           SPEAKER_HZ(349.23), 0, SPEAKER_HZ(440.0), 0,
-                                           SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_EndOfSequence};
+const uint8_t Sequence_LaCucaracha[]          PROGMEM = {SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 5,
+                                                         SPEAKER_HZ(261.63), 0, SPEAKER_HZ(261.63), 0, SPEAKER_HZ(261.63), 0,
+                                                         SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_ToneDuration, 10,
+                                                         SPEAKER_HZ(349.23), 0, SPEAKER_HZ(440.0), 0,
+                                                         SPEAKER_SEQESCAPE, SPEAKER_ESCCMD_EndOfSequence};
 
-const uint8_t* Sequence_Table[]         = {Sequence_Connecting, Sequence_Connected, Sequence_Disconnected, Sequence_ConnectFailed, Sequence_LaCucaracha};
+static const uint8_t* Sequence_Table[]        PROGMEM = {Sequence_Connecting, Sequence_Connected, Sequence_Disconnected, Sequence_ConnectFailed, Sequence_LaCucaracha};
 
 static const uint8_t* SequencePosition = NULL;
 static uint8_t SequenceTicksElapsed    = 0;
@@ -81,16 +81,16 @@ void Speaker_NextSequenceTone(void)
 		
 		uint8_t NextTone;
 		
-		while ((NextTone = *(SequencePosition++)) == SPEAKER_SEQESCAPE)
+		while ((NextTone = pgm_read_byte(SequencePosition++)) == SPEAKER_SEQESCAPE)
 		{
-			switch (*(SequencePosition++))
+			switch (pgm_read_byte(SequencePosition++))
 			{
 				case SPEAKER_ESCCMD_EndOfSequence:
-					SequencePosition = NULL;
-					Speaker_SetPWM(0);
+					SequencePosition     = NULL;
+					NextTone             = 0;
 					return;
 				case SPEAKER_ESCCMD_ToneDuration:
-					SequenceTickDuration = *(SequencePosition++);
+					SequenceTickDuration = pgm_read_byte(SequencePosition++);
 					break;
 			}
 		}
@@ -101,7 +101,7 @@ void Speaker_NextSequenceTone(void)
 
 void Speaker_PlaySequence(const uint8_t SequenceID)
 {
-	SequencePosition     = Sequence_Table[SequenceID];
+	SequencePosition     = pgm_read_ptr(&Sequence_Table[SequenceID]);
 	SequenceTicksElapsed = 0;
 	SequenceTickDuration = 10;
 }

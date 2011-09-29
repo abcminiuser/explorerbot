@@ -184,9 +184,23 @@ void RFCOMM_Manage(BT_StackConfig_t* const StackState)
 			/* Check if the local signals have not yet been sent on the current channel */
 			if (!(RFCOMMChannel->ConfigFlags & RFCOMM_CONFIG_LOCALSIGNALSSENT))
 			{
-				/* Indicate that the local signals have been sent, transmit them to the remote device */
+				struct
+				{
+					RFCOMM_Command_t        CommandHeader;
+					uint8_t                 Length;
+					RFCOMM_MSC_Parameters_t Params;
+				} MSCommand;
+
+				MSCommand.CommandHeader      = (RFCOMM_Command_t){.Command = RFCOMM_Control_ModemStatus, .EA = true, .CR = true};
+				MSCommand.Length             = (sizeof(MSCommand.Params) << 1) | 0x01;
+				MSCommand.Params.Address     = (RFCOMM_Address_t){.DLCI = RFCOMMChannel->DLCI, .EA = true, .CR = true};
+				MSCommand.Params.Signals     = RFCOMMChannel->Local.Signals;
+
+				/* Send the MSC command to the remote device */
+//				RFCOMM_SendFrame(StackState, RFCOMMChannel->ACLChannel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_UIH, sizeof(MSCommand), &MSCommand);
+
+				/* Indicate that the local signals have now been sent, transmit them to the remote device */
 				RFCOMMChannel->ConfigFlags |= RFCOMM_CONFIG_LOCALSIGNALSSENT;
-				//RFCOMM_SendChannelSignals(RFCOMMChannel);
 			}
 
 			/* If signals have been configured in both directions, progress to the open state */
@@ -213,7 +227,214 @@ void RFCOMM_ChannelOpened(BT_StackConfig_t* const StackState,
 void RFCOMM_ChannelClosed(BT_StackConfig_t* const StackState,
                           BT_L2CAP_Channel_t* const Channel)
 {
+	for (uint8_t i = 0; i < RFCOMM_MAX_OPEN_CHANNELS; i++)
+	{
+		RFCOMM_Channel_t* RFCOMMChannel = &RFCOMM_Channels[i];
+		
+		/* Ignore channels allocated to different stack instances */
+		if (RFCOMMChannel->Stack != StackState)
+		  continue;
+		  
+//		if (RFCOMMChannel->ACLChannel == Channel)
+//		  RFCOMMChannel->State = RFCOMM_Channel_Closed;
+	}
+}
 
+#include "../../../Drivers/LCD.h"
+
+static void RFCOMM_ProcessTestCommand(BT_StackConfig_t* const StackState,
+                                      BT_L2CAP_Channel_t* const ACLChannel,
+                                      RFCOMM_Command_t* const CommandHeader,
+                                      uint8_t* CommandData,
+									  const uint16_t CommandDataLen)
+{
+	struct
+	{
+		RFCOMM_Command_t CommandHeader;
+		uint8_t          Length;
+		uint8_t          TestData[CommandDataLen];
+	} TestResponse;
+
+	/* Fill out the Test response data */
+	TestResponse.CommandHeader = (RFCOMM_Command_t){.Command = RFCOMM_Control_Test, .EA = true, .CR = false};
+	TestResponse.Length        = (CommandDataLen << 1) | 0x01;
+	memcpy(TestResponse.TestData, CommandData, CommandDataLen);
+
+	/* Send the response to acknowledge the command */
+	RFCOMM_SendFrame(StackState, ACLChannel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_UIH, sizeof(TestResponse), &TestResponse);
+}
+
+static void RFCOMM_ProcessFCECommand(BT_StackConfig_t* const StackState,
+                                     BT_L2CAP_Channel_t* const ACLChannel,
+                                     RFCOMM_Command_t* const CommandHeader,
+                                     uint8_t* CommandData)
+{
+	// TODO
+}
+
+static void RFCOMM_ProcessFCDCommand(BT_StackConfig_t* const StackState,
+                                     BT_L2CAP_Channel_t* const ACLChannel,
+                                     RFCOMM_Command_t* const CommandHeader,
+                                     uint8_t* CommandData)
+{
+	// TODO
+}
+
+static void RFCOMM_ProcessMSCCommand(BT_StackConfig_t* const StackState,
+                                     BT_L2CAP_Channel_t* const ACLChannel,
+                                     RFCOMM_Command_t* const CommandHeader,
+                                     uint8_t* CommandData,
+									 const uint16_t CommandDataLen)
+{
+	RFCOMM_MSC_Parameters_t* MSCParams = (RFCOMM_MSC_Parameters_t*)CommandData;
+	
+	/* Ignore status flags sent to the control channel */
+	if (MSCParams->Address.DLCI == RFCOMM_CONTROL_DLCI)
+	  return;
+	  
+	/* Find the corresponding entry in the RFCOMM channel list that the data is directed to */
+	RFCOMM_Channel_t* RFCOMMChannel = RFCOMM_FindChannel(StackState, ACLChannel, MSCParams->Address.DLCI);
+
+	/* Check if the frame is a command or a response to an issued command */
+	if (CommandHeader->CR)
+	{
+		/* Cound not find entry, send an error frame and abort */
+		if (!(RFCOMMChannel))
+		{
+			RFCOMM_SendFrame(StackState, ACLChannel, MSCParams->Address.DLCI, RFCOMM_Frame_DM, 0, NULL);
+			return;
+		}
+		
+		/* Save the new channel signals to the channel state structure */
+		RFCOMMChannel->Remote.Signals  = MSCParams->Signals;
+		RFCOMMChannel->ConfigFlags    |= RFCOMM_CONFIG_REMOTESIGNALS;
+
+		struct
+		{
+			RFCOMM_Command_t        CommandHeader;
+			uint8_t                 Length;
+			RFCOMM_MSC_Parameters_t Params;
+		} MSResponse;
+
+		/* Fill out the MS response data */
+		MSResponse.CommandHeader  = (RFCOMM_Command_t){.Command = RFCOMM_Control_ModemStatus, .EA = true, .CR = false};
+		MSResponse.Length         = (sizeof(RFCOMM_MSC_Parameters_t) << 1) | 0x01;
+		memcpy(&MSResponse.Params, MSCParams, sizeof(RFCOMM_MSC_Parameters_t));
+
+		/* Send the MSC response to acknowledge the command */
+		RFCOMM_SendFrame(StackState, ACLChannel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_UIH, sizeof(MSResponse), &MSResponse);
+	}
+	else
+	{
+		/* Save the local signals ACK from the remote device */
+		RFCOMMChannel->ConfigFlags |= RFCOMM_CONFIG_LOCALSIGNALS;
+	}
+}
+
+static void RFCOMM_ProcessRPNCommand(BT_StackConfig_t* const StackState,
+                                     BT_L2CAP_Channel_t* const ACLChannel,
+                                     RFCOMM_Command_t* const CommandHeader,
+                                     uint8_t* CommandData)
+{
+	// TODO
+}
+
+static void RFCOMM_ProcessRLSCommand(BT_StackConfig_t* const StackState,
+                                     BT_L2CAP_Channel_t* const ACLChannel,
+                                     RFCOMM_Command_t* const CommandHeader,
+                                     uint8_t* CommandData)
+{
+	// TODO
+}
+
+static void RFCOMM_ProcessPNCommand(BT_StackConfig_t* const StackState,
+                                    BT_L2CAP_Channel_t* const ACLChannel,
+                                    RFCOMM_Command_t* const CommandHeader,
+                                    uint8_t* CommandData)
+{
+	RFCOMM_PN_Parameters_t* PNParams = (RFCOMM_PN_Parameters_t*)CommandData;
+	
+	/* Ignore parameter negotiations to the control channel */
+	if (PNParams->Address.DLCI == RFCOMM_CONTROL_DLCI)
+	  return;
+
+	/* Find the corresponding entry in the RFCOMM channel list that the data is directed to */
+	RFCOMM_Channel_t* RFCOMMChannel = RFCOMM_FindChannel(StackState, ACLChannel, PNParams->Address.DLCI);
+
+	/* Check if the frame is a command or a response to an issued command */
+	if (CommandHeader->CR)
+	{
+		RFCOMMChannel = RFCOMM_NewChannel(StackState, ACLChannel, PNParams->Address.DLCI);
+
+		/* Cound not create new channel entry, abort */
+		if (!(RFCOMMChannel))
+		  return;
+
+		struct
+		{
+			RFCOMM_Command_t       CommandHeader;
+			uint8_t                Length;
+			RFCOMM_PN_Parameters_t Params;
+		} PNResponse;
+
+		/* Fill out the DPN response data */
+		PNResponse.CommandHeader = (RFCOMM_Command_t){.Command = RFCOMM_Control_ParameterNegotiation, .EA = true, .CR = false};
+		PNResponse.Length        = (sizeof(PNResponse.Params) << 1) | 0x01;
+		memcpy(&PNResponse.Params, PNParams, sizeof(RFCOMM_PN_Parameters_t));
+		PNResponse.Params.ConvergenceLayer = 0x00; // TODO: Enable credit based transaction support
+
+		/* Send the PN response to acknowledge the command */
+		RFCOMM_SendFrame(StackState, ACLChannel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_UIH, sizeof(PNResponse), &PNResponse);
+	}
+	else
+	{
+		// TODO
+	}	
+}
+
+void RFCOMM_ProcessMultiplexerCommand(BT_StackConfig_t* const StackState,
+                                      BT_L2CAP_Channel_t* const ACLChannel,
+                                      RFCOMM_Command_t* const CommandHeader)
+{
+	uint8_t* CommandData = (uint8_t*)CommandHeader + sizeof(RFCOMM_Command_t);
+	uint16_t CommandDataLen;
+	
+	/* Unpack the command data length field - may be 8 or 16 bits depending on LSB */
+	if (*CommandData & 0x01)
+	{
+		CommandDataLen = (*CommandData >> 1);
+		*CommandData  += 1;
+	}
+	else
+	{
+		CommandDataLen = ((*(CommandData + 1) << 7) | (*CommandData >> 1));
+		*CommandData  += 2;
+	}
+	
+	switch (CommandHeader->Command)
+	{
+		case RFCOMM_Control_Test:
+			RFCOMM_ProcessTestCommand(StackState, ACLChannel, CommandHeader, CommandData, CommandDataLen);
+			break;
+		case RFCOMM_Control_FlowControlEnable:
+			RFCOMM_ProcessFCECommand(StackState, ACLChannel, CommandHeader, CommandData);
+			break;
+		case RFCOMM_Control_FlowControlDisable:
+			RFCOMM_ProcessFCDCommand(StackState, ACLChannel, CommandHeader, CommandData);
+			break;
+		case RFCOMM_Control_ModemStatus:
+			RFCOMM_ProcessMSCCommand(StackState, ACLChannel, CommandHeader, CommandData, CommandDataLen);
+			break;
+		case RFCOMM_Control_RemotePortNegotiation:
+			RFCOMM_ProcessRPNCommand(StackState, ACLChannel, CommandHeader, CommandData);
+			break;
+		case RFCOMM_Control_RemoteLineStatus:
+			RFCOMM_ProcessRLSCommand(StackState, ACLChannel, CommandHeader, CommandData);
+			break;
+		case RFCOMM_Control_ParameterNegotiation:
+			RFCOMM_ProcessPNCommand(StackState, ACLChannel, CommandHeader, CommandData);
+			break;
+	}
 }
 
 static void RFCOMM_ProcessSABM(BT_StackConfig_t* const StackState,
@@ -264,14 +485,19 @@ static void RFCOMM_ProcessDISC(BT_StackConfig_t* const StackState,
 	RFCOMMChannel->State = RFCOMM_Channel_Closed;
 }
 
-#include "../../../Drivers/LCD.h"
-
 static void RFCOMM_ProcessUIH(BT_StackConfig_t* const StackState,
                               BT_L2CAP_Channel_t* const ACLChannel,
                               RFCOMM_Header_t* FrameHeader)
 {
-	uint8_t* FrameData    = (uint8_t*)FrameHeader + sizeof(RFCOMM_Header_t);
+	uint8_t* FrameData = (uint8_t*)FrameHeader + sizeof(RFCOMM_Header_t);
 	uint16_t FrameDataLen;
+
+	/* Check if the data is directed to the control DLCI - if so run command processor */
+	if (FrameHeader->Address.DLCI == RFCOMM_CONTROL_DLCI)
+	{
+		RFCOMM_ProcessMultiplexerCommand(StackState, ACLChannel, (RFCOMM_Command_t*)FrameData);	
+		return;
+	}
 	
 	/* Unpack the frame data length field - may be 8 or 16 bits depending on LSB */
 	if (*FrameData & 0x01)
@@ -285,14 +511,6 @@ static void RFCOMM_ProcessUIH(BT_StackConfig_t* const StackState,
 		*FrameData  += 2;
 	}
 
-	/* Check if the data is directed to the control DLCI - if so run command processor */
-	if (FrameHeader->Address.DLCI == RFCOMM_CONTROL_DLCI)
-	{
-		// Todo : control requests
-	
-		return;
-	}
-	
 	/* Find the corresponding entry in the RFCOMM channel list that the data is directed to */
 	RFCOMM_Channel_t* RFCOMMChannel = RFCOMM_FindChannel(StackState, ACLChannel, FrameHeader->Address.DLCI);
 	

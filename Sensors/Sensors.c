@@ -76,3 +76,63 @@ void Sensors_Update(void)
 	ITG3200_Update(&Sensors.Orientation, &Sensors.Temperature);
 }
 
+uint8_t Sensors_WriteSensorCSVHeader(char* LineBuffer)
+{
+	uint8_t       OutputLen = 0;
+	SensorData_t* CurrSensor;
+
+	/* Log file created, print out sensor names */
+	CurrSensor = (SensorData_t*)&Sensors;
+	for (uint8_t SensorIndex = 0; SensorIndex < (sizeof(Sensors) / sizeof(SensorData_t)); SensorIndex++)
+	{
+		OutputLen += sprintf(&LineBuffer[OutputLen], "%s%s%s", (SensorIndex ? "," : ""), CurrSensor->Name, (CurrSensor->SingleAxis) ? "" : ",,");
+
+		/* Advance pointer to next sensor entry in the sensor structure */
+		CurrSensor++;
+	}
+
+	/* Add newline terminator to the end of the line */
+	strcpy(&LineBuffer[OutputLen], "\r\n");
+	OutputLen += strlen("\r\n");
+
+	/* Print out sensor axis */
+	CurrSensor = (SensorData_t*)&Sensors;
+	for (uint8_t SensorIndex = 0; SensorIndex < (sizeof(Sensors) / sizeof(SensorData_t)); SensorIndex++)
+	{
+		OutputLen += sprintf(&LineBuffer[OutputLen], "%s%s", (SensorIndex ? "," : ""), (CurrSensor->SingleAxis) ? "" : "X,Y,Z");
+
+		/* Advance pointer to next sensor entry in the sensor structure */
+		CurrSensor++;
+	}
+
+	/* Add newline terminator to the end of the line */
+	strcpy(&LineBuffer[OutputLen], "\r\n");
+	OutputLen += strlen("\r\n");
+
+	return OutputLen;
+}
+
+uint8_t Sensors_WriteSensorDataCSV(char* LineBuffer)
+{
+	uint8_t OutputLen = 0;
+
+	SensorData_t* CurrSensor = (SensorData_t*)&Sensors;
+	for (uint8_t SensorIndex = 0; SensorIndex < (sizeof(Sensors) / sizeof(SensorData_t)); SensorIndex++)
+	{
+		/* Print the current sensor data into the temporary buffer */
+		if (CurrSensor->SingleAxis)
+		  OutputLen += sprintf(&LineBuffer[OutputLen], "%s%ld", (SensorIndex ? "," : ""), CurrSensor->Data.Single);
+		else
+		  OutputLen += sprintf(&LineBuffer[OutputLen], "%s%d,%d,%d", (SensorIndex ? "," : ""), CurrSensor->Data.Triplicate.X, CurrSensor->Data.Triplicate.Y, CurrSensor->Data.Triplicate.Z);
+		
+		/* Advance pointer to next sensor entry in the sensor structure */
+		CurrSensor++;
+	}
+	
+	/* Add newline terminator to the end of the line */
+	strcpy(&LineBuffer[OutputLen], "\r\n");
+	OutputLen += strlen("\r\n");
+
+	return OutputLen;
+}
+

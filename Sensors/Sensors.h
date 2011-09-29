@@ -41,7 +41,9 @@
 		#include "BMP085.h"
 
 	/* Function Prototypes: */
-		void Sensors_Init(void);
-		void Sensors_Update(void);
+		void    Sensors_Init(void);
+		void    Sensors_Update(void);
+		uint8_t Sensors_WriteSensorCSVHeader(char* LineBuffer);
+		uint8_t Sensors_WriteSensorDataCSV(char* LineBuffer);
 
 #endif

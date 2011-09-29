@@ -62,8 +62,6 @@
 		void SetupHardware(void);
 		void StartupSequence(void);
 		void CheckSensors(void);
-		void WriteSensorHeaders(void);
-		void LogSensors(void);
 
 		void EVENT_USB_Host_HostError(const uint8_t ErrorCode);
 		void EVENT_USB_Host_DeviceAttached(void);

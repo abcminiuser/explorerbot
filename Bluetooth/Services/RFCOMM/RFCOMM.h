@@ -93,14 +93,14 @@
 
 		typedef struct
 		{
-			uint8_t          DLCI;
-			unsigned         FrameType        : 4;
-			unsigned         ConvergenceLayer : 4;
-			uint8_t          Priority;
-			uint8_t          ACKTimerTicks;
-			uint16_t         MaximumFrameSize;
-			uint8_t          MaxRetransmissions;
-			uint8_t          RecoveryWindowSize;
+			uint8_t  DLCI;
+			unsigned FrameType        : 4;
+			unsigned ConvergenceLayer : 4;
+			uint8_t  Priority;
+			uint8_t  ACKTimerTicks;
+			uint16_t MaximumFrameSize;
+			uint8_t  MaxRetransmissions;
+			uint8_t  RecoveryWindowSize;
 		} RFCOMM_PN_Parameters_t;
 
 		typedef struct

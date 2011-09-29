@@ -43,7 +43,7 @@
 		#include "BluetoothAdapter.h"
 		#include "../Bluetooth/Bluetooth.h"
 
-		#include "../Sensors/SensorsCommon.h"
+		#include "../Sensors/Sensors.h"
 
 		#include "../FatFS/ff.h"
 		
@@ -57,6 +57,7 @@
 	/* External Variables: */
 		extern USB_ClassInfo_MS_Host_t Disk_MS_Interface;
 		extern bool MassStorage_SensorLoggingEnabled;
+		extern FIL MassStorage_DiskLogFile;
 
 	/* Function Prototypes: */
 		bool MassStorage_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
@@ -64,8 +65,6 @@
 		                                void* ConfigDescriptorData);
 		bool MassStorage_PostConfiguration(void);
 		void MassStorage_USBTask(void);
-		
-		void MassStorage_LogSensors(void);
 
 #endif
 

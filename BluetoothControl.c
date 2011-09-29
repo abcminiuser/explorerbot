@@ -158,7 +158,12 @@ void EVENT_RFCOMM_ChannelOpened(BT_StackConfig_t* const StackState,
 {
 	RFCOMM_SensorStream = Channel;
 	
-	WriteSensorHeaders();
+	char    LineBuffer[200];
+	uint8_t LineLength;
+		
+	/* Construct the sensor CSV header lines and write them to the virtual serial port */
+	LineLength = Sensors_WriteSensorCSVHeader(LineBuffer);
+	RFCOMM_SendData(RFCOMM_SensorStream, LineLength, LineBuffer);
 }
 
 void EVENT_RFCOMM_ChannelClosed(BT_StackConfig_t* const StackState,
@@ -172,9 +177,7 @@ void CALLBACK_RFCOMM_DataReceived(BT_StackConfig_t* const StackState,
                                   uint16_t Length,
                                   uint8_t* Data)
 {
-	LCD_Clear();
-	LCD_WriteFormattedString_P(PSTR("RFCOMM DAT\n"
-	                                "C:%02X L:%04X"), Channel->DLCI, Length);
+
 }
 
 void CALLBACK_HID_ReportReceived(BT_StackConfig_t* const StackState,

@@ -44,11 +44,12 @@ static RFCOMM_Channel_t RFCOMM_Channels[RFCOMM_MAX_OPEN_CHANNELS];
 static uint8_t RFCOMM_ComputeFCS(const void* FrameStart,
                                  uint8_t Length)
 {
-	uint8_t FCS = 0xFF;
+	uint8_t* DataLoc = (uint8_t*)FrameStart;
+	uint8_t  FCS     = 0xFF;
 
 	/* Calculate new Frame CRC value via the given data bytes and the CRC table */
-	for (uint8_t i = 0; i < Length; i++)
-	  FCS = pgm_read_byte(&RFCOMM_CRC8Table[FCS ^ ((const uint8_t*)FrameStart)[i]]);
+	while (Length--)
+	  FCS = pgm_read_byte(&RFCOMM_CRC8Table[FCS ^ *(DataLoc++)]);
 
 	return ~FCS;
 }
@@ -89,15 +90,15 @@ static RFCOMM_Channel_t* const RFCOMM_NewChannel(BT_StackConfig_t* const StackSt
 		if (RFCOMMChannel->State != RFCOMM_Channel_Closed)
 		  continue;
 
-		RFCOMMChannel->Stack            = StackState;
-		RFCOMMChannel->ACLChannel       = ACLChannel;
-		RFCOMMChannel->State            = RFCOMM_Channel_Configure;
-		RFCOMMChannel->DLCI             = DLCI;
-		RFCOMMChannel->Priority         = (7 + (RFCOMMChannel->DLCI & 0xF8));
-		RFCOMMChannel->MTU              = 0xFFFF;
-		RFCOMMChannel->Remote.Signals   = 0;
-		RFCOMMChannel->Local.Signals    = (RFCOMM_SIGNAL_RTC | RFCOMM_SIGNAL_RTR | RFCOMM_SIGNAL_DV);
-		RFCOMMChannel->ConfigFlags      = 0;
+		RFCOMMChannel->Stack          = StackState;
+		RFCOMMChannel->ACLChannel     = ACLChannel;
+		RFCOMMChannel->State          = RFCOMM_Channel_Configure;
+		RFCOMMChannel->DLCI           = DLCI;
+		RFCOMMChannel->Priority       = (7 + (RFCOMMChannel->DLCI & 0xF8));
+		RFCOMMChannel->MTU            = 0xFFFF;
+		RFCOMMChannel->Remote.Signals = 0;
+		RFCOMMChannel->Local.Signals  = (RFCOMM_SIGNAL_RTC | RFCOMM_SIGNAL_RTR | RFCOMM_SIGNAL_DV);
+		RFCOMMChannel->ConfigFlags    = 0;
 		return RFCOMMChannel;
 	}
 
@@ -118,16 +119,21 @@ static void RFCOMM_SendFrame(BT_StackConfig_t* const StackState,
 		uint8_t         Data[DataLen];
 		uint8_t         FCS;
 	} ResponsePacket;
-
-	BT_HCI_Connection_t* Connection  = Bluetooth_HCI_FindConnection(StackState, NULL, ACLChannel->ConnectionHandle);
-	bool                 CommandResp = Connection->LocallyInitiated;
-
-	/* Sanity check the HCI connection - if missing, abort */
-	if (!(Connection))
+	
+	/* Abort if invalid ACL connection handle is given */
+	if (!(ACLChannel))
 	  return;
 
+	BT_HCI_Connection_t* HCIConnection = Bluetooth_HCI_FindConnection(StackState, NULL, ACLChannel->ConnectionHandle);
+
+	/* Sanity check the HCI connection - if missing, abort */
+	if (!(HCIConnection))
+	  return;
+
+	bool CommandResp = HCIConnection->LocallyInitiated;
+
 	if ((Control == RFCOMM_Frame_UA) || (Control == RFCOMM_Frame_DM))
-	  CommandResp = !(Connection->LocallyInitiated);
+	  CommandResp = !(CommandResp);
 
 	/* Set the frame header values to the specified address and frame type */
 	ResponsePacket.FrameHeader.Control = (Control | FRAME_POLL_FINAL);
@@ -283,11 +289,11 @@ static void RFCOMM_ProcessFCDCommand(BT_StackConfig_t* const StackState,
 	// TODO
 }
 
-static void RFCOMM_ProcessMSCCommand(BT_StackConfig_t* const StackState,
-                                     BT_L2CAP_Channel_t* const ACLChannel,
-                                     RFCOMM_Command_t* const CommandHeader,
-                                     uint8_t* CommandData,
-									 const uint16_t CommandDataLen)
+static void RFCOMM_ProcessMSCommand(BT_StackConfig_t* const StackState,
+                                    BT_L2CAP_Channel_t* const ACLChannel,
+                                    RFCOMM_Command_t* const CommandHeader,
+                                    uint8_t* CommandData,
+                                    const uint16_t CommandDataLen)
 {
 	RFCOMM_MSC_Parameters_t* MSCParams = (RFCOMM_MSC_Parameters_t*)CommandData;
 	
@@ -444,7 +450,7 @@ void RFCOMM_ProcessMultiplexerCommand(BT_StackConfig_t* const StackState,
 			LCD_Clear();
 			LCD_WriteString("MS");
 
-			RFCOMM_ProcessMSCCommand(StackState, ACLChannel, CommandHeader, CommandData, CommandDataLen);
+			RFCOMM_ProcessMSCommand(StackState, ACLChannel, CommandHeader, CommandData, CommandDataLen);
 			break;
 		case RFCOMM_Control_RemotePortNegotiation:
 			LCD_Clear();
@@ -611,8 +617,6 @@ bool RFCOMM_SendData(RFCOMM_Channel_t* const RFCOMMChannel,
 {
 	if (!(RFCOMMChannel) || (RFCOMMChannel->State != RFCOMM_Channel_Open))
 	  return false;
-
-	Delay_MS(100); // TEMP - REMOVE
 
 	/* Send the channel data to the remote device */
 	RFCOMM_SendFrame(RFCOMMChannel->Stack, RFCOMMChannel->ACLChannel, RFCOMMChannel->DLCI, RFCOMM_Frame_UIH, DataLen, Data);

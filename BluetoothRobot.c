@@ -100,11 +100,24 @@ int main(void)
 				/* Update all connected sensors' values */
 				Sensors_Update();
 				
-				/* Log sensors to attached mass storage disk if available */
-				MassStorage_LogSensors();
-			
-				/* Log sensors to Bluetooth serial port if available */
-				LogSensors();
+				char    LineBuffer[200];
+				uint8_t LineLength;
+				
+				/* Construct the next sensor CSV line from the current sensor data */
+				LineLength = Sensors_WriteSensorDataCSV(LineBuffer);
+				
+				/* Write the sensor data to the attached Mass Storage disk (if available and logging enabled) */
+				if (Disk_MS_Interface.State.IsActive && MassStorage_SensorLoggingEnabled)
+				{
+					uint16_t BytesWritten;
+					
+					f_write(&MassStorage_DiskLogFile, LineBuffer, LineLength, &BytesWritten);
+					f_sync(&MassStorage_DiskLogFile);
+				}
+
+				/* Write the sensor data to the attached wireless serial port (if available) */
+				if (RFCOMM_SensorStream)
+				  RFCOMM_SendData(RFCOMM_SensorStream, LineLength, LineBuffer);				
 			}
 			
 			/* Update the currently playing tone through the speaker (if one is playing) */
@@ -193,87 +206,6 @@ void CheckSensors(void)
 	                                                     (Sensors.Pressure.Connected     ? '\2' : '\1'));
 												 
 	Delay_MS(1500);
-}
-
-void WriteSensorHeaders(void)
-{
-	if (!(RFCOMM_SensorStream))
-	  return;
-
-	SensorData_t* CurrSensor;
-
-	/* Log file created, print out sensor names */
-	CurrSensor = (SensorData_t*)&Sensors;
-	for (uint8_t SensorIndex = 0; SensorIndex < (sizeof(Sensors) / sizeof(SensorData_t)); SensorIndex++)
-	{
-		/* Add seperator between sensor names as they are written out */
-		if (SensorIndex)
-		  RFCOMM_SendData(RFCOMM_SensorStream, strlen(","), ",");
-
-		/* Output sensor name to the log file */
-		RFCOMM_SendData(RFCOMM_SensorStream, strlen(CurrSensor->Name), CurrSensor->Name);
-		
-		/* If the sensor is a triplicate, need to add in seperators to keep values aligned properly */
-		if (!(CurrSensor->SingleAxis))
-		  RFCOMM_SendData(RFCOMM_SensorStream, strlen(",,"), ",,");
-
-		/* Advance pointer to next sensor entry in the sensor structure */
-		CurrSensor++;
-	}
-
-	/* Add end of line terminator */
-	RFCOMM_SendData(RFCOMM_SensorStream, strlen("\r\n"), "\r\n");
-
-	/* Print out sensor axis */
-	CurrSensor = (SensorData_t*)&Sensors;
-	for (uint8_t SensorIndex = 0; SensorIndex < (sizeof(Sensors) / sizeof(SensorData_t)); SensorIndex++)
-	{
-		/* Add seperator between sensor names as they are written out */
-		if (SensorIndex)
-		  RFCOMM_SendData(RFCOMM_SensorStream, strlen(","), ",");
-
-		/* If the sensor is a triplicate, need to add in seperators to keep values aligned properly */
-		if (!(CurrSensor->SingleAxis))
-		  RFCOMM_SendData(RFCOMM_SensorStream, strlen("X,Y,Z"), "X,Y,Z");
-
-		/* Advance pointer to next sensor entry in the sensor structure */
-		CurrSensor++;
-	}
-
-	/* Add end of line terminator */
-	RFCOMM_SendData(RFCOMM_SensorStream, strlen("\r\n"), "\r\n");
-}
-
-void LogSensors(void)
-{
-	if (!(RFCOMM_SensorStream))
-	  return;
-
-	SensorData_t* CurrSensor = (SensorData_t*)&Sensors;
-	
-	for (uint8_t SensorIndex = 0; SensorIndex < (sizeof(Sensors) / sizeof(SensorData_t)); SensorIndex++)
-	{
-		/* Add seperator between sensor values as they are written */
-		if (SensorIndex)
-		  RFCOMM_SendData(RFCOMM_SensorStream, strlen(", "), ", ");
-
-		char    TempBuffer[25];
-		uint8_t TempBufferLen;
-		
-		/* Print the current sensor data into the temporary buffer */
-		if (CurrSensor->SingleAxis)
-		  TempBufferLen = sprintf(TempBuffer, "%ld", CurrSensor->Data.Single);
-		else
-		  TempBufferLen = sprintf(TempBuffer, "%d, %d, %d", CurrSensor->Data.Triplicate.X, CurrSensor->Data.Triplicate.Y, CurrSensor->Data.Triplicate.Z);
-
-		/* Output sensor value to the stream */
-		RFCOMM_SendData(RFCOMM_SensorStream, TempBufferLen, TempBuffer);
-		
-		/* Advance pointer to next sensor entry in the sensor structure */
-		CurrSensor++;
-	}
-
-	RFCOMM_SendData(RFCOMM_SensorStream, strlen("\r\n"), "\r\n");
 }
 
 /** Event handler for the USB_DeviceAttached event. This indicates that a device has been attached to the host, and

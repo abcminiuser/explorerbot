@@ -47,10 +47,10 @@ USB_ClassInfo_MS_Host_t Disk_MS_Interface =
 	};
 
 /** FAT Fs structure to hold the internal state of the FAT driver for the Dataflash contents. */
-static FATFS DiskFATState;
+static FATFS MassStorage_DiskFATState;
 
 /** FAT Fs structure to hold a FAT file handle for the log data write destination. */
-static FIL DiskLogFile;
+FIL MassStorage_DiskLogFile;
 
 /** Flag to indicate if sensor logging to disk is currently enabled or not. */
 bool MassStorage_SensorLoggingEnabled = false;
@@ -61,62 +61,26 @@ static bool MassStorage_OpenSensorLogFile(void)
 	uint8_t ErrorCode;
 	
 	/* Create a new file on the disk to log the sensor data to, fail if one already exists */
-	ErrorCode = f_open(&DiskLogFile, DATALOG_FILENAME, (FA_CREATE_NEW | FA_WRITE));
+	ErrorCode = f_open(&MassStorage_DiskLogFile, DATALOG_FILENAME, (FA_CREATE_NEW | FA_WRITE));
 
 	/* See if the existing log was created sucessfully */
 	if (ErrorCode == FR_OK)
 	{
-		uint16_t      BytesWritten = 0;
-		SensorData_t* CurrSensor;
-	
-		/* Log file created, print out sensor names */
-		CurrSensor = (SensorData_t*)&Sensors;
-		for (uint8_t SensorIndex = 0; SensorIndex < (sizeof(Sensors) / sizeof(SensorData_t)); SensorIndex++)
-		{
-			/* Add seperator between sensor names as they are written to the log file */
-			if (SensorIndex)
-			  f_write(&DiskLogFile, ",", strlen(","), &BytesWritten);
-
-			/* Output sensor name to the log file */
-			f_write(&DiskLogFile, CurrSensor->Name, strlen(CurrSensor->Name), &BytesWritten);
-			
-			/* If the sensor is a triplicate, need to add in seperators to keep values aligned properly */
-			if (!(CurrSensor->SingleAxis))
-			  f_write(&DiskLogFile, ",,", strlen(",,"), &BytesWritten);
-			
-			/* Advance pointer to next sensor entry in the sensor structure */
-			CurrSensor++;
-		}
-
-		/* Add end of line terminator */
-		f_write(&DiskLogFile, "\r\n", strlen("\r\n"), &BytesWritten);
-
-		/* Print out sensor axis */
-		CurrSensor = (SensorData_t*)&Sensors;
-		for (uint8_t SensorIndex = 0; SensorIndex < (sizeof(Sensors) / sizeof(SensorData_t)); SensorIndex++)
-		{
-			/* Add seperator between sensor names as they are written to the log file */
-			if (SensorIndex)
-			  f_write(&DiskLogFile, ",", strlen(","), &BytesWritten);
-
-			/* If the sensor is a triplicate, need to add in seperators to keep values aligned properly */
-			if (!(CurrSensor->SingleAxis))
-			  f_write(&DiskLogFile, "X,Y,Z", strlen("X,Y,Z"), &BytesWritten);
-			
-			/* Advance pointer to next sensor entry in the sensor structure */
-			CurrSensor++;
-		}
+		uint16_t BytesWritten = 0;
+		char     LineBuffer[200];
+		uint8_t  LineLength;
 		
-		/* Add end of line terminator */
-		f_write(&DiskLogFile, "\r\n", strlen("\r\n"), &BytesWritten);
+		/* Construct the sensor CSV header lines and write them to disk */
+		LineLength = Sensors_WriteSensorCSVHeader(LineBuffer);
+		f_write(&MassStorage_DiskLogFile, LineBuffer, LineLength, &BytesWritten);
 	}
 	else if (ErrorCode == FR_EXIST)
 	{
 		/* Open the already existing file on the disk */
-		f_open(&DiskLogFile, DATALOG_FILENAME, (FA_OPEN_EXISTING | FA_WRITE));
+		f_open(&MassStorage_DiskLogFile, DATALOG_FILENAME, (FA_OPEN_EXISTING | FA_WRITE));
 	
 		/* Seek to the end of the existing log file */
-		f_lseek(&DiskLogFile, DiskLogFile.fsize);	
+		f_lseek(&MassStorage_DiskLogFile, MassStorage_DiskLogFile.fsize);	
 	}
 	else
 	{
@@ -204,7 +168,7 @@ bool MassStorage_PostConfiguration(void)
 
 	MassStorage_SensorLoggingEnabled = false;
 
-	f_mount(0, &DiskFATState);	
+	f_mount(0, &MassStorage_DiskFATState);	
 
 	/* Try to read in the data file containing the remote Bluetooth device address to connect to on demand */
 	if (!(MassStorage_ParseRemoteBDADDRFile()))
@@ -228,37 +192,3 @@ void MassStorage_USBTask(void)
 	MS_Host_USBTask(&Disk_MS_Interface);
 }
 
-/** Writes the current sensor values out to the attached Mass Storage device. */
-void MassStorage_LogSensors(void)
-{
-	if ((USB_HostState != HOST_STATE_Configured) || !(Disk_MS_Interface.State.IsActive) || !(MassStorage_SensorLoggingEnabled))
-	  return;
-
-	uint16_t      BytesWritten = 0;
-	SensorData_t* CurrSensor   = (SensorData_t*)&Sensors;
-
-	for (uint8_t SensorIndex = 0; SensorIndex < (sizeof(Sensors) / sizeof(SensorData_t)); SensorIndex++)
-	{
-		/* Add seperator between sensor values as they are written to the log file */
-		if (SensorIndex)
-		  f_write(&DiskLogFile, ", ", strlen(", "), &BytesWritten);
-
-		char    TempBuffer[25];
-		uint8_t TempBufferLen;
-		
-		/* Print the current sensor data into the temporary buffer */
-		if (CurrSensor->SingleAxis)
-		  TempBufferLen = sprintf(TempBuffer, "%ld", CurrSensor->Data.Single);
-		else
-		  TempBufferLen = sprintf(TempBuffer, "%d, %d, %d", CurrSensor->Data.Triplicate.X, CurrSensor->Data.Triplicate.Y, CurrSensor->Data.Triplicate.Z);
-
-		/* Output sensor value to the log file */
-		f_write(&DiskLogFile, TempBuffer, TempBufferLen, &BytesWritten);			
-		
-		/* Advance pointer to next sensor entry in the sensor structure */
-		CurrSensor++;
-	}
-
-	f_write(&DiskLogFile, "\r\n", strlen("\r\n"), &BytesWritten);
-	f_sync(&DiskLogFile);
-}

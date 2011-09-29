@@ -70,7 +70,7 @@ static RFCOMM_Channel_t* const RFCOMM_FindChannel(BT_StackConfig_t* const StackS
 		}
 
 		/* If the DLCI matches against the current channel, return the found channel object */
-		if ((RFCOMMChannel->DLCI == DLCI) && (RFCOMMChannel->ConnectionHandle == ACLChannel->ConnectionHandle))
+		if ((RFCOMMChannel->DLCI == DLCI) && (RFCOMMChannel->ACLChannel == ACLChannel))
 		  return RFCOMMChannel;
 	}
 
@@ -91,7 +91,7 @@ static RFCOMM_Channel_t* const RFCOMM_NewChannel(BT_StackConfig_t* const StackSt
 
 		RFCOMMChannel->State            = RFCOMM_Channel_Configure;
 		RFCOMMChannel->Stack            = StackState;
-		RFCOMMChannel->ConnectionHandle = ACLChannel->ConnectionHandle;
+		RFCOMMChannel->ACLChannel       = ACLChannel;
 		RFCOMMChannel->DLCI             = DLCI;
 		RFCOMMChannel->Priority         = (7 + (RFCOMMChannel->DLCI & 0xF8));
 		RFCOMMChannel->MTU              = 0xFFFF;
@@ -197,7 +197,7 @@ void RFCOMM_Manage(BT_StackConfig_t* const StackState)
 				MSCommand.Params.Signals     = RFCOMMChannel->Local.Signals;
 
 				/* Send the MSC command to the remote device */
-//				RFCOMM_SendFrame(StackState, RFCOMMChannel->ACLChannel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_UIH, sizeof(MSCommand), &MSCommand);
+				RFCOMM_SendFrame(StackState, RFCOMMChannel->ACLChannel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_UIH, sizeof(MSCommand), &MSCommand);
 
 				/* Indicate that the local signals have now been sent, transmit them to the remote device */
 				RFCOMMChannel->ConfigFlags |= RFCOMM_CONFIG_LOCALSIGNALSSENT;
@@ -235,8 +235,8 @@ void RFCOMM_ChannelClosed(BT_StackConfig_t* const StackState,
 		if (RFCOMMChannel->Stack != StackState)
 		  continue;
 		  
-//		if (RFCOMMChannel->ACLChannel == Channel)
-//		  RFCOMMChannel->State = RFCOMM_Channel_Closed;
+		if (RFCOMMChannel->ACLChannel == Channel)
+		  RFCOMMChannel->State = RFCOMM_Channel_Closed;
 	}
 }
 
@@ -364,7 +364,9 @@ static void RFCOMM_ProcessPNCommand(BT_StackConfig_t* const StackState,
 	/* Check if the frame is a command or a response to an issued command */
 	if (CommandHeader->CR)
 	{
-		RFCOMMChannel = RFCOMM_NewChannel(StackState, ACLChannel, PNParams->Address.DLCI);
+		/* Existing channel not found, attempt to create a new one */
+		if (!(RFCOMMChannel))
+		  RFCOMMChannel = RFCOMM_NewChannel(StackState, ACLChannel, PNParams->Address.DLCI);
 
 		/* Cound not create new channel entry, abort */
 		if (!(RFCOMMChannel))
@@ -403,36 +405,61 @@ void RFCOMM_ProcessMultiplexerCommand(BT_StackConfig_t* const StackState,
 	if (*CommandData & 0x01)
 	{
 		CommandDataLen = (*CommandData >> 1);
-		*CommandData  += 1;
+		CommandData  += 1;
 	}
 	else
 	{
 		CommandDataLen = ((*(CommandData + 1) << 7) | (*CommandData >> 1));
-		*CommandData  += 2;
+		CommandData  += 2;
 	}
 	
 	switch (CommandHeader->Command)
 	{
 		case RFCOMM_Control_Test:
+			LCD_Clear();
+			LCD_WriteString("TEST");
+
 			RFCOMM_ProcessTestCommand(StackState, ACLChannel, CommandHeader, CommandData, CommandDataLen);
 			break;
 		case RFCOMM_Control_FlowControlEnable:
+			LCD_Clear();
+			LCD_WriteString("FCE");
+
 			RFCOMM_ProcessFCECommand(StackState, ACLChannel, CommandHeader, CommandData);
 			break;
 		case RFCOMM_Control_FlowControlDisable:
+			LCD_Clear();
+			LCD_WriteString("FCD");
+
 			RFCOMM_ProcessFCDCommand(StackState, ACLChannel, CommandHeader, CommandData);
 			break;
 		case RFCOMM_Control_ModemStatus:
+			LCD_Clear();
+			LCD_WriteString("MS");
+
 			RFCOMM_ProcessMSCCommand(StackState, ACLChannel, CommandHeader, CommandData, CommandDataLen);
 			break;
 		case RFCOMM_Control_RemotePortNegotiation:
+			LCD_Clear();
+			LCD_WriteString("RPN");
+
 			RFCOMM_ProcessRPNCommand(StackState, ACLChannel, CommandHeader, CommandData);
 			break;
 		case RFCOMM_Control_RemoteLineStatus:
+			LCD_Clear();
+			LCD_WriteString("RLS");
+
 			RFCOMM_ProcessRLSCommand(StackState, ACLChannel, CommandHeader, CommandData);
 			break;
 		case RFCOMM_Control_ParameterNegotiation:
+			LCD_Clear();
+			LCD_WriteString("PN");
+
 			RFCOMM_ProcessPNCommand(StackState, ACLChannel, CommandHeader, CommandData);
+			break;
+		default:
+			LCD_Clear();
+			LCD_WriteFormattedString("UNK %02X", CommandHeader->Command);
 			break;
 	}
 }
@@ -483,6 +510,9 @@ static void RFCOMM_ProcessDISC(BT_StackConfig_t* const StackState,
 
 	/* Mark the disconnected channel as closed in the RFCOMM channel list */
 	RFCOMMChannel->State = RFCOMM_Channel_Closed;
+	
+	/* ACK the disconnection request */
+	RFCOMM_SendFrame(StackState, ACLChannel, FrameHeader->Address.DLCI, RFCOMM_Frame_UA, 0, NULL);
 }
 
 static void RFCOMM_ProcessUIH(BT_StackConfig_t* const StackState,
@@ -492,23 +522,23 @@ static void RFCOMM_ProcessUIH(BT_StackConfig_t* const StackState,
 	uint8_t* FrameData = (uint8_t*)FrameHeader + sizeof(RFCOMM_Header_t);
 	uint16_t FrameDataLen;
 
+	/* Unpack the frame data length field - may be 8 or 16 bits depending on LSB */
+	if (*FrameData & 0x01)
+	{
+		FrameDataLen = (*FrameData >> 1);
+		FrameData  += 1;
+	}
+	else
+	{
+		FrameDataLen = ((*(FrameData + 1) << 7) | (*FrameData >> 1));
+		FrameData  += 2;
+	}
+
 	/* Check if the data is directed to the control DLCI - if so run command processor */
 	if (FrameHeader->Address.DLCI == RFCOMM_CONTROL_DLCI)
 	{
 		RFCOMM_ProcessMultiplexerCommand(StackState, ACLChannel, (RFCOMM_Command_t*)FrameData);	
 		return;
-	}
-	
-	/* Unpack the frame data length field - may be 8 or 16 bits depending on LSB */
-	if (*FrameData & 0x01)
-	{
-		FrameDataLen = (*FrameData >> 1);
-		*FrameData  += 1;
-	}
-	else
-	{
-		FrameDataLen = ((*(FrameData + 1) << 7) | (*FrameData >> 1));
-		*FrameData  += 2;
 	}
 
 	/* Find the corresponding entry in the RFCOMM channel list that the data is directed to */

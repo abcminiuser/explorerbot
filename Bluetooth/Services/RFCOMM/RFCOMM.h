@@ -111,8 +111,8 @@
 
 		typedef struct
 		{
-			BT_StackConfig_t* Stack;
-			uint16_t ConnectionHandle;
+			BT_StackConfig_t*   Stack;
+			BT_L2CAP_Channel_t* ACLChannel;
 		
 			uint8_t  DLCI;
 			uint8_t  State;

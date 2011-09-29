@@ -28,13 +28,13 @@
   this software.
 */
 
-#include "DataloggerMS.h"
+#include "MassStorageDisk.h"
 
 /** LUFA HID Class driver interface configuration and state information. This structure is
  *  passed to all Mass Storage Class driver functions, so that multiple instances of the same class
  *  within a device can be differentiated from one another.
  */
-USB_ClassInfo_MS_Host_t Datalogger_MS_Interface =
+USB_ClassInfo_MS_Host_t Disk_MS_Interface =
 	{
 		.Config =
 			{
@@ -53,10 +53,10 @@ static FATFS DiskFATState;
 static FIL DiskLogFile;
 
 /** Flag to indicate if sensor logging to disk is currently enabled or not. */
-bool Datalogger_SensorLoggingEnabled = false;
+bool MassStorage_SensorLoggingEnabled = false;
 
 
-static bool Datalogger_OpenSensorLogFile(void)
+static bool MassStorage_OpenSensorLogFile(void)
 {
 	uint8_t ErrorCode;
 	
@@ -127,7 +127,7 @@ static bool Datalogger_OpenSensorLogFile(void)
 	return true;
 }
 
-static bool Datalogger_ParseRemoteBDADDRFile(void)
+static bool MassStorage_ParseRemoteBDADDRFile(void)
 {
 	uint8_t ErrorCode;
 	FIL     DiskRemAddrFile;
@@ -185,33 +185,33 @@ static bool Datalogger_ParseRemoteBDADDRFile(void)
  *
  *  \return  Boolean true if a valid Mass Storage interface was found, false otherwise.
  */
-bool Datalogger_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
+bool MassStorage_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
                                uint16_t ConfigDescriptorSize,
                                void* ConfigDescriptorData)
 {
 	/* Attempt to bind to the attached device as a Mass Storage class interface */
-	return (MS_Host_ConfigurePipes(&Datalogger_MS_Interface, ConfigDescriptorSize, ConfigDescriptorData) == HID_ENUMERROR_NoError);
+	return (MS_Host_ConfigurePipes(&Disk_MS_Interface, ConfigDescriptorSize, ConfigDescriptorData) == HID_ENUMERROR_NoError);
 }
 
 /** Performs any post configuration tasks after the attached Mass Storage device has been successfully enumerated.
  *
  *  \return Boolean true if no Mass Storage device attached or if all post-configuration tasks complete without error, false otherwise
  */
-bool Datalogger_PostConfiguration(void)
+bool MassStorage_PostConfiguration(void)
 {
-	if (!(Datalogger_MS_Interface.State.IsActive))
+	if (!(Disk_MS_Interface.State.IsActive))
 	  return true;
 
-	Datalogger_SensorLoggingEnabled = false;
+	MassStorage_SensorLoggingEnabled = false;
 
 	f_mount(0, &DiskFATState);	
 
 	/* Try to read in the data file containing the remote Bluetooth device address to connect to on demand */
-	if (!(Datalogger_ParseRemoteBDADDRFile()))
+	if (!(MassStorage_ParseRemoteBDADDRFile()))
 	  return false;
 
 	/* Abort if the sensor log file could not be opened */
-	if (!(Datalogger_OpenSensorLogFile()))
+	if (!(MassStorage_OpenSensorLogFile()))
 	  return false;
 
 	RGB_SetColour(RGB_ALIAS_Connected);
@@ -219,19 +219,19 @@ bool Datalogger_PostConfiguration(void)
 }
 
 /** Task to manage an enumerated Mass Storage device once connected. */
-void Datalogger_USBTask(void)
+void MassStorage_USBTask(void)
 {
-	if ((USB_HostState != HOST_STATE_Configured) || !(Datalogger_MS_Interface.State.IsActive))
+	if ((USB_HostState != HOST_STATE_Configured) || !(Disk_MS_Interface.State.IsActive))
 	  return;
 	
 	/* Run the Mass Storage Class Driver service task on the Mass Storage interface */
-	MS_Host_USBTask(&Datalogger_MS_Interface);
+	MS_Host_USBTask(&Disk_MS_Interface);
 }
 
 /** Writes the current sensor values out to the attached Mass Storage device. */
-void Datalogger_LogSensors(void)
+void MassStorage_LogSensors(void)
 {
-	if ((USB_HostState != HOST_STATE_Configured) || !(Datalogger_MS_Interface.State.IsActive) || !(Datalogger_SensorLoggingEnabled))
+	if ((USB_HostState != HOST_STATE_Configured) || !(Disk_MS_Interface.State.IsActive) || !(MassStorage_SensorLoggingEnabled))
 	  return;
 
 	uint16_t      BytesWritten = 0;

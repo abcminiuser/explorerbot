@@ -55,17 +55,17 @@
 		#define DATALOG_FILENAME   "SENSLOG.CSV"
 		
 	/* External Variables: */
-		extern USB_ClassInfo_MS_Host_t Datalogger_MS_Interface;
-		extern bool Datalogger_SensorLoggingEnabled;
+		extern USB_ClassInfo_MS_Host_t Disk_MS_Interface;
+		extern bool MassStorage_SensorLoggingEnabled;
 
 	/* Function Prototypes: */
-		bool Datalogger_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
-		                               uint16_t ConfigDescriptorSize,
-		                               void* ConfigDescriptorData);
-		bool Datalogger_PostConfiguration(void);
-		void Datalogger_USBTask(void);
+		bool MassStorage_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
+		                                uint16_t ConfigDescriptorSize,
+		                                void* ConfigDescriptorData);
+		bool MassStorage_PostConfiguration(void);
+		void MassStorage_USBTask(void);
 		
-		void Datalogger_LogSensors(void);
+		void MassStorage_LogSensors(void);
 
 #endif
 

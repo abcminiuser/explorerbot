@@ -66,7 +66,7 @@
 		{
 			if (PWMValue)
 			{
-				OCR0A = PWMValue;
+				OCR0A  = PWMValue;
 				TCCR0B = ((1 << CS02) | (1 << CS00));
 			}
 			else

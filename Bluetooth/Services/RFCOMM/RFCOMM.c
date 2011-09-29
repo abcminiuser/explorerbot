@@ -41,6 +41,18 @@ static const uint8_t RFCOMM_CRC8Table[256] PROGMEM =
 static RFCOMM_Channel_t RFCOMM_Channels[RFCOMM_MAX_OPEN_CHANNELS];
 
 
+static uint8_t RFCOMM_ComputeFCS(const void* FrameStart,
+                                 uint8_t Length)
+{
+	uint8_t FCS = 0xFF;
+
+	/* Calculate new Frame CRC value via the given data bytes and the CRC table */
+	for (uint8_t i = 0; i < Length; i++)
+	  FCS = pgm_read_byte(&RFCOMM_CRC8Table[FCS ^ ((const uint8_t*)FrameStart)[i]]);
+
+	return ~FCS;
+}
+
 static RFCOMM_Channel_t* const RFCOMM_FindChannel(BT_StackConfig_t* const StackState,
                                                   BT_L2CAP_Channel_t* const ACLChannel,
                                                   uint8_t DLCI)
@@ -51,7 +63,7 @@ static RFCOMM_Channel_t* const RFCOMM_FindChannel(BT_StackConfig_t* const StackS
 		RFCOMM_Channel_t* RFCOMMChannel = &RFCOMM_Channels[i];
 
 		/* Filter out closed channel objects, and object allocated to other stacks */
-		if ((RFCOMMChannel->State != RFCOMM_Channel_Closed) ||
+		if ((RFCOMMChannel->State == RFCOMM_Channel_Closed) ||
 		    (RFCOMMChannel->Stack != StackState))
 		{
 			continue;
@@ -92,18 +104,6 @@ static RFCOMM_Channel_t* const RFCOMM_NewChannel(BT_StackConfig_t* const StackSt
 	return NULL;
 }
 
-static uint8_t RFCOMM_GetFCSValue(const void* FrameStart,
-                                  uint8_t Length)
-{
-	uint8_t FCS = 0xFF;
-
-	/* Calculate new Frame CRC value via the given data bytes and the CRC table */
-	for (uint8_t i = 0; i < Length; i++)
-	  FCS = pgm_read_byte(&RFCOMM_CRC8Table[FCS ^ ((const uint8_t*)FrameStart)[i]]);
-
-	return ~FCS;
-}
-
 static void RFCOMM_SendFrame(BT_StackConfig_t* const StackState,
                              BT_L2CAP_Channel_t* const ACLChannel,
                              uint8_t DLCI,
@@ -114,13 +114,17 @@ static void RFCOMM_SendFrame(BT_StackConfig_t* const StackState,
 	struct
 	{
 		RFCOMM_Header_t FrameHeader;
-		uint8_t         Length[(DataLen < 128) ? 1 : 2];
+		uint8_t         Size[(DataLen < 128) ? 1 : 2];
 		uint8_t         Data[DataLen];
 		uint8_t         FCS;
 	} ResponsePacket;
 
 	BT_HCI_Connection_t* Connection  = Bluetooth_HCI_FindConnection(StackState, NULL, ACLChannel->ConnectionHandle);
 	bool                 CommandResp = Connection->LocallyInitiated;
+
+	/* Sanity check the HCI connection - if missing, abort */
+	if (!(Connection))
+	  return;
 
 	if ((Control == RFCOMM_Frame_UA) || (Control == RFCOMM_Frame_DM))
 	  CommandResp = !(Connection->LocallyInitiated);
@@ -129,14 +133,14 @@ static void RFCOMM_SendFrame(BT_StackConfig_t* const StackState,
 	ResponsePacket.FrameHeader.Control = (Control | FRAME_POLL_FINAL);
 	ResponsePacket.FrameHeader.Address = (RFCOMM_Address_t){.DLCI = DLCI, .EA = true, .CR = CommandResp};
 
-	/* Set lower 7 bits of the length field - LSB reserved for 16-bit field extension */
-	ResponsePacket.Length[0] = (DataLen << 1);
+	/* Set lower 7 bits of the Size field - LSB reserved for 16-bit field extension */
+	ResponsePacket.Size[0] = (DataLen << 1);
 	
 	/* If length extension not required, set terminator bit, otherwise add upper length bits */
 	if (DataLen < 128)
-	  ResponsePacket.Length[0] |= 0x01;
+	  ResponsePacket.Size[0] |= 0x01;
 	else
-	  ResponsePacket.Length[1]  = (DataLen >> 7);
+	  ResponsePacket.Size[1]  = (DataLen >> 7);
 
 	/* Copy over the packet data from the source buffer to the response packet buffer */
 	memcpy(ResponsePacket.Data, Data, DataLen);
@@ -146,10 +150,10 @@ static void RFCOMM_SendFrame(BT_StackConfig_t* const StackState,
 
 	/* UIH frames do not have the CRC calculated on the Size field in the response, all other frames do */
 	if (Control != RFCOMM_Frame_UIH)
-	  CRCLength += sizeof(ResponsePacket.Length);
+	  CRCLength += sizeof(ResponsePacket.Size);
 
 	/* Calculate the frame checksum from the appropriate fields */
-	ResponsePacket.FCS = RFCOMM_GetFCSValue(&ResponsePacket, CRCLength);
+	ResponsePacket.FCS = RFCOMM_ComputeFCS(&ResponsePacket, CRCLength);
 
 	/* Send the completed response packet to the sender */
 	Bluetooth_L2CAP_SendPacket(StackState, ACLChannel, sizeof(ResponsePacket), &ResponsePacket);
@@ -246,18 +250,57 @@ static void RFCOMM_ProcessDM(BT_StackConfig_t* const StackState,
 static void RFCOMM_ProcessDISC(BT_StackConfig_t* const StackState,
                                RFCOMM_Header_t* FrameHeader)
 {
-	// TODO
-	for(;;);
+	/* Find the corresponding entry in the RFCOMM channel list that the data is directed to */
+	RFCOMM_Channel_t* RFCOMMChannel = RFCOMM_FindChannel(StackState, ACLChannel, FrameHeader->Address.DLCI);
+
+	/* Cound not find corresponding channel entry, abort */
+	if (!(RFCOMMChannel))
+	  return;
+
+	/* Mark the disconnected channel as closed in the RFCOMM channel list */
+	RFCOMMChannel->State = RFCOMM_Channel_Closed;
 }
+
+#include "../../../Drivers/LCD.h"
 
 static void RFCOMM_ProcessUIH(BT_StackConfig_t* const StackState,
                               RFCOMM_Header_t* FrameHeader)
 {
-	// TODO
-	for(;;);
+	if (FrameHeader->Address.DLCI == RFCOMM_CONTROL_DLCI)
+	{
+		// Todo : control requests
+	
+		return;
+	}
+
+	uint8_t* FrameData    = (uint8_t*)FrameHeader + sizeof(RFCOMM_Header_t);
+	uint16_t FrameDataLen;
+	
+	/* Unpack the frame data length field - may be 8 or 16 bits depending on LSB */
+	if (*FrameData & 0x01)
+	{
+		FrameDataLen = (*FrameData >> 1);
+		*FrameData  += 1;
+	}
+	else
+	{
+		FrameDataLen = ((*(FrameData + 1) << 7) | (*FrameData >> 1));
+		*FrameData  += 2;
+	}
+	
+	/* Find the corresponding entry in the RFCOMM channel list that the data is directed to */
+	RFCOMM_Channel_t* RFCOMMChannel = RFCOMM_FindChannel(StackState, ACLChannel, FrameHeader->Address.DLCI);
+	
+	LCD_Clear();
+	LCD_WriteFormattedString("UIH C:%02X L:%04X\n%s", FrameHeader->Address.DLCI, FrameDataLen, (RFCOMMChannel != NULL) ? "FOUND" : "NOT FOUND");
+
+	/* Cound not find corresponding channel entry, abort */
+	if (!(RFCOMMChannel))
+	  return;
+
+	// TODO: Pass data to user app
 }
 
-#include "../../../Drivers/LCD.h"
 void RFCOMM_ProcessPacket(BT_StackConfig_t* const StackState,
                           BT_L2CAP_Channel_t* const Channel,
                           uint16_t Length,

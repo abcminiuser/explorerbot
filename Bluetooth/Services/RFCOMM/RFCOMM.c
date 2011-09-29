@@ -234,6 +234,7 @@ static void RFCOMM_ProcessSABM(BT_StackConfig_t* const StackState,
 }
 
 static void RFCOMM_ProcessUA(BT_StackConfig_t* const StackState,
+                             BT_L2CAP_Channel_t* const ACLChannel,
                              RFCOMM_Header_t* FrameHeader)
 {
 	// TODO
@@ -241,6 +242,7 @@ static void RFCOMM_ProcessUA(BT_StackConfig_t* const StackState,
 }
 
 static void RFCOMM_ProcessDM(BT_StackConfig_t* const StackState,
+                             BT_L2CAP_Channel_t* const ACLChannel,
                              RFCOMM_Header_t* FrameHeader)
 {
 	// TODO
@@ -248,6 +250,7 @@ static void RFCOMM_ProcessDM(BT_StackConfig_t* const StackState,
 }
 
 static void RFCOMM_ProcessDISC(BT_StackConfig_t* const StackState,
+                               BT_L2CAP_Channel_t* const ACLChannel,
                                RFCOMM_Header_t* FrameHeader)
 {
 	/* Find the corresponding entry in the RFCOMM channel list that the data is directed to */
@@ -264,15 +267,9 @@ static void RFCOMM_ProcessDISC(BT_StackConfig_t* const StackState,
 #include "../../../Drivers/LCD.h"
 
 static void RFCOMM_ProcessUIH(BT_StackConfig_t* const StackState,
+                              BT_L2CAP_Channel_t* const ACLChannel,
                               RFCOMM_Header_t* FrameHeader)
 {
-	if (FrameHeader->Address.DLCI == RFCOMM_CONTROL_DLCI)
-	{
-		// Todo : control requests
-	
-		return;
-	}
-
 	uint8_t* FrameData    = (uint8_t*)FrameHeader + sizeof(RFCOMM_Header_t);
 	uint16_t FrameDataLen;
 	
@@ -286,6 +283,14 @@ static void RFCOMM_ProcessUIH(BT_StackConfig_t* const StackState,
 	{
 		FrameDataLen = ((*(FrameData + 1) << 7) | (*FrameData >> 1));
 		*FrameData  += 2;
+	}
+
+	/* Check if the data is directed to the control DLCI - if so run command processor */
+	if (FrameHeader->Address.DLCI == RFCOMM_CONTROL_DLCI)
+	{
+		// Todo : control requests
+	
+		return;
 	}
 	
 	/* Find the corresponding entry in the RFCOMM channel list that the data is directed to */
@@ -325,25 +330,25 @@ void RFCOMM_ProcessPacket(BT_StackConfig_t* const StackState,
 			LCD_Clear();
 			LCD_WriteString("UA");
 
-			RFCOMM_ProcessUA(StackState, FrameHeader);
+			RFCOMM_ProcessUA(StackState, Channel, FrameHeader);
 			break;
 		case RFCOMM_Frame_DM:
 			LCD_Clear();
 			LCD_WriteString("DM");
 
-			RFCOMM_ProcessDM(StackState, FrameHeader);
+			RFCOMM_ProcessDM(StackState, Channel, FrameHeader);
 			break;
 		case RFCOMM_Frame_DISC:
 			LCD_Clear();
 			LCD_WriteString("DISC");
 
-			RFCOMM_ProcessDISC(StackState, FrameHeader);
+			RFCOMM_ProcessDISC(StackState, Channel, FrameHeader);
 			break;
 		case RFCOMM_Frame_UIH:
 			LCD_Clear();
 			LCD_WriteString("UIH");
 
-			RFCOMM_ProcessUIH(StackState, FrameHeader);
+			RFCOMM_ProcessUIH(StackState, Channel, FrameHeader);
 			break;
 	}
 }

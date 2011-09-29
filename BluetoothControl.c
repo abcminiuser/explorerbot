@@ -33,14 +33,14 @@
 void EVENT_Bluetooth_InitServices(BT_StackConfig_t* const StackState)
 {
 	SDP_Init(StackState);
-	HID_Client_Init(StackState);
+	HID_Init(StackState);
 	RFCOMM_Init(StackState);
 }
 
 void EVENT_Bluetooth_ManageServices(BT_StackConfig_t* const StackState)
 {
 	SDP_Manage(StackState);
-	HID_Client_Manage(StackState);
+	HID_Manage(StackState);
 	RFCOMM_Manage(StackState);
 }
 
@@ -112,7 +112,7 @@ void EVENT_Bluetooth_ChannelOpened(BT_StackConfig_t* const StackState,
 	                                "L:%04X R:%04X"), Channel->LocalNumber, Channel->RemoteNumber);
 
 	SDP_ChannelOpened(StackState, Channel);			
-	HID_Client_ChannelOpened(StackState, Channel);
+	HID_ChannelOpened(StackState, Channel);
 	RFCOMM_ChannelOpened(StackState, Channel);
 }
 
@@ -124,7 +124,7 @@ void EVENT_Bluetooth_ChannelClosed(BT_StackConfig_t* const StackState,
 	                                "L:%04X R:%04X"), Channel->LocalNumber, Channel->RemoteNumber);
 
 	SDP_ChannelClosed(StackState, Channel);			
-	HID_Client_ChannelClosed(StackState, Channel);
+	HID_ChannelClosed(StackState, Channel);
 	RFCOMM_ChannelClosed(StackState, Channel);
 }
 
@@ -140,7 +140,7 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
 		case CHANNEL_PSM_HIDINT:
 		case CHANNEL_PSM_RFCOMM:
 			SDP_ProcessPacket(StackState, Channel, Length, Data);
-			HID_Client_ProcessPacket(StackState, Channel, Length, Data);
+			HID_ProcessPacket(StackState, Channel, Length, Data);
 			RFCOMM_ProcessPacket(StackState, Channel, Length, Data);
 			break;		
 		default:
@@ -151,11 +151,11 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
 	}	
 }
 
-void CALLBACK_HID_Client_ReportReceived(BT_StackConfig_t* const StackState,
-                                        BT_L2CAP_Channel_t* const Channel,
-                                        uint8_t ReportType,
-                                        uint16_t Length,
-                                        uint8_t* Data)
+void CALLBACK_HID_ReportReceived(BT_StackConfig_t* const StackState,
+                                 BT_L2CAP_Channel_t* const Channel,
+                                 uint8_t ReportType,
+                                 uint16_t Length,
+                                 uint8_t* Data)
 {
 	/* Process output reports to look for key code changes */
 	if (ReportType == HID_DATAT_Input)

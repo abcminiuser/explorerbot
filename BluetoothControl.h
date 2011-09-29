@@ -45,7 +45,7 @@
 		
 		#include "Bluetooth/Bluetooth.h"
 		#include "Bluetooth/Services/SDP/SDP.h"
-		#include "Bluetooth/Services/HID/HIDClient.h"
+		#include "Bluetooth/Services/HID/HID.h"
 		#include "Bluetooth/Services/RFCOMM/RFCOMM.h"
 
 		#include "USB/JoystickHID.h"

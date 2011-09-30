@@ -163,7 +163,7 @@ bool BluetoothAdapter_PostConfiguration(void)
 	if (!(BluetoothAdapter_IsActive))
 	  return true;
 	  
-	Bluetooth_Init(&BluetoothAdapter_Stack);	
+	Bluetooth_Init(&BluetoothAdapter_Stack);
 	return true;
 }
 

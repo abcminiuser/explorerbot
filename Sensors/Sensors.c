@@ -76,63 +76,74 @@ void Sensors_Update(void)
 	ITG3200_Update(&Sensors.Orientation, &Sensors.Temperature);
 }
 
-uint8_t Sensors_WriteSensorCSVHeader(char* LineBuffer)
+void Sensors_WriteSensorCSVHeader(char* LineBuffer)
 {
-	uint8_t       OutputLen = 0;
 	SensorData_t* CurrSensor;
+	
+	/* Terminate the string at the very start, so that future strcat() calls work correctly */
+	LineBuffer[0] = '\0';
 
 	/* Log file created, print out sensor names */
 	CurrSensor = (SensorData_t*)&Sensors;
 	for (uint8_t SensorIndex = 0; SensorIndex < (sizeof(Sensors) / sizeof(SensorData_t)); SensorIndex++)
 	{
-		OutputLen += sprintf(&LineBuffer[OutputLen], "%s%s%s", (SensorIndex ? "," : ""), CurrSensor->Name, (CurrSensor->SingleAxis) ? "" : ",,");
+		if (SensorIndex)
+		  strcat(LineBuffer, ",");
+
+		strcat(LineBuffer, CurrSensor->Name);
+
+		if (!(CurrSensor->SingleAxis))
+		  strcat(LineBuffer, ",,");
 
 		/* Advance pointer to next sensor entry in the sensor structure */
 		CurrSensor++;
 	}
 
 	/* Add newline terminator to the end of the line */
-	strcpy(&LineBuffer[OutputLen], "\r\n");
-	OutputLen += strlen("\r\n");
+	strcat(LineBuffer, "\r\n");
 
 	/* Print out sensor axis */
 	CurrSensor = (SensorData_t*)&Sensors;
 	for (uint8_t SensorIndex = 0; SensorIndex < (sizeof(Sensors) / sizeof(SensorData_t)); SensorIndex++)
 	{
-		OutputLen += sprintf(&LineBuffer[OutputLen], "%s%s", (SensorIndex ? "," : ""), (CurrSensor->SingleAxis) ? "" : "X,Y,Z");
+		if (SensorIndex)
+		  strcat(LineBuffer, ",");
+
+		if (!(CurrSensor->SingleAxis))
+		  strcat(LineBuffer, "X,Y,Z");
 
 		/* Advance pointer to next sensor entry in the sensor structure */
 		CurrSensor++;
 	}
 
 	/* Add newline terminator to the end of the line */
-	strcpy(&LineBuffer[OutputLen], "\r\n");
-	OutputLen += strlen("\r\n");
-
-	return OutputLen;
+	strcat(LineBuffer, "\r\n");
 }
 
-uint8_t Sensors_WriteSensorDataCSV(char* LineBuffer)
+void Sensors_WriteSensorDataCSV(char* LineBuffer)
 {
 	uint8_t OutputLen = 0;
+
+	/* Terminate the string at the very start, so that future strcat() calls work correctly */
+	LineBuffer[0] = '\0';
 
 	SensorData_t* CurrSensor = (SensorData_t*)&Sensors;
 	for (uint8_t SensorIndex = 0; SensorIndex < (sizeof(Sensors) / sizeof(SensorData_t)); SensorIndex++)
 	{
+		if (SensorIndex)
+		  LineBuffer[OutputLen++] = ',';
+	
 		/* Print the current sensor data into the temporary buffer */
 		if (CurrSensor->SingleAxis)
-		  OutputLen += sprintf(&LineBuffer[OutputLen], "%s%ld", (SensorIndex ? "," : ""), CurrSensor->Data.Single);
+		  OutputLen += sprintf(&LineBuffer[OutputLen], "%ld", CurrSensor->Data.Single);
 		else
-		  OutputLen += sprintf(&LineBuffer[OutputLen], "%s%d,%d,%d", (SensorIndex ? "," : ""), CurrSensor->Data.Triplicate.X, CurrSensor->Data.Triplicate.Y, CurrSensor->Data.Triplicate.Z);
+		  OutputLen += sprintf(&LineBuffer[OutputLen], "%d,%d,%d", CurrSensor->Data.Triplicate.X, CurrSensor->Data.Triplicate.Y, CurrSensor->Data.Triplicate.Z);
 		
 		/* Advance pointer to next sensor entry in the sensor structure */
 		CurrSensor++;
 	}
 	
 	/* Add newline terminator to the end of the line */
-	strcpy(&LineBuffer[OutputLen], "\r\n");
-	OutputLen += strlen("\r\n");
-
-	return OutputLen;
+	strcat(LineBuffer, "\r\n");
 }
 

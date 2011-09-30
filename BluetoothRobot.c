@@ -104,13 +104,13 @@ int main(void)
 				uint8_t LineLength;
 				
 				/* Construct the next sensor CSV line from the current sensor data */
-				LineLength = Sensors_WriteSensorDataCSV(LineBuffer);
+				Sensors_WriteSensorDataCSV(LineBuffer);
+				LineLength = strlen(LineBuffer);
 				
 				/* Write the sensor data to the attached Mass Storage disk (if available and logging enabled) */
 				if (Disk_MS_Interface.State.IsActive && MassStorage_SensorLoggingEnabled)
 				{
 					uint16_t BytesWritten;
-					
 					f_write(&MassStorage_DiskLogFile, LineBuffer, LineLength, &BytesWritten);
 					f_sync(&MassStorage_DiskLogFile);
 				}

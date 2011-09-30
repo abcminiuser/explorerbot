@@ -69,12 +69,14 @@
 		{
 			if (PWMValue)
 			{
+				DDRB  |= (1 << 7);
 				OCR0A  = PWMValue;
 				TCCR0B = ((1 << CS02) | (1 << CS00));
 			}
 			else
 			{
 				TCCR0B = 0;
+				DDRB  &= ~(1 << 7);
 			}
 		}
 

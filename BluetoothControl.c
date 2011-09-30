@@ -158,12 +158,11 @@ void EVENT_RFCOMM_ChannelOpened(BT_StackConfig_t* const StackState,
 {
 	RFCOMM_SensorStream = Channel;
 	
-	char    LineBuffer[200];
-	uint8_t LineLength;
+	char LineBuffer[200];
 		
 	/* Construct the sensor CSV header lines and write them to the virtual serial port */
-	LineLength = Sensors_WriteSensorCSVHeader(LineBuffer);
-	RFCOMM_SendData(RFCOMM_SensorStream, LineLength, LineBuffer);
+	Sensors_WriteSensorCSVHeader(LineBuffer);
+	RFCOMM_SendData(RFCOMM_SensorStream, strlen(LineBuffer), LineBuffer);
 }
 
 void EVENT_RFCOMM_ChannelClosed(BT_StackConfig_t* const StackState,

@@ -66,13 +66,12 @@ static bool MassStorage_OpenSensorLogFile(void)
 	/* See if the existing log was created sucessfully */
 	if (ErrorCode == FR_OK)
 	{
-		uint16_t BytesWritten = 0;
 		char     LineBuffer[200];
-		uint8_t  LineLength;
+		uint16_t BytesWritten = 0;
 		
 		/* Construct the sensor CSV header lines and write them to disk */
-		LineLength = Sensors_WriteSensorCSVHeader(LineBuffer);
-		f_write(&MassStorage_DiskLogFile, LineBuffer, LineLength, &BytesWritten);
+		Sensors_WriteSensorCSVHeader(LineBuffer);
+		f_write(&MassStorage_DiskLogFile, LineBuffer, strlen(LineBuffer), &BytesWritten);
 	}
 	else if (ErrorCode == FR_EXIST)
 	{
@@ -153,6 +152,8 @@ bool MassStorage_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
                                uint16_t ConfigDescriptorSize,
                                void* ConfigDescriptorData)
 {
+	MassStorage_SensorLoggingEnabled = false;
+
 	/* Attempt to bind to the attached device as a Mass Storage class interface */
 	return (MS_Host_ConfigurePipes(&Disk_MS_Interface, ConfigDescriptorSize, ConfigDescriptorData) == HID_ENUMERROR_NoError);
 }
@@ -165,8 +166,6 @@ bool MassStorage_PostConfiguration(void)
 {
 	if (!(Disk_MS_Interface.State.IsActive))
 	  return true;
-
-	MassStorage_SensorLoggingEnabled = false;
 
 	f_mount(0, &MassStorage_DiskFATState);	
 

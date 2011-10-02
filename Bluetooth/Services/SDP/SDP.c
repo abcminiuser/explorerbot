@@ -48,7 +48,7 @@ void SDP_UnregisterService(SDP_ServiceEntry_t* const ServiceEntry)
 	SDP_ServiceEntry_t* CurrentService = RegisteredServices;
 
 	/* No service currently registered, abort */
-	if (CurrentService == NULL)
+	if (!(CurrentService))
 	  return;
 
 	/* Root registered service is the service to remove */
@@ -69,8 +69,29 @@ void SDP_UnregisterService(SDP_ServiceEntry_t* const ServiceEntry)
 
 void SDP_Init(BT_StackConfig_t* const StackState)
 {
-	/* Reset list of registered service attribute tables */
-	RegisteredServices = NULL;
+	/* Reset list of registered service attribute tables for the current stack */
+	if (RegisteredServices != NULL)
+	{
+		SDP_ServiceEntry_t* PreviousService = NULL;
+		SDP_ServiceEntry_t* CurrentService  = RegisteredServices;
+		
+		while (CurrentService != NULL)
+		{
+			/* Check if the current regisered service is registered to the stack being re-initialized */
+			if (CurrentService->Stack == StackState)
+			{
+				/* Check if we are altering the root service node, special-case the removal */
+				if (!(PreviousService))
+				  RegisteredServices = CurrentService->NextService;
+				else
+				  PreviousService->NextService = CurrentService->NextService;
+			}
+			
+			/* Save reference to previous node for node removal, transverse linked list to next registered service */
+			PreviousService = CurrentService;
+			CurrentService  = CurrentService->NextService;
+		}
+	}
 }
 
 void SDP_Manage(BT_StackConfig_t* const StackState)
@@ -475,6 +496,10 @@ static void SDP_ServiceSearch(BT_StackConfig_t* const StackState,
 	SDP_ServiceEntry_t* CurrentService = RegisteredServices;
 	while (CurrentService != NULL)
 	{
+		/* Ignore service nodes registered to other stacks */
+		if (CurrentService->Stack && (CurrentService->Stack != StackState))
+		  continue;
+	
 		/* Search the current SDP service attribute table for the given UUIDs */
 		if (SDP_SearchServiceTable(CurrentService, UUIDList, TotalUUIDs))
 		{

@@ -37,6 +37,9 @@ static const uint8_t RFCOMM_CRC8Table[256] PROGMEM =
 		0xB4, 0x25, 0x57, 0xC6, 0xB3, 0x22, 0x50, 0xC1, 0xBA, 0x2B, 0x59, 0xC8, 0xBD, 0x2C, 0x5E, 0xCF,
 	};
 
+/** Indicates if the common RFCOMM channel list has been initialized by at least one stack. */
+static bool RFCOMM_ChannelListValid = false;
+
 /** RFCOMM channel state structure, to retain information about each open channel in the RFCOMM multiplexer. */
 static RFCOMM_Channel_t RFCOMM_Channels[RFCOMM_MAX_OPEN_CHANNELS];
 
@@ -169,8 +172,14 @@ void RFCOMM_Init(BT_StackConfig_t* const StackState)
 {
 	/* Reset the RFCOMM channel structures, to invalidate any configured RFCOMM channels */
 	for (uint8_t i = 0; i < RFCOMM_MAX_OPEN_CHANNELS; i++)
-	  RFCOMM_Channels[i].State = RFCOMM_Channel_Closed;
+	{
+		if (!(RFCOMM_ChannelListValid) || (RFCOMM_Channels[i].Stack == StackState))
+		  RFCOMM_Channels[i].State = RFCOMM_Channel_Closed;
+	}
 
+	/* Mark the channel table as having been globally initialized at least once */
+	RFCOMM_ChannelListValid = true;
+	
 	/* Register the RFCOMM virtual serial port service with the SDP service */
 	SDP_RegisterService(&ServiceEntry_RFCOMMSerialPort);
 }
@@ -248,8 +257,6 @@ void RFCOMM_ChannelClosed(BT_StackConfig_t* const StackState,
 		}
 	}
 }
-
-#include "../../../Drivers/LCD.h"
 
 static void RFCOMM_ProcessTestCommand(BT_StackConfig_t* const StackState,
                                       BT_L2CAP_Channel_t* const ACLChannel,
@@ -525,7 +532,7 @@ static void RFCOMM_ProcessDISC(BT_StackConfig_t* const StackState,
 	/* ACK the disconnection request */
 	RFCOMM_SendFrame(StackState, ACLChannel, FrameHeader->Address.DLCI, RFCOMM_Frame_UA, 0, NULL);
 
-	EVENT_RFCOMM_ChannelClosed(StackState, RFCOMMChannel);	
+	EVENT_RFCOMM_ChannelClosed(StackState, RFCOMMChannel);
 }
 
 static void RFCOMM_ProcessUIH(BT_StackConfig_t* const StackState,

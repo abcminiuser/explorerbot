@@ -46,6 +46,7 @@ void EVENT_Bluetooth_ManageServices(BT_StackConfig_t* const StackState)
 	RFCOMM_Manage(StackState);
 }
 
+
 bool CALLBACK_Bluetooth_ConnectionRequest(BT_StackConfig_t* const StackState,
                                           BT_HCI_Connection_t* const Connection)
 {
@@ -93,6 +94,7 @@ void EVENT_Bluetooth_DisconnectionComplete(BT_StackConfig_t* const StackState,
 
 	Speaker_PlaySequence(SPEAKER_SEQUENCE_Disconnected);
 }
+
 
 bool CALLBACK_Bluetooth_ChannelRequest(BT_StackConfig_t* const StackState,
                                        BT_HCI_Connection_t* const Connection,
@@ -153,14 +155,14 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
 	}	
 }
 
+
 void EVENT_RFCOMM_ChannelOpened(BT_StackConfig_t* const StackState,
                                 RFCOMM_Channel_t* const Channel)
 {
 	RFCOMM_SensorStream = Channel;
-	
-	char LineBuffer[200];
-		
+
 	/* Construct the sensor CSV header lines and write them to the virtual serial port */
+	char LineBuffer[200];
 	Sensors_WriteSensorCSVHeader(LineBuffer);
 	RFCOMM_SendData(RFCOMM_SensorStream, strlen(LineBuffer), LineBuffer);
 }
@@ -178,6 +180,7 @@ void CALLBACK_RFCOMM_DataReceived(BT_StackConfig_t* const StackState,
 {
 
 }
+
 
 void CALLBACK_HID_ReportReceived(BT_StackConfig_t* const StackState,
                                  BT_L2CAP_Channel_t* const Channel,

@@ -69,9 +69,11 @@
 		{
 			if (PWMValue)
 			{
+				#if !defined(DISABLE_SPEAKER)
 				DDRB  |= (1 << 7);
 				OCR0A  = PWMValue;
 				TCCR0B = ((1 << CS02) | (1 << CS00));
+				#endif
 			}
 			else
 			{

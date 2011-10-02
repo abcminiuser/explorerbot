@@ -57,11 +57,11 @@ BT_L2CAP_Channel_t* const Bluetooth_L2CAP_FindChannel(BT_StackConfig_t* const St
 		}
 		
 		/* If local channel number specified, check for match */
-		if ((LocalChannel) && (StackState->State.L2CAP.Channels[i].LocalNumber == LocalChannel))
+		if ((LocalChannel) && (CurrentChannel->LocalNumber == LocalChannel))
 		  return CurrentChannel;
 
 		/* If remote channel number specified, check for match */
-		if ((RemoteChannel) && (StackState->State.L2CAP.Channels[i].RemoteNumber == RemoteChannel))
+		if ((RemoteChannel) && (CurrentChannel->RemoteNumber == RemoteChannel))
 		  return CurrentChannel;
 	}
 	
@@ -548,7 +548,7 @@ BT_L2CAP_Channel_t* const Bluetooth_L2CAP_OpenChannel(BT_StackConfig_t* const St
 	BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_NewChannel(StackState, HCIConnection->Handle, 0, PSM);
 
 	/* If no space left in the connection table, abort */
-	if (L2CAPChannel == NULL)
+	if (!(L2CAPChannel))
 	  return NULL;
 
 	/* Update the channel state to indicate it is waiting for a connection response */
@@ -577,7 +577,7 @@ void Bluetooth_L2CAP_CloseChannel(BT_StackConfig_t* const StackState,
                                   BT_L2CAP_Channel_t* const L2CAPChannel)
 {
 	/* Don't try to close a non-existing or already closed channel */
-	if ((L2CAPChannel == NULL) || (L2CAPChannel->State == L2CAP_CHANSTATE_Closed))
+	if (!(L2CAPChannel) || (L2CAPChannel->State == L2CAP_CHANSTATE_Closed))
 	  return;
 
 	BT_HCI_Connection_t* HCIConnection = Bluetooth_HCI_FindConnection(StackState, NULL, L2CAPChannel->ConnectionHandle);

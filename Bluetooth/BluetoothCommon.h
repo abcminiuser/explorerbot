@@ -17,28 +17,30 @@
 
 	/* Includes: */
 		#include <LUFA/Common/Common.h>
+		
+		#include "../Drivers/LCD.h"
 
 	/* Defines: */
 		/** Length of a Bluetooth device address in bytes. */
-		#define BT_BDADDR_LEN                6
+		#define BT_BDADDR_LEN                     6
 		
 		/** Maximum number of simultaneous device connections. */
-		#define MAX_DEVICE_CONNECTIONS       2
+		#define MAX_DEVICE_CONNECTIONS            2
 		
 		/** Maximum number of simultaneous L2CAP logical channels. */
-		#define MAX_LOGICAL_CHANNELS         8
+		#define MAX_LOGICAL_CHANNELS              8
 
 		/** Default maximum transmission unit size for a L2CAP channel packet. */
-		#define DEFAULT_L2CAP_CHANNEL_MTU    1024
+		#define DEFAULT_L2CAP_CHANNEL_MTU         1024
 
 	/* Enums: */
 		/** Enum for the possible device connection states. */
 		enum BT_HCI_ConnectionStates_t
 		{
-			HCI_CONSTATE_Closed                 = 0,
-			HCI_CONSTATE_New                    = 1,
-			HCI_CONSTATE_Connecting             = 2,
-			HCI_CONSTATE_Connected              = 3,
+			HCI_CONSTATE_Closed                   = 0,
+			HCI_CONSTATE_New                      = 1,
+			HCI_CONSTATE_Connecting               = 2,
+			HCI_CONSTATE_Connected                = 3,
 		};
 
 		/** Enum for the possible states for a Bluetooth L2CAP channel. */
@@ -51,14 +53,14 @@
 			L2CAP_CHANSTATE_Config_WaitConfig     = 4, /**< Channel has been connected, but not yet configured on either end. */
 			L2CAP_CHANSTATE_Config_WaitSendConfig = 5, /**< Channel configuration has been received and accepted, but not yet sent. */
 			L2CAP_CHANSTATE_Config_WaitReqResp    = 6, /**< Channel configuration has been sent but not responded to, and a configuration
-			                                          *   request from the remote end has not yet been received.
-			                                          */
+			                                            *   request from the remote end has not yet been received.
+			                                            */
 			L2CAP_CHANSTATE_Config_WaitResp       = 7, /**< Channel configuration has been sent but not accepted, but a configuration request
-			                                          *   from the remote end has been accepted.
-			                                          */
+			                                            *   from the remote end has been accepted.
+			                                            */
 			L2CAP_CHANSTATE_Config_WaitReq        = 8, /**< Channel configuration has been sent and accepted, but a configuration request
-			                                          *   from the remote end has not yet been accepted.
-			                                          */
+			                                            *   from the remote end has not yet been accepted.
+			                                            */
 			L2CAP_CHANSTATE_Open                  = 9, /**< Channel is open and ready to send or receive data */
 			L2CAP_CHANSTATE_WaitDisconnect        = 10, /**< A disconnection request has been sent, but not yet acknowledged. */
 		};
@@ -66,16 +68,16 @@
 		/** Enum for the possible L2CAP channel Protocol Service Multiplexer (PSM) values. */
 		enum BT_ChannelPSM_t
 		{
-			CHANNEL_PSM_SDP                     = 0x0001,
-			CHANNEL_PSM_UDP                     = 0x0002,
-			CHANNEL_PSM_RFCOMM                  = 0x0003,
-			CHANNEL_PSM_TCP                     = 0x0004,
-			CHANNEL_PSM_IP                      = 0x0009,
-			CHANNEL_PSM_FTP                     = 0x000A,
-			CHANNEL_PSM_HTTP                    = 0x000C,
-			CHANNEL_PSM_UPNP                    = 0x0010,
-			CHANNEL_PSM_HIDCTL                  = 0x0011,
-			CHANNEL_PSM_HIDINT                  = 0x0013,
+			CHANNEL_PSM_SDP                       = 0x0001,
+			CHANNEL_PSM_UDP                       = 0x0002,
+			CHANNEL_PSM_RFCOMM                    = 0x0003,
+			CHANNEL_PSM_TCP                       = 0x0004,
+			CHANNEL_PSM_IP                        = 0x0009,
+			CHANNEL_PSM_FTP                       = 0x000A,
+			CHANNEL_PSM_HTTP                      = 0x000C,
+			CHANNEL_PSM_UPNP                      = 0x0010,
+			CHANNEL_PSM_HIDCTL                    = 0x0011,
+			CHANNEL_PSM_HIDINT                    = 0x0013,
 		};
 
 		/** Enum for the possible Bluetooth packet types. */

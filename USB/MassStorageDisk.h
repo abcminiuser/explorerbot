@@ -48,7 +48,7 @@
 		#include "../FatFS/ff.h"
 		
 	/* Macros: */
-		/* Name of the remote bluetooth device address file on the attached disk, in 8.3 naming format. */
+		/** Name of the remote bluetooth device address file on the attached disk, in 8.3 naming format. */
 		#define REMADDR_FILENAME   "REMADDR.TXT"
 	
 		/** Name of the data log file created on the attached disk, in 8.3 naming format. */

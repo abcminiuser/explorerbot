@@ -158,4 +158,9 @@ const SDP_ServiceAttributeTable_t PROGMEM SerialPort_Attribute_Table[] =
 	};
 
 /** Service entry node, used to register the attribute table with the SDP service */
-SDP_ServiceEntry_t ServiceEntry_RFCOMMSerialPort = {(sizeof(SerialPort_Attribute_Table) / sizeof(SerialPort_Attribute_Table[0])), SerialPort_Attribute_Table};
+SDP_ServiceEntry_t ServiceEntry_RFCOMMSerialPort =
+	{
+		.Stack                = NULL,
+		.TotalTableAttributes = (sizeof(SerialPort_Attribute_Table) / sizeof(SerialPort_Attribute_Table[0])),
+		.AttributeTable       = SerialPort_Attribute_Table,
+	};

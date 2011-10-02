@@ -167,6 +167,19 @@ bool BluetoothAdapter_PostConfiguration(void)
 	return true;
 }
 
+/** Attempts a connection to the remote device whose address has been stored internally.
+ *
+ *  \return Created HCI connection handle for the new connection.
+ */
+BT_HCI_Connection_t* BluetoothAdapter_ConnectToRemoteDevice(void)
+{
+	uint8_t RemoteBDADDR[BT_BDADDR_LEN];
+	
+	/* Retrieve the remote device's BDADDR saved in EEPROM, attempt a connection */
+	eeprom_read_block(RemoteBDADDR, BluetoothAdapter_RemoteBDADDR, BT_BDADDR_LEN);
+	return Bluetooth_HCI_Connect(&BluetoothAdapter_Stack, RemoteBDADDR, LINK_TYPE_ACL);
+}
+
 /** Task to manage an enumerated USB Bluetooth adapter once connected, to display movement data as it is received. */
 void BluetoothAdapter_USBTask(void)
 {
@@ -262,13 +275,3 @@ void EVENT_Bluetooth_InitComplete(BT_StackConfig_t* const StackState)
 	/* Save the local BDADDR of the connected Bluetooth adapter for later use */
 	eeprom_update_block(BluetoothAdapter_Stack.State.HCI.LocalBDADDR, BluetoothAdapter_LastLocalBDADDR, BT_BDADDR_LEN);
 }
-
-BT_HCI_Connection_t* BluetoothAdapter_ConnectToRemoteDevice(void)
-{
-	uint8_t RemoteBDADDR[BT_BDADDR_LEN];
-	
-	/* Retrieve the remote device's BDADDR saved in EEPROM, attempt a connection */
-	eeprom_read_block(RemoteBDADDR, BluetoothAdapter_RemoteBDADDR, BT_BDADDR_LEN);
-	return Bluetooth_HCI_Connect(&BluetoothAdapter_Stack, RemoteBDADDR, LINK_TYPE_ACL);
-}
-

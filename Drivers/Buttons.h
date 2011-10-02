@@ -36,7 +36,10 @@
 		#include <stdbool.h>
 
 	/* Macros: */
+		/** Mask for the first button on the board. */
 		#define BUTTON1_MASK (1 << 7)
+
+		/** Mask for the second button on the board. */
 		#define BUTTON2_MASK (1 << 6)
 
 	/* Function Prototypes: */

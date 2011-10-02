@@ -40,36 +40,41 @@
 		#include <LUFA/Drivers/Peripheral/TWI.h>
 
 	/* Macros: */
+		/** Timeout period in milliseconds allowable to capture a sensor on the I2C bus, before the packet is aborted. */
 		#define SENSOR_BUS_TIMEOUT_MS   10
 
 	/* Type Defines: */
+		/** Type define for a sensor descriptor structure, passed to the individual sensor driver functions as needed to
+		 *  get and set sensor data.
+		 */
 		typedef struct
 		{
-			bool  Connected;
-			const char* Name;
+			bool  Connected; /**< Indicates if the current sensor is connected or not. */
+			const char* Name; /**< Human-readable name of the sensor, stored in SRAM. */
 			
-			bool SingleAxis;
+			bool SingleAxis; /**< Indicates if the sensor data is represented as a single value, or a triplicate of three axis values. */
 			
 			union
 			{
-				int32_t Single;
+				int32_t Single; /**< Sensor data if the sensor outputs a single axis value. */
 			
 				struct
 				{
-					int16_t X;
-					int16_t Y;
-					int16_t Z;
-				} Triplicate;
-			} Data;
+					int16_t X; /**< X axis value of the triplicate. */
+					int16_t Y; /**< Y axis value of the triplicate. */
+					int16_t Z; /**< Z axis value of the triplicate. */
+				} Triplicate; /**< Sensor data if the sensor outputs a triplicate of three axis values. */
+			} Data; /**< Last retrieved data from the sensor. */
 		} SensorData_t;
 		
+		/** Type define for a structure which contains all the possible sensor descriptors for the robot. */
 		typedef struct
 		{
-			SensorData_t Direction;
-			SensorData_t Acceleration;
-			SensorData_t Orientation;
-			SensorData_t Pressure;
-			SensorData_t Temperature;
+			SensorData_t Direction; /**< Robot direction (compass) sensor descriptor. */
+			SensorData_t Acceleration; /**< Robot acceleration sensor descriptor. */
+			SensorData_t Orientation; /**< Robot orientation (gyroscope) sensor descriptor. */
+			SensorData_t Pressure;  /**< Robot air pressure sensor descriptor. */
+			SensorData_t Temperature; /**< Robot temperature sensor descriptor. */
 		} Sensor_t;
 	
 	/* Inline Functions */

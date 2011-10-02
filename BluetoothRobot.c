@@ -121,7 +121,7 @@ int main(void)
 			}
 			
 			/* Update the currently playing tone through the speaker (if one is playing) */
-			Speaker_NextSequenceTone();
+			Speaker_TickElapsed();
 		}
 		
 		BluetoothAdapter_USBTask();

@@ -40,11 +40,40 @@
 		#include <LUFA/Common/Common.h>
 	
 	/* Macros: */
+		/** Update interval that \ref Speaker_TickElapsed() will be called at, used to calculate the tick duration of notes
+		 *  in a sequence constructed with \ref SPEAKER_NOTE.
+		 */
+		#define SPEAKER_UPDATE_TICK_MS     10
+	
+		/** Converts a given frequency (expressed as a floating point number, in Hz) to the PWM reload value needed by
+		 *  \ref Speaker_Tone().
+		 *
+		 *  \param[in] Freq  Frequency to convert, in Hz.
+		 *
+		 *  \return PWM reload value suitable for \ref Speaker_Tone().
+		 */
 		#define SPEAKER_HZ(Freq)           (uint8_t)(Freq ? ((F_CPU / 1024) / Freq) : 0)
-		#define SPEAKER_DURATION(MS)       (uint8_t)(MS ? ((MS) / 10) : 0)
+		
+		/** Converts the given number of milliseconds into a number of update ticks, needed to play a note sequence.
+		 *
+		 *  \param[in] MS  Milliseconds the note should play for.
+		 *
+		 *  \return Number of ticks the note should play for.
+		 */
+		#define SPEAKER_DURATION(MS)       (uint8_t)(MS ? ((MS) / SPEAKER_UPDATE_TICK_MS) : 0)
+		
+		/** Constructs a note sequence element value from the given note frequency and duration. This may be placed into
+		 *  a \c uint16_t array to define a note sequence which can be played via \ref Speaker_PlaySequence().
+		 *
+		 *  \param[in] Freq  Note frequency to play, in Hz.
+		 *  \param[in] MS    Note duration to play for, in milliseconds.
+		 *
+		 *  \return Note element array value for a note sequence.
+		 */
 		#define SPEAKER_NOTE(Freq, MS)     (((uint16_t)SPEAKER_HZ(Freq) << 8) | SPEAKER_DURATION(MS))
 	
 	/* Enums: */
+		/** Enum for the possible note sequences which can be played via \ref Speaker_PlaySequence(). */
 		enum Speaker_SequenceIDs_t
 		{
 			SPEAKER_SEQUENCE_Connecting    = 0,
@@ -78,9 +107,9 @@
 
 	/* Function Prototypes: */
 		void Speaker_Init(void);
-		void Speaker_Tone(const uint8_t PWMValue);
+		void Speaker_TickElapsed(void);
 		void Speaker_PlaySequence(const uint8_t SequenceID);
-		void Speaker_NextSequenceTone(void);
+		void Speaker_Tone(const uint8_t PWMValue);
 
 #endif
 

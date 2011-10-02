@@ -41,7 +41,7 @@ void Motors_Init(void)
 	TCCR1A = (1 << WGM11);
 	TCCR1B = ((1 << WGM13) | (1 << CS10));
 	
-	ICR1 = 0x0FFC;
+	ICR1 = 0x0FFF;
 	
 	Motors_SetChannelSpeed(0, 0);
 }

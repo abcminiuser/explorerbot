@@ -56,6 +56,11 @@ FIL MassStorage_DiskLogFile;
 bool MassStorage_SensorLoggingEnabled = false;
 
 
+/** Opens the sensor log file on the attached Mass Storage disk, seeking to the end of the
+ *  existing file (if found) or writing out the sensor log header if not.
+ *
+ *  \return Boolean true if an existing log file was opened (or a new one created), false otherwise.
+ */
 static bool MassStorage_OpenSensorLogFile(void)
 {
 	uint8_t ErrorCode;
@@ -90,6 +95,12 @@ static bool MassStorage_OpenSensorLogFile(void)
 	return true;
 }
 
+/** Opens and parses the existing Remote Bluetooth Device Address file stored on the attached Mass Storage
+ *  device, if one is available. If not, a new file is created and populated with the currently stored
+ *  address.
+ *
+ *  \return Boolean true if the file was read or created sucessfully, false otherwise.
+ */
 static bool MassStorage_ParseRemoteBDADDRFile(void)
 {
 	uint8_t ErrorCode;

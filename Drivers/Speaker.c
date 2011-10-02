@@ -30,25 +30,39 @@
 
 #include "Speaker.h"
 
+/** Note sequence for to signal a connection in progress. */
 static const uint16_t Sequence_Connecting[]    PROGMEM = {SPEAKER_NOTE(440.0, 120),  0};
 
+/** Note sequence for to signal a connection has completed sucessfully. */
 static const uint16_t Sequence_Connected[]     PROGMEM = {SPEAKER_NOTE(349.23, 80),  SPEAKER_NOTE(440.0, 120),  0};
 
+/** Note sequence for to signal an established connection has disconnected. */
 static const uint16_t Sequence_Disconnected[]  PROGMEM = {SPEAKER_NOTE(440.0, 80),   SPEAKER_NOTE(349.23, 120), 0};
 
+/** Note sequence for to signal a connection has failed to complete. */
 static const uint16_t Sequence_ConnectFailed[] PROGMEM = {SPEAKER_NOTE(349.23, 150), SPEAKER_NOTE(349.23, 150), 0};
-										  
+
+/** Note sequence for the robot's novelty horn. */
 static const uint16_t Sequence_LaCucaracha[]   PROGMEM = {SPEAKER_NOTE(261.63, 50),  SPEAKER_NOTE(0, 50),
                                                           SPEAKER_NOTE(261.63, 50),  SPEAKER_NOTE(0, 50), 
                                                           SPEAKER_NOTE(261.63, 50),  SPEAKER_NOTE(0, 50),
                                                           SPEAKER_NOTE(349.23, 100), SPEAKER_NOTE(0, 50), 
                                                           SPEAKER_NOTE(440.0, 100),  0};
 
-static const uint16_t* Sequence_Table[]        PROGMEM = {Sequence_Connecting, Sequence_Connected, Sequence_Disconnected, Sequence_ConnectFailed, Sequence_LaCucaracha};
+/** Table of note sequences which can be played via \ref Speaker_PlaySequence(). */
+static const uint16_t* Sequence_Table[]        PROGMEM = {Sequence_Connecting, Sequence_Connected,
+                                                          Sequence_Disconnected, Sequence_ConnectFailed,
+                                                          Sequence_LaCucaracha};
 
+/** Pointer to the current note being played in the selected note sequence. */
 static const uint16_t* SequencePosition = NULL;
+
+/** Number of ticks elapsed for the currently playing note in the sequence */
 static uint8_t SequenceTicksElapsed     = 0;
+
+/** Number of ticks the currently playing note should continue for. */
 static uint8_t SequenceTickDuration     = 0;
+
 
 /** Initializes the Speaker hardware driver ready for use. This must be called before any other
  *  functions in the Speaker hardware driver.
@@ -62,7 +76,10 @@ void Speaker_Init(void)
 	Speaker_SetPWM(0);
 }
 
-void Speaker_NextSequenceTone(void)
+/** Updates the currently playing note sequence (if any), progressing to the next note if needed. This function should be called at
+ *  \ref SPEAKER_UPDATE_TICK_MS to obtain the correct note timings.
+ */
+void Speaker_TickElapsed(void)
 {
 	if (!(SequencePosition))
 	  return;
@@ -80,6 +97,11 @@ void Speaker_NextSequenceTone(void)
 	}
 }
 
+/** Plays the requested note sequence through the robot's speaker, updating the current tone as \ref Speaker_TickElapsed() is called.
+ *  While playing, calls to \ref Speaker_Tone() are ignored.
+ *
+ *  \param[in] SequenceID  Note sequence to play, a value from \ref Speaker_SequenceIDs_t.
+ */
 void Speaker_PlaySequence(const uint8_t SequenceID)
 {
 	SequencePosition     = pgm_read_ptr(&Sequence_Table[SequenceID]);
@@ -87,9 +109,14 @@ void Speaker_PlaySequence(const uint8_t SequenceID)
 	SequenceTickDuration = 10;
 }
 
+/** Plays the given tone through the speaker, if a note sequence is not currently playing.
+ *
+ *  \note The given PWM value will continue to play until overridden by a note sequence, or a subsequent call to \ref Speaker_Tone().
+ *
+ *  \param[in] PWMValue  PWM value to play through the speaker; use \ref SPEAKER_DURATION() to obtain a value from a specific frequency.
+ */
 void Speaker_Tone(const uint8_t PWMValue)
 {
 	if (!(SequencePosition))
 	  Speaker_SetPWM(PWMValue);
 }
-

@@ -30,7 +30,9 @@
 
 #include "Sensors.h"
 
+/** Global sensor information structure, holding the last retrieved sensor values. */
 Sensor_t Sensors;
+
 
 /** Initializes the robot sensors mounted on the board, ready for use. This must be called before any other functions in the
  *  sensors hardware driver.
@@ -76,6 +78,12 @@ void Sensors_Update(void)
 	ITG3200_Update(&Sensors.Orientation, &Sensors.Temperature);
 }
 
+/** Creates a header suitable for CSV format files, describing the device sensors which have been initialized previously.
+ *
+ *  \note The caller is responsible for providing a line buffer large enough to hold the created string.
+ *
+ *  \param[out] LineBuffer  Buffer where the created sensor CSV header text can be stored.
+ */
 void Sensors_WriteSensorCSVHeader(char* LineBuffer)
 {
 	/* Terminate the string at the very start, so that future strcat() calls work correctly */
@@ -117,6 +125,12 @@ void Sensors_WriteSensorCSVHeader(char* LineBuffer)
 	strcat(LineBuffer, "\r\n");
 }
 
+/** Creates a CSV format line of text, describing the device sensor values which have been retrieved previously.
+ *
+ *  \note The caller is responsible for providing a line buffer large enough to hold the created string.
+ *
+ *  \param[out] LineBuffer  Buffer where the created sensor CSV data text can be stored.
+ */
 void Sensors_WriteSensorDataCSV(char* LineBuffer)
 {
 	uint8_t OutputLen = 0;

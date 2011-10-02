@@ -35,6 +35,7 @@
 		#include <avr/io.h>
 
 	/* Enums: */
+		/** Enum for the possible RGB LED colours, used by \ref RGB_SetColour(). */
 		enum RGB_Colour_t
 		{
 			RGB_COLOUR_Off          = 0,
@@ -47,6 +48,7 @@
 			RGB_COLOUR_White        = (RGB_COLOUR_Red  | RGB_COLOUR_Green | RGB_COLOUR_Blue),
 		};
 		
+		/** Enum for the possible status, which can be used by \ref RGB_SetColor() in favour of a direct colour value. */
 		enum RGB_Colour_Aliases_t
 		{
 			RGB_ALIAS_Disconnected  = RGB_COLOUR_White,

@@ -40,6 +40,9 @@
 		#include <LUFA/Common/Common.h>
 		
 	/* Macros: */
+		/** Sets the maximum motor PWM value which may be set. Motor power values above this absolute value will
+		 *  be clamped to this value instead.
+		 */
 		#define MAX_MOTOR_POWER   0x0EEE
 	
 	/* Function Prototypes: */

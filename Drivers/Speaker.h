@@ -40,17 +40,11 @@
 		#include <LUFA/Common/Common.h>
 	
 	/* Macros: */
-		#define SPEAKER_SEQESCAPE    0xFF
-		
-		#define SPEAKER_HZ(Freq)     (uint8_t)((F_CPU / 1024) / Freq)
+		#define SPEAKER_HZ(Freq)           (uint8_t)(Freq ? ((F_CPU / 1024) / Freq) : 0)
+		#define SPEAKER_DURATION(MS)       (uint8_t)(MS ? ((MS) / 10) : 0)
+		#define SPEAKER_NOTE(Freq, MS)     (((uint16_t)SPEAKER_HZ(Freq) << 8) | SPEAKER_DURATION(MS))
 	
 	/* Enums: */
-		enum Speaker_EscapeValues_t
-		{
-			SPEAKER_ESCCMD_EndOfSequence = 0,
-			SPEAKER_ESCCMD_ToneDuration  = 1,
-		};
-		
 		enum Speaker_SequenceIDs_t
 		{
 			SPEAKER_SEQUENCE_Connecting    = 0,

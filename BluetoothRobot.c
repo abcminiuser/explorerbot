@@ -92,8 +92,8 @@ int main(void)
 		
 			static uint8_t SensorTicksElapsed = 0;
 			
-			/* Update sensors every 250ms and log to disk */
-			if (SensorTicksElapsed++ == 25)
+			/* Update sensors every 100ms and log to disk/stream to remote device */
+			if (SensorTicksElapsed++ == 10)
 			{
 				SensorTicksElapsed = 0;
 				

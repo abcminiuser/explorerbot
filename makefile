@@ -127,6 +127,9 @@ LUFA_OPTS += -D HOST_STATE_AS_GPIOR=0
 LUFA_OPTS += -D HID_MAX_REPORTITEMS=10
 LUFA_OPTS += -D HOST_DEVICE_SETTLE_DELAY_MS=0
 
+#LUFA_OPTS += -D DISABLE_SPEAKER
+
+
 # Create the LUFA source path variables by including the LUFA root makefile
 include $(LUFA_PATH)/LUFA/makefile
 

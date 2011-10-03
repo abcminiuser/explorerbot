@@ -117,7 +117,7 @@ static RFCOMM_Channel_t* const RFCOMM_NewChannel(BT_StackConfig_t* const StackSt
 static void RFCOMM_SendFrame(BT_StackConfig_t* const StackState,
                              BT_L2CAP_Channel_t* const ACLChannel,
                              uint8_t DLCI,
-                             const uint8_t Control,
+                             uint8_t Control,
                              const uint16_t DataLen,
                              const void* Data)
 {
@@ -144,8 +144,11 @@ static void RFCOMM_SendFrame(BT_StackConfig_t* const StackState,
 	if ((Control == RFCOMM_Frame_UA) || (Control == RFCOMM_Frame_DM))
 	  CommandResp = !(CommandResp);
 
+	if (Control != RFCOMM_Frame_UIH)
+	  Control |= FRAME_POLL_FINAL;
+
 	/* Set the frame header values to the specified address and frame type */
-	ResponsePacket.FrameHeader.Control = (Control | FRAME_POLL_FINAL);
+	ResponsePacket.FrameHeader.Control = Control;
 	ResponsePacket.FrameHeader.Address = (RFCOMM_Address_t){.DLCI = DLCI, .EA = true, .CR = CommandResp};
 
 	/* Set lower 7 bits of the Size field - LSB reserved for 16-bit field extension */

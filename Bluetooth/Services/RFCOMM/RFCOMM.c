@@ -349,9 +349,6 @@ static void RFCOMM_ProcessMSCommand(BT_StackConfig_t* const StackState,
 
 		/* Save the local signals ACK from the remote device */
 		RFCOMMChannel->ConfigFlags |= RFCOMM_CONFIG_LOCALSIGNALS;
-		
-		LCD_Clear();
-		LCD_WriteString("LOCAL SIG ACK");
 	}
 }
 

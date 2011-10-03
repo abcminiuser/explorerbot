@@ -174,6 +174,29 @@ static void RFCOMM_SendFrame(BT_StackConfig_t* const StackState,
 	Bluetooth_L2CAP_SendPacket(StackState, ACLChannel, sizeof(ResponsePacket), &ResponsePacket);
 }
 
+static void RFCOMM_SendControlFrame(BT_StackConfig_t* const StackState,
+                                    BT_L2CAP_Channel_t* const ACLChannel,
+                                    const uint8_t Command,
+                                    const bool CR,
+                                    const uint16_t DataLen,
+                                    const void* Data)
+{
+	struct
+	{
+		RFCOMM_Command_t CommandHeader;
+		uint8_t          Length;
+		uint8_t          Data[DataLen];
+	} ResponsePacket;
+	
+	/* Fill out the control header and copy over the payload */
+	ResponsePacket.CommandHeader = (RFCOMM_Command_t){.Command = Command, .EA = true, .CR = CR};
+	ResponsePacket.Length        = ((DataLen << 1) | 0x01);	
+	memcpy(&ResponsePacket.Data, Data, DataLen);
+
+	/* Send the constructed control frame encapsulated as a UIH frame */
+	RFCOMM_SendFrame(StackState, ACLChannel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_UIH, sizeof(ResponsePacket), &ResponsePacket);
+}
+
 void RFCOMM_Init(BT_StackConfig_t* const StackState)
 {
 	/* Reset the RFCOMM channel structures, to invalidate any configured RFCOMM channels */
@@ -205,20 +228,12 @@ void RFCOMM_Manage(BT_StackConfig_t* const StackState)
 			/* Check if the local signals have not yet been sent on the current channel */
 			if (!(RFCOMMChannel->ConfigFlags & RFCOMM_CONFIG_LOCALSIGNALSSENT))
 			{
-				struct
-				{
-					RFCOMM_Command_t        CommandHeader;
-					uint8_t                 Length;
-					RFCOMM_MSC_Parameters_t Params;
-				} MSCommand;
-
-				MSCommand.CommandHeader  = (RFCOMM_Command_t){.Command = RFCOMM_Control_ModemStatus, .EA = true, .CR = true};
-				MSCommand.Length         = (sizeof(MSCommand.Params) << 1) | 0x01;
-				MSCommand.Params.Address = (RFCOMM_Address_t){.DLCI = RFCOMMChannel->DLCI, .EA = true, .CR = false};
-				MSCommand.Params.Signals = RFCOMMChannel->DataLink.LocalSignals;
-
+				RFCOMM_MSC_Parameters_t MSCommand;
+				MSCommand.Address = (RFCOMM_Address_t){.DLCI = RFCOMMChannel->DLCI, .EA = true, .CR = false};
+				MSCommand.Signals = RFCOMMChannel->DataLink.LocalSignals;
+				
 				/* Send the MSC command to the remote device */
-				RFCOMM_SendFrame(StackState, RFCOMMChannel->ACLChannel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_UIH, sizeof(MSCommand), &MSCommand);
+				RFCOMM_SendControlFrame(StackState, RFCOMMChannel->ACLChannel, RFCOMM_Control_ModemStatus, true, sizeof(MSCommand), &MSCommand);
 
 				/* Indicate that the local signals have now been sent */
 				RFCOMMChannel->ConfigFlags |= RFCOMM_CONFIG_LOCALSIGNALSSENT;
@@ -270,20 +285,8 @@ static void RFCOMM_ProcessTestCommand(BT_StackConfig_t* const StackState,
                                       uint8_t* CommandData,
 									  const uint16_t CommandDataLen)
 {
-	struct
-	{
-		RFCOMM_Command_t CommandHeader;
-		uint8_t          Length;
-		uint8_t          TestData[CommandDataLen];
-	} TestResponse;
-
-	/* Fill out the Test response data */
-	TestResponse.CommandHeader = (RFCOMM_Command_t){.Command = RFCOMM_Control_Test, .EA = true, .CR = false};
-	TestResponse.Length        = ((CommandDataLen << 1) | 0x01);
-	memcpy(TestResponse.TestData, CommandData, CommandDataLen);
-
 	/* Send the response to acknowledge the command */
-	RFCOMM_SendFrame(StackState, ACLChannel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_UIH, sizeof(TestResponse), &TestResponse);
+	RFCOMM_SendControlFrame(StackState, ACLChannel, RFCOMM_Control_Test, false, CommandDataLen, &CommandData);
 }
 
 static void RFCOMM_ProcessFCECommand(BT_StackConfig_t* const StackState,
@@ -330,21 +333,9 @@ static void RFCOMM_ProcessMSCommand(BT_StackConfig_t* const StackState,
 		/* Save the new channel signals to the channel state structure */
 		RFCOMMChannel->DataLink.RemoteSignals = MSCParams->Signals;
 		RFCOMMChannel->ConfigFlags |= RFCOMM_CONFIG_REMOTESIGNALS;
-
-		struct
-		{
-			RFCOMM_Command_t        CommandHeader;
-			uint8_t                 Length;
-			RFCOMM_MSC_Parameters_t Params;
-		} MSResponse;
-
-		/* Fill out the MS response data */
-		MSResponse.CommandHeader  = (RFCOMM_Command_t){.Command = RFCOMM_Control_ModemStatus, .EA = true, .CR = false};
-		MSResponse.Length         = ((sizeof(RFCOMM_MSC_Parameters_t) << 1) | 0x01);
-		memcpy(&MSResponse.Params, MSCParams, sizeof(RFCOMM_MSC_Parameters_t));
-
-		/* Send the MSC response to acknowledge the command */
-		RFCOMM_SendFrame(StackState, ACLChannel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_UIH, sizeof(MSResponse), &MSResponse);
+		
+		/* Send the MSC response to the remote device */
+		RFCOMM_SendControlFrame(StackState, ACLChannel, RFCOMM_Control_ModemStatus, false, sizeof(*MSCParams), MSCParams);		
 	}
 	else
 	{
@@ -384,21 +375,9 @@ static void RFCOMM_ProcessRPNCommand(BT_StackConfig_t* const StackState,
 		/* If a single byte was sent, it is a request for the current parameters, otherwise it is a request to set the parameters */
 		if (CommandDataLen > 1)
 		  memcpy(&RFCOMMChannel->PortConfig, &RPNParams->Params, sizeof(RFCOMMChannel->PortConfig));
-		  
-		struct
-		{
-			RFCOMM_Command_t        CommandHeader;
-			uint8_t                 Length;
-			RFCOMM_RPN_Parameters_t Params;		
-		} RPNResponse;
-		
-		/* Fill out the RPN response data */
-		RPNResponse.CommandHeader = (RFCOMM_Command_t){.Command = RFCOMM_Control_RemotePortNegotiation, .EA = true, .CR = false};
-		RPNResponse.Length        = ((sizeof(RPNResponse.Params) << 1) | 0x01);		
-		memcpy(&RPNResponse.Params, &RFCOMMChannel->PortConfig, sizeof(RPNResponse.Params));
-	
-		/* Respond with the current/new port parameters */
-		RFCOMM_SendFrame(StackState, ACLChannel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_UIH, sizeof(RPNResponse), &RPNResponse);
+
+		/* Send the RPN response to the remote device */
+		RFCOMM_SendControlFrame(StackState, ACLChannel, RFCOMM_Control_RemotePortNegotiation, false, sizeof(*RPNParams), RPNParams);
 	}
 }
 
@@ -436,21 +415,10 @@ static void RFCOMM_ProcessPNCommand(BT_StackConfig_t* const StackState,
 		RFCOMMChannel->DataLink.Priority = PNParams->Priority;
 		RFCOMMChannel->DataLink.MTU      = PNParams->MaximumFrameSize;
 
-		struct
-		{
-			RFCOMM_Command_t       CommandHeader;
-			uint8_t                Length;
-			RFCOMM_PN_Parameters_t Params;
-		} PNResponse;
+		PNParams->ConvergenceLayer = 0x00; // TODO: Enable credit based transaction support
 
-		/* Fill out the DPN response data */
-		PNResponse.CommandHeader = (RFCOMM_Command_t){.Command = RFCOMM_Control_ParameterNegotiation, .EA = true, .CR = false};
-		PNResponse.Length        = ((sizeof(PNResponse.Params) << 1) | 0x01);
-		memcpy(&PNResponse.Params, PNParams, sizeof(RFCOMM_PN_Parameters_t));
-		PNResponse.Params.ConvergenceLayer = 0x00; // TODO: Enable credit based transaction support
-
-		/* Send the PN response to acknowledge the command */
-		RFCOMM_SendFrame(StackState, ACLChannel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_UIH, sizeof(PNResponse), &PNResponse);
+		/* Send the PN response to the remote device */
+		RFCOMM_SendControlFrame(StackState, ACLChannel, RFCOMM_Control_ParameterNegotiation, false, sizeof(*PNParams), PNParams);
 	}
 	else
 	{
@@ -693,6 +661,5 @@ bool RFCOMM_SendData(RFCOMM_Channel_t* const RFCOMMChannel,
 
 	/* Send the channel data to the remote device */
 	RFCOMM_SendFrame(RFCOMMChannel->Stack, RFCOMMChannel->ACLChannel, RFCOMMChannel->DLCI, RFCOMM_Frame_UIH, DataLen, Data);
-	
 	return true;
 }

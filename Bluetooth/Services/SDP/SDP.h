@@ -75,7 +75,7 @@
 			uint16_t TransactionID; /**< Unique transaction ID number to associate requests and responses */
 			uint16_t ParameterLength; /**< Length of the data following the SDP header */
 			uint8_t  Parameters[];
-		} BT_SDP_PDUHeader_t;
+		} ATTR_PACKED BT_SDP_PDUHeader_t;
 
 	/* Inline Functions: */
 		/** Writes 8 bits of raw data to the given buffer, incrementing the buffer position afterwards.

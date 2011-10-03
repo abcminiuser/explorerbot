@@ -25,7 +25,7 @@ const struct
 } PROGMEM SerialPort_Attribute_ServiceHandle =
 	{
 		(SDP_DATATYPE_UnsignedInt | SDP_DATASIZE_32Bit),
-		CPU_TO_BE32(0x00010001),
+		CPU_TO_BE32(0x00010000),
 	};
 
 /** Serial Port Profile attribute, listing the implemented Service Class UUIDs of the Serial Port service

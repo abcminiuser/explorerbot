@@ -356,6 +356,7 @@ static void RFCOMM_ProcessRPNCommand(BT_StackConfig_t* const StackState,
                                      RFCOMM_Command_t* const CommandHeader,
                                      uint8_t* CommandData)
 {
+	for(;;);
 	// TODO
 }
 
@@ -364,6 +365,7 @@ static void RFCOMM_ProcessRLSCommand(BT_StackConfig_t* const StackState,
                                      RFCOMM_Command_t* const CommandHeader,
                                      uint8_t* CommandData)
 {
+	for(;;);
 	// TODO
 }
 
@@ -512,13 +514,6 @@ static void RFCOMM_ProcessDM(BT_StackConfig_t* const StackState,
                              BT_L2CAP_Channel_t* const ACLChannel,
                              RFCOMM_Header_t* FrameHeader)
 {
-	// TODO
-}
-
-static void RFCOMM_ProcessDISC(BT_StackConfig_t* const StackState,
-                               BT_L2CAP_Channel_t* const ACLChannel,
-                               RFCOMM_Header_t* FrameHeader)
-{
 	/* Find the corresponding entry in the RFCOMM channel list that the data is directed to */
 	RFCOMM_Channel_t* RFCOMMChannel = RFCOMM_FindChannel(StackState, ACLChannel, FrameHeader->Address.DLCI);
 
@@ -528,11 +523,31 @@ static void RFCOMM_ProcessDISC(BT_StackConfig_t* const StackState,
 
 	/* Mark the disconnected channel as closed in the RFCOMM channel list */
 	RFCOMMChannel->State = RFCOMM_Channel_Closed;
-	
-	/* ACK the disconnection request */
-	RFCOMM_SendFrame(StackState, ACLChannel, FrameHeader->Address.DLCI, RFCOMM_Frame_UA, 0, NULL);
+}
 
-	EVENT_RFCOMM_ChannelClosed(StackState, RFCOMMChannel);
+static void RFCOMM_ProcessDISC(BT_StackConfig_t* const StackState,
+                               BT_L2CAP_Channel_t* const ACLChannel,
+                               RFCOMM_Header_t* FrameHeader)
+{
+	/* Find the corresponding entry in the RFCOMM channel list that the data is directed to */
+	RFCOMM_Channel_t* RFCOMMChannel = RFCOMM_FindChannel(StackState, ACLChannel, FrameHeader->Address.DLCI);
+
+	uint8_t ResponseFrameType = RFCOMM_Frame_UA;
+
+	/* Cound not find corresponding channel entry, send disconnected frame */
+	if (!(RFCOMMChannel))
+	  ResponseFrameType = RFCOMM_Frame_DM;
+
+	/* ACK the disconnection request */
+	RFCOMM_SendFrame(StackState, ACLChannel, FrameHeader->Address.DLCI, ResponseFrameType, 0, NULL);
+
+	/* If channel object was found, mark it as closed and notify the user application */
+	if (RFCOMMChannel)
+	{
+		/* Mark the disconnected channel as closed in the RFCOMM channel list */
+		RFCOMMChannel->State = RFCOMM_Channel_Closed;
+		EVENT_RFCOMM_ChannelClosed(StackState, RFCOMMChannel);
+	}
 }
 
 static void RFCOMM_ProcessUIH(BT_StackConfig_t* const StackState,
@@ -546,12 +561,12 @@ static void RFCOMM_ProcessUIH(BT_StackConfig_t* const StackState,
 	if (*FrameData & 0x01)
 	{
 		FrameDataLen = (*FrameData >> 1);
-		FrameData  += 1;
+		FrameData   += 1;
 	}
 	else
 	{
 		FrameDataLen = ((*(FrameData + 1) << 7) | (*FrameData >> 1));
-		FrameData  += 2;
+		FrameData   += 2;
 	}
 
 	/* Check if the data is directed to the control DLCI - if so run command processor */

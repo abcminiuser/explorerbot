@@ -30,7 +30,9 @@
 
 #include "BluetoothControl.h"
 
+/** Handle for the currently open RFCOMM communication channel between the robot and a remote device. */
 RFCOMM_Channel_t* RFCOMM_SensorStream = NULL;
+
 
 void EVENT_Bluetooth_InitServices(BT_StackConfig_t* const StackState)
 {
@@ -113,7 +115,7 @@ void EVENT_Bluetooth_ChannelOpened(BT_StackConfig_t* const StackState,
 {
 	LCD_Clear();
 	LCD_WriteFormattedString_P(PSTR("L2CAP Opened\n"
-	                                "L:%04X R:%04X"), Channel->LocalNumber, Channel->RemoteNumber);
+	                                "PSM:%04X L:%04X"), Channel->PSM, Channel->LocalNumber);
 
 	SDP_ChannelOpened(StackState, Channel);			
 	HID_ChannelOpened(StackState, Channel);
@@ -125,7 +127,7 @@ void EVENT_Bluetooth_ChannelClosed(BT_StackConfig_t* const StackState,
 {
 	LCD_Clear();
 	LCD_WriteFormattedString_P(PSTR("L2CAP Closed\n"
-	                                "L:%04X R:%04X"), Channel->LocalNumber, Channel->RemoteNumber);
+	                                "PSM:%04X L:%04X"), Channel->PSM, Channel->LocalNumber);
 
 	SDP_ChannelClosed(StackState, Channel);			
 	HID_ChannelClosed(StackState, Channel);

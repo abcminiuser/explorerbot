@@ -81,11 +81,16 @@ static BT_L2CAP_Channel_t* const Bluetooth_L2CAP_NewChannel(BT_StackConfig_t* co
 		  continue;
 
 		CurrentChannel->ConnectionHandle = ConnectionHandle;
-		CurrentChannel->LocalNumber      = (BT_CHANNEL_BASEOFFSET + i);
+		CurrentChannel->LocalNumber      = StackState->State.L2CAP.LastAllocatedChannel;
 		CurrentChannel->RemoteNumber     = RemoteChannel;
 		CurrentChannel->LocalMTU         = DEFAULT_L2CAP_CHANNEL_MTU;
 		CurrentChannel->State            = L2CAP_CHANSTATE_New;
 		CurrentChannel->PSM              = PSM;
+		
+		/* Wrap the allocated channel number back to the starting address when all channel indexes have been allocated */
+		if (StackState->State.L2CAP.LastAllocatedChannel++ == 0xFF)
+		  StackState->State.L2CAP.LastAllocatedChannel = BT_CHANNEL_BASEOFFSET;
+		  
 		return CurrentChannel;
 	}
 	
@@ -382,6 +387,8 @@ void Bluetooth_L2CAP_Init(BT_StackConfig_t* const StackState)
 {
 	for (uint8_t i = 0; i < MAX_LOGICAL_CHANNELS; i++)
 	  StackState->State.L2CAP.Channels[i].State = L2CAP_CHANSTATE_Closed;
+	  
+	StackState->State.L2CAP.LastAllocatedChannel = BT_CHANNEL_BASEOFFSET;
 }
 
 /** Processes a recieved Bluetooth L2CAP packet from a Bluetooth adapter.

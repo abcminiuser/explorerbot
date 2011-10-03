@@ -145,6 +145,7 @@
 				
 				struct
 				{
+					uint8_t             LastAllocatedChannel;
 					BT_L2CAP_Channel_t  Channels[MAX_LOGICAL_CHANNELS];
 				} L2CAP;
 			} State;

@@ -226,7 +226,8 @@ void RFCOMM_Manage(BT_StackConfig_t* const StackState)
 		if (RFCOMMChannel->State == RFCOMM_Channel_Configure)
 		{
 			/* Check if the local signals have not yet been sent on the current channel */
-			if (!(RFCOMMChannel->ConfigFlags & RFCOMM_CONFIG_LOCALSIGNALSSENT))
+			if (!(RFCOMMChannel->ConfigFlags & RFCOMM_CONFIG_LOCALSIGNALSSENT) &&
+			    (RFCOMMChannel->ConfigFlags & RFCOMM_CONFIG_ABMMODESET))
 			{
 				RFCOMM_MSC_Parameters_t MSCommand;
 				MSCommand.Address = (RFCOMM_Address_t){.DLCI = RFCOMMChannel->DLCI, .EA = true, .CR = false};
@@ -503,16 +504,30 @@ static void RFCOMM_ProcessSABM(BT_StackConfig_t* const StackState,
                                BT_L2CAP_Channel_t* const ACLChannel,
                                RFCOMM_Header_t* FrameHeader)
 {
+	/* ACK requests to the control channel (start the multiplexer) */
+	if (FrameHeader->Address.DLCI == RFCOMM_CONTROL_DLCI)
+	{
+		RFCOMM_SendFrame(StackState, ACLChannel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_UA, 0, NULL);	
+		return;
+	}
+
+	/* Find the corresponding entry in the RFCOMM channel list that the data is directed to */
+	RFCOMM_Channel_t* RFCOMMChannel = RFCOMM_FindChannel(StackState, ACLChannel, FrameHeader->Address.DLCI);
+
+	/* If an existing channel wasn't found, create a new channel entry */
+	if (!(RFCOMMChannel))
+	  RFCOMMChannel = RFCOMM_NewChannel(StackState, ACLChannel, FrameHeader->Address.DLCI);
+	  
 	uint8_t ResponseFrameType = RFCOMM_Frame_DM;
-	
-	/* If the destination channel is the control channel, if the channel exists or if it was created successfully, accept the request */
-	if ((FrameHeader->Address.DLCI == RFCOMM_CONTROL_DLCI) ||
-	    RFCOMM_FindChannel(StackState, ACLChannel, FrameHeader->Address.DLCI) ||
-	    RFCOMM_NewChannel(StackState, ACLChannel, FrameHeader->Address.DLCI))
+
+	/* If a channel was found or created sucessfully, set response to ACK the request and indicate channel ABM mode set */
+	if (RFCOMMChannel)
 	{
 		ResponseFrameType = RFCOMM_Frame_UA;
+		RFCOMMChannel->ConfigFlags |= RFCOMM_CONFIG_ABMMODESET;
 	}
-	
+
+	/* Send the ACK or NAK request based on the success or failure of the channel lookup/creation */
 	RFCOMM_SendFrame(StackState, ACLChannel, FrameHeader->Address.DLCI, ResponseFrameType, 0, NULL);
 }
 

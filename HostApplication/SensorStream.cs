@@ -13,11 +13,11 @@ namespace RobotSensorStream
     {
         const int MAX_GRAPH_VALUES = 10;
 
-        Stack<Int32>[] Orientation  = new Stack<Int32>[3];
-        Stack<Int32>[] Direction    = new Stack<Int32>[3];
+        Stack<Int32>[] Orientation = new Stack<Int32>[3];
+        Stack<Int32>[] Direction = new Stack<Int32>[3];
         Stack<Int32>[] Acceleration = new Stack<Int32>[3];
-        Stack<Int32>   Temperature;
-        Stack<Int32>   Pressure;
+        Stack<Int32> Temperature;
+        Stack<Int32> Pressure;
 
         void Log(String text)
         {
@@ -51,17 +51,17 @@ namespace RobotSensorStream
             Temperature = new Stack<int>();
             Pressure = new Stack<int>();
 
-            chtOrientation.ChartAreas[0].AxisY.Minimum = -Math.Pow(2, 9);
-            chtOrientation.ChartAreas[0].AxisY.Maximum = Math.Pow(2, 9);
+            chtOrientation.ChartAreas[0].AxisY.Minimum = -1024;
+            chtOrientation.ChartAreas[0].AxisY.Maximum = 1024;
 
-            chtDirection.ChartAreas[0].AxisY.Minimum = -Math.Pow(2, 15);
-            chtDirection.ChartAreas[0].AxisY.Maximum = Math.Pow(2, 15);
+            chtDirection.ChartAreas[0].AxisY.Minimum = -1024;
+            chtDirection.ChartAreas[0].AxisY.Maximum = 1024;
 
-            chtAcceleration.ChartAreas[0].AxisY.Minimum = -Math.Pow(2, 9);
-            chtAcceleration.ChartAreas[0].AxisY.Maximum = Math.Pow(2, 9);
-            
+            chtAcceleration.ChartAreas[0].AxisY.Minimum = -1024;
+            chtAcceleration.ChartAreas[0].AxisY.Maximum = 1024;
+
             chtTemperature.ChartAreas[0].AxisY.Maximum = 60;
-            chtPressure.ChartAreas[0].AxisY.Maximum = Math.Pow(2, 19);
+            chtPressure.ChartAreas[0].AxisY.Maximum = 65536;
         }
 
         private void btnConnect_Click(object sender, EventArgs e)
@@ -92,8 +92,8 @@ namespace RobotSensorStream
 
         private void spSerialPort_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
-            String   SensorDataLine = spSerialPort.ReadLine();
-            String[] SensorValues   = SensorDataLine.Split(new char[]{','});
+            String SensorDataLine = spSerialPort.ReadLine();
+            String[] SensorValues = SensorDataLine.Split(new char[] { ',' });
 
             Int32 CurrentSensorValue;
 
@@ -143,8 +143,6 @@ namespace RobotSensorStream
                     if (chtAcceleration.Series[i].Points.Count > MAX_GRAPH_VALUES)
                         chtAcceleration.Series[i].Points.RemoveAt(0);
                 }
-
-                chtOrientation.Series[i].MarkerSize = 4096;
             }
 
             while (Temperature.Count > 0)

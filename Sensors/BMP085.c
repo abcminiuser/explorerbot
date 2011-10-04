@@ -88,12 +88,12 @@ void BMP085_Update(SensorData_t* const PressureSensorInfo)
 	while (!(PIND & (1 << 2)));
 	
 	/* Read the converted sensor data as a block packet */
-	if (Sensor_ReadBytes(BMP085_ADDRESS, BMP085_CONVERSION_REG_MSB, PacketBuffer, 3) != TWI_ERROR_NoError)
+	if (Sensor_ReadBytes(BMP085_ADDRESS, BMP085_CONVERSION_REG_MSB, PacketBuffer, 2) != TWI_ERROR_NoError)
 	  return;
 
 	/* Save updated sensor data */
-	PressureSensorInfo->Data.Single = (((uint32_t)PacketBuffer[0] << 16) | ((uint32_t)PacketBuffer[1] << 8) | PacketBuffer[0]);
-		
+	PressureSensorInfo->Data.Single = (((uint32_t)PacketBuffer[1] << 8) | PacketBuffer[0]);
+
 	/* Start next sensor data conversion */
 	BMP085_StartConversion(PressureSensorInfo);
 }

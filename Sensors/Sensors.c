@@ -60,12 +60,6 @@ void Sensors_Init(void)
 	BMA150_Init(&Sensors.Acceleration);
 	BMP085_Init(&Sensors.Pressure);
 	ITG3200_Init(&Sensors.Orientation, &Sensors.Temperature);
-	
-	/* Pre-sensor calibration delay */
-	Delay_MS(100);
-	
-	/* Attempt to zero-calibrate all sensors that are connected */
-	ITG3200_ZeroCalibrate(&Sensors.Orientation);
 }
 
 /** Updates the current raw values for each connected sensor. */

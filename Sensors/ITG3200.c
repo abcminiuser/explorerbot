@@ -32,7 +32,6 @@
 
 static const char* SensorNameGyro = "Gyroscope";
 static const char* SensorNameTemp = "Temperature";
-static SensorData_t GyroZeroOffset;
 
 void ITG3200_Init(SensorData_t* const GyroSensorInfo,
 		          SensorData_t* const TempSensorInfo)
@@ -97,18 +96,6 @@ void ITG3200_Init(SensorData_t* const GyroSensorInfo,
 	  return;
 }
 
-void ITG3200_ZeroCalibrate(SensorData_t* const GyroSensorInfo)
-{
-	/* Abort if sensor not connected and initialized */
-	if (!(GyroSensorInfo->Connected))
-	  return;
-
-	memset(&GyroZeroOffset, 0x00, sizeof(GyroZeroOffset));
-	GyroZeroOffset.Connected = true;
-	
-	ITG3200_Update(&GyroZeroOffset, NULL);
-}
-
 void ITG3200_Update(SensorData_t* const GyroSensorInfo,
 		            SensorData_t* const TempSensorInfo)
 {
@@ -130,8 +117,8 @@ void ITG3200_Update(SensorData_t* const GyroSensorInfo,
 	  TempSensorInfo->Data.Single = (35 + ((13200 + (((int16_t)PacketBuffer[0] << 8) | PacketBuffer[1])) / 280));
 
 	/* Save updated sensor data */
-	GyroSensorInfo->Data.Triplicate.X = (((uint16_t)PacketBuffer[2] << 8) | PacketBuffer[3]) - GyroZeroOffset.Data.Triplicate.X;
-	GyroSensorInfo->Data.Triplicate.Y = (((uint16_t)PacketBuffer[4] << 8) | PacketBuffer[5]) - GyroZeroOffset.Data.Triplicate.Y;
-	GyroSensorInfo->Data.Triplicate.Z = (((uint16_t)PacketBuffer[6] << 8) | PacketBuffer[7]) - GyroZeroOffset.Data.Triplicate.Z;
+	GyroSensorInfo->Data.Triplicate.X = (((int16_t)PacketBuffer[2] << 8) | PacketBuffer[3]);
+	GyroSensorInfo->Data.Triplicate.Y = (((int16_t)PacketBuffer[4] << 8) | PacketBuffer[5]);
+	GyroSensorInfo->Data.Triplicate.Z = (((int16_t)PacketBuffer[6] << 8) | PacketBuffer[7]);
 }
 

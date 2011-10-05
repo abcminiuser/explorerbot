@@ -115,7 +115,7 @@ namespace RobotSensorStream
             for (int i = 0; i < 3; i++)
             {
                 if (Double.TryParse(SensorValues[6 + i], out CurrentSensorValue))
-                    AddChartPoint(chtOrientation.Series[i].Points, ((CurrentSensorValue / (double)0x7FFF) * chtOrientation.ChartAreas[0].AxisY.Maximum));
+                    AddChartPoint(chtOrientation.Series[i].Points, (CurrentSensorValue / (double)14.375));
             }
 
             /* Convert pressure data to human readable units and add it to the graph */

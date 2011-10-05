@@ -59,19 +59,26 @@ void BMA150_Init(SensorData_t* const AccelSensorInfo)
 	if (Sensor_WriteBytes(BMA150_ADDRESS, BMA150_SMB150_CTRL_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;
 
-	/* Enable latched interrupt line on end of conversion */
-	if (Sensor_ReadBytes(BMA150_ADDRESS, BMA150_SMB150_CONF2_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
+	/* Turn off sleep mode */
+	if (Sensor_ReadBytes(BMA150_ADDRESS, BMA150_SMB150_CTRL_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;
-	PacketBuffer[0] |= ((1 << 5) | (1 << 4) | (1 << 0));
-	if (Sensor_WriteBytes(BMA150_ADDRESS, BMA150_SMB150_CONF2_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
+	PacketBuffer[0] &= 0xFE;
+	if (Sensor_WriteBytes(BMA150_ADDRESS, BMA150_SMB150_CTRL_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;
-	  
-	/* Set 25Hz bandwidth, 2g range */
+
+	/* Set 25Hz bandwidth, +/-2g range */
 	if (Sensor_ReadBytes(BMA150_ADDRESS, BMA150_RANGE_BWIDTH_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;
 	PacketBuffer[0] &= 0xE0;
 	if (Sensor_WriteBytes(BMA150_ADDRESS, BMA150_RANGE_BWIDTH_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
 	  return;
+
+	/* Enable interrupt line on end of conversion, wake up sensor */
+	if (Sensor_ReadBytes(BMA150_ADDRESS, BMA150_SMB150_CONF2_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
+	  return;
+	PacketBuffer[0] |= ((1 << 5) | (1 << 3));
+	if (Sensor_WriteBytes(BMA150_ADDRESS, BMA150_SMB150_CONF2_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
+	  return;	  
 }
 
 void BMA150_Update(SensorData_t* const AccelSensorInfo)
@@ -82,29 +89,17 @@ void BMA150_Update(SensorData_t* const AccelSensorInfo)
 	if (!(AccelSensorInfo->Connected))
 	  return;
 
-	/* Wait for sensor interrupt line to go high to signal end of conversion */
-	while (!(PINB & (1 << 2)));
+	/* Abort if sensor interrupt line is not high to signal end of conversion */
+	if (!(PINB & (1 << 2)))
+	  return;
 
 	/* Read the converted sensor data as a block packet */
 	if (Sensor_ReadBytes(BMA150_ADDRESS, BMA150_X_AXIS_LSB_REG, PacketBuffer, 6) != TWI_ERROR_NoError)
 	  return;
 	  
-	/* Save updated sensor data */
-	AccelSensorInfo->Data.Triplicate.X = (((uint16_t)PacketBuffer[1] << 2) | (PacketBuffer[0] >> 6));
-	AccelSensorInfo->Data.Triplicate.Y = (((uint16_t)PacketBuffer[3] << 2) | (PacketBuffer[2] >> 6));
-	AccelSensorInfo->Data.Triplicate.Z = (((uint16_t)PacketBuffer[5] << 2) | (PacketBuffer[4] >> 6));
-	
-	/* Sign extend from 10-bit to 16-bit */
-	if (AccelSensorInfo->Data.Triplicate.X & (1 << 9))
-	  AccelSensorInfo->Data.Triplicate.X |= 0xFC00;
-	if (AccelSensorInfo->Data.Triplicate.Y & (1 << 9))
-	  AccelSensorInfo->Data.Triplicate.Y |= 0xFC00;
-	if (AccelSensorInfo->Data.Triplicate.Z & (1 << 9))
-	  AccelSensorInfo->Data.Triplicate.Z |= 0xFC00;
-
-	/* Clear the interrupt line after read complete */
-	PacketBuffer[0] = (1 << 7);
-	if (Sensor_WriteBytes(BMA150_ADDRESS, BMA150_SMB150_CTRL_REG, PacketBuffer, 1) != TWI_ERROR_NoError)
-	  return;
+	/* Save updated sensor data, sign-extend to 16-bit */
+	AccelSensorInfo->Data.Triplicate.X = SIGN_EXTEND(((uint16_t)PacketBuffer[1] << 2) | (PacketBuffer[0] >> 6), 10, int16_t);
+	AccelSensorInfo->Data.Triplicate.Y = SIGN_EXTEND(((uint16_t)PacketBuffer[3] << 2) | (PacketBuffer[2] >> 6), 10, int16_t);
+	AccelSensorInfo->Data.Triplicate.Z = SIGN_EXTEND(((uint16_t)PacketBuffer[5] << 2) | (PacketBuffer[4] >> 6), 10, int16_t);
 }
 

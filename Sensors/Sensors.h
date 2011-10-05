@@ -43,7 +43,7 @@
 	/* Function Prototypes: */
 		void Sensors_Init(void);
 		void Sensors_Update(void);
-		void Sensors_WriteSensorCSVHeader(char* LineBuffer);
-		void Sensors_WriteSensorDataCSV(char* LineBuffer);
+		void Sensors_WriteSensorCSVHeader(char* const LineBuffer);
+		void Sensors_WriteSensorDataCSV(char* const LineBuffer);
 
 #endif

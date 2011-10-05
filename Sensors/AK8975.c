@@ -79,8 +79,9 @@ void AK8975_Update(SensorData_t* const CompassSensorInfo)
 	if (!(CompassSensorInfo->Connected))
 	  return;
 	
-	/* Wait for sensor interrupt line to go high to signal end of conversion */
-	while (!(PINB & (1 << 1)));
+	/* Abort if sensor interrupt line is not high to signal end of conversion */
+	if (!(PINB & (1 << 1)))
+	  return;
 
 	/* Read the converted sensor data as a block packet */
 	if (Sensor_ReadBytes(AK8975_ADDRESS, AK8975_REG_HXL, PacketBuffer, 6) != TWI_ERROR_NoError)

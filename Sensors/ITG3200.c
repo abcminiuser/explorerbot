@@ -105,8 +105,9 @@ void ITG3200_Update(SensorData_t* const GyroSensorInfo,
 	if (!(GyroSensorInfo->Connected))
 	  return;
 
-	/* Wait for sensor interrupt line to go high to signal end of conversion */
-	while (!(PINB & (1 << 0)));
+	/* Abort if sensor interrupt line is not high to signal end of conversion */
+	if (!(PINB & (1 << 0)))
+	  return;
 
 	/* Read the converted sensor data as a block packet */
 	if (Sensor_ReadBytes(ITG3200_ADDRESS, ITG3200_TMP_H_REG, PacketBuffer, 8) != TWI_ERROR_NoError)

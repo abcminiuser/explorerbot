@@ -78,7 +78,7 @@ void Sensors_Update(void)
  *
  *  \param[out] LineBuffer  Buffer where the created sensor CSV header text can be stored.
  */
-void Sensors_WriteSensorCSVHeader(char* LineBuffer)
+void Sensors_WriteSensorCSVHeader(char* const LineBuffer)
 {
 	/* Terminate the string at the very start, so that future strcat() calls work correctly */
 	LineBuffer[0] = '\0';
@@ -125,7 +125,7 @@ void Sensors_WriteSensorCSVHeader(char* LineBuffer)
  *
  *  \param[out] LineBuffer  Buffer where the created sensor CSV data text can be stored.
  */
-void Sensors_WriteSensorDataCSV(char* LineBuffer)
+void Sensors_WriteSensorDataCSV(char* const LineBuffer)
 {
 	uint8_t OutputLen = 0;
 

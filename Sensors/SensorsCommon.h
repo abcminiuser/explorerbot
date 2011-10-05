@@ -42,6 +42,16 @@
 	/* Macros: */
 		/** Timeout period in milliseconds allowable to capture a sensor on the I2C bus, before the packet is aborted. */
 		#define SENSOR_BUS_TIMEOUT_MS   10
+		
+		/** Sign-extends a value from a given number of bits to the given type.
+		 *
+		 *  \param[in] Value     Value to sign-extend.
+		 *  \param[in] FromBits  Number of bits of the signed input value.
+		 *  \param[in] ToType    Name of the output signed integer type.
+		 *
+		 *  \return Sign-extended version of the input value.
+		 */
+		#define SIGN_EXTEND(Value, FromBits, ToType) (ToType)(((Value) & (1 << ((FromBits) - 1))) ? ((Value) | ((ToType)-1 & ~((1 << (FromBits)) - 1))) : (Value))
 
 	/* Type Defines: */
 		/** Type define for a sensor descriptor structure, passed to the individual sensor driver functions as needed to

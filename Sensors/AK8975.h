@@ -72,7 +72,6 @@
 
 	/* Function Prototypes: */
 		void AK8975_Init(SensorData_t* const CompassSensorInfo);
-		void AK8975_ZeroCalibrate(void);
 		void AK8975_Update(SensorData_t* const CompassSensorInfo);
 
 #endif

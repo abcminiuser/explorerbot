@@ -84,8 +84,9 @@ void BMP085_Update(SensorData_t* const PressureSensorInfo)
 	if (!(PressureSensorInfo->Connected))
 	  return;
 
-	/* Wait for sensor interrupt line to go high to signal end of conversion */
-	while (!(PIND & (1 << 2)));
+	/* Abort if sensor interrupt line is not high to signal end of conversion */
+	if (!(PIND & (1 << 2)))
+	  return;
 	
 	/* Read the converted sensor data as a block packet */
 	if (Sensor_ReadBytes(BMP085_ADDRESS, BMP085_CONVERSION_REG_MSB, PacketBuffer, 2) != TWI_ERROR_NoError)

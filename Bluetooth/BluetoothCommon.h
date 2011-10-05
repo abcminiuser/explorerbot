@@ -83,10 +83,10 @@
 		/** Enum for the possible Bluetooth packet types. */
 		enum BT_PacketType_t
 		{
-			BLUETOOTH_PACKET_HCICommand         = 0x01,
-			BLUETOOTH_PACKET_L2CAPData          = 0x02,
-			BLUETOOTH_PACKET_SynchData          = 0x03,
-			BLUETOOTH_PACKET_HCIEvent           = 0x04,
+			BLUETOOTH_PACKET_HCICommand           = 0x01,
+			BLUETOOTH_PACKET_Data                 = 0x02,
+			BLUETOOTH_PACKET_SynchData            = 0x03,
+			BLUETOOTH_PACKET_HCIEvent             = 0x04,
 		};
 		
 		/** Enum for the possible Bluetooth link types. */

@@ -19,14 +19,6 @@
 		#include "BluetoothCommon.h"
 
 	/* Type Defines: */	
-		/** Bluetooth L2CAP header structure, common to all L2CAP data packets. */
-		typedef struct
-		{
-			uint16_t ConnectionHandle; /**< Unique device connection handle of the L2CAP packet. */
-			uint16_t DataLength; /**< Length of the packet payload, in bytes. */
-			uint8_t  Data[]; /**< Trailing packet data. */
-		} ATTR_PACKED BT_L2CAP_Header_t;
-
 		/** Bluetooth L2CAP data packet header structure, for L2CAP packets containing L2CAP data. */
 		typedef struct
 		{

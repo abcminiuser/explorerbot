@@ -44,6 +44,13 @@
 
 		typedef struct
 		{
+			uint16_t ConnectionHandle;
+			uint16_t DataLength;
+			uint8_t  Data[];
+		} ATTR_PACKED BT_HCIData_Header_t;
+
+		typedef struct
+		{
 			uint8_t  Status;
 			uint8_t  Packets;
 			uint16_t OpCode;

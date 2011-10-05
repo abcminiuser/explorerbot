@@ -50,7 +50,7 @@ bool Bluetooth_ManageConnections(BT_StackConfig_t* const StackState)
 	return false;
 }
 
-/** Processes the Bluetooth packet of the specified type currently stored in the input packet buffer.
+/** Processes the Bluetooth packet of the specified type currently stored in the input packet buffer of the given stack instance.
  *
  *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.
  *  \param[in]      Type        Packet type, a value from the \ref BT_PacketType_t enum.
@@ -61,10 +61,10 @@ void Bluetooth_ProcessPacket(BT_StackConfig_t* const StackState,
 	switch (Type)
 	{
 		case BLUETOOTH_PACKET_HCIEvent:
-			Bluetooth_HCI_ProcessPacket(StackState);
+			Bluetooth_HCI_ProcessEventPacket(StackState);
 			return;
-		case BLUETOOTH_PACKET_L2CAPData:
-			Bluetooth_L2CAP_ProcessPacket(StackState);
+		case BLUETOOTH_PACKET_Data:
+			Bluetooth_HCI_ProcessDataPacket(StackState);
 			return;
 	}
 }

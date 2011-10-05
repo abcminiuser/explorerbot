@@ -191,16 +191,16 @@ void BluetoothAdapter_USBTask(void)
 	
 	if (Pipe_IsINReceived())
 	{
-		BT_L2CAP_Header_t* PacketHeader = (BT_L2CAP_Header_t*)BluetoothAdapter_Stack.Config.PacketBuffer;
+		BT_HCIData_Header_t* PacketHeader = (BT_HCIData_Header_t*)BluetoothAdapter_Stack.Config.PacketBuffer;
 
-		/* Read in the L2CAP packet data from the Data IN pipe */
-		Pipe_Read_Stream_LE(PacketHeader, sizeof(BT_L2CAP_Header_t), NULL);
+		/* Read in the HCI Data packet data from the Data IN pipe */
+		Pipe_Read_Stream_LE(PacketHeader, sizeof(BT_HCIData_Header_t), NULL);
 		Pipe_Read_Stream_LE(PacketHeader->Data, PacketHeader->DataLength, NULL);
 		Pipe_ClearIN();
 		Pipe_Freeze();
 
 		RGB_SetColour(RGB_ALIAS_Busy);
-		Bluetooth_ProcessPacket(&BluetoothAdapter_Stack, BLUETOOTH_PACKET_L2CAPData);
+		Bluetooth_ProcessPacket(&BluetoothAdapter_Stack, BLUETOOTH_PACKET_Data);
 		RGB_SetColour(RGB_ALIAS_Connected);
 	}
 	
@@ -213,7 +213,7 @@ void BluetoothAdapter_USBTask(void)
 	{
 		BT_HCIEvent_Header_t* EventHeader = (BT_HCIEvent_Header_t*)BluetoothAdapter_Stack.Config.PacketBuffer;
 
-		/* Read in the Event packet data from the Event IN pipe */
+		/* Read in the HCI Event packet data from the Event IN pipe */
 		Pipe_Read_Stream_LE(EventHeader, sizeof(BT_HCIEvent_Header_t), NULL);
 		Pipe_Read_Stream_LE(EventHeader->Parameters, EventHeader->ParameterLength, NULL);
 		Pipe_ClearIN();
@@ -256,10 +256,10 @@ void CALLBACK_Bluetooth_SendPacket(BT_StackConfig_t* const StackState,
 			Pipe_SelectPipe(PIPE_CONTROLPIPE);
 			USB_Host_SendControlRequest(StackState->Config.PacketBuffer);
 			break;
-		case BLUETOOTH_PACKET_L2CAPData:
+		case BLUETOOTH_PACKET_Data:
 			Pipe_SelectPipe(BLUETOOTH_DATA_OUT_PIPE);
 
-			/* L2CAP packets must be sent over the Data OUT pipe */
+			/* HCI data packets must be sent over the Data OUT pipe */
 			Pipe_Unfreeze();
 			Pipe_Write_Stream_LE(StackState->Config.PacketBuffer, Length, NULL);
 			Pipe_ClearOUT();

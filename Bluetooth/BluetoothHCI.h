@@ -26,7 +26,7 @@
 		#include "BluetoothL2CAP.h"
 	
 	/* Macros: */
-		#define BT_HCI_CONNECTION_HANDLE_MASK     0x0FFF	
+		#define BT_HCI_CONNECTION_HANDLE_MASK     0x0EFF	
 	
 	/* Enums: */
 		/** Enum for the possible states in the Bluetooth HCI state machine. */
@@ -47,12 +47,19 @@
 		                                                        const uint16_t Handle);
 
 		void Bluetooth_HCI_Init(BT_StackConfig_t* const StackState);
-		void Bluetooth_HCI_ProcessPacket(BT_StackConfig_t* const StackState);
+		void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState);
+		void Bluetooth_HCI_ProcessDataPacket(BT_StackConfig_t* const StackState);
 		bool Bluetooth_HCI_Manage(BT_StackConfig_t* const StackState);
+
 		BT_HCI_Connection_t* Bluetooth_HCI_Connect(BT_StackConfig_t* const StackState,
 		                                           const uint8_t* const RemoteBDADDR,
 		                                           const uint8_t LinkType);
 		bool Bluetooth_HCI_Disconnect(BT_StackConfig_t* const StackState,
 		                              BT_HCI_Connection_t* const HCIConnection);
+									  
+		bool HCI_SendPacket(BT_StackConfig_t* const StackState,
+		                    uint16_t ConnectionHandle,
+		                    const uint16_t Length,
+		                    const void* Data);
 
 #endif

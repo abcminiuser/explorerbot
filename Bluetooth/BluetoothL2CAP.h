@@ -45,17 +45,22 @@
 		                                                      const uint16_t ConnectionHandle,
 		                                                      const uint16_t LocalChannel,
 		                                                      const uint16_t RemoteChannel);
+
 		void Bluetooth_L2CAP_Init(BT_StackConfig_t* const StackState);
-		void Bluetooth_L2CAP_ProcessPacket(BT_StackConfig_t* const StackState);
+		void Bluetooth_L2CAP_ProcessPacket(BT_StackConfig_t* const StackState,
+		                                   BT_HCI_Connection_t* const HCIConnection,
+		                                   const void* Data);
 		bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState);
 
-		bool Bluetooth_L2CAP_SendPacket(BT_StackConfig_t* const StackState,
-		                                BT_L2CAP_Channel_t* const L2CAPChannel,
-		                                const uint16_t Length,
-		                                const void* Data);
 		BT_L2CAP_Channel_t* const Bluetooth_L2CAP_OpenChannel(BT_StackConfig_t* const StackState,
                                                               BT_HCI_Connection_t* const HCIConnection,
                                                               const uint16_t PSM);
 		void Bluetooth_L2CAP_CloseChannel(BT_StackConfig_t* const StackState,
 		                                  BT_L2CAP_Channel_t* const L2CAPChannel);
+
+		bool Bluetooth_L2CAP_SendPacket(BT_StackConfig_t* const StackState,
+		                                BT_L2CAP_Channel_t* const L2CAPChannel,
+		                                const uint16_t Length,
+		                                const void* Data);
+
 #endif

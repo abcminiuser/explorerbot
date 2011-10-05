@@ -85,6 +85,7 @@ static BT_L2CAP_Channel_t* const Bluetooth_L2CAP_NewChannel(BT_StackConfig_t* co
 		CurrentChannel->LocalNumber      = StackState->State.L2CAP.LastAllocatedChannel;
 		CurrentChannel->RemoteNumber     = RemoteChannel;
 		CurrentChannel->LocalMTU         = DEFAULT_L2CAP_CHANNEL_MTU;
+		CurrentChannel->RemoteMTU        = 0xFFFF;
 		CurrentChannel->State            = L2CAP_CHANSTATE_New;
 		CurrentChannel->PSM              = PSM;
 		
@@ -583,6 +584,12 @@ bool Bluetooth_L2CAP_SendPacket(BT_StackConfig_t* const StackState,
 	if (!(L2CAPChannel) || (L2CAPChannel->State != L2CAP_CHANSTATE_Open))
 	  return false;
 
+	BT_HCI_Connection_t* HCIConnection = Bluetooth_HCI_FindConnection(StackState, NULL, L2CAPChannel->ConnectionHandle);
+
+	/* If an open device connection with the correct connection handle was not foumd, abort */
+	if (!(HCIConnection))
+	  return false;
+
 	/* Determine the length of the first fragment (includes L2CAP data packet header) */
 	uint16_t BytesInPacket  = MIN(Length, (L2CAPChannel->RemoteMTU - sizeof(BT_DataPacket_Header_t)));
 	uint16_t BytesRemaining = Length;
@@ -597,7 +604,7 @@ bool Bluetooth_L2CAP_SendPacket(BT_StackConfig_t* const StackState,
 	FirstPacket.L2CAPDataHeader.DestinationChannel = cpu_to_le16(L2CAPChannel->RemoteNumber);
 	memcpy(FirstPacket.Data, Data, BytesInPacket);
 	
-	HCI_SendPacket(StackState, L2CAPChannel->ConnectionHandle, sizeof(FirstPacket), &FirstPacket);
+	HCI_SendPacket(StackState, HCIConnection, sizeof(FirstPacket), &FirstPacket);
 	BytesRemaining -= BytesInPacket;
 	Data           += BytesInPacket;
 		
@@ -607,7 +614,7 @@ bool Bluetooth_L2CAP_SendPacket(BT_StackConfig_t* const StackState,
 		/* Determine the length of the next fragment */
 		BytesInPacket = MIN(BytesRemaining, L2CAPChannel->RemoteMTU);
 		
-		HCI_SendPacket(StackState, L2CAPChannel->ConnectionHandle, BytesInPacket, Data);
+		HCI_SendPacket(StackState, HCIConnection, BytesInPacket, Data);
 		BytesRemaining -= BytesInPacket;
 		Data           += BytesInPacket;
 	}

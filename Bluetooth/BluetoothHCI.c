@@ -430,23 +430,20 @@ bool Bluetooth_HCI_Disconnect(BT_StackConfig_t* const StackState,
 }
 
 bool HCI_SendPacket(BT_StackConfig_t* const StackState,
-		            uint16_t ConnectionHandle,
+		            BT_HCI_Connection_t* const HCIConnection,
 		            const uint16_t Length,
 		            const void* Data)
 {
-	BT_HCI_Connection_t* HCIConnection = Bluetooth_HCI_FindConnection(StackState, NULL, ConnectionHandle);
-
-	/* If an open device connection with the correct connection handle was not foumd, abort */
-	if (!(HCIConnection))
+	if (!(HCIConnection) || (HCIConnection->State != HCI_CONSTATE_Connected))
 	  return false;
 
 	BT_HCIData_Header_t* HCIDataHeader = (BT_HCIData_Header_t*)StackState->Config.PacketBuffer;
-	HCIDataHeader->ConnectionHandle  = cpu_to_le16(HCIConnection->Handle | BT_L2CAP_FIRST_AUTOFLUSH);
-	HCIDataHeader->DataLength        = cpu_to_le16(sizeof(BT_DataPacket_Header_t) + Length);
+	HCIDataHeader->ConnectionHandle = cpu_to_le16(HCIConnection->Handle | BT_L2CAP_FIRST_AUTOFLUSH);
+	HCIDataHeader->DataLength       = cpu_to_le16(Length);
 
 	memcpy(HCIDataHeader->Data, Data, Length);
 
-	CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_Data, (sizeof(BT_DataPacket_Header_t) + Length));
+	CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_Data, (sizeof(BT_HCIData_Header_t) + Length));
 	return true;
 }
 

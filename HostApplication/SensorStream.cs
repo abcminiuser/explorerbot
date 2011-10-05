@@ -124,7 +124,7 @@ namespace RobotSensorStream
 
             /* Convert temperature data to human readable units and add it to the graph */
             if (Double.TryParse(SensorValues[10], out CurrentSensorValue))
-                AddChartPoint(chtTemperature.Series[0].Points, CurrentSensorValue);
+                AddChartPoint(chtTemperature.Series[0].Points, (35 + ((13200 + CurrentSensorValue) / (double)280)));
         }
 
         private void cmbPort_SelectedIndexChanged(object sender, EventArgs e)

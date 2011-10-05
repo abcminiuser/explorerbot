@@ -115,7 +115,7 @@ void EVENT_Bluetooth_ChannelOpened(BT_StackConfig_t* const StackState,
 {
 	LCD_Clear();
 	LCD_WriteFormattedString_P(PSTR("L2CAP Opened\n"
-	                                "PSM:%04X L:%04X"), Channel->PSM, Channel->LocalNumber);
+	                                "PSM:%04X LC:%04X"), Channel->PSM, Channel->LocalNumber);
 
 	SDP_ChannelOpened(StackState, Channel);			
 	HID_ChannelOpened(StackState, Channel);
@@ -127,7 +127,7 @@ void EVENT_Bluetooth_ChannelClosed(BT_StackConfig_t* const StackState,
 {
 	LCD_Clear();
 	LCD_WriteFormattedString_P(PSTR("L2CAP Closed\n"
-	                                "PSM:%04X L:%04X"), Channel->PSM, Channel->LocalNumber);
+	                                "PSM:%04X LC:%04X"), Channel->PSM, Channel->LocalNumber);
 
 	SDP_ChannelClosed(StackState, Channel);			
 	HID_ChannelClosed(StackState, Channel);
@@ -151,7 +151,7 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
 			break;		
 		default:
 			LCD_Clear();
-			LCD_WriteFormattedString_P(PSTR("P:%04X L:%04X\n"
+			LCD_WriteFormattedString_P(PSTR("PSM:%04X L:%04X\n"
 			                                "LC:%04X RC:%04X"), Channel->PSM, Length, Channel->LocalNumber, Channel->RemoteNumber);
 			break;
 	}	

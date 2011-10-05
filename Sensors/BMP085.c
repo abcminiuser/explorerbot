@@ -93,7 +93,7 @@ void BMP085_Update(SensorData_t* const PressureSensorInfo)
 	  return;
 
 	/* Save updated sensor data */
-	PressureSensorInfo->Data.Single = (((uint32_t)PacketBuffer[1] << 8) | PacketBuffer[0]);
+	PressureSensorInfo->Data.Single = (((int16_t)PacketBuffer[1] << 8) | PacketBuffer[0]);
 
 	/* Start next sensor data conversion */
 	BMP085_StartConversion(PressureSensorInfo);

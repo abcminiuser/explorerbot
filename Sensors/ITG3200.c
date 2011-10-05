@@ -115,7 +115,7 @@ void ITG3200_Update(SensorData_t* const GyroSensorInfo,
 
 	/* Update temperature sensor data */
 	if (TempSensorInfo)
-	  TempSensorInfo->Data.Single = (35 + ((13200 + (((int16_t)PacketBuffer[0] << 8) | PacketBuffer[1])) / 280));
+	  TempSensorInfo->Data.Single = (((int16_t)PacketBuffer[0] << 8) | PacketBuffer[1]);
 
 	/* Save updated sensor data */
 	GyroSensorInfo->Data.Triplicate.X = (((int16_t)PacketBuffer[2] << 8) | PacketBuffer[3]);

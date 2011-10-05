@@ -161,6 +161,7 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
 void EVENT_RFCOMM_ChannelOpened(BT_StackConfig_t* const StackState,
                                 RFCOMM_Channel_t* const Channel)
 {
+	/* Save the handle to the opened RFCOMM channel object, so we can write to it later */
 	RFCOMM_SensorStream = Channel;
 
 	/* Construct the sensor CSV header lines and write them to the virtual serial port */
@@ -172,6 +173,7 @@ void EVENT_RFCOMM_ChannelOpened(BT_StackConfig_t* const StackState,
 void EVENT_RFCOMM_ChannelClosed(BT_StackConfig_t* const StackState,
                                 RFCOMM_Channel_t* const Channel)
 {
+	/* Delete the handle to the now closed RFCOMM channel object, to prevent us from trying to write to it */
 	RFCOMM_SensorStream = NULL;
 }
 

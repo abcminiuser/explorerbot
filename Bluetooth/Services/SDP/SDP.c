@@ -75,6 +75,7 @@ void SDP_Init(BT_StackConfig_t* const StackState)
 		SDP_ServiceEntry_t* PreviousService = NULL;
 		SDP_ServiceEntry_t* CurrentService  = RegisteredServices;
 		
+		/* Search through the registered service list nodes */
 		while (CurrentService != NULL)
 		{
 			/* Check if the current regisered service is registered to the stack being re-initialized */

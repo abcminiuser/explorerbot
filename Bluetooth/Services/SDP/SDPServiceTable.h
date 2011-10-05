@@ -34,6 +34,47 @@
 		#define SDP_ATTRIBUTE_ID_LANGUAGEBASEATTROFFSET 0x0006
 		#define SDP_ATTRIBUTE_ID_SERVICENAME            0x0100
 		#define SDP_ATTRIBUTE_ID_SERVICEDESCRIPTION     0x0101
+		
+		#define SDP_ITEM8BIT(Type, Value)               {(SDP_DATASIZE_8Bit   | (Type)), Value}
+		#define SDP_ITEM16BIT(Type, Value)              {(SDP_DATASIZE_16Bit  | (Type)), Value}
+		#define SDP_ITEM32BIT(Type, Value)              {(SDP_DATASIZE_32Bit  | (Type)), Value}
+		#define SDP_ITEM64BIT(Type, Value)              {(SDP_DATASIZE_64Bit  | (Type)), Value}
+		#define SDP_ITEMUUID(UUID)                      {(SDP_DATASIZE_128Bit | SDP_DATATYPE_UUID), UUID}
+		#define SDP_ITEMSEQUENCE8BIT(Size)              {(SDP_DATASIZE_Variable8Bit | SDP_DATATYPE_Sequence), Size}
+		#define SDP_ITEMSEQUENCE16BIT(Size)             {(SDP_DATASIZE_Variable16Bit | SDP_DATATYPE_Sequence), Size}
+		#define SDP_ITEMSTRING(String)                  {(SDP_DATASIZE_Variable8Bit | SDP_DATATYPE_String), (sizeof(String) - 1)}, String
+
+	/* Enums: */
+		/** Data sizes for SDP Data Element headers, to indicate the size of the data contained in the element. When creating
+		 *  a Data Element, a value from this enum should be ORed with a value from the \ref SDP_Element_DataTypes_t enum.
+		 */
+		enum SDP_Element_DataSizes_t
+		{
+			SDP_DATASIZE_8Bit                      = 0, /**< Contained data is 8 bits in length. */
+			SDP_DATASIZE_16Bit                     = 1, /**< Contained data is 16 bits in length. */
+			SDP_DATASIZE_32Bit                     = 2, /**< Contained data is 32 bits in length. */
+			SDP_DATASIZE_64Bit                     = 3, /**< Contained data is 64 bits in length. */
+			SDP_DATASIZE_128Bit                    = 4, /**< Contained data is 128 bits in length. */
+			SDP_DATASIZE_Variable8Bit              = 5, /**< Contained data is encoded in an 8 bit size integer following the header. */
+			SDP_DATASIZE_Variable16Bit             = 6, /**< Contained data is encoded in an 16 bit size integer following the header. */
+			SDP_DATASIZE_Variable32Bit             = 7, /**< Contained data is encoded in an 32 bit size integer following the header. */
+		};
+
+		/** Data types for SDP Data Element headers, to indicate the type of data contained in the element. When creating
+		 *  a Data Element, a value from this enum should be ORed with a value from the \ref SDP_Element_DataSizes_t enum.
+		 */
+		enum SDP_Element_DataTypes_t
+		{
+			SDP_DATATYPE_Nill                     = (0 << 3), /**< Indicates the container data is a Nill (null) type. */
+			SDP_DATATYPE_UnsignedInt              = (1 << 3), /**< Indicates the container data is an unsigned integer. */
+			SDP_DATATYPE_SignedInt                = (2 << 3), /**< Indicates the container data is a signed integer. */
+			SDP_DATATYPE_UUID                     = (3 << 3), /**< Indicates the container data is a UUID. */
+			SDP_DATATYPE_String                   = (4 << 3), /**< Indicates the container data is an ASCII string. */
+			SDP_DATATYPE_Boolean                  = (5 << 3), /**< Indicates the container data is a logical boolean. */
+			SDP_DATATYPE_Sequence                 = (6 << 3), /**< Indicates the container data is a sequence of containers. */
+			SDP_DATATYPE_Alternative              = (7 << 3), /**< Indicates the container data is a sequence of alternative containers. */
+			SDP_DATATYPE_URL                      = (8 << 3), /**< Indicates the container data is a URL. */
+		};
 
 	/* Type Defines: */
 		/** Type define for a UUID value structure. This struct can be used to hold full 128-bit UUIDs. */
@@ -51,99 +92,76 @@
 		 */
 		typedef struct
 		{
-			uint16_t    AttributeID; /**< Attribute ID of the table element which the UUID service supports */
-			const void* Data; /**< Pointer to the attribute data, located in PROGMEM memory space */
+			uint16_t    AttributeID; /**< Attribute ID of the table element which the UUID service supports. */
+			const void* Data; /**< Pointer to the attribute data, located in PROGMEM memory space. */
 		} SDP_ServiceAttributeTable_t;
 
 		typedef struct SDP_ServiceEntry_t
 		{
-			BT_StackConfig_t*                  Stack;
-			const uint8_t                      TotalTableAttributes;
-			const SDP_ServiceAttributeTable_t* AttributeTable;			
+			BT_StackConfig_t*                  Stack; /**< Stack the service node should be registered to, or NULL if all stacks. */
+			const uint8_t                      TotalTableAttributes; /**< Total number of attributes stored in the service's attribute table. */
+			const SDP_ServiceAttributeTable_t* AttributeTable; /**< Attribute table of the service, stored in PROGMEM. */
 
-			struct SDP_ServiceEntry_t*         NextService;
+			struct SDP_ServiceEntry_t*         NextService; /**< Pointer to the next service node in the registration list (for internal use only). */
 		} SDP_ServiceEntry_t;
 
 		/** Structure for a list of Data Elements containing 8-bit integers, for service attributes requiring such lists. */
 		typedef struct
 		{
-			uint8_t Header; /**< Data Element header, should be (SDP_DATATYPE_UnsignedInt | SDP_DATASIZE_8Bit) */
-			uint8_t Value; /**< Value to store in the list Data Element */
+			uint8_t Header; /**< Data Element header, should be (SDP_DATATYPE_UnsignedInt | SDP_DATASIZE_8Bit). */
+			uint8_t Value; /**< Value to store in the list Data Element. */
 		} SDP_Item8Bit_t;
 
 		/** Structure for a list of Data Elements containing 16-bit integers, for service attributes requiring such lists. */
 		typedef struct
 		{
-			uint8_t  Header; /**< Data Element header, should be (SDP_DATATYPE_UnsignedInt | SDP_DATASIZE_16Bit) */
-			uint16_t Value; /**< Value to store in the list Data Element */
+			uint8_t  Header; /**< Data Element header, should be (SDP_DATATYPE_UnsignedInt | SDP_DATASIZE_16Bit). */
+			uint16_t Value; /**< Value to store in the list Data Element. */
 		} SDP_Item16Bit_t;
 
 		/** Structure for a list of Data Elements containing 32-bit integers, for service attributes requiring such lists. */
 		typedef struct
 		{
-			uint8_t  Header; /**< Data Element header, should be (SDP_DATATYPE_UnsignedInt | SDP_DATASIZE_32Bit) */
-			uint32_t Value; /**< Value to store in the list Data Element */
+			uint8_t  Header; /**< Data Element header, should be (SDP_DATATYPE_UnsignedInt | SDP_DATASIZE_32Bit). */
+			uint32_t Value; /**< Value to store in the list Data Element. */
 		} SDP_Item32Bit_t;
 
-		/** Structure for a list of Data Elements containing UUIDs, for service attributes requiring UUID lists. */
+		/** Structure for a list of Data Elements containing 64-bit integers, for service attributes requiring such lists. */
 		typedef struct
 		{
-			uint8_t Header; /**< Data Element header, should be (SDP_DATATYPE_UUID | SDP_DATASIZE_128Bit) */
-			UUID_t  UUID; /**< UUID to store in the list Data Element */
+			uint8_t  Header; /**< Data Element header, should be (SDP_DATATYPE_UnsignedInt | SDP_DATASIZE_64Bit). */
+			uint64_t Value; /**< Value to store in the list Data Element. */
+		} SDP_Item64Bit_t;
+
+		/** Structure for a list of Data Elements containing 128-bit UUIDs, for service attributes requiring UUID lists. */
+		typedef struct
+		{
+			uint8_t Header; /**< Data Element header, should be (SDP_DATATYPE_UUID | SDP_DATASIZE_128Bit). */
+			UUID_t  UUID; /**< UUID to store in the list Data Element. */
 		} SDP_ItemUUID_t;
 
-		/** Structure for a list of Data Elements Sequences containing UUID Data Elements, for service attributes requiring
-		 *  protocol lists.
+		/** Structure for a list of Data Elements containing a string of maximum length 255, for service attributes requiring strings.
+		 *
+		 *  \note This structure should be immediately followed by the string buffer.
 		 */
 		typedef struct
 		{
-			uint8_t        Header; /**< Data Element header, should be (SDP_DATATYPE_Sequence | SDP_DATASIZE_Variable8Bit) */
-			uint8_t        Size; /**< Size of the inner Data Element sequence */
+			uint8_t Header; /**< Data Element header, should be (SDP_DATATYPE_String | SDP_DATASIZE_Variable8Bit). */
+			uint8_t Length; /**< Length of the string, in bytes. */
+		} SDP_ItemString8Bit_t;
 
-			struct
-			{
-				SDP_ItemUUID_t UUID; /**< UUID to store in the protocol list Data Element sequence */
-			} Protocol;
-		} SDP_ItemProtocol_t;
-
-		/** Structure for a list of Data Elements Sequences containing UUID Data Elements and an 8-bit param value, for service
-		 *  attributes requiring extended protocol lists containing an 8-bit value.
-		 */
+		/** Structure for a list of Data Elements containing child elements, for service attributes requiring such lists. */
 		typedef struct
 		{
-			uint8_t        Header; /**< Data Element header, should be (SDP_DATATYPE_Sequence | SDP_DATASIZE_Variable8Bit) */
-			uint8_t        Size; /**< Size of the inner Data Element sequence */
+			uint8_t Header; /**< Data Element header, should be (SDP_DATATYPE_Sequence | SDP_DATASIZE_Variable8Bit). */
+			uint8_t Size; /**< Size of the inner Data Element sequence. */
+		} SDP_ItemSequence8Bit_t;
 
-			struct
-			{
-				SDP_ItemUUID_t UUID; /**< UUID to store in the protocol list Data Element sequence */
-				SDP_Item8Bit_t Param; /**< 8-Bit Parameter associated with the service */
-			} Protocol;
-		} SDP_ItemProtocol_8BitParam_t;
-
-		/** Structure for a list of Data Elements Sequences containing UUID Data Elements and an 16-bit param value, for service
-		 *  attributes requiring extended protocol lists containing an 16-bit value.
-		 */
+		/** Structure for a list of Data Elements containing child elements, for service attributes requiring such lists. */
 		typedef struct
 		{
-			uint8_t        Header; /**< Data Element header, should be (SDP_DATATYPE_Sequence | SDP_DATASIZE_Variable8Bit) */
-			uint8_t        Size; /**< Size of the inner Data Element sequence */
-
-			struct
-			{
-				SDP_ItemUUID_t UUID; /**< UUID to store in the protocol list Data Element sequence */
-				SDP_Item16Bit_t Channel; /**< 16-Bit Parameter associated with the service */
-			} Protocol;
-		} SDP_ItemProtocol_16BitParam_t;
-
-		/** Structure for a list of Data Elements containing language encodings, including the language ID, Encoding ID and
-		 *  Attribute base offset.
-		 */
-		typedef struct
-		{
-			SDP_Item16Bit_t LanguageID; /**< Language ID for the current language */
-			SDP_Item16Bit_t EncodingID; /**< Encoding used for the current language */
-			SDP_Item16Bit_t OffsetID; /**< Attribute offset added to all strings using this language within the service */
-		} SDP_ItemLangEncoding_t;
+			uint8_t  Header; /**< Data Element header, should be (SDP_DATATYPE_Sequence | SDP_DATASIZE_Variable16Bit). */
+			uint16_t Size; /**< Size of the inner Data Element sequence. */
+		} SDP_ItemSequence16Bit_t;
 		
 #endif

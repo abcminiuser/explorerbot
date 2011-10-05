@@ -60,7 +60,7 @@
 		extern FIL MassStorage_DiskLogFile;
 
 	/* Function Prototypes: */
-		bool MassStorage_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
+		bool MassStorage_ConfigurePipes(USB_Descriptor_Device_t* const DeviceDescriptor,
 		                                uint16_t ConfigDescriptorSize,
 		                                void* ConfigDescriptorData);
 		bool MassStorage_PostConfiguration(void);

@@ -78,7 +78,7 @@ static struct
  *
  *  \return  Boolean true if a valid HID Joystick interface was found, false otherwise.
  */
-bool Joystick_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
+bool Joystick_ConfigurePipes(USB_Descriptor_Device_t* const DeviceDescriptor,
                              uint16_t ConfigDescriptorSize,
                              void* ConfigDescriptorData)
 {

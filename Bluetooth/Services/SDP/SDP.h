@@ -190,7 +190,7 @@
 		                       BT_L2CAP_Channel_t* const Channel);
 		void SDP_ProcessPacket(BT_StackConfig_t* const StackState,
                                BT_L2CAP_Channel_t* const Channel,
-                               uint16_t Length,
+                               const uint16_t Length,
                                uint8_t* Data);
 
 #endif

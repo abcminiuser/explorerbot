@@ -61,7 +61,7 @@ uint8_t BluetoothAdapter_RemoteBDADDR[BT_BDADDR_LEN] EEMEM;
  *
  *  \return  Boolean true if a valid Bluetooth interface was found, false otherwise.
  */
-bool BluetoothAdapter_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
+bool BluetoothAdapter_ConfigurePipes(USB_Descriptor_Device_t* const DeviceDescriptor,
                                      uint16_t ConfigDescriptorSize,
                                      void* ConfigDescriptorData)
 {

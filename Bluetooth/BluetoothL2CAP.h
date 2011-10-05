@@ -51,8 +51,8 @@
 
 		bool Bluetooth_L2CAP_SendPacket(BT_StackConfig_t* const StackState,
 		                                BT_L2CAP_Channel_t* const L2CAPChannel,
-		                                uint16_t Length,
-		                                void* Data);
+		                                const uint16_t Length,
+		                                const void* Data);
 		BT_L2CAP_Channel_t* const Bluetooth_L2CAP_OpenChannel(BT_StackConfig_t* const StackState,
                                                               BT_HCI_Connection_t* const HCIConnection,
                                                               const uint16_t PSM);

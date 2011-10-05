@@ -65,7 +65,7 @@
 		extern uint8_t BluetoothAdapter_RemoteBDADDR[BT_BDADDR_LEN] EEMEM;
 
 	/* Function Prototypes: */
-		bool BluetoothAdapter_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
+		bool BluetoothAdapter_ConfigurePipes(USB_Descriptor_Device_t* const DeviceDescriptor,
 		                                     uint16_t ConfigDescriptorSize,
 		                                     void* ConfigDescriptorData);
 		bool BluetoothAdapter_PostConfiguration(void);

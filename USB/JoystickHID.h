@@ -94,7 +94,7 @@
 		extern USB_ClassInfo_HID_Host_t Joystick_HID_Interface;
 
 	/* Function Prototypes: */
-		bool Joystick_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
+		bool Joystick_ConfigurePipes(USB_Descriptor_Device_t* const DeviceDescriptor,
 		                             uint16_t ConfigDescriptorSize,
 		                             void* ConfigDescriptorData);
 		bool Joystick_PostConfiguration(void);

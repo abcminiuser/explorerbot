@@ -94,7 +94,7 @@ void HID_ChannelClosed(BT_StackConfig_t* const StackState,
 
 void HID_ProcessPacket(BT_StackConfig_t* const StackState,
                        BT_L2CAP_Channel_t* const Channel,
-                       uint16_t Length,
+                       const uint16_t Length,
                        uint8_t* Data)
 {
 	switch (Channel->PSM)

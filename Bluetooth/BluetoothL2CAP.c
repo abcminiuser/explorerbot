@@ -518,8 +518,8 @@ bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 
 bool Bluetooth_L2CAP_SendPacket(BT_StackConfig_t* const StackState,
                                 BT_L2CAP_Channel_t* const L2CAPChannel,
-                                uint16_t Length,
-                                void* Data)
+                                const uint16_t Length,
+                                const void* Data)
 {
 	/* If the destination channel is not the signaling channel and it is not currently fully open, abort */
 	if (!(L2CAPChannel) || (L2CAPChannel->State != L2CAP_CHANSTATE_Open))

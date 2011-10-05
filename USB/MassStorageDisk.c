@@ -159,7 +159,7 @@ static bool MassStorage_ParseRemoteBDADDRFile(void)
  *
  *  \return  Boolean true if a valid Mass Storage interface was found, false otherwise.
  */
-bool MassStorage_ConfigurePipes(USB_Descriptor_Device_t* DeviceDescriptor,
+bool MassStorage_ConfigurePipes(USB_Descriptor_Device_t* const DeviceDescriptor,
                                uint16_t ConfigDescriptorSize,
                                void* ConfigDescriptorData)
 {

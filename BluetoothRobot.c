@@ -41,7 +41,7 @@ int main(void)
 
 	EVENT_USB_Host_DeviceUnattached();
 	sei();
-
+	
 	for (;;)
 	{
 		uint8_t ButtonStatus = Buttons_GetStateMask();
@@ -96,10 +96,10 @@ int main(void)
 			if (SensorTicksElapsed++ == 10)
 			{
 				SensorTicksElapsed = 0;
-				
+								
 				/* Update all connected sensors' values */
 				Sensors_Update();
-				
+
 				char    LineBuffer[200];
 				uint8_t LineLength;
 				

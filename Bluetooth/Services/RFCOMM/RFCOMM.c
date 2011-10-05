@@ -59,7 +59,7 @@ static uint8_t RFCOMM_ComputeFCS(const void* FrameStart,
 
 static RFCOMM_Channel_t* const RFCOMM_FindChannel(BT_StackConfig_t* const StackState,
                                                   BT_L2CAP_Channel_t* const ACLChannel,
-                                                  uint8_t DLCI)
+                                                  const uint8_t DLCI)
 {
 	/* Find corresponding entry in the RFCOMM channel multiplexer state array */
 	for (uint8_t i = 0; i < RFCOMM_MAX_OPEN_CHANNELS; i++)
@@ -83,7 +83,7 @@ static RFCOMM_Channel_t* const RFCOMM_FindChannel(BT_StackConfig_t* const StackS
 
 static RFCOMM_Channel_t* const RFCOMM_NewChannel(BT_StackConfig_t* const StackState,
                                                  BT_L2CAP_Channel_t* const ACLChannel,
-                                                 uint8_t DLCI)
+                                                 const uint8_t DLCI)
 {
 	/* Find a free entry in the RFCOMM channel multiplexer state array */
 	for (uint8_t i = 0; i < RFCOMM_MAX_OPEN_CHANNELS; i++)
@@ -116,7 +116,7 @@ static RFCOMM_Channel_t* const RFCOMM_NewChannel(BT_StackConfig_t* const StackSt
 
 static void RFCOMM_SendFrame(BT_StackConfig_t* const StackState,
                              BT_L2CAP_Channel_t* const ACLChannel,
-                             uint8_t DLCI,
+                             const uint8_t DLCI,
                              uint8_t Control,
                              const uint16_t DataLen,
                              const void* Data)
@@ -453,45 +453,24 @@ void RFCOMM_ProcessMultiplexerCommand(BT_StackConfig_t* const StackState,
 	switch (CommandHeader->Command)
 	{
 		case RFCOMM_Control_Test:
-			LCD_Clear();
-			LCD_WriteString("TEST");
-
 			RFCOMM_ProcessTestCommand(StackState, ACLChannel, CommandHeader, CommandData, CommandDataLen);
 			break;
 		case RFCOMM_Control_FlowControlEnable:
-			LCD_Clear();
-			LCD_WriteString("FCE");
-
 			RFCOMM_ProcessFCECommand(StackState, ACLChannel, CommandHeader, CommandData);
 			break;
 		case RFCOMM_Control_FlowControlDisable:
-			LCD_Clear();
-			LCD_WriteString("FCD");
-
 			RFCOMM_ProcessFCDCommand(StackState, ACLChannel, CommandHeader, CommandData);
 			break;
 		case RFCOMM_Control_ModemStatus:
-			LCD_Clear();
-			LCD_WriteString("MS");
-
 			RFCOMM_ProcessMSCommand(StackState, ACLChannel, CommandHeader, CommandData, CommandDataLen);
 			break;
 		case RFCOMM_Control_RemotePortNegotiation:
-			LCD_Clear();
-			LCD_WriteString("RPN");
-
 			RFCOMM_ProcessRPNCommand(StackState, ACLChannel, CommandHeader, CommandData, CommandDataLen);
 			break;
 		case RFCOMM_Control_RemoteLineStatus:
-			LCD_Clear();
-			LCD_WriteString("RLS");
-
 			RFCOMM_ProcessRLSCommand(StackState, ACLChannel, CommandHeader, CommandData);
 			break;
 		case RFCOMM_Control_ParameterNegotiation:
-			LCD_Clear();
-			LCD_WriteString("PN");
-
 			RFCOMM_ProcessPNCommand(StackState, ACLChannel, CommandHeader, CommandData);
 			break;
 		default:
@@ -502,7 +481,7 @@ void RFCOMM_ProcessMultiplexerCommand(BT_StackConfig_t* const StackState,
 
 static void RFCOMM_ProcessSABM(BT_StackConfig_t* const StackState,
                                BT_L2CAP_Channel_t* const ACLChannel,
-                               RFCOMM_Header_t* FrameHeader)
+                               RFCOMM_Header_t* const FrameHeader)
 {
 	/* ACK requests to the control channel (start the multiplexer) */
 	if (FrameHeader->Address.DLCI == RFCOMM_CONTROL_DLCI)
@@ -533,14 +512,14 @@ static void RFCOMM_ProcessSABM(BT_StackConfig_t* const StackState,
 
 static void RFCOMM_ProcessUA(BT_StackConfig_t* const StackState,
                              BT_L2CAP_Channel_t* const ACLChannel,
-                             RFCOMM_Header_t* FrameHeader)
+                             RFCOMM_Header_t* const FrameHeader)
 {
 	// TODO
 }
 
 static void RFCOMM_ProcessDM(BT_StackConfig_t* const StackState,
                              BT_L2CAP_Channel_t* const ACLChannel,
-                             RFCOMM_Header_t* FrameHeader)
+                             RFCOMM_Header_t* const FrameHeader)
 {
 	/* Find the corresponding entry in the RFCOMM channel list that the data is directed to */
 	RFCOMM_Channel_t* RFCOMMChannel = RFCOMM_FindChannel(StackState, ACLChannel, FrameHeader->Address.DLCI);
@@ -555,7 +534,7 @@ static void RFCOMM_ProcessDM(BT_StackConfig_t* const StackState,
 
 static void RFCOMM_ProcessDISC(BT_StackConfig_t* const StackState,
                                BT_L2CAP_Channel_t* const ACLChannel,
-                               RFCOMM_Header_t* FrameHeader)
+                               RFCOMM_Header_t* const FrameHeader)
 {
 	/* Find the corresponding entry in the RFCOMM channel list that the data is directed to */
 	RFCOMM_Channel_t* RFCOMMChannel = RFCOMM_FindChannel(StackState, ACLChannel, FrameHeader->Address.DLCI);
@@ -580,7 +559,7 @@ static void RFCOMM_ProcessDISC(BT_StackConfig_t* const StackState,
 
 static void RFCOMM_ProcessUIH(BT_StackConfig_t* const StackState,
                               BT_L2CAP_Channel_t* const ACLChannel,
-                              RFCOMM_Header_t* FrameHeader)
+                              RFCOMM_Header_t* const FrameHeader)
 {
 	uint8_t* FrameData = (uint8_t*)FrameHeader + sizeof(RFCOMM_Header_t);
 	uint16_t FrameDataLen;
@@ -619,7 +598,7 @@ static void RFCOMM_ProcessUIH(BT_StackConfig_t* const StackState,
 
 void RFCOMM_ProcessPacket(BT_StackConfig_t* const StackState,
                           BT_L2CAP_Channel_t* const Channel,
-                          uint16_t Length,
+                          const uint16_t Length,
                           uint8_t* Data)
 {
 	/* Ensure correct channel PSM before processing the data */
@@ -632,36 +611,21 @@ void RFCOMM_ProcessPacket(BT_StackConfig_t* const StackState,
 	switch (FrameHeader->Control & ~FRAME_POLL_FINAL)
 	{
 		case RFCOMM_Frame_SABM:
-			LCD_Clear();
-			LCD_WriteString("SABM");
-
 			if (FrameHeader->Control & FRAME_POLL_FINAL)
 			  RFCOMM_ProcessSABM(StackState, Channel, FrameHeader);
 			break;
 		case RFCOMM_Frame_UA:
-			LCD_Clear();
-			LCD_WriteString("UA");
-
 			if (FrameHeader->Control & FRAME_POLL_FINAL)
 			  RFCOMM_ProcessUA(StackState, Channel, FrameHeader);
 			break;
 		case RFCOMM_Frame_DM:
-			LCD_Clear();
-			LCD_WriteString("DM");
-
 			RFCOMM_ProcessDM(StackState, Channel, FrameHeader);
 			break;
 		case RFCOMM_Frame_DISC:
-			LCD_Clear();
-			LCD_WriteString("DISC");
-
 			if (FrameHeader->Control & FRAME_POLL_FINAL)
 			  RFCOMM_ProcessDISC(StackState, Channel, FrameHeader);
 			break;
 		case RFCOMM_Frame_UIH:
-			LCD_Clear();
-			LCD_WriteString("UIH");
-
 			RFCOMM_ProcessUIH(StackState, Channel, FrameHeader);
 			break;
 	}

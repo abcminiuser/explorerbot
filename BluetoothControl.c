@@ -192,103 +192,116 @@ void CALLBACK_HID_ReportReceived(BT_StackConfig_t* const StackState,
                                  uint16_t Length,
                                  uint8_t* Data)
 {
+	uint16_t MotorPower[2]    = {0, 0};
+	bool     Headlights       = false;
+	bool     HeadlightsToggle = false;
+	bool     Horn             = false;
+	bool     NoveltyHorn      = false;
+
 	/* Process output reports to look for key code changes */
 	if (ReportType == HID_DATAT_Input)
 	{
-		// TODO: FIXME
 		if (Length < 4) // Wiimote
 		{
 			switch (*((uint16_t*)&Data[1]) & 0x000F)
 			{
-				default:
-					Motors_SetChannelSpeed(0, 0);
-					break;
 				case 0x0008:
-					Motors_SetChannelSpeed( MAX_MOTOR_POWER,  MAX_MOTOR_POWER);
+					MotorPower[0] =  MAX_MOTOR_POWER;
+					MotorPower[1] =  MAX_MOTOR_POWER;
 					break;
 				case 0x0004:
-					Motors_SetChannelSpeed(-MAX_MOTOR_POWER, -MAX_MOTOR_POWER);					
+					MotorPower[0] = -MAX_MOTOR_POWER;
+					MotorPower[1] = -MAX_MOTOR_POWER;
 					break;
 				case 0x0001:
-					Motors_SetChannelSpeed(-MAX_MOTOR_POWER,  MAX_MOTOR_POWER);
+					MotorPower[0] = -MAX_MOTOR_POWER;
+					MotorPower[1] =  MAX_MOTOR_POWER;
 					break;
 				case 0x0002:
-					Motors_SetChannelSpeed( MAX_MOTOR_POWER, -MAX_MOTOR_POWER);					
+					MotorPower[0] =  MAX_MOTOR_POWER;
+					MotorPower[1] = -MAX_MOTOR_POWER;
 					break;
 			}
 			
-			Headlights_SetState(Data[2] & 0x04);
-			Speaker_Tone((Data[2] & 0x08) ? 30 : 0);
-			
 			static uint16_t PrevButtons = 0;
 			
-			if (!(PrevButtons & 0x0010) && (*((uint16_t*)&Data[1]) & 0x0010))
-			  Headlights_ToggleState();
-			
-			if (!(PrevButtons & 0x1000) && (*((uint16_t*)&Data[1]) & 0x1000))
-			  Speaker_PlaySequence(SPEAKER_SEQUENCE_LaCucaracha);
+			Headlights       = ((Data[2] & 0x04) ? true : false);
+			HeadlightsToggle = (!(PrevButtons & 0x0010) && (*((uint16_t*)&Data[1]) & 0x0010));
+			Horn             = ((Data[2] & 0x08) ? true : false);
+			NoveltyHorn      = (!(PrevButtons & 0x1000) && (*((uint16_t*)&Data[1]) & 0x1000));
 
 			PrevButtons = *((uint16_t*)&Data[1]);
 		}
 		else if (Length < 12) // Sony Ericson Z550i Phone
 		{
-			// TODO: FIXME
 			switch (*((uint16_t*)&Data[2]))
 			{
-				default:
-					Motors_SetChannelSpeed(0, 0);
-					break;
 				case 0xF600:
-					Motors_SetChannelSpeed( MAX_MOTOR_POWER,  MAX_MOTOR_POWER);
+					MotorPower[0] =  MAX_MOTOR_POWER;
+					MotorPower[1] =  MAX_MOTOR_POWER;
 					break;
 				case 0x0A00:
-					Motors_SetChannelSpeed(-MAX_MOTOR_POWER, -MAX_MOTOR_POWER);					
+					MotorPower[0] = -MAX_MOTOR_POWER;
+					MotorPower[1] = -MAX_MOTOR_POWER;
 					break;
 				case 0x00F6:
-					Motors_SetChannelSpeed(-MAX_MOTOR_POWER,  MAX_MOTOR_POWER);
+					MotorPower[0] = -MAX_MOTOR_POWER;
+					MotorPower[1] =  MAX_MOTOR_POWER;
 					break;
 				case 0x000A:
-					Motors_SetChannelSpeed( MAX_MOTOR_POWER, -MAX_MOTOR_POWER);					
+					MotorPower[0] =  MAX_MOTOR_POWER;
+					MotorPower[1] = -MAX_MOTOR_POWER;
 					break;
 			}
 			
-			Headlights_SetState(Data[1] & 0x01);
-			Speaker_Tone((Data[1] & 0x02) ? 30 : 0);
+			static uint8_t PrevButtons = 0;
+
+			HeadlightsToggle = (!(PrevButtons & 0x01) && (Data[1] & 0x01));
+			Horn             = ((Data[1] & 0x02) ? true : false);
+			
+			PrevButtons = Data[1];
 		}
 		else // PS3 Controller
 		{
 			switch (*((uint16_t*)&Data[2]))
 			{
-				default:
-					Motors_SetChannelSpeed(0, 0);
-					break;
 				case 0x0010:
-					Motors_SetChannelSpeed( MAX_MOTOR_POWER,  MAX_MOTOR_POWER);
+					MotorPower[0] =  MAX_MOTOR_POWER;
+					MotorPower[1] =  MAX_MOTOR_POWER;
 					break;
 				case 0x0040:
-					Motors_SetChannelSpeed(-MAX_MOTOR_POWER, -MAX_MOTOR_POWER);					
+					MotorPower[0] = -MAX_MOTOR_POWER;
+					MotorPower[1] = -MAX_MOTOR_POWER;
 					break;
 				case 0x0080:
-					Motors_SetChannelSpeed(-MAX_MOTOR_POWER,  MAX_MOTOR_POWER);
+					MotorPower[0] = -MAX_MOTOR_POWER;
+					MotorPower[1] =  MAX_MOTOR_POWER;
 					break;
 				case 0x0020:
-					Motors_SetChannelSpeed( MAX_MOTOR_POWER, -MAX_MOTOR_POWER);					
+					MotorPower[0] =  MAX_MOTOR_POWER;
+					MotorPower[1] = -MAX_MOTOR_POWER;
 					break;
 			}
 			
-			Headlights_SetState(*((uint16_t*)&Data[2]) & (1 << (PS3CONTROLLER_BUTTON_R2 - 1)));
-			Speaker_Tone((*((uint16_t*)&Data[2]) & (1 << (PS3CONTROLLER_BUTTON_L2 - 1))) ? 30 : 0);
-			
 			static uint16_t PrevButtons = 0;
 
-			if (!(PrevButtons & (1 << (PS3CONTROLLER_BUTTON_R1 - 1))) && (*((uint16_t*)&Data[2]) & (1 << (PS3CONTROLLER_BUTTON_R1 - 1))))
-			  Headlights_ToggleState();
-			
-			if (!(PrevButtons & (1 << (PS3CONTROLLER_BUTTON_L1 - 1))) && (*((uint16_t*)&Data[2]) & (1 << (PS3CONTROLLER_BUTTON_L1 - 1))))
-			  Speaker_PlaySequence(SPEAKER_SEQUENCE_LaCucaracha);
-			
+			Headlights       = ((*((uint16_t*)&Data[2]) & (1 << (PS3CONTROLLER_BUTTON_R2 - 1))) ? true : false);
+			HeadlightsToggle = (!(PrevButtons & (1 << (PS3CONTROLLER_BUTTON_R1 - 1))) && (*((uint16_t*)&Data[2]) & (1 << (PS3CONTROLLER_BUTTON_R1 - 1))));
+			Horn             = ((*((uint16_t*)&Data[2]) & (1 << (PS3CONTROLLER_BUTTON_L2 - 1))) ? true : false);
+			NoveltyHorn      = (!(PrevButtons & (1 << (PS3CONTROLLER_BUTTON_L1 - 1))) && (*((uint16_t*)&Data[2]) & (1 << (PS3CONTROLLER_BUTTON_L1 - 1))));
+
 			PrevButtons = *((uint16_t*)&Data[2]);
 		}
+		
+		Motors_SetChannelSpeed(MotorPower[0], MotorPower[1]);
+		Headlights_SetState(Headlights);
+		Speaker_Tone(Horn ? 30 : 0);
+
+		if (HeadlightsToggle)
+		  Headlights_ToggleState();
+		
+		if (NoveltyHorn)
+		  Speaker_PlaySequence(SPEAKER_SEQUENCE_LaCucaracha);
 	}
 }
 

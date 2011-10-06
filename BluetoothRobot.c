@@ -36,8 +36,8 @@
 int main(void)
 {
 	SetupHardware();
-	//StartupSequence();
-	//CheckSensors();
+	StartupSequence();
+	CheckSensors();
 
 	EVENT_USB_Host_DeviceUnattached();
 	sei();
@@ -92,8 +92,8 @@ int main(void)
 		
 			static uint8_t SensorTicksElapsed = 0;
 			
-			/* Update sensors every 100ms and log to disk/stream to remote device */
-			if (SensorTicksElapsed++ == 10)
+			/* Update sensors and log to disk/stream to remote device */
+			if (SensorTicksElapsed++ == SENSOR_UPDATE_TICKS)
 			{
 				SensorTicksElapsed = 0;
 								
@@ -122,6 +122,9 @@ int main(void)
 			
 			/* Update the currently playing tone through the speaker (if one is playing) */
 			Speaker_TickElapsed();
+			
+			/* Update the LCD backlight counter to automatically dim the display */
+			LCD_TickElapsed();
 		}
 		
 		BluetoothAdapter_USBTask();
@@ -148,15 +151,15 @@ void SetupHardware(void)
 	PRR0 = ((1 << PRADC)  | (1 << PRSPI));
 	PRR1 = (1 << PRUSART1);
 	
-	/* Enable system update tick timer (10ms) */
+	/* Enable system update tick timer */
 	TCCR3B = ((1 << WGM32) | (1 << CS31) | (1 << CS30));
-	OCR3A  = ((F_CPU / 64) / 100);
+	OCR3A  = ((F_CPU / 64) / (1000 / SYSTEM_TICK_MS));
 
 	/* Hardware Initialization */
 	ExternalSRAM_Init();
 	Buttons_Init();
 	Headlights_Init();
-	LCD_Init();
+	LCD_Init(true);
 	Motors_Init();
 	RGB_Init();
 	Sensors_Init();
@@ -174,13 +177,6 @@ void StartupSequence(void)
 	LCD_WriteString_P(PSTR("Bluetooth  Robot\n"
 	                       " By Dean Camera "));
 
-	/* Fade in LCD backlight to half maximum brightness to save power */
-	for (uint8_t i = 0; i < (0xFF / 2); i++)
-	{
-		LCD_SetBacklight(i);
-		Delay_MS(5);
-	}
-	
 	/* Cycle through the RGB status LED colours */
 	for (uint8_t i = 0; i < sizeof(ColourMap); i++)
 	{

@@ -43,7 +43,7 @@
 		/** Update interval that \ref Speaker_TickElapsed() will be called at, used to calculate the tick duration of notes
 		 *  in a sequence constructed with \ref SPEAKER_NOTE.
 		 */
-		#define SPEAKER_UPDATE_TICK_MS     10
+		#define SPEAKER_UPDATE_TICK_MS     SYSTEM_TICK_MS
 	
 		/** Converts a given frequency (expressed as a floating point number, in Hz) to the PWM reload value needed by
 		 *  \ref Speaker_Tone().
@@ -92,11 +92,9 @@
 		{
 			if (PWMValue)
 			{
-				#if !defined(DISABLE_SPEAKER)
 				DDRB  |= (1 << 7);
 				OCR0A  = PWMValue;
 				TCCR0B = ((1 << CS02) | (1 << CS00));
-				#endif
 			}
 			else
 			{

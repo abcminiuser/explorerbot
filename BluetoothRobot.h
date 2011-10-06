@@ -58,6 +58,10 @@
 		
 		#include "BluetoothControl.h"
 
+	/* Macros: */
+		/** Update interval that sensor update and logging functions will be called at. */
+		#define SENSOR_UPDATE_TICKS   (1000 / SYSTEM_TICK_MS)
+		
 	/* Function Prototypes: */
 		void SetupHardware(void);
 		void StartupSequence(void);

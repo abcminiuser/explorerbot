@@ -30,6 +30,11 @@
 
 #include "LCD.h"
 
+static bool    AutoBacklightEnabled = false;
+static uint8_t BacklightLevel;
+static uint8_t BacklightTicks;
+
+
 /** Latches a 4-bit data word onto the LCD bus.
  *
  *  \param[in] Data  Data word (4-bits) to latch onto the LCD bus.
@@ -92,7 +97,7 @@ static uint8_t LCD_GetDataLines(void)
 /** Intializes the LCD driver ready for use. This must be called before any other
  *  functions in the LCD driver.
  */
-void LCD_Init(void)
+void LCD_Init(bool AutoBacklight)
 {
 	DDRE |= (LCD_E | LCD_RS | LCD_RW);
 	DDRF |= (LCD_DATA7 | LCD_DATA6 | LCD_DATA5 | LCD_DATA4);
@@ -102,6 +107,7 @@ void LCD_Init(void)
 	TCCR2B = (1 << CS21);
 
 	LCD_SetBacklight(0);
+	AutoBacklightEnabled = AutoBacklight;
 
 	PORTE &= ~LCD_RS;
 	LCD_SetDataLines(0b0011);
@@ -119,6 +125,22 @@ void LCD_Init(void)
 	PORTE |=  LCD_RS;
 	
 	LCD_Clear();
+}
+
+void LCD_TickElapsed(void)
+{
+	if (!(AutoBacklightEnabled))
+	  return;
+
+	if (BacklightTicks < LCD_AUTOBACKLIGHT_DELAY_TICKS)
+	{
+		BacklightTicks++;
+	}
+	else if (BacklightLevel > LCD_AUTOBACKLIGHT_DIM)
+	{
+		BacklightLevel--;
+		LCD_SetBacklight(BacklightLevel);
+	}
 }
 
 /** Clears all text on the LCD display, moving the cursor back to the (1, 0) home position. */
@@ -187,6 +209,13 @@ void LCD_WriteByte(const uint8_t Byte)
 	
 	LCD_SetDataLines(Byte >> 4);
 	LCD_SetDataLines(Byte & 0x0F);
+	
+	if (AutoBacklightEnabled)
+	{
+		BacklightTicks = 0;
+		BacklightLevel = LCD_AUTOBACKLIGHT_BRIGHT;
+		LCD_SetBacklight(BacklightLevel);
+	}
 }
 
 /** Writes a NUL terminated string to the LCD bus, starting from the current LCD DRAM address.

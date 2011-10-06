@@ -41,13 +41,27 @@
 		#include <LUFA/Common/Common.h>
 		
 	/* Macros: */
-		#define LCD_E      (1 << 3)
-		#define LCD_RW     (1 << 4)
-		#define LCD_RS     (1 << 5)
-		#define LCD_DATA7  (1 << 0)
-		#define LCD_DATA6  (1 << 1)
-		#define LCD_DATA5  (1 << 2)
-		#define LCD_DATA4  (1 << 3)
+		#define LCD_E                          (1 << 3)
+		#define LCD_RW                         (1 << 4)
+		#define LCD_RS                         (1 << 5)
+		#define LCD_DATA7                      (1 << 0)
+		#define LCD_DATA6                      (1 << 1)
+		#define LCD_DATA5                      (1 << 2)
+		#define LCD_DATA4                      (1 << 3)
+		
+		/** Update interval that \ref LCD_TickElapsed() will be called at, used to calculate the tick duration of the backlight
+		 *  automatic dimming function.
+		 */
+		#define LCD_AUTOBACKLIGHT_TICK_MS      SYSTEM_TICK_MS
+		
+		/** Update ticks to elapse before the automatic display backlight dimming (if enabled) will begin. */
+		#define LCD_AUTOBACKLIGHT_DELAY_TICKS  (2000 / LCD_AUTOBACKLIGHT_TICK_MS)
+		
+		/** Maximum backlight level to set as part of the automatic backlight dimming feature (if enabled). */
+		#define LCD_AUTOBACKLIGHT_BRIGHT       0xFF
+
+		/** Minimum backlight level to set as part of the automatic backlight dimming feature (if enabled). */
+		#define LCD_AUTOBACKLIGHT_DIM          (0xFF / 2)
 	
 	/* Inline Functions: */
 		/** Sets the LCD backlight intensity level.
@@ -57,11 +71,12 @@
 		static inline void LCD_SetBacklight(const uint8_t Intensity)
 		{	
 			OCR2A = Intensity;
-		}		
+		}
 		
 	/* Function Prototypes: */
-		void    LCD_Init(void);
+		void    LCD_Init(bool AutoBacklight);
 		void    LCD_Clear(void);
+		void    LCD_TickElapsed(void);
 		void    LCD_SetCursor(const uint8_t Y,
 		                      const uint8_t X);
 		void    LCD_SetCustomChar(const uint8_t Index,

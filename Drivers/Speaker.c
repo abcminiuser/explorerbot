@@ -104,9 +104,13 @@ void Speaker_TickElapsed(void)
  */
 void Speaker_PlaySequence(const uint8_t SequenceID)
 {
+	#if !defined(DISABLE_SPEAKER_SEQUENCES)
 	SequencePosition     = pgm_read_ptr(&Sequence_Table[SequenceID]);
 	SequenceTicksElapsed = 0;
 	SequenceTickDuration = 10;
+	#else
+	(void)SequenceID;
+	#endif
 }
 
 /** Plays the given tone through the speaker, if a note sequence is not currently playing.

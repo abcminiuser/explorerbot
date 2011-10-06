@@ -60,6 +60,13 @@ namespace RobotSensorStream.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap action_refresh_blue {
+            get {
+                object obj = ResourceManager.GetObject("action_refresh_blue", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap FourWalledCubicle {
             get {
                 object obj = ResourceManager.GetObject("FourWalledCubicle", resourceCulture);

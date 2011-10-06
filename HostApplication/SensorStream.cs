@@ -55,29 +55,36 @@ namespace RobotSensorStream
 
         private void btnConnect_Click(object sender, EventArgs e)
         {
-            if (cmbPort.Text.Length == 0)
-                return;
-
             if (spSerialPort.IsOpen)
             {
                 Log("Closing port " + cmbPort.Text);
                 spSerialPort.Close();
+                Log("Closed port " + cmbPort.Text);
+
+                btnConnect.Text = "Connect";
             }
-
-            ReceivedLines.Clear();
-
-            try
+            else
             {
-                Log("Opening port " + cmbPort.Text + "...");
-                spSerialPort.PortName = cmbPort.Text;
+                if (cmbPort.Text.Length == 0)
+                    return;
 
-                spSerialPort.Open();
-                Log("Opened port " + cmbPort.Text);
-            }
-            catch (Exception ex)
-            {
-                Log("Could not open port " + cmbPort.Text + " (" + ex.Message + ")");
-                return;
+                ReceivedLines.Clear();
+
+                try
+                {
+                    Log("Opening port " + cmbPort.Text + "...");
+                    spSerialPort.PortName = cmbPort.Text;
+
+                    spSerialPort.Open();
+                    Log("Opened port " + cmbPort.Text);
+                }
+                catch (Exception ex)
+                {
+                    Log("Could not open port " + cmbPort.Text + " (" + ex.Message + ")");
+                    return;
+                }
+
+                btnConnect.Text = "Disconnect";
             }
         }
 
@@ -101,14 +108,14 @@ namespace RobotSensorStream
             for (int i = 0; i < 3; i++)
             {
                 if (Double.TryParse(SensorValues[0 + i], out CurrentSensorValue))
-                  AddChartPoint(chtDirection.Series[i].Points, ((CurrentSensorValue / (double)0xFFF) * chtDirection.ChartAreas[0].AxisY.Maximum));
+                    AddChartPoint(chtDirection.Series[i].Points, CurrentSensorValue * (1229 / (double)0xFFF));
             }
 
             /* Convert accelerometer data to human readable units and add it to the graph */
             for (int i = 0; i < 3; i++)
             {
                 if (Double.TryParse(SensorValues[3 + i], out CurrentSensorValue))
-                    AddChartPoint(chtAcceleration.Series[i].Points, ((CurrentSensorValue / (double)0x1FF) * chtAcceleration.ChartAreas[0].AxisY.Maximum));
+                    AddChartPoint(chtAcceleration.Series[i].Points, CurrentSensorValue * (2 / (double)0x1FF));
             }
 
             /* Convert gyroscope data to human readable units and add it to the graph */

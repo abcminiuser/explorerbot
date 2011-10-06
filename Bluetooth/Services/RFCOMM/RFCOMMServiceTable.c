@@ -28,7 +28,10 @@ SDP_Item32Bit_t PROGMEM SerialPort_Attribute_ServiceHandle = SDP_ITEM32BIT(SDP_D
 const struct
 {
 	SDP_ItemSequence8Bit_t Header;
-	SDP_ItemUUID_t         UUIDList[1];
+	struct
+	{
+		SDP_ItemUUID_t     SerialPortUUID;
+	} UUIDList;
 } PROGMEM SerialPort_Attribute_ServiceClassIDs =
 	{
 		SDP_ITEMSEQUENCE8BIT(sizeof(SerialPort_Attribute_ServiceClassIDs.UUIDList)),
@@ -91,7 +94,10 @@ const struct
 const struct
 {
 	SDP_ItemSequence8Bit_t Header;
-	SDP_ItemUUID_t         UUIDList[1];
+	struct
+	{
+		SDP_ItemUUID_t     PublicBrowseGroupUUID;
+	} UUIDList;
 } PROGMEM SerialPort_Attribute_BrowseGroupList =
 	{
 		SDP_ITEMSEQUENCE8BIT(sizeof(SerialPort_Attribute_BrowseGroupList.UUIDList)),
@@ -108,19 +114,17 @@ const struct
 	SDP_ItemSequence8Bit_t Header;
 	struct
 	{
-		SDP_Item16Bit_t LanguageID;
-		SDP_Item16Bit_t EncodingID;
-		SDP_Item16Bit_t OffsetID;
-	} LanguageEncodings[1];
+		SDP_Item16Bit_t    LanguageID;
+		SDP_Item16Bit_t    EncodingID;
+		SDP_Item16Bit_t    OffsetID;
+	} LanguageEncoding;
 } PROGMEM SerialPort_Attribute_LanguageBaseIDOffset =
 	{
-		SDP_ITEMSEQUENCE8BIT(sizeof(SerialPort_Attribute_LanguageBaseIDOffset.LanguageEncodings)),
+		SDP_ITEMSEQUENCE8BIT(sizeof(SerialPort_Attribute_LanguageBaseIDOffset.LanguageEncoding)),
 		{
-			{
-				SDP_ITEM16BIT(SDP_DATATYPE_UnsignedInt, CPU_TO_BE16(0x454E)),
-				SDP_ITEM16BIT(SDP_DATATYPE_UnsignedInt, CPU_TO_BE16(0x006A)),
-				SDP_ITEM16BIT(SDP_DATATYPE_UnsignedInt, CPU_TO_BE16(0x0100)),
-			},
+			SDP_ITEM16BIT(SDP_DATATYPE_UnsignedInt, CPU_TO_BE16(0x454E)),
+			SDP_ITEM16BIT(SDP_DATATYPE_UnsignedInt, CPU_TO_BE16(0x006A)),
+			SDP_ITEM16BIT(SDP_DATATYPE_UnsignedInt, CPU_TO_BE16(0x0100)),
 		},
 	};
 

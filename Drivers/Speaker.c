@@ -50,7 +50,7 @@ static const uint16_t Sequence_LaCucaracha[]   PROGMEM = {SPEAKER_NOTE(261.63, 5
                                                           SPEAKER_NOTE(440.0, 100),  0};
 
 /** Table of note sequences which can be played via \ref Speaker_PlaySequence(). */
-static const uint16_t* Sequence_Table[]        PROGMEM = {Sequence_Connecting, Sequence_Connected,
+static const uint16_t* const Sequence_Table[]  PROGMEM = {Sequence_Connecting, Sequence_Connected,
                                                           Sequence_Disconnected, Sequence_ConnectFailed,
                                                           Sequence_LaCucaracha};
 

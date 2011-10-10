@@ -22,6 +22,8 @@
 #define _BLUETOOTH_CLASS_CODES_H_
 
 	/* Macros: */
+		/** \name Bluetooth Service Class types. */
+		//@{
 		#define DEVICE_CLASS_SERVICE_POSITIONING               (1UL << 16)
 		#define DEVICE_CLASS_SERVICE_NETWORKING                (1UL << 17)
 		#define DEVICE_CLASS_SERVICE_RENDERING                 (1UL << 18)
@@ -30,7 +32,10 @@
 		#define DEVICE_CLASS_SERVICE_AUDIO                     (1UL << 21)
 		#define DEVICE_CLASS_SERVICE_TELEPHONY                 (1UL << 22)
 		#define DEVICE_CLASS_SERVICE_INFORMATION               (1UL << 23)
-
+		//@}
+		
+		/** \name Bluetooth Major Class types. */
+		//@{
 		#define DEVICE_CLASS_MAJOR_MISC                        (0x00 << 8)
 		#define DEVICE_CLASS_MAJOR_COMPUTER                    (0x01 << 8)
 		#define DEVICE_CLASS_MAJOR_PHONE                       (0x02 << 8)
@@ -39,7 +44,10 @@
 		#define DEVICE_CLASS_MAJOR_PERIPHERAL                  (0x05 << 8)
 		#define DEVICE_CLASS_MAJOR_IMAGING                     (0x06 << 8)
 		#define DEVICE_CLASS_MAJOR_UNCLASSIFIED                (0x1F << 8)
+		//@}
 
+		/** \name Bluetooth Minor Computer Class types. */
+		//@{
 		#define DEVICE_CLASS_MINOR_COMPUTER_UNCATEGORIZED      (0x00 << 2)
 		#define DEVICE_CLASS_MINOR_COMPUTER_DESKTOP            (0x01 << 2)
 		#define DEVICE_CLASS_MINOR_COMPUTER_SERVER             (0x02 << 2)
@@ -47,14 +55,20 @@
 		#define DEVICE_CLASS_MINOR_COMPUTER_HANDHELD           (0x04 << 2)
 		#define DEVICE_CLASS_MINOR_COMPUTER_PALM               (0x05 << 2)
 		#define DEVICE_CLASS_MINOR_COMPUTER_WEARABLE           (0x06 << 2)
+		//@}
 
+		/** \name Bluetooth Minor Phone Class types. */
+		//@{
 		#define DEVICE_CLASS_MINOR_PHONE_UNCATEGORIZED         (0x00 << 2)
 		#define DEVICE_CLASS_MINOR_PHONE_CELLULAR              (0x01 << 2)
 		#define DEVICE_CLASS_MINOR_PHONE_CORDLESS              (0x02 << 2)
 		#define DEVICE_CLASS_MINOR_PHONE_SMARTPHONE            (0x03 << 2)
 		#define DEVICE_CLASS_MINOR_PHONE_WIREDMODEM            (0x04 << 2)
 		#define DEVICE_CLASS_MINOR_PHONE_ISDN                  (0x05 << 2)
+		//@}
 
+		/** \name Bluetooth Minor LAN Class types. */
+		//@{
 		#define DEVICE_CLASS_MINOR_LAN_FULLY_AVAILABLE         (0x00 << 5)
 		#define DEVICE_CLASS_MINOR_LAN_1_TO_17_PC_UTILIZED     (0x01 << 5)
 		#define DEVICE_CLASS_MINOR_LAN_17_TO_33_PC_UTILIZED    (0x02 << 5)
@@ -63,7 +77,10 @@
 		#define DEVICE_CLASS_MINOR_LAN_67_TO_83_PC_UTILIZED    (0x05 << 5)
 		#define DEVICE_CLASS_MINOR_LAN_83_TO_99_PC_UTILIZED    (0x06 << 5)
 		#define DEVICE_CLASS_MINOR_LAN_NO_SERVICE_AVAILABLE    (0x07 << 5)
+		//@}
 
+		/** \name Bluetooth Minor AV Class types. */
+		//@{
 		#define DEVICE_CLASS_MINOR_AV_UNCATEGORIZED            (0x00 << 2)
 		#define DEVICE_CLASS_MINOR_AV_HEADSET                  (0x01 << 2)
 		#define DEVICE_CLASS_MINOR_AV_HANDSFREE                (0x02 << 2)
@@ -81,7 +98,10 @@
 		#define DEVICE_CLASS_MINOR_AV_DISPLAY_AND_LOUDSPEAKER  (0x0F << 2)
 		#define DEVICE_CLASS_MINOR_AV_VIDEO_CONFERENCING       (0x10 << 2)
 		#define DEVICE_CLASS_MINOR_AV_GAMING_TOY               (0x12 << 2)
+		//@}
 
+		/** \name Bluetooth Minor Peripheral Class types. */
+		//@{
 		#define DEVICE_CLASS_MINOR_PERIPHERAL_KEYBOARD         (0x01 << 6)
 		#define DEVICE_CLASS_MINOR_PERIPHERAL_POINTING         (0x02 << 6)
 		#define DEVICE_CLASS_MINOR_PERIPHERAL_COMBO            (0x03 << 6)
@@ -92,11 +112,15 @@
 		#define DEVICE_CLASS_MINOR_PERIPHERAL_SENSING_DEVICE   (0x04 << 2)
 		#define DEVICE_CLASS_MINOR_PERIPHERAL_DIGITIZER        (0x05 << 2)
 		#define DEVICE_CLASS_MINOR_PERIPHERAL_CARD_READER      (0x06 << 2)
+		//@}
 
+		/** \name Bluetooth Minor Imaging Class types. */
+		//@{
 		#define DEVICE_CLASS_MINOR_IMAGING_DISPLAY             (1 << 4)
 		#define DEVICE_CLASS_MINOR_IMAGING_CAMERA              (1 << 5)
 		#define DEVICE_CLASS_MINOR_IMAGING_SCANNER             (1 << 6)
 		#define DEVICE_CLASS_MINOR_IMAGING_PRINTER             (1 << 7)
+		//@}
 
 #endif
 

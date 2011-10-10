@@ -40,11 +40,24 @@
 		 */
 		typedef struct
 		{
-			uint8_t  PDU; /**< SDP packet type, a SDP_PDU_* mask value */
-			uint16_t TransactionID; /**< Unique transaction ID number to associate requests and responses */
-			uint16_t ParameterLength; /**< Length of the data following the SDP header */
-			uint8_t  Parameters[];
+			uint8_t  PDU; /**< SDP packet type, a SDP_PDU_* mask value. */
+			uint16_t TransactionID; /**< Unique transaction ID number to associate requests and responses. */
+			uint16_t ParameterLength; /**< Length of the data following the SDP header. */
+			uint8_t  Parameters[]; /**< SDP packet parameters contained in the packet. */
 		} ATTR_PACKED BT_SDP_PDUHeader_t;
+
+		/** Structure for a SDP service entry node, which links a service attribute table to a particular stack instance. For each service that is to
+		 *  be registered to a stack in the SDP service, an instance of this structure must be created and filled out before registering the node in the
+		 *  SDP service list via \ref SDP_RegisterService().
+		 */
+		typedef struct SDP_ServiceEntry_t
+		{
+			BT_StackConfig_t*                  Stack; /**< Stack the service node should be registered to, or NULL if all stacks. */
+			const uint8_t                      TotalTableAttributes; /**< Total number of attributes stored in the service's attribute table. */
+			const SDP_ServiceAttributeTable_t* AttributeTable; /**< Attribute table of the service, stored in PROGMEM. */
+
+			struct SDP_ServiceEntry_t*         NextService; /**< Pointer to the next service node in the registration list (for internal use only). */
+		} SDP_ServiceEntry_t;
 
 	/* Inline Functions: */
 		/** Writes 8 bits of raw data to the given buffer, incrementing the buffer position afterwards.

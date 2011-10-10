@@ -127,6 +127,9 @@ void LCD_Init(bool AutoBacklight)
 	LCD_Clear();
 }
 
+/** Updates the LCD backlight when Automatic Backlight Adjustment Mode is enabled, dimming the backlight
+ *  automatically after a certain number of ticks has elasped.
+ */
 void LCD_TickElapsed(void)
 {
 	if (!(AutoBacklightEnabled))

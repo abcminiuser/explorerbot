@@ -17,8 +17,6 @@
 
 	/* Includes: */
 		#include <LUFA/Common/Common.h>
-		
-		#include "../Drivers/LCD.h"
 
 	/* Defines: */
 		/** Length of a Bluetooth device address in bytes. */
@@ -67,14 +65,17 @@
 		};
 
 	/* Type Defines: */
+		/** Type define for a Bluetooth HCI connection information structure.  This structure contains all the relevant
+		 *  information on a HCI channel for data transmission and reception by the stack.
+		 */
 		typedef struct
 		{
-			uint8_t  State;
-			uint8_t  RemoteBDADDR[BT_BDADDR_LEN];
-			uint16_t Handle;
-			uint8_t  LinkType;
-			uint8_t  CurrentIdentifier;
-			bool     LocallyInitiated;
+			uint8_t  State; /**< Current connection state, a value from the \ref BT_HCIStates_t enum. */
+			uint8_t  RemoteBDADDR[BT_BDADDR_LEN]; /**< Remote Bluetooth device's BDADDR for the connection. */
+			uint16_t Handle; /**< Bluetooth HCI layer connection handle in the adapter for the connection. */
+			uint8_t  LinkType; /**< Link type of the connection, a value from the \ref BT_LinkTypes_t enum. */
+			uint8_t  CurrentIdentifier; /**< Current Bluetooth HCI signal layer identifier index. */
+			bool     LocallyInitiated; /**< Boolean true if the connection was initiated by the local device, false if remotely initiated. */
 		} BT_HCI_Connection_t;
 	
 		/** Type define for a Bluetooth L2CAP channel information structure. This structure contains all the relevant
@@ -82,7 +83,7 @@
 		 */
 		typedef struct
 		{
-			uint16_t ConnectionHandle; /** HCI connection handle for the channel. */
+			uint16_t ConnectionHandle; /**< HCI connection handle for the channel. */
 			uint8_t  State; /**< Current channel state, a value from the \ref BT_L2CAP_ChannelStates_t enum. */
 			uint16_t LocalNumber; /**< Local channel number on the device. */
 			uint16_t RemoteNumber; /**< Remote channel number on the connected device. */

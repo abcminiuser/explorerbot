@@ -15,6 +15,9 @@
 #ifndef _BLUETOOTH_SERVICE_SDP_TABLEDEFS_H_
 #define _BLUETOOTH_SERVICE_SDP_TABLEDEFS_H_
 
+	/* Includes: */
+		#include "SDP.h"
+
 	/* Macros: */
 		/** Size of a full 128 bit UUID, in bytes. */
 		#define UUID_SIZE_BYTES                         16
@@ -95,15 +98,6 @@
 			uint16_t    AttributeID; /**< Attribute ID of the table element which the UUID service supports. */
 			const void* Data; /**< Pointer to the attribute data, located in PROGMEM memory space. */
 		} SDP_ServiceAttributeTable_t;
-
-		typedef struct SDP_ServiceEntry_t
-		{
-			BT_StackConfig_t*                  Stack; /**< Stack the service node should be registered to, or NULL if all stacks. */
-			const uint8_t                      TotalTableAttributes; /**< Total number of attributes stored in the service's attribute table. */
-			const SDP_ServiceAttributeTable_t* AttributeTable; /**< Attribute table of the service, stored in PROGMEM. */
-
-			struct SDP_ServiceEntry_t*         NextService; /**< Pointer to the next service node in the registration list (for internal use only). */
-		} SDP_ServiceEntry_t;
 
 		/** Structure for a list of Data Elements containing 8-bit integers, for service attributes requiring such lists. */
 		typedef struct

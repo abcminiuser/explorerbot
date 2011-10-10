@@ -160,11 +160,11 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 
 		/* Try to create a new connection handle for the connection request */
 		BT_HCI_Connection_t* Connection      = Bluetooth_HCI_NewConnection(StackState, ConnectionRequestEventHeader->RemoteBDADDR, ConnectionRequestEventHeader->LinkType);		
-		uint8_t              RejectionReason = ERROR_LIMITED_RESOURCES;
+		uint8_t              RejectionReason = HCI_ERROR_LIMITED_RESOURCES;
 		
 		/* If a connection handle was created, fire user-application callback to accept or reject the request - otherwise reject with a LIMITED RESOURCES error code */
 		if (Connection)
-		  RejectionReason = CALLBACK_Bluetooth_ConnectionRequest(StackState, Connection) ? 0 : ERROR_UNACCEPTABLE_BDADDR;
+		  RejectionReason = CALLBACK_Bluetooth_ConnectionRequest(StackState, Connection) ? 0 : HCI_ERROR_UNACCEPTABLE_BDADDR;
 		
 		BT_HCICommand_Header_t* HCICommandHeader = (BT_HCICommand_Header_t*)StackState->Config.PacketBuffer;
 
@@ -293,7 +293,7 @@ void Bluetooth_HCI_ProcessDataPacket(BT_StackConfig_t* const StackState)
 	BT_HCIData_Header_t* HCIDataHeader = (BT_HCIData_Header_t*)StackState->Config.PacketBuffer;
 	
 	/* If an open device connection with the correct connection handle was not foumd, abort */	
-	BT_HCI_Connection_t* HCIConnection = Bluetooth_HCI_FindConnection(StackState, NULL, HCIDataHeader->ConnectionHandle);
+	BT_HCI_Connection_t* HCIConnection = Bluetooth_HCI_FindConnection(StackState, NULL, HCIDataHeader->Handle);
 
 	/* If an open device connection with the correct connection handle was not foumd, abort */
 	if (!(HCIConnection))
@@ -389,10 +389,10 @@ BT_HCI_Connection_t* Bluetooth_HCI_Connect(BT_StackConfig_t* const StackState,
 	
 	BT_HCICommand_Header_t* HCICommandHeader = (BT_HCICommand_Header_t*)StackState->Config.PacketBuffer;
 	HCICommandHeader->OpCode             = CPU_TO_LE16(OGF_LINK_CONTROL | OCF_LINK_CONTROL_CREATE_CONNECTION),
-	HCICommandHeader->ParameterLength    = sizeof(BT_HCIEvent_CreateConnection_t);
+	HCICommandHeader->ParameterLength    = sizeof(BT_HCICommand_CreateConnection_t);
 	
 	/* Fill out HCI connection parameters - assume role switch allowed for now, and all packet types supported */
-	BT_HCIEvent_CreateConnection_t* CreateConnectHeader = (BT_HCIEvent_CreateConnection_t*)&HCICommandHeader->Parameters;
+	BT_HCICommand_CreateConnection_t* CreateConnectHeader = (BT_HCICommand_CreateConnection_t*)&HCICommandHeader->Parameters;
 	memcpy(CreateConnectHeader->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
 	CreateConnectHeader->PacketType      = CPU_TO_LE16(0xCC18);
 	CreateConnectHeader->PageScanMode    = 1;
@@ -442,8 +442,8 @@ bool HCI_SendPacket(BT_StackConfig_t* const StackState,
 	  return false;
 
 	BT_HCIData_Header_t* HCIDataHeader = (BT_HCIData_Header_t*)StackState->Config.PacketBuffer;
-	HCIDataHeader->ConnectionHandle = cpu_to_le16(HCIConnection->Handle | BT_L2CAP_FIRST_AUTOFLUSH);
-	HCIDataHeader->DataLength       = cpu_to_le16(Length);
+	HCIDataHeader->Handle     = cpu_to_le16(HCIConnection->Handle | BT_L2CAP_FIRST_AUTOFLUSH);
+	HCIDataHeader->DataLength = cpu_to_le16(Length);
 
 	memcpy(HCIDataHeader->Data, Data, Length);
 

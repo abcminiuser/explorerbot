@@ -71,7 +71,7 @@
 		{
 			uint16_t DestinationChannel; /**< Destination channel address which is to be configured. */
 			uint16_t Flags; /**< Configuration flags for the request, including command continuation. */
-			uint8_t  Options[];
+			uint8_t  Options[]; /**< Option values for the channel configuration. */
 		} ATTR_PACKED BT_Signal_ConfigurationReq_t;
 
 		/** Configuration Response signaling command structure, for responses to channel configuration requests. */

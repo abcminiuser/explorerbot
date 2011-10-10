@@ -26,6 +26,7 @@
 		#include "BluetoothL2CAP.h"
 	
 	/* Macros: */
+		/** Mask for a HCI connection handle value to remove all HCI packet connection flags, leaving only the unique handle value. */
 		#define BT_HCI_CONNECTION_HANDLE_MASK     0x0EFF	
 	
 	/* Enums: */
@@ -41,13 +42,13 @@
 		/** Enum for the possible states in the Bluetooth HCI state machine. */
 		enum BT_HCIStates_t
 		{
-			HCISTATE_Init_Reset             = 0,
-			HCISTATE_Init_ReadBufferSize    = 1,
-			HCISTATE_Init_GetBDADDR         = 2,
-			HCISTATE_Init_SetLocalName      = 3,
-			HCISTATE_Init_SetDeviceClass    = 4,
-			HCISTATE_Init_SetScanEnable     = 5,
-			HCISTATE_Idle                   = 6,
+			HCISTATE_Init_Reset                   = 0, /**< The HCI layer is currently resetting the Bluetooth adapter. */
+			HCISTATE_Init_ReadBufferSize          = 1, /**< The HCI layer is currently retrieving the buffer size of the Bluetooth adapter. */
+			HCISTATE_Init_GetBDADDR               = 2, /**< The HCI layer is currently retrieving the local BDADDR the Bluetooth adapter. */
+			HCISTATE_Init_SetLocalName            = 3, /**< The HCI layer is currently setting the local name of the Bluetooth adapter. */
+			HCISTATE_Init_SetDeviceClass          = 4, /**< The HCI layer is currently setting the local device class of the Bluetooth adapter. */
+			HCISTATE_Init_SetScanEnable           = 5, /**< The HCI layer is currently setting the scan mode of the Bluetooth adapter. */
+			HCISTATE_Idle                         = 6, /**< The HCI layer is ready to accept and send data. */
 		};
 
 	/* Function Prototypes: */

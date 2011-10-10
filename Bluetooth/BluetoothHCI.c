@@ -364,6 +364,14 @@ bool Bluetooth_HCI_Manage(BT_StackConfig_t* const StackState)
 	return true;
 }
 
+/** Initiates a connection to a remote Bluetooth device, referenced by its Bluetooth BDADDR.
+ *
+ *  \param[in, out] StackState    Pointer to a Bluetooth Stack state table.
+ *  \param[in]      RemoteBDADDR  Address of the remote device to connect to.
+ *  \param[in]      LinkType      Type of link to establish, a value from \ref BT_LinkTypes_t.
+ *
+ *  \return Handle to the created HCI connection if one was made, \c NULL otherwise.
+ */
 BT_HCI_Connection_t* Bluetooth_HCI_Connect(BT_StackConfig_t* const StackState,
                                            const uint8_t* const RemoteBDADDR,
                                            const uint8_t LinkType)
@@ -404,6 +412,13 @@ BT_HCI_Connection_t* Bluetooth_HCI_Connect(BT_StackConfig_t* const StackState,
 	return HCIConnection;
 }
 
+/** Disconnects from an established HCI connection to a remote device.
+ *
+ *  \param[in, out] StackState     Pointer to a Bluetooth Stack state table.
+ *  \param[in, out] HCIConnection  Handle of the HCI connection to close.
+ *
+ *  \return Boolean \c true if the connection was disconnected, \c false otherwise.
+ */
 bool Bluetooth_HCI_Disconnect(BT_StackConfig_t* const StackState,
                               BT_HCI_Connection_t* const HCIConnection)
 {
@@ -415,6 +430,10 @@ bool Bluetooth_HCI_Disconnect(BT_StackConfig_t* const StackState,
 	switch (HCIConnection->State)
 	{
 		case HCI_CONSTATE_Connecting:
+			/* Can only terminate connections initiated from the local device (not remote devices) */
+			if (!(HCIConnection->LocallyInitiated))
+			  break;
+		
 			HCICommandHeader->OpCode           = CPU_TO_LE16(OGF_LINK_CONTROL | OCF_LINK_CONTROL_CREATE_CONNECTION_CANCEL),
 			HCICommandHeader->ParameterLength  = sizeof(BT_BDADDR_LEN);
 			memcpy(&HCICommandHeader->Parameters[0], HCIConnection->RemoteBDADDR, BT_BDADDR_LEN);
@@ -424,16 +443,26 @@ bool Bluetooth_HCI_Disconnect(BT_StackConfig_t* const StackState,
 			HCICommandHeader->ParameterLength  = 3;
 			HCICommandHeader->Parameters[0]    = (HCIConnection->Handle & 0xFF);		
 			HCICommandHeader->Parameters[1]    = (HCIConnection->Handle >> 8);		
-			HCICommandHeader->Parameters[2]    = 0x00;		
+			HCICommandHeader->Parameters[2]    = 0x00;
+			break;
 		default:
-			return false;			
+			return true;			
 	}
 	
 	CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCICommand, (sizeof(BT_HCICommand_Header_t) + HCICommandHeader->ParameterLength));
 	return true;
 }
 
-bool HCI_SendPacket(BT_StackConfig_t* const StackState,
+/** Sends a HCI data packet to the Bluetooth adapter for transmittion to a remote device.
+ *
+ *  \param[in, out] StackState     Pointer to a Bluetooth Stack state table.
+ *  \param[in, out] HCIConnection  Handle of the HCI connection to send the data on.
+ *  \param[in]      Length         Length of the data to send in bytes.
+ *  \param[in]      Data           Data to send through the nominated HCI connection.
+ *
+ *  \return Boolean \c true if the data was sent, \c false otherwise.
+ */ 
+void HCI_SendPacket(BT_StackConfig_t* const StackState,
 		            BT_HCI_Connection_t* const HCIConnection,
 		            const uint16_t Length,
 		            const void* Data)
@@ -444,7 +473,6 @@ bool HCI_SendPacket(BT_StackConfig_t* const StackState,
 	BT_HCIData_Header_t* HCIDataHeader = (BT_HCIData_Header_t*)StackState->Config.PacketBuffer;
 	HCIDataHeader->Handle     = cpu_to_le16(HCIConnection->Handle | BT_L2CAP_FIRST_AUTOFLUSH);
 	HCIDataHeader->DataLength = cpu_to_le16(Length);
-
 	memcpy(HCIDataHeader->Data, Data, Length);
 
 	CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCIData, (sizeof(BT_HCIData_Header_t) + Length));

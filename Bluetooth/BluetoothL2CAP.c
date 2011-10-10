@@ -22,6 +22,11 @@
 #include "BluetoothL2CAP.h"
 
 
+/** Notifies the L2CAP layer of a HCI connection layer disconnection, so that any associated L2CAP channels can also be terminated.
+ *
+ *  \param[in, out] StackState        Pointer to a Bluetooth Stack state table.
+ *  \param[in]      ConnectionHandle  Handle of the HCI connection that was disconnected.
+ */
 void Bluetooth_L2CAP_NotifyHCIDisconnection(BT_StackConfig_t* const StackState,
                                             const uint16_t ConnectionHandle)
 {
@@ -41,6 +46,16 @@ void Bluetooth_L2CAP_NotifyHCIDisconnection(BT_StackConfig_t* const StackState,
 	}
 }
 
+/** Finds a Bluetooth L2CAP connection handle associated with a given HCI connection handle and
+ *  local or remote L2CAP channel number.
+ *
+ *  \param[in, out] StackState        Pointer to a Bluetooth Stack state table.
+ *  \param[in]      ConnectionHandle  Handle of the HCI connection to search on.
+ *  \param[in]      LocalChannel      Local L2CAP channel index to search for, or zero if this should be ignored.
+ *  \param[in]      RemoteChannel     Remote L2CAP channel index to search for, or zero if this should be ignored.
+ *
+ *  \return Handle to the L2CAP channel object found matching the input search parameter(s) if found, \c NULL otherwise.
+ */
 BT_L2CAP_Channel_t* const Bluetooth_L2CAP_FindChannel(BT_StackConfig_t* const StackState,
                                                       const uint16_t ConnectionHandle,
                                                       const uint16_t LocalChannel,
@@ -58,12 +73,15 @@ BT_L2CAP_Channel_t* const Bluetooth_L2CAP_FindChannel(BT_StackConfig_t* const St
 		}
 		
 		/* If local channel number specified, check for match */
-		if ((LocalChannel) && (CurrentChannel->LocalNumber == LocalChannel))
-		  return CurrentChannel;
+		if ((LocalChannel) && (CurrentChannel->LocalNumber != LocalChannel))
+		  continue;
 
 		/* If remote channel number specified, check for match */
-		if ((RemoteChannel) && (CurrentChannel->RemoteNumber == RemoteChannel))
-		  return CurrentChannel;
+		if ((RemoteChannel) && (CurrentChannel->RemoteNumber != RemoteChannel))
+		  continue;
+		
+		/* All search parameters match, return the found channel object */
+		return CurrentChannel;
 	}
 	
 	return NULL;
@@ -395,7 +413,9 @@ void Bluetooth_L2CAP_Init(BT_StackConfig_t* const StackState)
 
 /** Processes a recieved Bluetooth L2CAP packet from a Bluetooth adapter.
  *
- *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.
+ *  \param[in, out] StackState     Pointer to a Bluetooth Stack state table.
+ *  \param[in, out] HCIConnection  HCI connection handle the packet was received on.
+ *  \param[in]      Data           Pointer to the received data packet.
  */
 void Bluetooth_L2CAP_ProcessPacket(BT_StackConfig_t* const StackState,
                                    BT_HCI_Connection_t* const HCIConnection,
@@ -512,6 +532,14 @@ bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 	return false;
 }
 
+/** Opens a new channel to the given device on the given PSM.
+ *
+ *  \param[in, out] StackState     Pointer to a Bluetooth Stack state table.
+ *  \param[in, out] HCIConnection  Handle to the HCI connection the L2CAP channel is to be opened upon.
+ *  \param[in]      PSM            Protocol the opened channel is to be assicated with.
+ *
+ *  \return Handle to a L2CAP channel object if one was created, \c NULL otherwise.
+ */
 BT_L2CAP_Channel_t* const Bluetooth_L2CAP_OpenChannel(BT_StackConfig_t* const StackState,
                                                       BT_HCI_Connection_t* const HCIConnection,
                                                       const uint16_t PSM)
@@ -545,6 +573,11 @@ BT_L2CAP_Channel_t* const Bluetooth_L2CAP_OpenChannel(BT_StackConfig_t* const St
 	return L2CAPChannel;
 }
 
+/** Closes the given L2CAP channel.
+ *
+ *  \param[in, out] StackState    Pointer to a Bluetooth Stack state table.
+ *  \param[in, out] L2CAPChannel  Handle to the L2CAP channel object which is to be closed.
+ */
 void Bluetooth_L2CAP_CloseChannel(BT_StackConfig_t* const StackState,
                                   BT_L2CAP_Channel_t* const L2CAPChannel)
 {
@@ -575,6 +608,15 @@ void Bluetooth_L2CAP_CloseChannel(BT_StackConfig_t* const StackState,
 	Bluetooth_L2CAP_SendSignalPacket(StackState, HCIConnection, sizeof(PacketData), &PacketData);
 }
 
+/** Sends the given data through the given established L2CAP channel to a remote device.
+ *
+ *  \param[in, out] StackState    Pointer to a Bluetooth Stack state table.
+ *  \param[in, out] L2CAPChannel  Handle to the established L2CAP channel object which is to be used.
+ *  \param[in]      Length        Length of the data to send to the remote device, in bytes.
+ *  \param[in]      Data          Data to send to the remote device.
+ *
+ *  \return Boolean \c true if the data was sent sucessfully, \c false otherwise.
+ */
 bool Bluetooth_L2CAP_SendPacket(BT_StackConfig_t* const StackState,
                                 BT_L2CAP_Channel_t* const L2CAPChannel,
                                 const uint16_t Length,
@@ -614,7 +656,9 @@ bool Bluetooth_L2CAP_SendPacket(BT_StackConfig_t* const StackState,
 		/* Determine the length of the next fragment */
 		BytesInPacket = MIN(BytesRemaining, L2CAPChannel->RemoteMTU);
 		
-		HCI_SendPacket(StackState, HCIConnection, BytesInPacket, Data);
+		if (!(HCI_SendPacket(StackState, HCIConnection, BytesInPacket, Data)))
+		  return false;
+
 		BytesRemaining -= BytesInPacket;
 		Data           += BytesInPacket;
 	}

@@ -81,7 +81,7 @@ DRESULT disk_write (
 		ErrorCode = RES_ERROR;
 	}
 	
-	return RES_OK;
+	return ErrorCode;
 }
 #endif /* _READONLY */
 

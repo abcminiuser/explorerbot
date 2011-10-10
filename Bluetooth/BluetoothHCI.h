@@ -29,6 +29,15 @@
 		#define BT_HCI_CONNECTION_HANDLE_MASK     0x0EFF	
 	
 	/* Enums: */
+		/** Enum for the possible device connection states. */
+		enum BT_HCI_ConnectionStates_t
+		{
+			HCI_CONSTATE_Closed                   = 0, /**< Connnection is closed and inactive. No data may be sent or received. */
+			HCI_CONSTATE_New                      = 1, /**< Connection has been created, but no initial handshake has been sent or received. */
+			HCI_CONSTATE_Connecting               = 2, /**< Connection is being established, but has not been completed. */
+			HCI_CONSTATE_Connected                = 3, /**< Connection is complete and ready for data transfer. */
+		};
+
 		/** Enum for the possible states in the Bluetooth HCI state machine. */
 		enum BT_HCIStates_t
 		{

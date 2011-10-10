@@ -63,7 +63,7 @@ void Bluetooth_ProcessPacket(BT_StackConfig_t* const StackState,
 		case BLUETOOTH_PACKET_HCIEvent:
 			Bluetooth_HCI_ProcessEventPacket(StackState);
 			return;
-		case BLUETOOTH_PACKET_Data:
+		case BLUETOOTH_PACKET_HCIData:
 			Bluetooth_HCI_ProcessDataPacket(StackState);
 			return;
 	}

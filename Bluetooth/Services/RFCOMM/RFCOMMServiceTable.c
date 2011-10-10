@@ -27,7 +27,7 @@ static const SDP_Item32Bit_t PROGMEM SerialPort_Attribute_ServiceHandle = SDP_IT
  */
 static const struct
 {
-	SDP_ItemSequence8Bit_t Header;
+	SDP_ItemSequence8Bit_t UUIDList_Header;
 	struct
 	{
 		SDP_ItemUUID_t     SerialPortUUID;
@@ -46,43 +46,35 @@ static const struct
  */
 static const struct
 {
-	SDP_ItemSequence8Bit_t Header;
+	SDP_ItemSequence8Bit_t Protocols_Header;
 	struct
 	{
+		SDP_ItemSequence8Bit_t L2CAP_Header;
 		struct
 		{
-			SDP_ItemSequence8Bit_t Header;
-			struct
-			{
-				SDP_ItemUUID_t UUID;
-			} Data;
+			SDP_ItemUUID_t UUID;
 		} L2CAP;
+
+		SDP_ItemSequence8Bit_t RFCOMM_Header;
 		struct
 		{
-			SDP_ItemSequence8Bit_t Header;
-			struct
-			{
-				SDP_ItemUUID_t UUID;
-				SDP_Item8Bit_t ControlChannel;
-			} Data;
+			SDP_ItemUUID_t UUID;
+			SDP_Item8Bit_t ControlChannel;
 		} RFCOMM;
 	} Protocols;
 } PROGMEM SerialPort_Attribute_ProtocolDescriptor =
 	{
 		SDP_ITEMSEQUENCE8BIT(sizeof(SerialPort_Attribute_ProtocolDescriptor.Protocols)),
 		{
+			SDP_ITEMSEQUENCE8BIT(sizeof(SerialPort_Attribute_ProtocolDescriptor.Protocols.L2CAP)),
 			{
-				SDP_ITEMSEQUENCE8BIT(sizeof(SerialPort_Attribute_ProtocolDescriptor.Protocols.L2CAP.Data)),
-				{
-					SDP_ITEMUUID(L2CAP_UUID),
-				},
+				SDP_ITEMUUID(L2CAP_UUID),
 			},
+
+			SDP_ITEMSEQUENCE8BIT((sizeof(SerialPort_Attribute_ProtocolDescriptor.Protocols.RFCOMM))),
 			{
-				SDP_ITEMSEQUENCE8BIT((sizeof(SerialPort_Attribute_ProtocolDescriptor.Protocols.RFCOMM.Data))),
-				{
-					SDP_ITEMUUID(RFCOMM_UUID),
-					SDP_ITEM8BIT(SDP_DATATYPE_UnsignedInt, 0x01),
-				},
+				SDP_ITEMUUID(RFCOMM_UUID),
+				SDP_ITEM8BIT(SDP_DATATYPE_UnsignedInt, 0x01),
 			},
 		},
 	};
@@ -93,7 +85,7 @@ static const struct
  */
 static const struct
 {
-	SDP_ItemSequence8Bit_t Header;
+	SDP_ItemSequence8Bit_t UUIDList_Header;
 	struct
 	{
 		SDP_ItemUUID_t     PublicBrowseGroupUUID;
@@ -111,7 +103,7 @@ static const struct
  */
 static const struct
 {
-	SDP_ItemSequence8Bit_t Header;
+	SDP_ItemSequence8Bit_t LanguageEncoding_Header;
 	struct
 	{
 		SDP_Item16Bit_t    LanguageID;
@@ -131,7 +123,7 @@ static const struct
 /** Serial Port Profile attribute, listing a human readable name of the service. */
 static const struct
 {
-	SDP_ItemString8Bit_t Header;
+	SDP_ItemString8Bit_t Text_Header;
 	char                 Text[];
 } PROGMEM SerialPort_Attribute_ServiceName =
 	{
@@ -141,7 +133,7 @@ static const struct
 /** Serial Port Profile attribute, listing a human readable description of the service. */
 static const struct
 {
-	SDP_ItemString8Bit_t Header;
+	SDP_ItemString8Bit_t Text_Header;
 	char                 Text[];
 } PROGMEM SerialPort_Attribute_ServiceDescription =
 	{

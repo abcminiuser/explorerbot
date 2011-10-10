@@ -371,6 +371,10 @@ BT_HCI_Connection_t* Bluetooth_HCI_Connect(BT_StackConfig_t* const StackState,
 	/* Disallow connections until the stack is ready */
 	if (StackState->State.HCI.State != HCISTATE_Idle)
 	  return NULL;
+	  
+	/* Only ACL connections are implemented at present, reject other types */
+	if (LinkType != LINK_TYPE_ACL)
+	  return NULL;
 	
 	/* Create a new HCI connection entry in the stack's HCI connection table */
 	BT_HCI_Connection_t* HCIConnection = Bluetooth_HCI_NewConnection(StackState, RemoteBDADDR, LinkType);
@@ -443,7 +447,7 @@ bool HCI_SendPacket(BT_StackConfig_t* const StackState,
 
 	memcpy(HCIDataHeader->Data, Data, Length);
 
-	CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_Data, (sizeof(BT_HCIData_Header_t) + Length));
+	CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCIData, (sizeof(BT_HCIData_Header_t) + Length));
 	return true;
 }
 

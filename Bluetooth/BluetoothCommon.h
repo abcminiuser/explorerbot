@@ -34,67 +34,36 @@
 		#define DEFAULT_L2CAP_CHANNEL_MTU         1024
 
 	/* Enums: */
-		/** Enum for the possible device connection states. */
-		enum BT_HCI_ConnectionStates_t
-		{
-			HCI_CONSTATE_Closed                   = 0,
-			HCI_CONSTATE_New                      = 1,
-			HCI_CONSTATE_Connecting               = 2,
-			HCI_CONSTATE_Connected                = 3,
-		};
-
-		/** Enum for the possible states for a Bluetooth L2CAP channel. */
-		enum BT_L2CAP_ChannelStates_t
-		{
-			L2CAP_CHANSTATE_Closed                = 0, /**< Channel is closed and inactive. No data may be sent or received. */
-			L2CAP_CHANSTATE_New                   = 1, 
-			L2CAP_CHANSTATE_WaitConnect           = 2, /**< A connection request has been received, but a response has not been sent. */
-			L2CAP_CHANSTATE_WaitConnectRsp        = 3, /**< A connection request has been sent, but a response has not been received. */
-			L2CAP_CHANSTATE_Config_WaitConfig     = 4, /**< Channel has been connected, but not yet configured on either end. */
-			L2CAP_CHANSTATE_Config_WaitSendConfig = 5, /**< Channel configuration has been received and accepted, but not yet sent. */
-			L2CAP_CHANSTATE_Config_WaitReqResp    = 6, /**< Channel configuration has been sent but not responded to, and a configuration
-			                                            *   request from the remote end has not yet been received.
-			                                            */
-			L2CAP_CHANSTATE_Config_WaitResp       = 7, /**< Channel configuration has been sent but not accepted, but a configuration request
-			                                            *   from the remote end has been accepted.
-			                                            */
-			L2CAP_CHANSTATE_Config_WaitReq        = 8, /**< Channel configuration has been sent and accepted, but a configuration request
-			                                            *   from the remote end has not yet been accepted.
-			                                            */
-			L2CAP_CHANSTATE_Open                  = 9, /**< Channel is open and ready to send or receive data */
-			L2CAP_CHANSTATE_WaitDisconnect        = 10, /**< A disconnection request has been sent, but not yet acknowledged. */
-		};
-
 		/** Enum for the possible L2CAP channel Protocol Service Multiplexer (PSM) values. */
 		enum BT_ChannelPSM_t
 		{
-			CHANNEL_PSM_SDP                       = 0x0001,
-			CHANNEL_PSM_UDP                       = 0x0002,
-			CHANNEL_PSM_RFCOMM                    = 0x0003,
-			CHANNEL_PSM_TCP                       = 0x0004,
-			CHANNEL_PSM_IP                        = 0x0009,
-			CHANNEL_PSM_FTP                       = 0x000A,
-			CHANNEL_PSM_HTTP                      = 0x000C,
-			CHANNEL_PSM_UPNP                      = 0x0010,
-			CHANNEL_PSM_HIDCTL                    = 0x0011,
-			CHANNEL_PSM_HIDINT                    = 0x0013,
+			CHANNEL_PSM_SDP                       = 0x0001, /**< Bluetooth channel PSM for Service Discovery Protocol. */
+			CHANNEL_PSM_UDP                       = 0x0002, /**< Bluetooth channel PSM for UDP. */
+			CHANNEL_PSM_RFCOMM                    = 0x0003, /**< Bluetooth channel PSM for RFCOMM. */
+			CHANNEL_PSM_TCP                       = 0x0004, /**< Bluetooth channel PSM for TCP. */
+			CHANNEL_PSM_IP                        = 0x0009, /**< Bluetooth channel PSM for IP. */
+			CHANNEL_PSM_FTP                       = 0x000A, /**< Bluetooth channel PSM for FTP. */
+			CHANNEL_PSM_HTTP                      = 0x000C, /**< Bluetooth channel PSM for HTTP. */
+			CHANNEL_PSM_UPNP                      = 0x0010, /**< Bluetooth channel PSM for UPNP. */
+			CHANNEL_PSM_HIDCTL                    = 0x0011, /**< Bluetooth channel PSM for HID Control. */
+			CHANNEL_PSM_HIDINT                    = 0x0013, /**< Bluetooth channel PSM for HID Data. */
 		};
 
 		/** Enum for the possible Bluetooth packet types. */
 		enum BT_PacketType_t
 		{
-			BLUETOOTH_PACKET_HCICommand           = 0x01,
-			BLUETOOTH_PACKET_Data                 = 0x02,
-			BLUETOOTH_PACKET_SynchData            = 0x03,
-			BLUETOOTH_PACKET_HCIEvent             = 0x04,
+			BLUETOOTH_PACKET_HCICommand           = 0x01, /**< Bluetooth packet is a HCI Command Packet. */
+			BLUETOOTH_PACKET_HCIData              = 0x02, /**< Bluetooth packet is a HCI Data Packet. */
+			BLUETOOTH_PACKET_HCISynchData         = 0x03, /**< Bluetooth packet is a HCI Synchronous Data Packet. */
+			BLUETOOTH_PACKET_HCIEvent             = 0x04, /**< Bluetooth packet is a HCI Event Packet. */
 		};
 		
 		/** Enum for the possible Bluetooth link types. */
 		enum BT_LinkTypes_t
 		{
-			LINK_TYPE_SCO                       = 0x00,
-			LINK_TYPE_ACL                       = 0x01,
-			LINK_TYPE_eSCO                      = 0x02,
+			LINK_TYPE_SCO                         = 0x00, /**< Bluetooth link type for a SCO link. */
+			LINK_TYPE_ACL                         = 0x01, /**< Bluetooth link type for an ACL link. */
+			LINK_TYPE_eSCO                        = 0x02, /**< Bluetooth link type for an Extended SCO link. */
 		};
 
 	/* Type Defines: */
@@ -122,6 +91,7 @@
 			uint16_t RemoteMTU; /**< MTU of data sent from the local device to the connected device. */
 		} BT_L2CAP_Channel_t;
 
+		/** Type define for a Bluetooth Stack instance, used to contain the complete stack state for a Bluetooth adapter. */
 		typedef struct
 		{
 			struct
@@ -129,26 +99,26 @@
 				uint32_t Class; /**< Class of the local device, a mask of DEVICE_CLASS_* masks. */
 				char     PINCode[16]; /**< Pin code required to send or receive in order to authenticate with a remote device. */
 				char*    Name; /**< Name of the local Bluetooth device, up to 248 characters. */
-				bool     Discoverable;
-				void*    PacketBuffer;
-			} Config;
+				bool     Discoverable; /**< Indicates if the stack should be discoverable to other devices during an Inquiry. */
+				void*    PacketBuffer; /**< Pointer to a location where packets are to be stored and retrieved from the physical adapter. */
+			} Config; /**< Stack configuration. This must be set by the user application before the stack is initialized via \ref Bluetooth_Init(). */
 			
 			struct
 			{
 				struct
 				{
-					uint8_t             State;
-					bool                StateTransition;
-					uint8_t             LocalBDADDR[BT_BDADDR_LEN];
-					BT_HCI_Connection_t Connections[MAX_DEVICE_CONNECTIONS];
-				} HCI;
+					uint8_t             State; /**< Current HCI state machine state, a value from the \ref BT_HCIStates_t enum. */
+					bool                StateTransition; /**< Indicates if the state machine has undergone a state transition that needs to be processed. */
+					uint8_t             LocalBDADDR[BT_BDADDR_LEN]; /**< Address of the local Bluetooth adapter attached to this stack instance. */
+					BT_HCI_Connection_t Connections[MAX_DEVICE_CONNECTIONS]; /**< HCI connection state information list. */
+				} HCI; /**< HCI layer connection state information. */
 				
 				struct
 				{
-					uint8_t             LastAllocatedChannel;
-					BT_L2CAP_Channel_t  Channels[MAX_LOGICAL_CHANNELS];
-				} L2CAP;
-			} State;
+					uint8_t             LastAllocatedChannel; /**< Index of the last allocated L2CAP channel. */
+					BT_L2CAP_Channel_t  Channels[MAX_LOGICAL_CHANNELS]; /**< L2CAP channel state information list. */
+				} L2CAP; /**< L2CAP layer channel state information. */
+			} State; /**< Stack state information, managed by the Bluetooth stack internally. */
 		} BT_StackConfig_t;
 
 	/* User Implemented Callback Functions: */

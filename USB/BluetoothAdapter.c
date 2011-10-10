@@ -200,7 +200,7 @@ void BluetoothAdapter_USBTask(void)
 		Pipe_Freeze();
 
 		RGB_SetColour(RGB_ALIAS_Busy);
-		Bluetooth_ProcessPacket(&BluetoothAdapter_Stack, BLUETOOTH_PACKET_Data);
+		Bluetooth_ProcessPacket(&BluetoothAdapter_Stack, BLUETOOTH_PACKET_HCIData);
 		RGB_SetColour(RGB_ALIAS_Connected);
 	}
 	
@@ -256,7 +256,7 @@ void CALLBACK_Bluetooth_SendPacket(BT_StackConfig_t* const StackState,
 			Pipe_SelectPipe(PIPE_CONTROLPIPE);
 			USB_Host_SendControlRequest(StackState->Config.PacketBuffer);
 			break;
-		case BLUETOOTH_PACKET_Data:
+		case BLUETOOTH_PACKET_HCIData:
 			Pipe_SelectPipe(BLUETOOTH_DATA_OUT_PIPE);
 
 			/* HCI data packets must be sent over the Data OUT pipe */

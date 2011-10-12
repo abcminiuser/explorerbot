@@ -66,12 +66,9 @@ static RFCOMM_Channel_t* const RFCOMM_FindChannel(BT_StackConfig_t* const StackS
 	{
 		RFCOMM_Channel_t* RFCOMMChannel = &RFCOMM_Channels[i];
 
-		/* Filter out closed channel objects, and object allocated to other stacks */
-		if ((RFCOMMChannel->State == RFCOMM_Channel_Closed) ||
-		    (RFCOMMChannel->Stack != StackState))
-		{
-			continue;
-		}
+		/* Filter out closed channel objects */
+		if (RFCOMMChannel->State == RFCOMM_Channel_Closed)
+		  continue;
 
 		/* If the DLCI matches against the current channel, return the found channel object */
 		if ((RFCOMMChannel->DLCI == DLCI) && (RFCOMMChannel->ACLChannel == ACLChannel))
@@ -271,10 +268,6 @@ void RFCOMM_ChannelClosed(BT_StackConfig_t* const StackState,
 	{
 		RFCOMM_Channel_t* RFCOMMChannel = &RFCOMM_Channels[i];
 		
-		/* Ignore channels allocated to different stack instances */
-		if (RFCOMMChannel->Stack != StackState)
-		  continue;
-		  
 		if (RFCOMMChannel->ACLChannel == Channel)
 		{
 			RFCOMMChannel->State = RFCOMM_Channel_Closed;
@@ -338,7 +331,7 @@ static void RFCOMM_ProcessMSCommand(BT_StackConfig_t* const StackState,
 		RFCOMMChannel->DataLink.RemoteSignals = MSCParams->Signals;
 		RFCOMMChannel->ConfigFlags |= RFCOMM_CONFIG_REMOTESIGNALS;
 		
-		/* Send the MSC response to the remote device */
+		/* Send the MSC response to the remote device (echo sent data to confirm) */
 		RFCOMM_SendControlFrame(StackState, ACLChannel, RFCOMM_Control_ModemStatus, false, sizeof(*MSCParams), MSCParams);		
 	}
 	else
@@ -536,6 +529,26 @@ static void RFCOMM_ProcessDISC(BT_StackConfig_t* const StackState,
                                BT_L2CAP_Channel_t* const ACLChannel,
                                RFCOMM_Header_t* const FrameHeader)
 {
+	/* ACK requests to the control channel (stop the multiplexer) */
+	if (FrameHeader->Address.DLCI == RFCOMM_CONTROL_DLCI)
+	{
+		/* Terminate all open channels in the multiplexer */
+		for (uint8_t i = 0; i < RFCOMM_MAX_OPEN_CHANNELS; i++)
+		{
+			RFCOMM_Channel_t* RFCOMMChannel = &RFCOMM_Channels[i];
+			
+			if ((RFCOMMChannel->ACLChannel == ACLChannel) && (RFCOMMChannel->State != RFCOMM_Channel_Closed))
+			{
+				RFCOMMChannel->State = RFCOMM_Channel_Closed;
+				EVENT_RFCOMM_ChannelClosed(StackState, RFCOMMChannel);
+			}
+		}
+		
+		/* ACK the session disconnection request */
+		RFCOMM_SendFrame(StackState, ACLChannel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_UA, 0, NULL);
+		return;
+	}
+	
 	/* Find the corresponding entry in the RFCOMM channel list that the data is directed to */
 	RFCOMM_Channel_t* RFCOMMChannel = RFCOMM_FindChannel(StackState, ACLChannel, FrameHeader->Address.DLCI);
 

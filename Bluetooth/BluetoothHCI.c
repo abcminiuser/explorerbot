@@ -462,8 +462,8 @@ bool Bluetooth_HCI_Disconnect(BT_StackConfig_t* const StackState,
  *
  *  \return Boolean \c true if the data was sent, \c false otherwise.
  */ 
-void HCI_SendPacket(BT_StackConfig_t* const StackState,
-		            BT_HCI_Connection_t* const HCIConnection,
+bool HCI_SendPacket(BT_StackConfig_t* const StackState,
+                    BT_HCI_Connection_t* const HCIConnection,
 		            const uint16_t Length,
 		            const void* Data)
 {

@@ -646,7 +646,9 @@ bool Bluetooth_L2CAP_SendPacket(BT_StackConfig_t* const StackState,
 	FirstPacket.L2CAPDataHeader.DestinationChannel = cpu_to_le16(L2CAPChannel->RemoteNumber);
 	memcpy(FirstPacket.Data, Data, BytesInPacket);
 	
-	HCI_SendPacket(StackState, HCIConnection, sizeof(FirstPacket), &FirstPacket);
+	if (!(HCI_SendPacket(StackState, HCIConnection, sizeof(FirstPacket), &FirstPacket)))
+	  return false;
+
 	BytesRemaining -= BytesInPacket;
 	Data           += BytesInPacket;
 		

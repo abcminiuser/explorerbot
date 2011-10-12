@@ -164,10 +164,12 @@ void EVENT_RFCOMM_ChannelOpened(BT_StackConfig_t* const StackState,
 	/* Save the handle to the opened RFCOMM channel object, so we can write to it later */
 	RFCOMM_SensorStream = Channel;
 
-	/* Construct the sensor CSV header lines and write them to the virtual serial port */
-	char LineBuffer[200];
-	Sensors_WriteSensorCSVHeader(LineBuffer);
-	RFCOMM_SendData(RFCOMM_SensorStream, strlen(LineBuffer), LineBuffer);
+	/* Construct the sensor CSV header line(s) */
+	char    LineBuffer[200];
+	uint8_t LineLength = Sensors_WriteSensorCSVHeader(LineBuffer);
+
+	/* Write sensor CSV data to the virtual serial port */
+	RFCOMM_SendData(RFCOMM_SensorStream, LineLength, LineBuffer);
 }
 
 void EVENT_RFCOMM_ChannelClosed(BT_StackConfig_t* const StackState,
@@ -198,7 +200,7 @@ void CALLBACK_HID_ReportReceived(BT_StackConfig_t* const StackState,
 	bool     Horn             = false;
 	bool     NoveltyHorn      = false;
 
-	/* Process output reports to look for key code changes */
+	/* Process input reports to look for key code changes */
 	if (ReportType == HID_DATAT_Input)
 	{
 		if (Length < 4) // Wiimote
@@ -293,6 +295,7 @@ void CALLBACK_HID_ReportReceived(BT_StackConfig_t* const StackState,
 			PrevButtons = *((uint16_t*)&Data[2]);
 		}
 		
+		/* Change robot hardware states to match the values in the controller report */
 		Motors_SetChannelSpeed(MotorPower[0], MotorPower[1]);
 		Headlights_SetState(Headlights);
 		Speaker_Tone(Horn ? 30 : 0);

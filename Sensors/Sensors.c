@@ -77,8 +77,10 @@ void Sensors_Update(void)
  *  \note The caller is responsible for providing a line buffer large enough to hold the created string.
  *
  *  \param[out] LineBuffer  Buffer where the created sensor CSV header text can be stored.
+ *
+ *  \return Length of the constructed CSV header line.
  */
-void Sensors_WriteSensorCSVHeader(char* const LineBuffer)
+uint8_t Sensors_WriteSensorCSVHeader(char* const LineBuffer)
 {
 	/* Terminate the string at the very start, so that future strcat() calls work correctly */
 	LineBuffer[0] = '\0';
@@ -117,6 +119,8 @@ void Sensors_WriteSensorCSVHeader(char* const LineBuffer)
 
 	/* Add newline terminator to the end of the line */
 	strcat(LineBuffer, "\r\n");
+	
+	return strlen(LineBuffer);
 }
 
 /** Creates a CSV format line of text, describing the device sensor values which have been retrieved previously.
@@ -124,8 +128,10 @@ void Sensors_WriteSensorCSVHeader(char* const LineBuffer)
  *  \note The caller is responsible for providing a line buffer large enough to hold the created string.
  *
  *  \param[out] LineBuffer  Buffer where the created sensor CSV data text can be stored.
+ *
+ *  \return Length of the constructed CSV header line.
  */
-void Sensors_WriteSensorDataCSV(char* const LineBuffer)
+uint8_t Sensors_WriteSensorDataCSV(char* const LineBuffer)
 {
 	uint8_t OutputLen = 0;
 
@@ -149,5 +155,7 @@ void Sensors_WriteSensorDataCSV(char* const LineBuffer)
 	
 	/* Add newline terminator to the end of the line */
 	strcat(LineBuffer, "\r\n");
+	
+	return strlen(LineBuffer);
 }
 

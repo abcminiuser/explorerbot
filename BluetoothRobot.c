@@ -100,12 +100,9 @@ int main(void)
 				/* Update all connected sensors' values */
 				Sensors_Update();
 
-				char    LineBuffer[200];
-				uint8_t LineLength;
-				
 				/* Construct the next sensor CSV line from the current sensor data */
-				Sensors_WriteSensorDataCSV(LineBuffer);
-				LineLength = strlen(LineBuffer);
+				char    LineBuffer[200];
+				uint8_t LineLength = Sensors_WriteSensorDataCSV(LineBuffer);
 				
 				/* Write the sensor data to the attached Mass Storage disk (if available and logging enabled) */
 				if (Disk_MS_Interface.State.IsActive && MassStorage_SensorLoggingEnabled)

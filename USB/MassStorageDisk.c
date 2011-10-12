@@ -71,12 +71,13 @@ static bool MassStorage_OpenSensorLogFile(void)
 	/* See if the existing log was created sucessfully */
 	if (ErrorCode == FR_OK)
 	{
+		/* Construct the sensor CSV header line(s) */
 		char     LineBuffer[200];
+		uint8_t  LineLength = Sensors_WriteSensorCSVHeader(LineBuffer);
+
+		/* Write constructed CSV header to the attached mass storage disk */
 		uint16_t BytesWritten = 0;
-		
-		/* Construct the sensor CSV header lines and write them to disk */
-		Sensors_WriteSensorCSVHeader(LineBuffer);
-		f_write(&MassStorage_DiskLogFile, LineBuffer, strlen(LineBuffer), &BytesWritten);
+		f_write(&MassStorage_DiskLogFile, LineBuffer, LineLength, &BytesWritten);
 	}
 	else if (ErrorCode == FR_EXIST)
 	{

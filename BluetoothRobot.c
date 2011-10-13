@@ -60,19 +60,24 @@ int main(void)
 			{
 				static BT_HCI_Connection_t* RemoteConnection = NULL;
 				
+				/* Only attempt a new connection if one does not already exist */
 				if (!(RemoteConnection) || (RemoteConnection->State == HCI_CONSTATE_Closed))
 				{
+					/* Attempt a connection to the remote device whose BDADDR was retrieved from an attached flash drive previously */
 					RemoteConnection = BluetoothAdapter_ConnectToRemoteDevice();
 					
+					/* Check if a new connection was created or not, display sucess/error */
 					if (RemoteConnection)
 					{
-						LCD_WriteString_P(PSTR("\fHCI Connecting\n"));
-						LCD_WriteBDADDR(RemoteConnection->RemoteBDADDR);
+						LCD_WriteFormattedString_P(PSTR("\fHCI Connecting\n"
+						                                  "%02X%02X:%02X%02X:%02X%02X"), RemoteConnection->RemoteBDADDR[5], RemoteConnection->RemoteBDADDR[4],
+	                                                                                     RemoteConnection->RemoteBDADDR[3], RemoteConnection->RemoteBDADDR[2],
+	                                                                                     RemoteConnection->RemoteBDADDR[1], RemoteConnection->RemoteBDADDR[0]);
 						Speaker_PlaySequence(SPEAKER_SEQUENCE_Connecting);
 					}
 					else
 					{
-						LCD_WriteString_P(PSTR("\fHCI Conn Rej\n"));
+						LCD_WriteString_P(PSTR("\fHCI Conn Rej"));
 						Speaker_PlaySequence(SPEAKER_SEQUENCE_ConnectFailed);
 					}
 				}

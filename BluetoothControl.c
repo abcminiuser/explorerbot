@@ -52,8 +52,10 @@ void EVENT_Bluetooth_ManageServices(BT_StackConfig_t* const StackState)
 bool CALLBACK_Bluetooth_ConnectionRequest(BT_StackConfig_t* const StackState,
                                           BT_HCI_Connection_t* const Connection)
 {
-	LCD_WriteString_P(PSTR("\fHCI Conn Request\n"));
-	LCD_WriteBDADDR(Connection->RemoteBDADDR);
+	LCD_WriteFormattedString_P(PSTR("\fHCI Conn Request\n"
+	                                  "%02X%02X:%02X%02X:%02X%02X"), Connection->RemoteBDADDR[5], Connection->RemoteBDADDR[4],
+	                                                                 Connection->RemoteBDADDR[3], Connection->RemoteBDADDR[2],
+	                                                                 Connection->RemoteBDADDR[1], Connection->RemoteBDADDR[0]);
 	
 	/* Accept all requests from all devices regardless of BDADDR */
 	return true;
@@ -90,8 +92,11 @@ void EVENT_Bluetooth_ConnectionStateChange(BT_StackConfig_t* const StackState,
 			return;
 	}
 	
-	LCD_WriteFormattedString_P(PSTR("\fHCI %S\n"), StateMessage);
-	LCD_WriteBDADDR(Connection->RemoteBDADDR);
+	LCD_WriteFormattedString_P(PSTR("\fHCI %S\n"
+	                                  "%02X%02X:%02X%02X:%02X%02X"), StateMessage,
+	                                                                 Connection->RemoteBDADDR[5], Connection->RemoteBDADDR[4],
+	                                                                 Connection->RemoteBDADDR[3], Connection->RemoteBDADDR[2],
+	                                                                 Connection->RemoteBDADDR[1], Connection->RemoteBDADDR[0]);
 }
 
 bool CALLBACK_Bluetooth_ChannelRequest(BT_StackConfig_t* const StackState,

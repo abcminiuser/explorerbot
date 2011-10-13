@@ -55,12 +55,12 @@ static void LCD_SetDataLines(const uint8_t Data)
 	if (Data & 0x08)
 	  NewData |= LCD_DATA7;
 
-	PORTF = (PORTF & ~(LCD_DATA7 | LCD_DATA6 | LCD_DATA5 | LCD_DATA4)) | NewData;
+	LCD_DATA_PORT = (LCD_DATA_PORT & ~(LCD_DATA7 | LCD_DATA6 | LCD_DATA5 | LCD_DATA4)) | NewData;
 	
 	Delay_MS(1);
-	PORTE |= LCD_E;
+	LCD_CTRL_PORT |=  LCD_E;
 	Delay_MS(1);
-	PORTE &= ~LCD_E;
+	LCD_CTRL_PORT &= ~LCD_E;
 }
 
 /** Retrieves the next 4-bits of data from the LCD bus.
@@ -72,12 +72,12 @@ static uint8_t LCD_GetDataLines(void)
 	uint8_t CurrDataLines;
 	uint8_t NewData = 0;
 	
-	PORTE |= LCD_E;
+	LCD_CTRL_PORT |=  LCD_E;
 	Delay_MS(1);
-	PORTE &= ~LCD_E;
+	LCD_CTRL_PORT &= ~LCD_E;
 	Delay_MS(1);
 	
-	CurrDataLines = PINF;
+	CurrDataLines = LCD_DATA_PIN;
 				
 	if (CurrDataLines & LCD_DATA4)
 	  NewData |= 0x01;
@@ -99,8 +99,8 @@ static uint8_t LCD_GetDataLines(void)
  */
 void LCD_Init(bool AutoBacklight)
 {
-	DDRE |= (LCD_E | LCD_RS | LCD_RW);
-	DDRF |= (LCD_DATA7 | LCD_DATA6 | LCD_DATA5 | LCD_DATA4);
+	LCD_CTRL_DDR |= (LCD_E | LCD_RS | LCD_RW);
+	LCD_DATA_DDR |= (LCD_DATA7 | LCD_DATA6 | LCD_DATA5 | LCD_DATA4);
 	DDRB |= (1 << 4);
 	
 	TCCR2A = ((1 << COM2A1) | (1 << WGM20));
@@ -109,20 +109,21 @@ void LCD_Init(bool AutoBacklight)
 	LCD_SetBacklight(0);
 	AutoBacklightEnabled = AutoBacklight;
 
-	PORTE &= ~LCD_RS;
+	LCD_CTRL_PORT &= ~LCD_RS;
+
 	LCD_SetDataLines(0b0011);
 	Delay_MS(5);
 	LCD_SetDataLines(0b0011);
 	Delay_MS(1);
 	LCD_SetDataLines(0b0011);
 	LCD_SetDataLines(0b0010);
-	
 	LCD_WriteByte(0x88);
 	LCD_WriteByte(0x08);
 	LCD_WriteByte(0x01);
 	LCD_WriteByte(0x04);
 	LCD_WriteByte(0x0C);
-	PORTE |=  LCD_RS;
+
+	LCD_CTRL_PORT |=  LCD_RS;
 	
 	LCD_Clear();
 }
@@ -149,9 +150,9 @@ void LCD_TickElapsed(void)
 /** Clears all text on the LCD display, moving the cursor back to the (1, 0) home position. */
 void LCD_Clear(void)
 {
-	PORTE &= ~LCD_RS;
+	LCD_CTRL_PORT &= ~LCD_RS;
 	LCD_WriteByte(0x01);
-	PORTE |=  LCD_RS;
+	LCD_CTRL_PORT |=  LCD_RS;
 }
 
 /** Sets the LCD cursor position to the nominated position on the LCD display.
@@ -162,9 +163,9 @@ void LCD_Clear(void)
 void LCD_SetCursor(const uint8_t Y,
                    const uint8_t X)
 {
-	PORTE &= ~LCD_RS;
+	LCD_CTRL_PORT &= ~LCD_RS;
 	LCD_WriteByte(0x80 | (((Y - 1) * 64) + X));
-	PORTE |=  LCD_RS;
+	LCD_CTRL_PORT |=  LCD_RS;
 }
 
 /** Sets the given LCD custom character index to the given character data.
@@ -175,9 +176,9 @@ void LCD_SetCursor(const uint8_t Y,
 void LCD_SetCustomChar(const uint8_t Index,
                        const uint8_t* CharacterData)
 {
-	PORTE &= ~LCD_RS;
+	LCD_CTRL_PORT &= ~LCD_RS;
 	LCD_WriteByte(0x40 | (Index << 3));
-	PORTE |=  LCD_RS;
+	LCD_CTRL_PORT |=  LCD_RS;
 	
 	for (uint8_t i = 0; i < 8; i++)
 	  LCD_WriteByte(pgm_read_byte(CharacterData++));
@@ -191,9 +192,9 @@ uint8_t LCD_ReadByte(void)
 {
 	uint8_t Byte = 0;
 
-	PORTF &= ~(LCD_DATA7 | LCD_DATA6 | LCD_DATA5 | LCD_DATA4);
-	DDRF  &= ~(LCD_DATA7 | LCD_DATA6 | LCD_DATA5 | LCD_DATA4);
-	PORTE |= LCD_RW;
+	LCD_DATA_PORT &= ~(LCD_DATA7 | LCD_DATA6 | LCD_DATA5 | LCD_DATA4);
+	LCD_DATA_DDR  &= ~(LCD_DATA7 | LCD_DATA6 | LCD_DATA5 | LCD_DATA4);
+	LCD_CTRL_PORT |= LCD_RW;
 
 	Byte |= (LCD_GetDataLines() << 4);
 	Byte |= LCD_GetDataLines();
@@ -207,8 +208,8 @@ uint8_t LCD_ReadByte(void)
  */
 void LCD_WriteByte(const uint8_t Byte)
 {
-	PORTE &= ~LCD_RW;
-	DDRF  |= LCD_DATA7 | LCD_DATA6 | LCD_DATA5 | LCD_DATA4;
+	LCD_CTRL_PORT &= ~LCD_RW;
+	LCD_DATA_DDR  |= (LCD_DATA7 | LCD_DATA6 | LCD_DATA5 | LCD_DATA4);
 	
 	LCD_SetDataLines(Byte >> 4);
 	LCD_SetDataLines(Byte & 0x0F);
@@ -269,7 +270,7 @@ void LCD_WriteString_P(const char* String)
  */
 void LCD_WriteFormattedString(const char* FormatString, ...)
 {
-	char LineBuffer[50];
+	char LineBuffer[16 * 2];
 
 	va_list va;
 	va_start(va, FormatString);
@@ -285,7 +286,7 @@ void LCD_WriteFormattedString(const char* FormatString, ...)
  */
 void LCD_WriteFormattedString_P(const char* FormatString, ...)
 {
-	char LineBuffer[50];
+	char LineBuffer[16 * 2];
 
 	va_list va;
 	va_start(va, FormatString);
@@ -294,15 +295,3 @@ void LCD_WriteFormattedString_P(const char* FormatString, ...)
 
 	LCD_WriteString(LineBuffer);
 }
-
-/** Writes the given Bluetooth BDADDR to the LCD display at the current LCD DRAM address, in
- *  Hexadecimal format seperated by colons.
- *
- *  \param[in] BDADDRR  Pointer to a buffer containing the BDADDR to print, in binary format
- */
-void LCD_WriteBDADDR(const uint8_t* const BDADDR)
-{
-	/* Print the given Bluetooth BDADDR to the LCD at the current cursor position */
-	LCD_WriteFormattedString_P(PSTR("%02X%02X:%02X%02X:%02X%02X"), BDADDR[5], BDADDR[4], BDADDR[3], BDADDR[2], BDADDR[1], BDADDR[0]);	
-}
-

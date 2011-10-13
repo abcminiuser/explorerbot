@@ -41,6 +41,13 @@
 		#include <LUFA/Common/Common.h>
 		
 	/* Macros: */
+		#define LCD_DATA_PORT                  PORTF
+		#define LCD_DATA_PIN                   PINF
+		#define LCD_DATA_DDR                   DDRF
+		#define LCD_CTRL_PORT                  PORTE
+		#define LCD_CTRL_PIN                   PINE
+		#define LCD_CTRL_DDR                   DDRE
+	
 		#define LCD_E                          (1 << 3)
 		#define LCD_RW                         (1 << 4)
 		#define LCD_RS                         (1 << 5)
@@ -61,7 +68,7 @@
 		#define LCD_AUTOBACKLIGHT_BRIGHT       0xFF
 
 		/** Minimum backlight level to set as part of the automatic backlight dimming feature (if enabled). */
-		#define LCD_AUTOBACKLIGHT_DIM          (0xFF / 2)
+		#define LCD_AUTOBACKLIGHT_DIM          (0xFF / 3)
 	
 	/* Inline Functions: */
 		/** Sets the LCD backlight intensity level.
@@ -87,6 +94,5 @@
 		void    LCD_WriteString_P(const char* String);
 		void    LCD_WriteFormattedString(const char* FormatString, ...);
 		void    LCD_WriteFormattedString_P(const char* FormatString, ...);
-		void    LCD_WriteBDADDR(const uint8_t* const BDADDR);
 
 #endif

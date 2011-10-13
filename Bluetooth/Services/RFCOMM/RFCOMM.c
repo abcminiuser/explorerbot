@@ -245,7 +245,7 @@ void RFCOMM_Manage(BT_StackConfig_t* const StackState)
 			                                  (RFCOMM_CONFIG_REMOTESIGNALS | RFCOMM_CONFIG_LOCALSIGNALS))
 			{
 				RFCOMMChannel->State = RFCOMM_Channel_Open;
-				EVENT_RFCOMM_ChannelOpened(StackState, RFCOMMChannel);
+				EVENT_RFCOMM_ChannelStateChange(StackState, RFCOMMChannel);
 			}
 		}		
 	}
@@ -271,7 +271,7 @@ void RFCOMM_ChannelClosed(BT_StackConfig_t* const StackState,
 		if (RFCOMMChannel->ACLChannel == Channel)
 		{
 			RFCOMMChannel->State = RFCOMM_Channel_Closed;
-			EVENT_RFCOMM_ChannelClosed(StackState, RFCOMMChannel);
+			EVENT_RFCOMM_ChannelStateChange(StackState, RFCOMMChannel);
 		}
 	}
 }
@@ -540,7 +540,7 @@ static void RFCOMM_ProcessDISC(BT_StackConfig_t* const StackState,
 			if ((RFCOMMChannel->ACLChannel == ACLChannel) && (RFCOMMChannel->State != RFCOMM_Channel_Closed))
 			{
 				RFCOMMChannel->State = RFCOMM_Channel_Closed;
-				EVENT_RFCOMM_ChannelClosed(StackState, RFCOMMChannel);
+				EVENT_RFCOMM_ChannelStateChange(StackState, RFCOMMChannel);
 			}
 		}
 		
@@ -566,7 +566,7 @@ static void RFCOMM_ProcessDISC(BT_StackConfig_t* const StackState,
 	{
 		/* Mark the disconnected channel as closed in the RFCOMM channel list */
 		RFCOMMChannel->State = RFCOMM_Channel_Closed;
-		EVENT_RFCOMM_ChannelClosed(StackState, RFCOMMChannel);
+		EVENT_RFCOMM_ChannelStateChange(StackState, RFCOMMChannel);
 	}
 }
 

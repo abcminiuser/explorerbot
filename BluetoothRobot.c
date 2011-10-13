@@ -53,9 +53,8 @@ int main(void)
 			{
 				MassStorage_SensorLoggingEnabled = true;
 			
-				LCD_Clear();
-				LCD_WriteString_P(PSTR("  Disk Sensor\n"
-				                       "Logging Enabled"));
+				LCD_WriteString_P(PSTR("\f  Disk Sensor\n"
+				                         "Logging Enabled"));
 			}
 			else if (BluetoothAdapter_IsActive)
 			{
@@ -65,8 +64,7 @@ int main(void)
 				{
 					RemoteConnection = BluetoothAdapter_ConnectToRemoteDevice();
 					
-					LCD_Clear();
-					LCD_WriteString_P(PSTR("Connecting to:\n"));
+					LCD_WriteString_P(PSTR("\fHCI Connecting\n"));
 					LCD_WriteBDADDR(RemoteConnection->RemoteBDADDR);
 					
 					Speaker_PlaySequence(SPEAKER_SEQUENCE_Connecting);
@@ -170,9 +168,8 @@ void StartupSequence(void)
 	const uint8_t ColourMap[] = {RGB_COLOUR_Green, RGB_COLOUR_Cyan,   RGB_COLOUR_Blue,  RGB_COLOUR_Magenta,
 	                             RGB_COLOUR_Red,   RGB_COLOUR_Yellow, RGB_COLOUR_White, RGB_COLOUR_Off};
 
-	LCD_Clear();
-	LCD_WriteString_P(PSTR("Bluetooth  Robot\n"
-	                       " By Dean Camera "));
+	LCD_WriteString_P(PSTR("\fBluetooth  Robot\n"
+	                         " By Dean Camera "));
 
 	/* Cycle through the RGB status LED colours */
 	for (uint8_t i = 0; i < sizeof(ColourMap); i++)
@@ -192,11 +189,11 @@ void CheckSensors(void)
 	LCD_SetCustomChar('\2', LCDIcon_Tick);
 	
 	LCD_Clear();
-	LCD_WriteFormattedString_P(PSTR(" CMP %c   ACC %c\n"
-	                                " GYR %c   PRS %c"), (Sensors.Direction.Connected    ? '\2' : '\1'),
-	                                                     (Sensors.Acceleration.Connected ? '\2' : '\1'),
-	                                                     (Sensors.Orientation.Connected  ? '\2' : '\1'),
-	                                                     (Sensors.Pressure.Connected     ? '\2' : '\1'));
+	LCD_WriteFormattedString_P(PSTR("\f CMP %c   ACC %c\n"
+	                                  " GYR %c   PRS %c"), (Sensors.Direction.Connected    ? '\2' : '\1'),
+	                                                       (Sensors.Acceleration.Connected ? '\2' : '\1'),
+	                                                       (Sensors.Orientation.Connected  ? '\2' : '\1'),
+	                                                       (Sensors.Pressure.Connected     ? '\2' : '\1'));
 												 
 	Delay_MS(1500);
 }
@@ -206,8 +203,7 @@ void CheckSensors(void)
  */
 void EVENT_USB_Host_DeviceAttached(void)
 {
-	LCD_Clear();
-	LCD_WriteString_P(PSTR("* Enumerating *"));
+	LCD_WriteString_P(PSTR("\f* Enumerating *"));
 	RGB_SetColour(RGB_ALIAS_Enumerating);
 }
 
@@ -218,8 +214,7 @@ void EVENT_USB_Host_DeviceUnattached(void)
 {
 	Motors_SetChannelSpeed(0, 0);
 
-	LCD_Clear();
-	LCD_WriteString_P(PSTR(" * Insert USB *"));
+	LCD_WriteString_P(PSTR("\f * Insert USB *"));
 	RGB_SetColour(RGB_ALIAS_Disconnected);
 }
 
@@ -232,13 +227,11 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 	uint16_t ConfigDescriptorSize;
 	uint8_t  ConfigDescriptorData[512];
 
-	LCD_Clear();
-	LCD_WriteString_P(PSTR("* Configuring *"));
+	LCD_WriteString_P(PSTR("\f* Configuring *"));
 
 	if (USB_Host_GetDeviceDescriptor(&DeviceDescriptor) != HOST_SENDCONTROL_Successful)
 	{
-		LCD_Clear();
-		LCD_WriteString_P(PSTR("ERR: Dev Desc"));
+		LCD_WriteString_P(PSTR("\fERR: Dev Desc"));
 		RGB_SetColour(RGB_ALIAS_Error);
 		return;
 	}
@@ -246,8 +239,7 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 	if (USB_Host_GetDeviceConfigDescriptor(1, &ConfigDescriptorSize, ConfigDescriptorData,
 	                                       sizeof(ConfigDescriptorData)) != HOST_GETCONFIG_Successful)
 	{
-		LCD_Clear();
-		LCD_WriteString_P(PSTR("ERR: Config Desc"));
+		LCD_WriteString_P(PSTR("\fERR: Config Desc"));
 		RGB_SetColour(RGB_ALIAS_Error);
 		return;
 	}
@@ -256,31 +248,26 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 	    !(BluetoothAdapter_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData)) &&
 	    !(MassStorage_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData)))
 	{
-		LCD_Clear();
-		LCD_WriteString_P(PSTR("ERR: Unknown USB"));
+		LCD_WriteString_P(PSTR("\fERR: Unknown USB"));
 		RGB_SetColour(RGB_ALIAS_Error);
 		return;
 	}
 
 	if (USB_Host_SetDeviceConfiguration(1) != HOST_SENDCONTROL_Successful)
 	{
-		LCD_Clear();
-		LCD_WriteString_P(PSTR("ERR: Set Config"));
+		LCD_WriteString_P(PSTR("\fERR: Set Config"));
 		RGB_SetColour(RGB_ALIAS_Error);
 		return;
 	}
 	
 	if (!(Joystick_PostConfiguration()) || !(BluetoothAdapter_PostConfiguration()) || !(MassStorage_PostConfiguration()))
 	{
-		LCD_Clear();
-		LCD_WriteString_P(PSTR("ERR: Post Config"));
+		LCD_WriteString_P(PSTR("\fERR: Post Config"));
 		RGB_SetColour(RGB_ALIAS_Error);
 		return;
 	}
 	
-	LCD_Clear();
-	LCD_WriteString_P(PSTR("* System Ready *"));
-	LCD_SetCursor(2, 0);
+	LCD_WriteString_P(PSTR("\f* System Ready *\n"));
 	
 	if (Joystick_HID_Interface.State.IsActive)
 	  LCD_WriteString_P(PSTR("   (HID Mode)   "));
@@ -298,8 +285,7 @@ void EVENT_USB_Host_HostError(const uint8_t ErrorCode)
 	Motors_SetChannelSpeed(0, 0);
 	USB_Disable();
 
-	LCD_Clear();
-	LCD_WriteString_P(PSTR("ERR: Host Error"));
+	LCD_WriteString_P(PSTR("\fERR: VBUS Error"));
 	RGB_SetColour(RGB_ALIAS_Error);
 	for(;;);
 }
@@ -310,7 +296,6 @@ void EVENT_USB_Host_HostError(const uint8_t ErrorCode)
 void EVENT_USB_Host_DeviceEnumerationFailed(const uint8_t ErrorCode,
                                             const uint8_t SubErrorCode)
 {
-	LCD_Clear();
-	LCD_WriteString_P(PSTR("ERR: Device Enum"));
+	LCD_WriteString_P(PSTR("\fERR: Device Enum"));
 	RGB_SetColour(RGB_ALIAS_Error);
 }

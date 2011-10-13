@@ -136,12 +136,12 @@ namespace RobotSensorStream
 
         private void cmbPort_SelectedIndexChanged(object sender, EventArgs e)
         {
-            btnConnect.Enabled = (cmbPort.Text.Length != 0);
+            btnConnect.Enabled = cmbPort.Text.ToUpper().StartsWith("COM");
         }
 
         private void cmbPort_TextChanged(object sender, EventArgs e)
         {
-            btnConnect.Enabled = (cmbPort.Text.Length != 0);
+            btnConnect.Enabled = cmbPort.Text.ToUpper().StartsWith("COM");
         }
 
         private void btnRefreshPorts_Click(object sender, EventArgs e)

@@ -227,12 +227,16 @@ void LCD_WriteByte(const uint8_t Byte)
  */
 void LCD_WriteString(const char* String)
 {
-	while (*String != 0x00)
+	uint8_t CurrByte;
+	
+	while ((CurrByte = *String) != 0x00)
 	{
-		if (*String == '\n')
+		if (CurrByte == '\n')
 		  LCD_SetCursor(2, 0);
+		else if (CurrByte == '\f')
+		  LCD_Clear();
 		else
-		  LCD_WriteByte(*String);
+		  LCD_WriteByte(CurrByte);
 
 		String++;
 	}
@@ -250,6 +254,8 @@ void LCD_WriteString_P(const char* String)
 	{
 		if (CurrByte == '\n')
 		  LCD_SetCursor(2, 0);
+		else if (CurrByte == '\f')
+		  LCD_Clear();
 		else
 		  LCD_WriteByte(CurrByte);
 

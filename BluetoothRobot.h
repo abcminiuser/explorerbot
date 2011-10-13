@@ -60,7 +60,7 @@
 
 	/* Macros: */
 		/** Update interval that sensor update and logging functions will be called at. */
-		#define SENSOR_UPDATE_TICKS   (100 / SYSTEM_TICK_MS)
+		#define SENSOR_UPDATE_TICKS   (200 / SYSTEM_TICK_MS)
 		
 	/* Function Prototypes: */
 		void SetupHardware(void);

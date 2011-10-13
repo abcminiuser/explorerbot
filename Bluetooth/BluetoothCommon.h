@@ -167,46 +167,26 @@
 		/** User application event callback, fired when the Bluetooth stack management routine has been run, and the user services may be managed. */
 		void EVENT_Bluetooth_ManageServices(BT_StackConfig_t* const StackState);
 
-		/** User application event callback, fired when the Bluetooth stack has completed a connection to a remote device.
+		/** User application event callback, fired when the Bluetooth stack has changed the state of a connection to a remote device.
+		 *
+		 *  \note This event fires only when a connection has opened, closed, or failed to open.
 		 *
 		 *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.
 		 *  \param[in, out] Connection  Pointer to the established device connection information.
 		 */
-		void EVENT_Bluetooth_ConnectionComplete(BT_StackConfig_t* const StackState,
-		                                        BT_HCI_Connection_t* const Connection);
+		void EVENT_Bluetooth_ConnectionStateChange(BT_StackConfig_t* const StackState,
+                                                   BT_HCI_Connection_t* const Connection);
 
-		/** User application event callback, fired when the Bluetooth stack has failed to complete a connection to a remote device.
-		 *
-		 *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.
-		 *  \param[in, out] Connection  Pointer to the failed device connection information.
-		 */
-		void EVENT_Bluetooth_ConnectionFailed(BT_StackConfig_t* const StackState,
-		                                      BT_HCI_Connection_t* const Connection);
-
-		/** User application event callback, fired when the Bluetooth stack has completed a disconnection from a remote device.
-		 *
-		 *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.
-		 *  \param[in, out] Connection  Pointer to the closed device connection information.
-		 */
-		void EVENT_Bluetooth_DisconnectionComplete(BT_StackConfig_t* const StackState,
-		                                           BT_HCI_Connection_t* const Connection);
-
-		/** User application event callback, fired when the Bluetooth stack has sucessfully opened a logical L2CAP connection to
+		/** User application event callback, fired when the Bluetooth stack has change the state of a logical L2CAP connection to
 		 *  a remote device.
+		 *
+		 *  \note This event fires only when a channel has opened, closed, or failed to open.
 		 *
 		 *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.
 		 *  \param[in, out] Channel     Pointer to the opened device connection information.
 		 */
-		void EVENT_Bluetooth_ChannelOpened(BT_StackConfig_t* const StackState,
-		                                   BT_L2CAP_Channel_t* const Channel);
-
-		/** User application event callback, fired when the Bluetooth stack has closed a logical L2CAP connection to a remote device.
-		 *
-		 *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.
-		 *  \param[in, out] Channel     Pointer to the closed device connection information.
-		 */
-		void EVENT_Bluetooth_ChannelClosed(BT_StackConfig_t* const StackState,
-		                                   BT_L2CAP_Channel_t* const Channel);
+		void EVENT_Bluetooth_ChannelStateChange(BT_StackConfig_t* const StackState,
+                                                BT_L2CAP_Channel_t* const Channel);
 
 		/** User application callback, fired when the Bluetooth stack has received data on an open connection.
 		 *

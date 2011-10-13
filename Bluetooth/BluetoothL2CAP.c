@@ -39,9 +39,14 @@ void Bluetooth_L2CAP_NotifyHCIDisconnection(BT_StackConfig_t* const StackState,
 		{
 			/* Notify the user of the closed connection if it is currently open */
 			if (CurrentChannel->State == L2CAP_CHANSTATE_Open)
-			  EVENT_Bluetooth_ChannelClosed(StackState, CurrentChannel);
-
-			CurrentChannel->State = L2CAP_CHANSTATE_Closed;
+			{
+				CurrentChannel->State = L2CAP_CHANSTATE_Closed;
+				EVENT_Bluetooth_ChannelStateChange(StackState, CurrentChannel);
+			}
+			else
+			{
+				CurrentChannel->State = L2CAP_CHANSTATE_Closed;
+			}
 		}
 	}
 }
@@ -208,8 +213,8 @@ static inline void Bluetooth_L2CAP_Signal_EchoReq(BT_StackConfig_t* const StackS
 }
 
 static inline void Bluetooth_L2CAP_Signal_DisconnectionReq(BT_StackConfig_t* const StackState,
-                                                         BT_HCI_Connection_t* const HCIConnection,
-                                                         BT_Signal_Header_t* const SignalCommandHeader)
+                                                           BT_HCI_Connection_t* const HCIConnection,
+                                                           BT_Signal_Header_t* const SignalCommandHeader)
 {
 	BT_Signal_DisconnectionReq_t* DisconnectionRequest = (BT_Signal_DisconnectionReq_t*)SignalCommandHeader->Data;
 
@@ -235,7 +240,7 @@ static inline void Bluetooth_L2CAP_Signal_DisconnectionReq(BT_StackConfig_t* con
 	if (L2CAPChannel)
 	{
 		L2CAPChannel->State = L2CAP_CHANSTATE_Closed;
-		EVENT_Bluetooth_ChannelClosed(StackState, L2CAPChannel);
+		EVENT_Bluetooth_ChannelStateChange(StackState, L2CAPChannel);
 	}
 
 	Bluetooth_L2CAP_SendSignalPacket(StackState, HCIConnection, sizeof(ResponsePacket), &ResponsePacket);
@@ -254,7 +259,7 @@ static inline void Bluetooth_L2CAP_Signal_DisconnectionResp(BT_StackConfig_t* co
 	if (L2CAPChannel)
 	{
 		L2CAPChannel->State = L2CAP_CHANSTATE_Closed;
-		EVENT_Bluetooth_ChannelClosed(StackState, L2CAPChannel);
+		EVENT_Bluetooth_ChannelStateChange(StackState, L2CAPChannel);
 	}
 }
 
@@ -327,7 +332,7 @@ static inline void Bluetooth_L2CAP_Signal_ConfigReq(BT_StackConfig_t* const Stac
 				break;
 			case L2CAP_CHANSTATE_Config_WaitReq:
 				L2CAPChannel->State = L2CAP_CHANSTATE_Open;
-				EVENT_Bluetooth_ChannelOpened(StackState, L2CAPChannel);
+				EVENT_Bluetooth_ChannelStateChange(StackState, L2CAPChannel);
 				break;
 		}
 		
@@ -388,7 +393,7 @@ static inline void Bluetooth_L2CAP_Signal_ConfigResp(BT_StackConfig_t* const Sta
 				break;
 			case L2CAP_CHANSTATE_Config_WaitResp:
 				L2CAPChannel->State = L2CAP_CHANSTATE_Open;
-				EVENT_Bluetooth_ChannelOpened(StackState, L2CAPChannel);
+				EVENT_Bluetooth_ChannelStateChange(StackState, L2CAPChannel);
 				break;
 		}
 	}

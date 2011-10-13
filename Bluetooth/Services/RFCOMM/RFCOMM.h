@@ -207,11 +207,9 @@
                              const uint16_t DataLen,
                              const void* Data);
 
-		void EVENT_RFCOMM_ChannelOpened(BT_StackConfig_t* const StackState,
-		                                RFCOMM_Channel_t* const Channel);
+		void EVENT_RFCOMM_ChannelStateChange(BT_StackConfig_t* const StackState,
+		                                     RFCOMM_Channel_t* const Channel);
 
-		void EVENT_RFCOMM_ChannelClosed(BT_StackConfig_t* const StackState,
-		                                RFCOMM_Channel_t* const Channel);
 		void CALLBACK_RFCOMM_DataReceived(BT_StackConfig_t* const StackState,
 		                                  RFCOMM_Channel_t* const Channel,
 		                                  uint16_t Length,

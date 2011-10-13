@@ -52,86 +52,87 @@ void EVENT_Bluetooth_ManageServices(BT_StackConfig_t* const StackState)
 bool CALLBACK_Bluetooth_ConnectionRequest(BT_StackConfig_t* const StackState,
                                           BT_HCI_Connection_t* const Connection)
 {
-	LCD_Clear();
-	LCD_WriteString_P(PSTR("Conn Request:\n"));
+	LCD_WriteString_P(PSTR("\fHCI Conn Request\n"));
 	LCD_WriteBDADDR(Connection->RemoteBDADDR);
 	
 	/* Accept all requests from all devices regardless of BDADDR */
 	return true;
 }
 
-void EVENT_Bluetooth_ConnectionComplete(BT_StackConfig_t* const StackState,
-                                        BT_HCI_Connection_t* const Connection)
-{	
-	LCD_Clear();
-	LCD_WriteString_P(PSTR("Connect:\n"));
-	LCD_WriteBDADDR(Connection->RemoteBDADDR);
-
-	/* If connection was locally initiated, open the HID control L2CAP channels */
-	if (Connection->LocallyInitiated)
-	{
-		Bluetooth_L2CAP_OpenChannel(StackState, Connection, CHANNEL_PSM_HIDCTL);
-		Bluetooth_L2CAP_OpenChannel(StackState, Connection, CHANNEL_PSM_HIDINT);
-	}
-
-	Speaker_PlaySequence(SPEAKER_SEQUENCE_Connected);
-}
-
-void EVENT_Bluetooth_ConnectionFailed(BT_StackConfig_t* const StackState,
-                                      BT_HCI_Connection_t* const Connection)
-{	
-	LCD_Clear();
-	LCD_WriteString_P(PSTR("Connect Fail:\n"));
-	LCD_WriteBDADDR(Connection->RemoteBDADDR);
-
-	Speaker_PlaySequence(SPEAKER_SEQUENCE_ConnectFailed);
-}
-
-void EVENT_Bluetooth_DisconnectionComplete(BT_StackConfig_t* const StackState,
+void EVENT_Bluetooth_ConnectionStateChange(BT_StackConfig_t* const StackState,
                                            BT_HCI_Connection_t* const Connection)
-{
-	LCD_Clear();
-	LCD_WriteString_P(PSTR("Disconnected:\n"));
+{	
+	const char* StateMessage;
+	
+	/* Determine the connection event that has occurred */
+	switch (Connection->State)
+	{
+		case HCI_CONSTATE_Connected:
+			StateMessage = PSTR("Connected");
+			Speaker_PlaySequence(SPEAKER_SEQUENCE_Connected);
+
+			/* If connection was locally initiated, open the HID control L2CAP channels */
+			if (Connection->LocallyInitiated)
+			{
+				Bluetooth_L2CAP_OpenChannel(StackState, Connection, CHANNEL_PSM_HIDCTL);
+				Bluetooth_L2CAP_OpenChannel(StackState, Connection, CHANNEL_PSM_HIDINT);
+			}
+			break;
+		case HCI_CONSTATE_Failed:
+			StateMessage = PSTR("Connect Fail");
+			Speaker_PlaySequence(SPEAKER_SEQUENCE_ConnectFailed);
+			break;
+		case HCI_CONSTATE_Closed:
+			StateMessage = PSTR("Disconnected");
+			Speaker_PlaySequence(SPEAKER_SEQUENCE_Disconnected);
+			break;
+		default:
+			return;
+	}
+	
+	LCD_WriteFormattedString_P(PSTR("\fHCI %S\n"), StateMessage);
 	LCD_WriteBDADDR(Connection->RemoteBDADDR);
-
-	Speaker_PlaySequence(SPEAKER_SEQUENCE_Disconnected);
 }
-
 
 bool CALLBACK_Bluetooth_ChannelRequest(BT_StackConfig_t* const StackState,
                                        BT_HCI_Connection_t* const Connection,
                                        BT_L2CAP_Channel_t* const Channel)
 {
-	LCD_Clear();
-	LCD_WriteFormattedString_P(PSTR("L2CAP Request\n"
-	                                "PSM:%04X"), Channel->PSM);
+	LCD_WriteFormattedString_P(PSTR("\fL2CAP Request\n"
+	                                  "PSM:%04X"), Channel->PSM);
 
 	/* Accept all channel requests from all devices regardless of PSM */
 	return true;
 }
 
-void EVENT_Bluetooth_ChannelOpened(BT_StackConfig_t* const StackState,
-                                   BT_L2CAP_Channel_t* const Channel)
+void EVENT_Bluetooth_ChannelStateChange(BT_StackConfig_t* const StackState,
+                                        BT_L2CAP_Channel_t* const Channel)
 {
-	LCD_Clear();
-	LCD_WriteFormattedString_P(PSTR("L2CAP Opened\n"
-	                                "PSM:%04X LC:%04X"), Channel->PSM, Channel->LocalNumber);
+	const char* StateMessage;
 
-	SDP_ChannelOpened(StackState, Channel);			
-	HID_ChannelOpened(StackState, Channel);
-	RFCOMM_ChannelOpened(StackState, Channel);
-}
+	/* Determine the channel event that has occurred */
+	switch (Channel->State)
+	{
+		case L2CAP_CHANSTATE_Open:
+			StateMessage = PSTR("Opened");
 
-void EVENT_Bluetooth_ChannelClosed(BT_StackConfig_t* const StackState,
-                                   BT_L2CAP_Channel_t* const Channel)
-{
-	LCD_Clear();
-	LCD_WriteFormattedString_P(PSTR("L2CAP Closed\n"
-	                                "PSM:%04X LC:%04X"), Channel->PSM, Channel->LocalNumber);
+			SDP_ChannelOpened(StackState, Channel);			
+			HID_ChannelOpened(StackState, Channel);
+			RFCOMM_ChannelOpened(StackState, Channel);
+			break;
+		case L2CAP_CHANSTATE_Closed:
+			StateMessage = PSTR("Closed");
 
-	SDP_ChannelClosed(StackState, Channel);			
-	HID_ChannelClosed(StackState, Channel);
-	RFCOMM_ChannelClosed(StackState, Channel);
+			SDP_ChannelClosed(StackState, Channel);
+			HID_ChannelClosed(StackState, Channel);
+			RFCOMM_ChannelClosed(StackState, Channel);
+			break;
+		default:
+			return;
+	}
+
+	LCD_WriteFormattedString_P(PSTR("\fL2CAP %S\n"
+	                                  "PSM:%04X C:%04X"), StateMessage, Channel->PSM, Channel->LocalNumber);
 }
 
 void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
@@ -139,6 +140,7 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
                                   uint16_t Length,
                                   uint8_t* Data)
 {
+	/* Determine if the PSM is known or not - indicate unknown PSM packets */
 	switch (Channel->PSM)
 	{
 		case CHANNEL_PSM_SDP:
@@ -150,33 +152,36 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
 			RFCOMM_ProcessPacket(StackState, Channel, Length, Data);
 			break;		
 		default:
-			LCD_Clear();
-			LCD_WriteFormattedString_P(PSTR("PSM:%04X L:%04X\n"
-			                                "LC:%04X RC:%04X"), Channel->PSM, Length, Channel->LocalNumber, Channel->RemoteNumber);
+			LCD_WriteFormattedString_P(PSTR("\fL2CAP DATA:%04X\n"
+			                                  "PSM:%04X C:%04X"), Length, Channel->PSM, Channel->LocalNumber);
 			break;
 	}	
 }
 
-
-void EVENT_RFCOMM_ChannelOpened(BT_StackConfig_t* const StackState,
-                                RFCOMM_Channel_t* const Channel)
+void EVENT_RFCOMM_ChannelStateChange(BT_StackConfig_t* const StackState,
+                                     RFCOMM_Channel_t* const Channel)
 {
-	/* Save the handle to the opened RFCOMM channel object, so we can write to it later */
-	RFCOMM_SensorStream = Channel;
+	/* Determine the RFCOMM channel event that has occurred */
+	switch (Channel->State)
+	{
+		case RFCOMM_Channel_Open:
+			/* Save the handle to the opened RFCOMM channel object, so we can write to it later */
+			RFCOMM_SensorStream = Channel;
 
-	/* Construct the sensor CSV header line(s) */
-	char    LineBuffer[200];
-	uint8_t LineLength = Sensors_WriteSensorCSVHeader(LineBuffer);
+			/* Construct the sensor CSV header line(s) */
+			char    LineBuffer[200];
+			uint8_t LineLength = Sensors_WriteSensorCSVHeader(LineBuffer);
 
-	/* Write sensor CSV data to the virtual serial port */
-	RFCOMM_SendData(RFCOMM_SensorStream, LineLength, LineBuffer);
-}
-
-void EVENT_RFCOMM_ChannelClosed(BT_StackConfig_t* const StackState,
-                                RFCOMM_Channel_t* const Channel)
-{
-	/* Delete the handle to the now closed RFCOMM channel object, to prevent us from trying to write to it */
-	RFCOMM_SensorStream = NULL;
+			/* Write sensor CSV data to the virtual serial port */
+			RFCOMM_SendData(RFCOMM_SensorStream, LineLength, LineBuffer);
+			break;
+		case RFCOMM_Channel_Closed:
+			/* Delete the handle to the now closed RFCOMM channel object, to prevent us from trying to write to it */
+			RFCOMM_SensorStream = NULL;
+			break;
+		default:
+			return;
+	}
 }
 
 void CALLBACK_RFCOMM_DataReceived(BT_StackConfig_t* const StackState,
@@ -184,7 +189,7 @@ void CALLBACK_RFCOMM_DataReceived(BT_StackConfig_t* const StackState,
                                   uint16_t Length,
                                   uint8_t* Data)
 {
-
+	/* Do nothing with received data from the RFCOMM channel */
 }
 
 

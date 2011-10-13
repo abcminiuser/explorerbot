@@ -205,13 +205,14 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 		if (Connection)
 		{
 			Connection->Handle = (le16_to_cpu(ConnectionCompleteEventHeader->Handle) & BT_HCI_CONNECTION_HANDLE_MASK);
-			Connection->State  = (ConnectionCompleteEventHeader->Status == 0x00) ? HCI_CONSTATE_Connected : HCI_CONSTATE_Closed;
+			Connection->State  = (ConnectionCompleteEventHeader->Status == 0x00) ? HCI_CONSTATE_Connected : HCI_CONSTATE_Failed;
 			
 			/* Fire user application callback to signal the connection completion */
-			if (Connection->State == HCI_CONSTATE_Connected)
-			  EVENT_Bluetooth_ConnectionComplete(StackState, Connection);
-			else
-			  EVENT_Bluetooth_ConnectionFailed(StackState, Connection);
+			EVENT_Bluetooth_ConnectionStateChange(StackState, Connection);
+			
+			/* Once the user application callback has fired with the failed connection state, free up the connection entry */
+			if (Connection->State == HCI_CONSTATE_Failed)
+			  Connection->State = HCI_CONSTATE_Closed;
 		}
 	}
 	else if (HCIEventHeader->EventCode == EVENT_DISCONNECTION_COMPLETE)
@@ -227,7 +228,7 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 			Connection->State = HCI_CONSTATE_Closed;
 			
 			Bluetooth_L2CAP_NotifyHCIDisconnection(StackState, Connection->Handle);			
-			EVENT_Bluetooth_DisconnectionComplete(StackState, Connection);
+			EVENT_Bluetooth_ConnectionStateChange(StackState, Connection);
 		}
 	}
 	else if (HCIEventHeader->EventCode == EVENT_PIN_CODE_REQUEST)
@@ -435,7 +436,7 @@ bool Bluetooth_HCI_Disconnect(BT_StackConfig_t* const StackState,
 			  break;
 		
 			HCICommandHeader->OpCode           = CPU_TO_LE16(OGF_LINK_CONTROL | OCF_LINK_CONTROL_CREATE_CONNECTION_CANCEL),
-			HCICommandHeader->ParameterLength  = sizeof(BT_BDADDR_LEN);
+			HCICommandHeader->ParameterLength  = BT_BDADDR_LEN;
 			memcpy(&HCICommandHeader->Parameters[0], HCIConnection->RemoteBDADDR, BT_BDADDR_LEN);
 			break;
 		case HCI_CONSTATE_Connected:

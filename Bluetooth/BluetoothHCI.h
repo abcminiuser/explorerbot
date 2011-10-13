@@ -37,6 +37,7 @@
 			HCI_CONSTATE_New                      = 1, /**< Connection has been created, but no initial handshake has been sent or received. */
 			HCI_CONSTATE_Connecting               = 2, /**< Connection is being established, but has not been completed. */
 			HCI_CONSTATE_Connected                = 3, /**< Connection is complete and ready for data transfer. */
+			HCI_CONSTATE_Failed                   = 4, /**< Connection to a remote device failed to complete. */
 		};
 
 		/** Enum for the possible states in the Bluetooth HCI state machine. */

@@ -31,27 +31,42 @@
 #include "Speaker.h"
 
 /** Note sequence for to signal a connection in progress. */
-static const uint16_t Sequence_Connecting[]    PROGMEM = {SPEAKER_NOTE(440.0, 120),  0};
+static const uint16_t Sequence_Connecting[]    PROGMEM = {SPEAKER_NOTE(440.00, 120), 0};
 
 /** Note sequence for to signal a connection has completed sucessfully. */
-static const uint16_t Sequence_Connected[]     PROGMEM = {SPEAKER_NOTE(349.23, 80),  SPEAKER_NOTE(440.0, 120),  0};
+static const uint16_t Sequence_Connected[]     PROGMEM = {SPEAKER_NOTE(349.23,  80), SPEAKER_NOTE(440.00, 120), 0};
 
 /** Note sequence for to signal an established connection has disconnected. */
-static const uint16_t Sequence_Disconnected[]  PROGMEM = {SPEAKER_NOTE(440.0, 80),   SPEAKER_NOTE(349.23, 120), 0};
+static const uint16_t Sequence_Disconnected[]  PROGMEM = {SPEAKER_NOTE(440.00,  80), SPEAKER_NOTE(349.23, 120), 0};
 
 /** Note sequence for to signal a connection has failed to complete. */
 static const uint16_t Sequence_ConnectFailed[] PROGMEM = {SPEAKER_NOTE(349.23, 150), SPEAKER_NOTE(349.23, 150), 0};
 
 /** Note sequence for the robot's novelty horn. */
-static const uint16_t Sequence_LaCucaracha[]   PROGMEM = {SPEAKER_NOTE(261.63, 50),  SPEAKER_NOTE(0, 50),
-                                                          SPEAKER_NOTE(261.63, 50),  SPEAKER_NOTE(0, 50), 
-                                                          SPEAKER_NOTE(261.63, 50),  SPEAKER_NOTE(0, 50),
+static const uint16_t Sequence_LaCucaracha[]   PROGMEM = {SPEAKER_NOTE(261.63,  50), SPEAKER_NOTE(0, 50),
+                                                          SPEAKER_NOTE(261.63,  50), SPEAKER_NOTE(0, 50), 
+                                                          SPEAKER_NOTE(261.63,  50), SPEAKER_NOTE(0, 50),
                                                           SPEAKER_NOTE(349.23, 100), SPEAKER_NOTE(0, 50), 
-                                                          SPEAKER_NOTE(440.0, 100),  0};
+                                                          SPEAKER_NOTE(440.00, 100), SPEAKER_NOTE(0, 80),
+                                                          SPEAKER_NOTE(261.63,  50), SPEAKER_NOTE(0, 50),
+                                                          SPEAKER_NOTE(261.63,  50), SPEAKER_NOTE(0, 50), 
+                                                          SPEAKER_NOTE(261.63,  50), SPEAKER_NOTE(0, 50),
+                                                          SPEAKER_NOTE(349.23, 100), SPEAKER_NOTE(0, 50), 
+                                                          SPEAKER_NOTE(440.00, 100), SPEAKER_NOTE(0, 80),
+                                                          SPEAKER_NOTE(349.23,  50), SPEAKER_NOTE(0, 50), 
+                                                          SPEAKER_NOTE(349.23,  50), SPEAKER_NOTE(0, 50), 
+                                                          SPEAKER_NOTE(329.63,  50), SPEAKER_NOTE(0, 50), 
+                                                          SPEAKER_NOTE(329.63,  50), SPEAKER_NOTE(0, 50), 
+                                                          SPEAKER_NOTE(293.66,  50), SPEAKER_NOTE(0, 50), 
+                                                          SPEAKER_NOTE(293.66,  50), SPEAKER_NOTE(0, 50), 
+                                                          SPEAKER_NOTE(261.63, 100), SPEAKER_NOTE(0, 50),
+                                                          0};
 
 /** Table of note sequences which can be played via \ref Speaker_PlaySequence(). */
-static const uint16_t* const Sequence_Table[]  PROGMEM = {Sequence_Connecting, Sequence_Connected,
-                                                          Sequence_Disconnected, Sequence_ConnectFailed,
+static const uint16_t* const Sequence_Table[]  PROGMEM = {Sequence_Connecting,
+                                                          Sequence_Connected,
+                                                          Sequence_Disconnected,
+                                                          Sequence_ConnectFailed,
                                                           Sequence_LaCucaracha};
 
 /** Pointer to the current note being played in the selected note sequence. */

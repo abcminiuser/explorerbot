@@ -64,10 +64,17 @@ int main(void)
 				{
 					RemoteConnection = BluetoothAdapter_ConnectToRemoteDevice();
 					
-					LCD_WriteString_P(PSTR("\fHCI Connecting\n"));
-					LCD_WriteBDADDR(RemoteConnection->RemoteBDADDR);
-					
-					Speaker_PlaySequence(SPEAKER_SEQUENCE_Connecting);
+					if (RemoteConnection)
+					{
+						LCD_WriteString_P(PSTR("\fHCI Connecting\n"));
+						LCD_WriteBDADDR(RemoteConnection->RemoteBDADDR);
+						Speaker_PlaySequence(SPEAKER_SEQUENCE_Connecting);
+					}
+					else
+					{
+						LCD_WriteString_P(PSTR("\fHCI Conn Rej\n"));
+						Speaker_PlaySequence(SPEAKER_SEQUENCE_ConnectFailed);
+					}
 				}
 			}
 		}

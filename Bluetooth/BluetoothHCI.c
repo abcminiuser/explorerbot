@@ -110,11 +110,12 @@ void Bluetooth_HCI_Init(BT_StackConfig_t* const StackState)
 void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 {
 	BT_HCIEvent_Header_t* HCIEventHeader = (BT_HCIEvent_Header_t*)StackState->Config.PacketBuffer;
-	uint8_t               NextHCIState   = StackState->State.HCI.State;
 
 	if (HCIEventHeader->EventCode == EVENT_COMMAND_COMPLETE)
 	{
 		BT_HCIEvent_CommandComplete_t* CommandCompleteHeader = (BT_HCIEvent_CommandComplete_t*)&HCIEventHeader->Parameters;
+		
+		uint8_t NextHCIState = StackState->State.HCI.State;
 		
 		/* Determine the next state to change to according to the current state and which command completed */
 		switch (StackState->State.HCI.State)
@@ -149,6 +150,9 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 				  NextHCIState = HCISTATE_Idle;
 				break;
 		}
+		
+		StackState->State.HCI.StateTransition = (StackState->State.HCI.State != NextHCIState);
+		StackState->State.HCI.State           = NextHCIState;		
 	}
 	else if (HCIEventHeader->EventCode == EVENT_CONNECTION_REQUEST)
 	{
@@ -279,10 +283,7 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 		memcpy(LinkKeyRequestNAKHeader->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
 		
 		CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCICommand, (sizeof(BT_HCICommand_Header_t) + HCICommandHeader->ParameterLength));
-	}
-	
-	StackState->State.HCI.StateTransition = (StackState->State.HCI.State != NextHCIState);
-	StackState->State.HCI.State           = NextHCIState;
+	}	
 }
 
 /** Processes a recieved Bluetooth HCI Data packet from a Bluetooth adapter.

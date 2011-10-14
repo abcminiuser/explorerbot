@@ -71,6 +71,7 @@
 		#define EVENT_CONNECTION_REQUEST                       0x04
 		#define EVENT_DISCONNECTION_COMPLETE                   0x05
 		#define EVENT_REMOTE_NAME_REQUEST_COMPLETE             0x07
+		#define EVENT_NUM_PACKETS_COMPLETE                     0x13
 		#define EVENT_PIN_CODE_REQUEST                         0x16
 		#define EVENT_LINK_KEY_REQUEST                         0x17
 		//@}

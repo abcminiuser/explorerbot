@@ -75,6 +75,7 @@
 		{
 			uint8_t  State; /**< Current connection state, a value from the \ref BT_HCIStates_t enum. */
 			uint8_t  RemoteBDADDR[BT_BDADDR_LEN]; /**< Remote Bluetooth device's BDADDR for the connection. */
+			uint16_t DataPacketsQueued; /**< Number of data packets queued by the controller for this connection. */
 			uint16_t Handle; /**< Bluetooth HCI layer connection handle in the adapter for the connection. */
 			uint8_t  LinkType; /**< Link type of the connection, a value from the \ref BT_LinkTypes_t enum. */
 			uint8_t  CurrentIdentifier; /**< Current Bluetooth HCI signal layer identifier index. */
@@ -114,6 +115,7 @@
 					uint8_t             State; /**< Current HCI state machine state, a value from the \ref BT_HCIStates_t enum. */
 					bool                StateTransition; /**< Indicates if the state machine has undergone a state transition that needs to be processed. */
 					uint8_t             CommandPackets; /**< Number of allowable HCI command packets which can be sent to the controller. */
+					uint16_t            ACLDataPackets; /**< Number of allowable ACL data packets which can be sent to the controller. */
 					uint16_t            TicksElapsed; /**< Number of ticks that has elapsed since the last command was sent. */
 					uint8_t             LocalBDADDR[BT_BDADDR_LEN]; /**< Address of the local Bluetooth adapter attached to this stack instance. */
 					BT_HCI_Connection_t Connections[BT_MAX_DEVICE_CONNECTIONS]; /**< HCI connection state information list. */

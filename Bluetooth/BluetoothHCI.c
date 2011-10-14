@@ -144,7 +144,12 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 				break;
 			case HCISTATE_Init_ReadBufferSize:
 				if (CommandCompleteHeader->Opcode == CPU_TO_LE16(OGF_CTRLR_INFORMATIONAL | OCF_CTRLR_INFORMATIONAL_READBUFFERSIZE))
-				  NextHCIState = HCISTATE_Init_GetBDADDR;
+				{
+					NextHCIState = HCISTATE_Init_GetBDADDR;
+				  
+					/* Store the total number of ACL data packets the controller is able to queue internally */
+					StackState->State.HCI.ACLDataPackets = (((uint16_t)CommandCompleteHeader->Parameters[5] << 8) | CommandCompleteHeader->Parameters[4]);
+				}
 				break;
 			case HCISTATE_Init_GetBDADDR:
 				if (CommandCompleteHeader->Opcode == CPU_TO_LE16(OGF_CTRLR_INFORMATIONAL | OCF_CTRLR_INFORMATIONAL_READBDADDR))
@@ -178,6 +183,21 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 		
 		/* Update number of allowable command packets to the controller */
 		StackState->State.HCI.CommandPackets = CommandStatusHeader->Packets;
+	}
+	else if (HCIEventHeader->EventCode == EVENT_NUM_PACKETS_COMPLETE)
+	{
+		uint16_t* CurrentPacketInfo = &HCIEventHeader->Parameters[1];
+		
+		/* For each connection reported in the event, find the associated connection object and decrease the number of
+		 * queued packets by the number of completed packets reported for each connection */
+		for (uint8_t i = 0; i < HCIEventHeader->Parameters[0]; i++)
+		{
+			BT_HCI_Connection_t* Connection = Bluetooth_HCI_FindConnection(StackState, 0, *(CurrentPacketInfo++));			
+			uint16_t             PacketsCompleted = *(CurrentPacketInfo++);
+			
+			if (Connection)
+			  Connection->DataPacketsQueued -= PacketsCompleted;
+		}
 	}
 	else if (HCIEventHeader->EventCode == EVENT_CONNECTION_REQUEST)
 	{
@@ -515,6 +535,12 @@ bool HCI_SendPacket(BT_StackConfig_t* const StackState,
 
 	if (!(HCIConnection) || (HCIConnection->State != HCI_CONSTATE_Connected))
 	  return false;
+	  
+	if (HCIConnection->DataPacketsQueued == StackState->State.HCI.ACLDataPackets)
+	  return false;
+	  
+	/* Keep track of how many packets have been queued into the controller for the connection to prevent buffer overrun */
+	HCIConnection->DataPacketsQueued++;
 
 	BT_HCIData_Header_t* HCIDataHeader = (BT_HCIData_Header_t*)StackState->Config.PacketBuffer;
 	HCIDataHeader->Handle     = cpu_to_le16(HCIConnection->Handle | BT_L2CAP_FIRST_AUTOFLUSH);

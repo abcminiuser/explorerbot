@@ -65,7 +65,7 @@ void Motors_SetChannelSpeed(const int16_t LeftPower, const int16_t RightPower)
 	if (LeftDirChange || !(LeftPower))
 	{
 		TCCR1A &= ~(1 << COM1B1);
-		PORTB  &= ~(1 << 4);	
+		PORTB  &= ~(1 << 5);	
 	}
 	
 	/* If motor channel off or direction switching, disable the PWM output completely */
@@ -77,7 +77,7 @@ void Motors_SetChannelSpeed(const int16_t LeftPower, const int16_t RightPower)
 	
 	/* Delay on direction change to wait until slow inverter transistors have finished switching to prevent voltage rail dips */
 	if (LeftDirChange || RightDirChange)
-	  Delay_MS(10);
+	  Delay_MS(5);
 	
 	/* DANGER: DO NOT REMOVE SPEED LIMITER BELOW - PREVENTS OVERCURRENT/OVERVOLTAGE OF MOTOR */
 	if (LeftPWMValue > MAX_MOTOR_POWER)

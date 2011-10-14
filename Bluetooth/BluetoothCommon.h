@@ -23,13 +23,16 @@
 		#define BT_BDADDR_LEN                     6
 		
 		/** Maximum number of simultaneous device connections. */
-		#define MAX_DEVICE_CONNECTIONS            2
+		#define BT_MAX_DEVICE_CONNECTIONS         2
 		
 		/** Maximum number of simultaneous L2CAP logical channels. */
-		#define MAX_LOGICAL_CHANNELS              8
+		#define BT_MAX_LOGICAL_CHANNELS           8
 
 		/** Default maximum transmission unit size for a L2CAP channel packet. */
-		#define DEFAULT_L2CAP_CHANNEL_MTU         1024
+		#define BT_DEFAULT_L2CAP_CHANNEL_MTU      1024
+		
+		/** Tick length interval that \ref Bluetooth_Tick() is called at. */
+		#define BT_TICK_MS                        SYSTEM_TICK_MS
 
 	/* Enums: */
 		/** Enum for the possible L2CAP channel Protocol Service Multiplexer (PSM) values. */
@@ -110,14 +113,15 @@
 				{
 					uint8_t             State; /**< Current HCI state machine state, a value from the \ref BT_HCIStates_t enum. */
 					bool                StateTransition; /**< Indicates if the state machine has undergone a state transition that needs to be processed. */
+					uint16_t            TicksElapsed;
 					uint8_t             LocalBDADDR[BT_BDADDR_LEN]; /**< Address of the local Bluetooth adapter attached to this stack instance. */
-					BT_HCI_Connection_t Connections[MAX_DEVICE_CONNECTIONS]; /**< HCI connection state information list. */
+					BT_HCI_Connection_t Connections[BT_MAX_DEVICE_CONNECTIONS]; /**< HCI connection state information list. */
 				} HCI; /**< HCI layer connection state information. */
 				
 				struct
 				{
 					uint8_t             LastAllocatedChannel; /**< Index of the last allocated L2CAP channel. */
-					BT_L2CAP_Channel_t  Channels[MAX_LOGICAL_CHANNELS]; /**< L2CAP channel state information list. */
+					BT_L2CAP_Channel_t  Channels[BT_MAX_LOGICAL_CHANNELS]; /**< L2CAP channel state information list. */
 				} L2CAP; /**< L2CAP layer channel state information. */
 			} State; /**< Stack state information, managed by the Bluetooth stack internally. */
 		} BT_StackConfig_t;

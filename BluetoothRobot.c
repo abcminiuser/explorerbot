@@ -100,6 +100,15 @@ int main(void)
 			/* Clear the timer compare flag */
 			TIFR3 |= (1 << OCF3A);
 		
+			/* Update the currently playing tone through the speaker (if one is playing) */
+			Speaker_TickElapsed();
+
+			/* Update the LCD backlight counter to automatically dim the display */
+			LCD_TickElapsed();
+			
+			/* If the bluetooth stack is active, manage timeouts within each layer */
+			BluetoothAdapter_TickElapsed();
+
 			static uint8_t SensorTicksElapsed = 0;
 			
 			/* Update sensors and log to disk/stream to remote device */
@@ -125,13 +134,7 @@ int main(void)
 				/* Write the sensor data to the attached wireless serial port (if available) */
 				if (RFCOMM_SensorStream)
 				  RFCOMM_SendData(RFCOMM_SensorStream, LineLength, LineBuffer);				
-			}
-			
-			/* Update the currently playing tone through the speaker (if one is playing) */
-			Speaker_TickElapsed();
-			
-			/* Update the LCD backlight counter to automatically dim the display */
-			LCD_TickElapsed();
+			}			
 		}
 		
 		BluetoothAdapter_USBTask();
@@ -187,7 +190,7 @@ void StartupSequence(void)
 	for (uint8_t i = 0; i < sizeof(ColourMap); i++)
 	{
 		RGB_SetColour(ColourMap[i]);
-		Delay_MS(150);
+		Delay_MS(140);
 	}
 }
 

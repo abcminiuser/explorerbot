@@ -27,7 +27,7 @@
 	
 	/* Macros: */
 		/** Mask for a HCI connection handle value to remove all HCI packet connection flags, leaving only the unique handle value. */
-		#define BT_HCI_CONNECTION_HANDLE_MASK     0x0EFF	
+		#define BT_HCI_CONNECTION_HANDLE_MASK     0x0EFF
 	
 	/* Enums: */
 		/** Enum for the possible device connection states. */
@@ -58,6 +58,7 @@
 		                                                        const uint16_t Handle);
 
 		void Bluetooth_HCI_Init(BT_StackConfig_t* const StackState);
+		void Bluetooth_HCI_TickElapsed(BT_StackConfig_t* const StackState);
 		void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState);
 		void Bluetooth_HCI_ProcessDataPacket(BT_StackConfig_t* const StackState);
 		bool Bluetooth_HCI_Manage(BT_StackConfig_t* const StackState);

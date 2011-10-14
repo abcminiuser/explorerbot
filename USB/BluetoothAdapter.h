@@ -70,6 +70,7 @@
 		                                     void* ConfigDescriptorData);
 		bool BluetoothAdapter_PostConfiguration(void);
 		void BluetoothAdapter_USBTask(void);
+		void BluetoothAdapter_TickElapsed(void);
 		BT_HCI_Connection_t* BluetoothAdapter_ConnectToRemoteDevice(void);
 
 		uint8_t DComp_NextInterfaceBluetoothDataEndpoint(void* CurrentDescriptor);

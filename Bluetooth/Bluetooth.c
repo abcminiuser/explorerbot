@@ -68,3 +68,12 @@ void Bluetooth_ProcessPacket(BT_StackConfig_t* const StackState,
 			return;
 	}
 }
+
+/** Manages the Bluetooth stack internal timeouts. This must be called at the interval specified by \ref BT_TICK_MS.
+ *
+ *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.
+ */
+void Bluetooth_TickElapsed(BT_StackConfig_t* const StackState)
+{
+	Bluetooth_HCI_TickElapsed(StackState);
+}

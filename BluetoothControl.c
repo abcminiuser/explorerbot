@@ -285,7 +285,7 @@ void CALLBACK_HID_ReportReceived(BT_StackConfig_t* const StackState,
 			PrevButtons = *((uint16_t*)&Data[2]);
 		}
 		
-		/* Table to map the controller direction coordinates to a pair of PWM power values */
+		/* Table to map the controller direction coordinates to a pair of motor power coordinates */
 		static const struct { int8_t Left; int8_t Right; } MotorPowerMap[3][3] =
 			{
 				{{ 0, 1},{ 1, 1},{ 1, 0}},

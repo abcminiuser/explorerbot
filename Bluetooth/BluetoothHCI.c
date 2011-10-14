@@ -36,7 +36,7 @@ BT_HCI_Connection_t* const Bluetooth_HCI_FindConnection(BT_StackConfig_t* const 
                                                         const uint16_t Handle)
 {
 	/* Search through the HCI connection table, looking for a matching connection */
-	for (uint8_t i = 0; i < MAX_DEVICE_CONNECTIONS; i++)
+	for (uint8_t i = 0; i < BT_MAX_DEVICE_CONNECTIONS; i++)
 	{
 		BT_HCI_Connection_t* Connection = &StackState->State.HCI.Connections[i];
 		
@@ -72,7 +72,7 @@ static BT_HCI_Connection_t* const Bluetooth_HCI_NewConnection(BT_StackConfig_t* 
                                                               const uint8_t* const RemoteBDADDR,
                                                               const uint8_t LinkType)
 {
-	for (uint8_t i = 0; i < MAX_DEVICE_CONNECTIONS; i++)
+	for (uint8_t i = 0; i < BT_MAX_DEVICE_CONNECTIONS; i++)
 	{
 		BT_HCI_Connection_t* Connection = &StackState->State.HCI.Connections[i];
 
@@ -99,8 +99,22 @@ void Bluetooth_HCI_Init(BT_StackConfig_t* const StackState)
 	StackState->State.HCI.State           = HCISTATE_Init_Reset;
 	StackState->State.HCI.StateTransition = true;
 
-	for (uint8_t i = 0; i < MAX_DEVICE_CONNECTIONS; i++)
+	for (uint8_t i = 0; i < BT_MAX_DEVICE_CONNECTIONS; i++)
 	  StackState->State.HCI.Connections[i].State = HCI_CONSTATE_Closed;
+}
+
+/** Manages the timeouts within the HCI command portion of the controller, each time one tick period has elapsed.
+ *
+ *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.
+ */
+void Bluetooth_HCI_TickElapsed(BT_StackConfig_t* const StackState)
+{
+	/* If the stack's HCI timeout period has expired, reset it and fire a new state transition */
+	if (StackState->State.HCI.TicksElapsed++ == (2000 / BT_TICK_MS))
+	{
+		StackState->State.HCI.TicksElapsed    = 0;
+		StackState->State.HCI.StateTransition = true;
+	}
 }
 
 /** Processes a recieved Bluetooth HCI Event packet from a Bluetooth adapter.
@@ -318,6 +332,9 @@ bool Bluetooth_HCI_Manage(BT_StackConfig_t* const StackState)
 	if (!(StackState->State.HCI.StateTransition))
 	  return false;
 	
+	/* Reset HCI layer timeout counter */
+	StackState->State.HCI.TicksElapsed = 0;
+
 	/* Null out the OpCode to signify no packet should be sent */
 	HCICommandHeader->OpCode = 0;
 	

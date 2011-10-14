@@ -233,6 +233,15 @@ void BluetoothAdapter_USBTask(void)
 	RGB_SetColour(RGB_ALIAS_Connected);
 }
 
+/** Manages timeouts within the Bluetooth stack, each time the stack's tick interval has expired. */
+void BluetoothAdapter_TickElapsed(void)
+{
+	if ((USB_HostState != HOST_STATE_Configured) || !(BluetoothAdapter_IsActive))
+	  return;
+	  
+	Bluetooth_TickElapsed(&BluetoothAdapter_Stack);
+}
+
 void CALLBACK_Bluetooth_SendPacket(BT_StackConfig_t* const StackState,
                                    const uint8_t Type,
                                    const uint16_t Length)

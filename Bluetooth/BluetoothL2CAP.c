@@ -30,7 +30,7 @@
 void Bluetooth_L2CAP_NotifyHCIDisconnection(BT_StackConfig_t* const StackState,
                                             const uint16_t ConnectionHandle)
 {
-	for (uint8_t i = 0; i < MAX_LOGICAL_CHANNELS; i++)
+	for (uint8_t i = 0; i < BT_MAX_LOGICAL_CHANNELS; i++)
 	{
 		BT_L2CAP_Channel_t* CurrentChannel = &StackState->State.L2CAP.Channels[i];
 		
@@ -66,7 +66,7 @@ BT_L2CAP_Channel_t* const Bluetooth_L2CAP_FindChannel(BT_StackConfig_t* const St
                                                       const uint16_t LocalChannel,
                                                       const uint16_t RemoteChannel)
 {
-	for (uint8_t i = 0; i < MAX_LOGICAL_CHANNELS; i++)
+	for (uint8_t i = 0; i < BT_MAX_LOGICAL_CHANNELS; i++)
 	{
 		BT_L2CAP_Channel_t* CurrentChannel = &StackState->State.L2CAP.Channels[i];
 
@@ -97,7 +97,7 @@ static BT_L2CAP_Channel_t* const Bluetooth_L2CAP_NewChannel(BT_StackConfig_t* co
                                                             const uint16_t RemoteChannel,
                                                             const uint16_t PSM)
 {
-	for (uint8_t i = 0; i < MAX_LOGICAL_CHANNELS; i++)
+	for (uint8_t i = 0; i < BT_MAX_LOGICAL_CHANNELS; i++)
 	{
 		BT_L2CAP_Channel_t* CurrentChannel = &StackState->State.L2CAP.Channels[i];
 
@@ -107,7 +107,7 @@ static BT_L2CAP_Channel_t* const Bluetooth_L2CAP_NewChannel(BT_StackConfig_t* co
 		CurrentChannel->ConnectionHandle = ConnectionHandle;
 		CurrentChannel->LocalNumber      = StackState->State.L2CAP.LastAllocatedChannel;
 		CurrentChannel->RemoteNumber     = RemoteChannel;
-		CurrentChannel->LocalMTU         = DEFAULT_L2CAP_CHANNEL_MTU;
+		CurrentChannel->LocalMTU         = BT_DEFAULT_L2CAP_CHANNEL_MTU;
 		CurrentChannel->RemoteMTU        = 0xFFFF;
 		CurrentChannel->State            = L2CAP_CHANSTATE_New;
 		CurrentChannel->PSM              = PSM;
@@ -285,7 +285,7 @@ static inline void Bluetooth_L2CAP_Signal_InformationReq(BT_StackConfig_t* const
 			ResponsePacket.InformationResponse.Result = CPU_TO_LE16(BT_INFORMATION_SUCCESSFUL);
 			DataLen = 2;
 
-			*((uint16_t*)&ResponsePacket.Data) = CPU_TO_LE16(DEFAULT_L2CAP_CHANNEL_MTU);
+			*((uint16_t*)&ResponsePacket.Data) = CPU_TO_LE16(BT_DEFAULT_L2CAP_CHANNEL_MTU);
 			break;
 		case BT_INFOREQ_EXTENDEDFEATURES:
 			ResponsePacket.InformationResponse.Result = CPU_TO_LE16(BT_INFORMATION_SUCCESSFUL);
@@ -410,7 +410,7 @@ static inline void Bluetooth_L2CAP_Signal_ConfigResp(BT_StackConfig_t* const Sta
  */
 void Bluetooth_L2CAP_Init(BT_StackConfig_t* const StackState)
 {
-	for (uint8_t i = 0; i < MAX_LOGICAL_CHANNELS; i++)
+	for (uint8_t i = 0; i < BT_MAX_LOGICAL_CHANNELS; i++)
 	  StackState->State.L2CAP.Channels[i].State = L2CAP_CHANSTATE_Closed;
 	  
 	StackState->State.L2CAP.LastAllocatedChannel = BT_CHANNEL_BASEOFFSET;
@@ -481,7 +481,7 @@ void Bluetooth_L2CAP_ProcessPacket(BT_StackConfig_t* const StackState,
 bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 {
 	/* Check for any half-open channels, send configuration details to the remote device if found */
-	for (uint8_t i = 0; i < MAX_LOGICAL_CHANNELS; i++)
+	for (uint8_t i = 0; i < BT_MAX_LOGICAL_CHANNELS; i++)
 	{
 		BT_L2CAP_Channel_t* CurrentChannel = &StackState->State.L2CAP.Channels[i];
 

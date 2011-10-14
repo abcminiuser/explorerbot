@@ -204,39 +204,33 @@ void CALLBACK_HID_ReportReceived(BT_StackConfig_t* const StackState,
                                  uint16_t Length,
                                  uint8_t* Data)
 {
-	uint16_t MotorPower[2]    = {0, 0};
-	bool     Headlights       = false;
-	bool     HeadlightsToggle = false;
-	bool     Horn             = false;
-	bool     NoveltyHorn      = false;
+	uint8_t MotorX           = 1;
+	uint8_t MotorY           = 1;
+	bool    Headlights       = false;
+	bool    HeadlightsToggle = false;
+	bool    Horn             = false;
+	bool    NoveltyHorn      = false;
 
 	/* Process input reports to look for key code changes */
 	if (ReportType == HID_DATAT_Input)
 	{
 		if (Length < 4) // Wiimote
 		{
-			switch (*((uint16_t*)&Data[1]) & 0x000F)
-			{
-				case 0x0008:
-					MotorPower[0] =  MAX_MOTOR_POWER;
-					MotorPower[1] =  MAX_MOTOR_POWER;
-					break;
-				case 0x0004:
-					MotorPower[0] = -MAX_MOTOR_POWER;
-					MotorPower[1] = -MAX_MOTOR_POWER;
-					break;
-				case 0x0001:
-					MotorPower[0] = -MAX_MOTOR_POWER;
-					MotorPower[1] =  MAX_MOTOR_POWER;
-					break;
-				case 0x0002:
-					MotorPower[0] =  MAX_MOTOR_POWER;
-					MotorPower[1] = -MAX_MOTOR_POWER;
-					break;
-			}
-			
 			static uint16_t PrevButtons = 0;
+
+			/* Left/Right */
+			if (Data[1] & 0x01)
+			  MotorX = 0;
+			else if (Data[1] & 0x02)
+			  MotorX = 2;
 			
+			/* Forward/Backward */
+			if (Data[1] & 0x08)
+			  MotorY = 0;
+			else if (Data[1] & 0x04)
+			  MotorY = 2;
+
+			/* Other Features */
 			Headlights       = ((Data[2] & 0x04) ? true : false);
 			HeadlightsToggle = (!(PrevButtons & 0x0010) && (*((uint16_t*)&Data[1]) & 0x0010));
 			Horn             = ((Data[2] & 0x08) ? true : false);
@@ -246,28 +240,21 @@ void CALLBACK_HID_ReportReceived(BT_StackConfig_t* const StackState,
 		}
 		else if (Length < 12) // Sony Ericson Z550i Phone
 		{
-			switch (*((uint16_t*)&Data[2]))
-			{
-				case 0xF600:
-					MotorPower[0] =  MAX_MOTOR_POWER;
-					MotorPower[1] =  MAX_MOTOR_POWER;
-					break;
-				case 0x0A00:
-					MotorPower[0] = -MAX_MOTOR_POWER;
-					MotorPower[1] = -MAX_MOTOR_POWER;
-					break;
-				case 0x00F6:
-					MotorPower[0] = -MAX_MOTOR_POWER;
-					MotorPower[1] =  MAX_MOTOR_POWER;
-					break;
-				case 0x000A:
-					MotorPower[0] =  MAX_MOTOR_POWER;
-					MotorPower[1] = -MAX_MOTOR_POWER;
-					break;
-			}
-			
 			static uint8_t PrevButtons = 0;
 
+			/* Left/Right */
+			if (Data[2] == 0xF6)
+			  MotorX = 0;
+			else if (Data[2] == 0x0A)
+			  MotorX = 2;
+
+			/* Forward/Backward */
+			if (Data[3] == 0xF6)
+			  MotorY = 0;
+			else if (Data[3] == 0x0A)
+			  MotorY = 2;
+			
+			/* Other Features */
 			HeadlightsToggle = (!(PrevButtons & 0x01) && (Data[1] & 0x01));
 			Horn             = ((Data[1] & 0x02) ? true : false);
 			
@@ -275,28 +262,21 @@ void CALLBACK_HID_ReportReceived(BT_StackConfig_t* const StackState,
 		}
 		else // PS3 Controller
 		{
-			switch (*((uint16_t*)&Data[2]))
-			{
-				case 0x0010:
-					MotorPower[0] =  MAX_MOTOR_POWER;
-					MotorPower[1] =  MAX_MOTOR_POWER;
-					break;
-				case 0x0040:
-					MotorPower[0] = -MAX_MOTOR_POWER;
-					MotorPower[1] = -MAX_MOTOR_POWER;
-					break;
-				case 0x0080:
-					MotorPower[0] = -MAX_MOTOR_POWER;
-					MotorPower[1] =  MAX_MOTOR_POWER;
-					break;
-				case 0x0020:
-					MotorPower[0] =  MAX_MOTOR_POWER;
-					MotorPower[1] = -MAX_MOTOR_POWER;
-					break;
-			}
-			
 			static uint16_t PrevButtons = 0;
+			
+			/* Left/Right */
+			if (Data[2] & 0x80)
+			  MotorX = 0;
+			else if (Data[2] & 0x20)
+			  MotorX = 2;
 
+			/* Forward/Backward */
+			if (Data[2] & 0x10)
+			  MotorY = 0;
+			else if (Data[2] & 0x40)
+			  MotorY = 2;
+			
+			/* Other Features */
 			Headlights       = ((*((uint16_t*)&Data[2]) & (1 << (PS3CONTROLLER_BUTTON_R2 - 1))) ? true : false);
 			HeadlightsToggle = (!(PrevButtons & (1 << (PS3CONTROLLER_BUTTON_R1 - 1))) && (*((uint16_t*)&Data[2]) & (1 << (PS3CONTROLLER_BUTTON_R1 - 1))));
 			Horn             = ((*((uint16_t*)&Data[2]) & (1 << (PS3CONTROLLER_BUTTON_L2 - 1))) ? true : false);
@@ -305,8 +285,17 @@ void CALLBACK_HID_ReportReceived(BT_StackConfig_t* const StackState,
 			PrevButtons = *((uint16_t*)&Data[2]);
 		}
 		
+		/* Table to map the controller direction coordinates to a pair of PWM power values */
+		static const struct { int8_t Left; int8_t Right; } MotorPowerMap[3][3] =
+			{
+				{{ 0, 1},{ 1, 1},{ 1, 0}},
+				{{-1, 1},{ 0, 0},{ 1,-1}},
+				{{0, -1},{-1,-1},{-1, 0}},
+			};
+		
 		/* Change robot hardware states to match the values in the controller report */
-		Motors_SetChannelSpeed(MotorPower[0], MotorPower[1]);
+		Motors_SetChannelSpeed((MotorPowerMap[MotorY][MotorX].Left  * (int16_t)MAX_MOTOR_POWER),
+		                       (MotorPowerMap[MotorY][MotorX].Right * (int16_t)MAX_MOTOR_POWER));
 		Headlights_SetState(Headlights);
 		Speaker_Tone(Horn ? 30 : 0);
 

@@ -53,23 +53,26 @@ void Motors_Init(void)
  */
 void Motors_SetChannelSpeed(const int16_t LeftPower, const int16_t RightPower)
 {
-	bool     LeftDirChange  = (LeftPower  <= 0) ? (PORTD & (1 << 4)) : !(PORTD & (1 << 4));
-	bool     RightDirChange = (RightPower <= 0) ? (PORTD & (1 << 3)) : !(PORTD & (1 << 3));
+	bool     LeftDirection  = (LeftPower  <= 0);
+	bool     RightDirection = (RightPower <= 0);
 	uint16_t LeftPWMValue   = abs(LeftPower);
 	uint16_t RightPWMValue  = abs(RightPower);
+
+	bool     LeftDirChange  = LeftDirection  ? (PORTD & (1 << 4)) : !(PORTD & (1 << 4));
+	bool     RightDirChange = RightDirection ? (PORTD & (1 << 3)) : !(PORTD & (1 << 3));
 
 	/* If motor channel off or direction switching, disable the PWM output completely */
 	if (LeftDirChange || !(LeftPower))
 	{
-		TCCR1A &= ~(1 << COM1A1);
-		PORTB  &= ~(1 << 6);	
+		TCCR1A &= ~(1 << COM1B1);
+		PORTB  &= ~(1 << 4);	
 	}
 	
 	/* If motor channel off or direction switching, disable the PWM output completely */
 	if (RightDirChange || !(RightPower))
 	{
-		TCCR1A &= ~(1 << COM1B1);
-		PORTB  &= ~(1 << 5);	
+		TCCR1A &= ~(1 << COM1A1);
+		PORTB  &= ~(1 << 6);	
 	}
 	
 	/* Delay on direction change to wait until slow inverter transistors have finished switching to prevent voltage rail dips */
@@ -85,26 +88,25 @@ void Motors_SetChannelSpeed(const int16_t LeftPower, const int16_t RightPower)
 	  RightPWMValue = MAX_MOTOR_POWER;
 
 	/* Set direction pin for left motor channel */
-	if (LeftPower <= 0)
+	if (LeftDirection)
 	  PORTD &= ~(1 << 4);
 	else
 	  PORTD |=  (1 << 4);
-		
-	/* If channel power non-zero, re-activate the PWM output */
-	if (LeftPower != 0)
-	  TCCR1A |= (1 << COM1A1);
 
-	OCR1A = LeftPWMValue;
-	
 	/* Set direction pin for right motor channel */
-	if (RightPower <= 0)
+	if (RightDirection)
 	  PORTD &= ~(1 << 3);
 	else
 	  PORTD |=  (1 << 3);
 
+	OCR1B = LeftPWMValue;
+	OCR1A = RightPWMValue;
+
+	/* If channel power non-zero, re-activate the PWM output */
+	if (LeftPower != 0)
+	  TCCR1A |= (1 << COM1B1);
+
 	/* If channel power non-zero, re-activate the PWM output */
 	if (RightPower != 0)
-	  TCCR1A |= (1 << COM1B1);
-	
-	OCR1B = RightPWMValue;
+	  TCCR1A |= (1 << COM1A1);
 }

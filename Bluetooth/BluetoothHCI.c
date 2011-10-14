@@ -96,6 +96,7 @@ static BT_HCI_Connection_t* const Bluetooth_HCI_NewConnection(BT_StackConfig_t* 
  */
 void Bluetooth_HCI_Init(BT_StackConfig_t* const StackState)
 {
+	StackState->State.HCI.CommandPackets  = 1;
 	StackState->State.HCI.State           = HCISTATE_Init_Reset;
 	StackState->State.HCI.StateTransition = true;
 
@@ -128,6 +129,9 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 	if (HCIEventHeader->EventCode == EVENT_COMMAND_COMPLETE)
 	{
 		BT_HCIEvent_CommandComplete_t* CommandCompleteHeader = (BT_HCIEvent_CommandComplete_t*)&HCIEventHeader->Parameters;
+		
+		/* Update number of allowable command packets to the controller */
+		StackState->State.HCI.CommandPackets = CommandCompleteHeader->Packets;
 		
 		uint8_t NextHCIState = StackState->State.HCI.State;
 		
@@ -167,6 +171,13 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 		
 		StackState->State.HCI.StateTransition = (StackState->State.HCI.State != NextHCIState);
 		StackState->State.HCI.State           = NextHCIState;		
+	}
+	else if (HCIEventHeader->EventCode == EVENT_COMMAND_STATUS)
+	{
+		BT_HCIEvent_CommandStatus_t* CommandStatusHeader = (BT_HCIEvent_CommandStatus_t*)&HCIEventHeader->Parameters;
+		
+		/* Update number of allowable command packets to the controller */
+		StackState->State.HCI.CommandPackets = CommandStatusHeader->Packets;
 	}
 	else if (HCIEventHeader->EventCode == EVENT_CONNECTION_REQUEST)
 	{
@@ -328,8 +339,8 @@ bool Bluetooth_HCI_Manage(BT_StackConfig_t* const StackState)
 {
 	BT_HCICommand_Header_t* HCICommandHeader = (BT_HCICommand_Header_t*)StackState->Config.PacketBuffer;
 
-	/* Only process HCI state transitions (one action per transition) */
-	if (!(StackState->State.HCI.StateTransition))
+	/* Only process HCI state transitions (one action per transition) when the controller is willing to accept a new command */
+	if (!(StackState->State.HCI.StateTransition) || !(StackState->State.HCI.CommandPackets))
 	  return false;
 	
 	/* Reset HCI layer timeout counter */
@@ -398,7 +409,11 @@ BT_HCI_Connection_t* Bluetooth_HCI_Connect(BT_StackConfig_t* const StackState,
 	/* Disallow connections until the stack is ready */
 	if (StackState->State.HCI.State != HCISTATE_Idle)
 	  return NULL;
-	  
+
+	/* Abort if not enough space in the controller for the command */
+	if (!(StackState->State.HCI.CommandPackets))
+	  return false;
+
 	/* Only ACL connections are implemented at present, reject other types */
 	if (LinkType != LINK_TYPE_ACL)
 	  return NULL;
@@ -441,7 +456,16 @@ BT_HCI_Connection_t* Bluetooth_HCI_Connect(BT_StackConfig_t* const StackState,
 bool Bluetooth_HCI_Disconnect(BT_StackConfig_t* const StackState,
                               BT_HCI_Connection_t* const HCIConnection)
 {
-	if ((StackState->State.HCI.State != HCISTATE_Idle) || !(HCIConnection))
+	/* Disallow connections until the stack is ready */
+	if (StackState->State.HCI.State != HCISTATE_Idle)
+	  return false;
+
+	/* Abort if not enough space in the controller for the command */
+	if (!(StackState->State.HCI.CommandPackets))
+	  return false;
+	  
+	/* Abort if invalid connection handle was given */
+	if (!(HCIConnection))
 	  return false;
 	  
 	BT_HCICommand_Header_t* HCICommandHeader = (BT_HCICommand_Header_t*)StackState->Config.PacketBuffer;
@@ -486,6 +510,9 @@ bool HCI_SendPacket(BT_StackConfig_t* const StackState,
 		            const uint16_t Length,
 		            const void* Data)
 {
+	if (StackState->State.HCI.State != HCISTATE_Idle)
+	  return false;
+
 	if (!(HCIConnection) || (HCIConnection->State != HCI_CONSTATE_Connected))
 	  return false;
 

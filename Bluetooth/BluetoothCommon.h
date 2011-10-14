@@ -113,7 +113,8 @@
 				{
 					uint8_t             State; /**< Current HCI state machine state, a value from the \ref BT_HCIStates_t enum. */
 					bool                StateTransition; /**< Indicates if the state machine has undergone a state transition that needs to be processed. */
-					uint16_t            TicksElapsed;
+					uint8_t             CommandPackets; /**< Number of allowable HCI command packets which can be sent to the controller. */
+					uint16_t            TicksElapsed; /**< Number of ticks that has elapsed since the last command was sent. */
 					uint8_t             LocalBDADDR[BT_BDADDR_LEN]; /**< Address of the local Bluetooth adapter attached to this stack instance. */
 					BT_HCI_Connection_t Connections[BT_MAX_DEVICE_CONNECTIONS]; /**< HCI connection state information list. */
 				} HCI; /**< HCI layer connection state information. */

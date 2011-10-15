@@ -40,17 +40,14 @@
 		#include "SensorsCommon.h"
 
 	/* Macros: */
+		/** Address of the ITG3200 sensor on the I2C bus. */
 		#define ITG3200_ADDRESS       (0x68 << 1)
-		#define ITG3200_CHIP_ID       0x69
 		
-		#define ITG3200_CFG_RAWRDY    (1 << 0)
-		#define ITG3200_CFG_PLLRDY    (1 << 2)
-		#define ITG3200_CFG_ANYRDCLR  (1 << 4)
-		#define ITG3200_CFG_LATCHINT  (1 << 5)
-
-		#define ITG3200_STA_RAWRDY    (1 << 0)
-		#define ITG3200_STA_PLLRDY    (1 << 2)
+		/** Device ID returned by the sensor when the WHOAMI register is queried. */
+		#define ITG3200_CHIP_ID       0x69
 	
+		/** \name Register addresses for the ITG3200 sensor. */
+		//@{
 		#define ITG3200_WHOAMI_REG    0x00
 		#define	ITG3200_SMPLRT_REG    0x15
 		#define ITG3200_DLPF_FS_REG   0x16
@@ -65,7 +62,19 @@
 		#define ITG3200_GZ_H_REG      0x21
 		#define ITG3200_GZ_L_REG      0x22
 		#define ITG3200_PWR_M_REG     0x3E
+		//@}
 
+		/** \name Register bit masks for the ITG3200 sensor. */
+		//@{
+		#define ITG3200_CFG_RAWRDY    (1 << 0)
+		#define ITG3200_CFG_PLLRDY    (1 << 2)
+		#define ITG3200_CFG_ANYRDCLR  (1 << 4)
+		#define ITG3200_CFG_LATCHINT  (1 << 5)
+
+		#define ITG3200_STA_RAWRDY    (1 << 0)
+		#define ITG3200_STA_PLLRDY    (1 << 2)
+		//@}
+		
 	/* Function Prototypes: */
 		void ITG3200_Init(SensorData_t* const GyroSensorInfo,
 		                  SensorData_t* const TempSensorInfo);

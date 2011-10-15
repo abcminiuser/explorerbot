@@ -47,6 +47,10 @@
 		void ExternalSRAM_Init(void);
 		
 	/* Inline Functions: */
+		/** Set the currently selected external SRAM 64KB bank.
+		 *
+		 *  \param[in] Index  Bank index to select.
+		 */
 		static inline void ExternalSRAM_SetBank(const uint8_t Index)
 		{
 			if (Index)

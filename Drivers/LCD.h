@@ -46,6 +46,8 @@
 		#include <LUFA/Common/Common.h>
 		
 	/* Macros: */
+		/** \name Physical LCD connection mapping defines. */
+		//@{
 		#define LCD_DATA_PORT                  PORTF
 		#define LCD_DATA_PIN                   PINF
 		#define LCD_DATA_DDR                   DDRF
@@ -60,6 +62,7 @@
 		#define LCD_DATA6                      (1 << 1)
 		#define LCD_DATA5                      (1 << 2)
 		#define LCD_DATA4                      (1 << 3)
+		//@}
 		
 		/** Update interval that \ref LCD_TickElapsed() will be called at, used to calculate the tick duration of the backlight
 		 *  automatic dimming function.

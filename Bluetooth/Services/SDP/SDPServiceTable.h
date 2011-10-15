@@ -30,11 +30,16 @@
 		/** First 80 bits common to all standardized Bluetooth services. */
 		#define BASE_80BIT_UUID                         CPU_TO_BE16(0x0000), CPU_TO_BE16(0x1000), CPU_TO_BE16(0x8000), {0x00, 0x80, 0x5F, 0x9B, 0x34, 0xFB}
 
+		/** \name UUID values for common Bluetooth service and classes. */
+		//@{
 		#define RFCOMM_UUID                             {CPU_TO_BE32(0x00000003), BASE_80BIT_UUID}
 		#define L2CAP_UUID                              {CPU_TO_BE32(0x00000100), BASE_80BIT_UUID}
 		#define SP_CLASS_UUID                           {CPU_TO_BE32(0x00001101), BASE_80BIT_UUID}
 		#define PUBLICBROWSEGROUP_CLASS_UUID            {CPU_TO_BE32(0x00001002), BASE_80BIT_UUID}
+		//@}
 
+		/** \name Bluetooth service attribute indexes for common service attributes. */
+		//@{
 		#define SDP_ATTRIBUTE_ID_SERVICERECORDHANDLE    0x0000
 		#define SDP_ATTRIBUTE_ID_SERVICECLASSIDS        0x0001
 		#define SDP_ATTRIBUTE_ID_PROTOCOLDESCRIPTORLIST 0x0004
@@ -42,7 +47,10 @@
 		#define SDP_ATTRIBUTE_ID_LANGUAGEBASEATTROFFSET 0x0006
 		#define SDP_ATTRIBUTE_ID_SERVICENAME            0x0100
 		#define SDP_ATTRIBUTE_ID_SERVICEDESCRIPTION     0x0101
+		//@}
 		
+		/** \name Convenience macros to encode SDP service attribute values for a given type and/or size. */
+		//@{
 		#define SDP_ITEM8BIT(Type, Value)               {(SDP_DATASIZE_8Bit   | (Type)), Value}
 		#define SDP_ITEM16BIT(Type, Value)              {(SDP_DATASIZE_16Bit  | (Type)), Value}
 		#define SDP_ITEM32BIT(Type, Value)              {(SDP_DATASIZE_32Bit  | (Type)), Value}
@@ -51,6 +59,7 @@
 		#define SDP_ITEMSEQUENCE8BIT(Size)              {(SDP_DATASIZE_Variable8Bit | SDP_DATATYPE_Sequence), Size}
 		#define SDP_ITEMSEQUENCE16BIT(Size)             {(SDP_DATASIZE_Variable16Bit | SDP_DATATYPE_Sequence), Size}
 		#define SDP_ITEMSTRING(String)                  {(SDP_DATASIZE_Variable8Bit | SDP_DATATYPE_String), (sizeof(String) - 1)}, String
+		//@}
 
 	/* Enums: */
 		/** Data sizes for SDP Data Element headers, to indicate the size of the data contained in the element. When creating

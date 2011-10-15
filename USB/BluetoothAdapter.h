@@ -59,8 +59,13 @@
 		/** Device Protocol value for the Bluetooth Device class. */
 		#define BLUETOOTH_DEVICE_PROTOCOL        0x01
 		
+		/** Pipe index for the Bluetooth adapter's Data IN pipe. */
 		#define BLUETOOTH_DATA_IN_PIPE           1
+
+		/** Pipe index for the Bluetooth adapter's Data OUT pipe. */
 		#define BLUETOOTH_DATA_OUT_PIPE          2
+
+		/** Pipe index for the Bluetooth adapter's Events pipe. */
 		#define BLUETOOTH_EVENTS_PIPE            3
 
 	/* External Variables: */

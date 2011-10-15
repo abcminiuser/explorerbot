@@ -40,15 +40,17 @@
 		#include "SensorsCommon.h"
 
 	/* Macros: */
+		/** Address of the AK8975 sensor on the I2C bus. */
 		#define AK8975_ADDRESS                  (0x0C << 1)
+		
+		/** Device ID returned by the sensor when the WIA register is queried. */
 		#define AK8975_DEVICE_ID                0x48		 
 
+		/** \name Register addresses for the AK8975 sensor. */
+		//@{
 		#define AK8975_REG_WIA                  0x00
 		#define AK8975_REG_INFO                 0x01
-
 		#define AK8975_REG_ST1                  0x02
-		#define AK8975_REG_ST1_DRDY_MASK        (1 << 0)
-
 		#define AK8975_REG_HXL                  0x03
 		#define AK8975_REG_HXH                  0x04
 		#define AK8975_REG_HYL                  0x05
@@ -56,16 +58,7 @@
 		#define AK8975_REG_HZL                  0x07
 		#define AK8975_REG_HZH                  0x08
 		#define AK8975_REG_ST2                  0x09
-		#define AK8975_REG_ST2_DERR_MASK        (1 << 2)
-
-		#define AK8975_REG_ST2_HOFL_MASK        (1 << 3)
-
 		#define AK8975_REG_CNTL                 0x0A
-		#define AK8975_REG_CNTL_MODE_POWER_DOWN (0  << 0)
-		#define AK8975_REG_CNTL_MODE_ONCE       (1  << 0)
-		#define AK8975_REG_CNTL_MODE_SELF_TEST  (8  << 0)
-		#define AK8975_REG_CNTL_MODE_FUSE_ROM   (15 << 0)
-
 		#define AK8975_REG_RSVC                 0x0B
 		#define AK8975_REG_ASTC                 0x0C
 		#define AK8975_REG_TS1                  0x0D
@@ -74,6 +67,18 @@
 		#define AK8975_REG_ASAX                 0x10
 		#define AK8975_REG_ASAY                 0x11
 		#define AK8975_REG_ASAZ                 0x12
+		//@}
+
+		/** \name Register bit masks for the AK8975 sensor. */
+		//@{
+		#define AK8975_REG_ST1_DRDY_MASK        (1 << 0)
+		#define AK8975_REG_ST2_DERR_MASK        (1 << 2)
+		#define AK8975_REG_ST2_HOFL_MASK        (1 << 3)
+		#define AK8975_REG_CNTL_MODE_POWER_DOWN (0  << 0)
+		#define AK8975_REG_CNTL_MODE_ONCE       (1  << 0)
+		#define AK8975_REG_CNTL_MODE_SELF_TEST  (8  << 0)
+		#define AK8975_REG_CNTL_MODE_FUSE_ROM   (15 << 0)
+		//@}
 
 	/* Function Prototypes: */
 		void AK8975_Init(SensorData_t* const CompassSensorInfo);

@@ -93,6 +93,15 @@
 		} Sensor_t;
 	
 	/* Inline Functions */
+		/** Writes a given buffer of bytes to the given sensor, over the I2C bus.
+		 *
+		 *  \param[in] SensorTWIAddress  Address of the sensor on the TWI bus.
+		 *  \param[in] RegisterAddress   Address of the first register to write to within the device.
+		 *  \param[in] PacketBuffer      Pointer to a buffer where the data to send is stored.
+		 *  \param[in] Length            Length of the data to send, in bytes.
+		 *
+		 *  \return Error code from the TWI driver.
+		 */
 		static inline uint8_t Sensor_WriteBytes(const uint8_t SensorTWIAddress,
 		                                        const uint8_t RegisterAddress,
 		                                        const uint8_t* const PacketBuffer,
@@ -101,6 +110,15 @@
 			return TWI_WritePacket(SensorTWIAddress, SENSOR_BUS_TIMEOUT_MS, &RegisterAddress, sizeof(RegisterAddress), PacketBuffer, Length);
 		}
 
+		/** Reads a given buffer of bytes from the given sensor, over the I2C bus.
+		 *
+		 *  \param[in] SensorTWIAddress  Address of the sensor on the TWI bus.
+		 *  \param[in] RegisterAddress   Address of the first register to read from within the device.
+		 *  \param[in] PacketBuffer      Pointer to a buffer where the received data is to be stored.
+		 *  \param[in] Length            Length of the data to read, in bytes.
+		 *
+		 *  \return Error code from the TWI driver.
+		 */
 		static inline uint8_t Sensor_ReadBytes(const uint8_t SensorTWIAddress,
 		                                       const uint8_t RegisterAddress,
 		                                       uint8_t* const PacketBuffer,

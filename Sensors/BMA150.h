@@ -40,9 +40,14 @@
 		#include "SensorsCommon.h"
 
 	/* Macros: */
+		/** Address of the BMA150 sensor on the I2C bus. */
 		#define BMA150_ADDRESS                 (0x38 << 1)
+		
+		/** Device ID returned by the sensor when the CHIP ID register is queried. */
 		#define BMA150_CHIP_ID                 0x02
 
+		/** \name Register addresses for the BMA150 sensor. */
+		//@{
 		#define BMA150_CHIP_ID_REG             0x00
 		#define BMA150_VERSION_REG             0x01
 		#define BMA150_X_AXIS_LSB_REG          0x02
@@ -65,7 +70,6 @@
 		#define BMA150_CUSTOMER2_REG           0x13
 		#define BMA150_RANGE_BWIDTH_REG        0x14
 		#define BMA150_SMB150_CONF2_REG        0x15
-
 		#define BMA150_OFFS_GAIN_X_REG         0x16
 		#define BMA150_OFFS_GAIN_Y_REG         0x17
 		#define BMA150_OFFS_GAIN_Z_REG         0x18
@@ -74,6 +78,7 @@
 		#define BMA150_OFFSET_Y_REG            0x1B
 		#define BMA150_OFFSET_Z_REG            0x1C
 		#define BMA150_OFFSET_T_REG            0x1D
+		//@}
 		
 	/* Function Prototypes: */
 		void BMA150_Init(SensorData_t* const AccelSensorInfo);

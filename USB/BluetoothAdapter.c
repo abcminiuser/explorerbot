@@ -144,6 +144,8 @@ bool BluetoothAdapter_ConfigurePipes(USB_Descriptor_Device_t* const DeviceDescri
  *  This comparator searches for the next Endpoint descriptor inside the current interface descriptor, aborting the
  *  search if another interface descriptor is found before the required endpoint.
  *
+ *  \param[in] CurrentDescriptor  Pointer to the current descriptor being examined.
+ *
  *  \return A value from the DSEARCH_Return_ErrorCodes_t enum
  */
 uint8_t DComp_NextInterfaceBluetoothDataEndpoint(void* CurrentDescriptor)

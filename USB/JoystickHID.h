@@ -74,6 +74,7 @@
 		#define PS3CONTROLLER_PID           0x0268
 	
 	/* Enums: */
+		/** Button usage indexes for the Sony Playstation 3 controller's HID report button entries. */
 		enum PS3Controller_ButtonUsages_t
 		{
 			PS3CONTROLLER_BUTTON_Select   = 1,

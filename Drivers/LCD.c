@@ -106,6 +106,8 @@ static uint8_t LCD_GetDataLines(void)
 
 /** Intializes the LCD driver ready for use. This must be called before any other
  *  functions in the LCD driver.
+ *
+ *  \param[in] AutoBacklight  Boolean \c true if the automatic LCD backlight dimming functionality should be enabled, \c false to disable.
  */
 void LCD_Init(bool AutoBacklight)
 {

@@ -28,9 +28,16 @@
   this software.
 */
 
+/** \file
+ *
+ *  Driver for the AK8975 3-Axis Digital Compass sensor.
+ */
+
 #include "AK8975.h"
 
+/** Human readable name for the sensor. */
 static const char* SensorName = "Compass";
+
 
 static void AK8975_StartConversion(SensorData_t* const CompassSensorInfo)
 {

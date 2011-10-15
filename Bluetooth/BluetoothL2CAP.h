@@ -12,6 +12,11 @@
   All rights reserved.
 */
 
+/** \file
+ *
+ *  Header file for BluetoothL2CAP.c.
+ */
+
 #ifndef _BLUETOOTH_L2CAP_H_
 #define _BLUETOOTH_L2CAP_H_
 

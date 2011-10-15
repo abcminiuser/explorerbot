@@ -28,6 +28,11 @@
   this software.
 */
 
+/** \file
+ *
+ *  Header file for BluetoothAdapter.c.
+ */
+
 #ifndef _BLUETOOTH_ADAPTER_H_
 #define _BLUETOOTH_ADAPTER_H_
 

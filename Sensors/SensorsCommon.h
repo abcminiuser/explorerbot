@@ -28,6 +28,11 @@
   this software.
 */
 
+/** \file
+ *
+ *  Common definitions for the sensor driver platform.
+ */
+
 #ifndef _SENSORS_COMMON_H_
 #define _SENSORS_COMMON_H_
 

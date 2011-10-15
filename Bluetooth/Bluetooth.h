@@ -12,6 +12,11 @@
   All rights reserved.
 */
 
+/** \file
+ *
+ *  Header file for Bluetooth.c.
+ */
+
 #ifndef _BLUETOOTH_H_
 #define _BLUETOOTH_H_
 

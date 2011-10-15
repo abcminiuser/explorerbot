@@ -28,9 +28,16 @@
   this software.
 */
 
+/** \file
+ *
+ *  Driver for the BMP085 Digital Pressure sensor.
+ */
+
 #include "BMP085.h"
 
+/** Human readable name for the sensor. */
 static const char* SensorName = "Pressure";
+
 
 static void BMP085_StartConversion(SensorData_t* const PressureSensorInfo)
 {

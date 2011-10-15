@@ -28,6 +28,11 @@
   this software.
 */
 
+/** \file
+ *
+ *  Bluetooth stack control event and callback functions, linking the Bluetooth stack to the user application.
+ */
+
 #include "BluetoothControl.h"
 
 /** Handle for the currently open RFCOMM communication channel between the robot and a remote device. */

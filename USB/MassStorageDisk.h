@@ -28,6 +28,11 @@
   this software.
 */
 
+/** \file
+ *
+ *  Header file for MassStorageDisk.c.
+ */
+
 #ifndef _DATA_LOGGER_H_
 #define _DATA_LOGGER_H_
 

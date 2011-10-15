@@ -28,7 +28,13 @@
   this software.
 */
 
+/** \file
+ *
+ *  Driver for the robot's PWM motor controller H-Bridge IC.
+ */
+
 #include "Motors.h"
+
 
 /** Initializes the Motors hardware driver ready for use. This must be called before any other
  *  functions in the Motors hardware driver.

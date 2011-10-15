@@ -28,6 +28,11 @@
   this software.
 */
 
+/** \file
+ *
+ *  Header file for BMP085.c.
+ */
+
 #ifndef _SENSORS_BMP085_H_
 #define _SENSORS_BMP085_H_
 

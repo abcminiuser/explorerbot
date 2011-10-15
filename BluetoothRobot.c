@@ -28,6 +28,12 @@
   this software.
 */
 
+/** \file
+ *
+ *  Main module for the Bluetooth robot, configuring the system hardware and executing the sub-tasks that comprise
+ *  the application.
+ */
+
 #include "BluetoothRobot.h"
 
 /** Main program entry point. This routine configures the hardware required by the application, then

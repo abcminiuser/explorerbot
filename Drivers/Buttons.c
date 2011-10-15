@@ -28,7 +28,13 @@
   this software.
 */
 
+/** \file
+ *
+ *  Driver for the robot's pushbuttons.
+ */
+
 #include "Buttons.h"
+
 
 /** Initializes the Buttons hardware driver, ready for use. This must be called prior to
  *  any other functions in this driver.

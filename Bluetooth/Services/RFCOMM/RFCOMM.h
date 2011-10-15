@@ -12,6 +12,11 @@
   All rights reserved.
 */
 
+/** \file
+ *
+ *  Header file for RFCOMM.h.
+ */
+
 #ifndef _RFCOMM_SERVICE_H_
 #define _RFCOMM_SERVICE_H_
 

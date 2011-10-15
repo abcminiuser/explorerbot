@@ -186,7 +186,7 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 	}
 	else if (HCIEventHeader->EventCode == EVENT_NUM_PACKETS_COMPLETE)
 	{
-		uint16_t* CurrentPacketInfo = &HCIEventHeader->Parameters[1];
+		uint16_t* CurrentPacketInfo = (uint16_t*)&HCIEventHeader->Parameters[1];
 		
 		/* For each connection reported in the event, find the associated connection object and decrease the number of
 		 * queued packets by the number of completed packets reported for each connection */
@@ -525,10 +525,10 @@ bool Bluetooth_HCI_Disconnect(BT_StackConfig_t* const StackState,
  *
  *  \return Boolean \c true if the data was sent, \c false otherwise.
  */ 
-bool HCI_SendPacket(BT_StackConfig_t* const StackState,
-                    BT_HCI_Connection_t* const HCIConnection,
-		            const uint16_t Length,
-		            const void* Data)
+bool Bluetooth_HCI_SendPacket(BT_StackConfig_t* const StackState,
+                              BT_HCI_Connection_t* const HCIConnection,
+		                      const uint16_t Length,
+		                      const void* Data)
 {
 	if (StackState->State.HCI.State != HCISTATE_Idle)
 	  return false;

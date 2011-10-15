@@ -28,6 +28,11 @@
   this software.
 */
 
+/** \file
+ *
+ *  Header file for AK8975.c.
+ */
+
 #ifndef _SENSORS_AK8975_H_
 #define _SENSORS_AK8975_H_
 

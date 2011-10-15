@@ -28,7 +28,13 @@
   this software.
 */
 
+/** \file
+ *
+ *  Driver for the robot's RGB status LED.c.
+ */
+
 #include "RGB.h"
+
 
 /** Initializes the RGB hardware driver ready for use. This must be called
  *  before any other functions in the RGB driver.

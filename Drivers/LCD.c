@@ -28,10 +28,20 @@
   this software.
 */
 
+/** \file
+ *
+ *  Driver for the robot's HD44780 compatible 16x2 line character LCD module.
+ */
+
 #include "LCD.h"
 
+/** Indicates if the automatic LCD backlight dimming function is currently enabled. */
 static bool    AutoBacklightEnabled = false;
+
+/** Current LCD backlight PWM level for automatic backlight dimming. */
 static uint8_t BacklightLevel;
+
+/** Number of ticks that have elapsed since the backlight was at full brightness, for automatic backlight dimming. */
 static uint8_t BacklightTicks;
 
 

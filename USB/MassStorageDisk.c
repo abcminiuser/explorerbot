@@ -28,6 +28,11 @@
   this software.
 */
 
+/** \file
+ *
+ *  USB transport management for USB Mass Storage devices.
+ */
+
 #include "MassStorageDisk.h"
 
 /** LUFA HID Class driver interface configuration and state information. This structure is

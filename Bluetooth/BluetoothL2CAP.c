@@ -651,7 +651,7 @@ bool Bluetooth_L2CAP_SendPacket(BT_StackConfig_t* const StackState,
 	FirstPacket.L2CAPDataHeader.DestinationChannel = cpu_to_le16(L2CAPChannel->RemoteNumber);
 	memcpy(FirstPacket.Data, Data, BytesInPacket);
 	
-	if (!(HCI_SendPacket(StackState, HCIConnection, sizeof(FirstPacket), &FirstPacket)))
+	if (!(Bluetooth_HCI_SendPacket(StackState, HCIConnection, sizeof(FirstPacket), &FirstPacket)))
 	  return false;
 
 	BytesRemaining -= BytesInPacket;
@@ -663,7 +663,7 @@ bool Bluetooth_L2CAP_SendPacket(BT_StackConfig_t* const StackState,
 		/* Determine the length of the next fragment */
 		BytesInPacket = MIN(BytesRemaining, L2CAPChannel->RemoteMTU);
 		
-		if (!(HCI_SendPacket(StackState, HCIConnection, BytesInPacket, Data)))
+		if (!(Bluetooth_HCI_SendPacket(StackState, HCIConnection, BytesInPacket, Data)))
 		  return false;
 
 		BytesRemaining -= BytesInPacket;

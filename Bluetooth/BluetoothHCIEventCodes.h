@@ -18,8 +18,8 @@
  *  event from a HCI controller.
  */
 
-#ifndef _HCI_EVENT_CODES_H_
-#define _HCI_EVENT_CODES_H_
+#ifndef _BLUETOOTH_HCIEVENT_CODES_H_
+#define _BLUETOOTH_HCIEVENT_CODES_H_
 
 	/* Macros: */
 		/** \name Bluetooth packet OGF class types. */

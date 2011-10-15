@@ -28,9 +28,16 @@
   this software.
 */
 
+/** \file
+ *
+ *  Driver for the BMA150 3-Axis Accelerometer sensor.
+ */
+
 #include "BMA150.h"
 
+/** Human readable name for the sensor. */
 static const char* SensorName = "Accelerometer";
+
 
 void BMA150_Init(SensorData_t* const AccelSensorInfo)
 {

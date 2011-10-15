@@ -12,6 +12,11 @@
   All rights reserved.
 */
 
+/** \file
+ *
+ *  Bluetooth SDP service table definitions.
+ */
+
 #ifndef _BLUETOOTH_SERVICE_SDP_TABLEDEFS_H_
 #define _BLUETOOTH_SERVICE_SDP_TABLEDEFS_H_
 

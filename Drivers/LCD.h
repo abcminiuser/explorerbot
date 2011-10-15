@@ -28,6 +28,11 @@
   this software.
 */
 
+/** \file
+ *
+ *  Header file for LCD.c.
+ */
+
 #ifndef _LCD_H_
 #define _LCD_H_
 

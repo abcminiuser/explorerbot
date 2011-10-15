@@ -28,6 +28,11 @@
   this software.
 */
 
+/** \file
+ *
+ *  Header file for Headlights.c.
+ */
+
 #ifndef _HEADLIGHTS_H_
 #define _HEADLIGHTS_H_
 

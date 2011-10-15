@@ -28,6 +28,11 @@
   this software.
 */
 
+/** \file
+ *
+ *  Header file for Speaker.c.
+ */
+
 #ifndef _SPEAKER_H_
 #define _SPEAKER_H_
 

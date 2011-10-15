@@ -12,8 +12,13 @@
   All rights reserved.
 */
 
-#ifndef __BLUETOOTH_L2CAPPACKET_TYPES_H_
-#define __BLUETOOTH_L2CAPPACKET_TYPES_H_
+/** \file
+ *
+ *  Bluetooth L2CAP layer packet definitions.
+ */
+
+#ifndef _BLUETOOTH_L2CAPPACKET_TYPES_H_
+#define _BLUETOOTH_L2CAPPACKET_TYPES_H_
 
 	/* Includes: */
 		#include "BluetoothCommon.h"

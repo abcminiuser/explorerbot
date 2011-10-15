@@ -28,6 +28,11 @@
   this software.
 */
 
+/** \file
+ *
+ *  Header file for BMA150.c.
+ */
+
 #ifndef _SENSORS_BMA150_H_
 #define _SENSORS_BMA150_H_
 

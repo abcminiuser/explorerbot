@@ -12,8 +12,12 @@
   All rights reserved.
 */
 
-#include "RFCOMMServiceTable.h"
+/** \file
+ *
+ *  Bluetooth RFCOMM service SDP table definitions, to register the RFCOMM service with the SDP service.
+ */
 
+#include "RFCOMMServiceTable.h"
 
 /** Serial Port Profile attribute, listing the unique service handle of the Serial Port service
  *  within the device. This handle can then be requested by the SDP client in future transactions

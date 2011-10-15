@@ -28,6 +28,11 @@
   this software.
 */
 
+/** \file
+ *
+ *  Header file for ITG3200.c.
+ */
+
 #ifndef _SENSORS_ITG3200_H_
 #define _SENSORS_ITG3200_H_
 

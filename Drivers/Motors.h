@@ -28,6 +28,11 @@
   this software.
 */
 
+/** \file
+ *
+ *  Header file for Motors.c.
+ */
+
 #ifndef _MOTORS_H_
 #define _MOTORS_H_
 

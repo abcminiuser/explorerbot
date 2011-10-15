@@ -28,6 +28,11 @@
   this software.
 */
 
+/** \file
+ *
+ *  Header file for Buttons.c.
+ */
+
 #ifndef _BUTTONS_H_
 #define _BUTTONS_H_
 

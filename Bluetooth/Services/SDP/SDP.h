@@ -12,6 +12,11 @@
   All rights reserved.
 */
 
+/** \file
+ *
+ *  Header file for SDP.c.
+ */
+
 #ifndef _SDP_SERVICE_H_
 #define _SDP_SERVICE_H_
 

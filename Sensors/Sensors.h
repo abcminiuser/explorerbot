@@ -28,6 +28,11 @@
   this software.
 */
 
+/** \file
+ *
+ *  Header file for Sensors.c.
+ */
+
 #ifndef _SENSORS_H_
 #define _SENSORS_H_
 

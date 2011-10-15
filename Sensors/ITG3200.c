@@ -28,10 +28,19 @@
   this software.
 */
 
+/** \file
+ *
+ *  Driver for the ITG3200 3-Axis Gyroscope sensor.
+ */
+
 #include "ITG3200.h"
 
+/** Human readable name for the sensor. */
 static const char* SensorNameGyro = "Gyroscope";
+
+/** Human readable name for the secondary internal sensor. */
 static const char* SensorNameTemp = "Temperature";
+
 
 void ITG3200_Init(SensorData_t* const GyroSensorInfo,
 		          SensorData_t* const TempSensorInfo)

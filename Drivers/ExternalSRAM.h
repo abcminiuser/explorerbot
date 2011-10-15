@@ -28,6 +28,11 @@
   this software.
 */
 
+/** \file
+ *
+ *  Header file for ExternalSRAM.c.
+ */
+
 #ifndef _EXTERNAL_SRAM_H_
 #define _EXTERNAL_SRAM_H_
 

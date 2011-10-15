@@ -12,8 +12,13 @@
   All rights reserved.
 */
 
-#ifndef _RFCOMM_CLIENT_SERVICETABLE_H_
-#define _RFCOMM_CLIENT_SERVICETABLE_H_
+/** \file
+ *
+ *  Header file for RFCOMMServiceTable.c.
+ */
+
+#ifndef _RFCOMM_SERVICETABLE_H_
+#define _RFCOMM_SERVICETABLE_H_
 
 	/* Includes: */
 		#include <stdbool.h>

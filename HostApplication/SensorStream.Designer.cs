@@ -69,6 +69,7 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.pbLUFA = new System.Windows.Forms.PictureBox();
             this.btnRefreshPorts = new System.Windows.Forms.Button();
+            this.pnlUIPositioner = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.chtTemperature)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chtPressure)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chtAcceleration)).BeginInit();
@@ -76,6 +77,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.chtDirection)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbLUFA)).BeginInit();
+            this.pnlUIPositioner.SuspendLayout();
             this.SuspendLayout();
             // 
             // chtTemperature
@@ -90,7 +92,7 @@
             chartArea1.AxisY.Title = "Temperature (Deg C)";
             chartArea1.Name = "chaTempData";
             this.chtTemperature.ChartAreas.Add(chartArea1);
-            this.chtTemperature.Location = new System.Drawing.Point(403, 230);
+            this.chtTemperature.Location = new System.Drawing.Point(403, 225);
             this.chtTemperature.Name = "chtTemperature";
             series1.BorderWidth = 3;
             series1.ChartArea = "chaTempData";
@@ -117,7 +119,7 @@
             chartArea2.AxisY.LabelStyle.Enabled = false;
             chartArea2.Name = "chaPressureData";
             this.chtPressure.ChartAreas.Add(chartArea2);
-            this.chtPressure.Location = new System.Drawing.Point(12, 230);
+            this.chtPressure.Location = new System.Drawing.Point(12, 225);
             this.chtPressure.Name = "chtPressure";
             series2.BorderWidth = 3;
             series2.ChartArea = "chaPressureData";
@@ -150,7 +152,7 @@
             this.chtAcceleration.ChartAreas.Add(chartArea3);
             legend1.Name = "Legend1";
             this.chtAcceleration.Legends.Add(legend1);
-            this.chtAcceleration.Location = new System.Drawing.Point(12, 12);
+            this.chtAcceleration.Location = new System.Drawing.Point(12, 7);
             this.chtAcceleration.Name = "chtAcceleration";
             series3.BorderWidth = 3;
             series3.ChartArea = "chaAccelData";
@@ -194,7 +196,7 @@
             this.chtOrientation.ChartAreas.Add(chartArea4);
             legend2.Name = "Legend1";
             this.chtOrientation.Legends.Add(legend2);
-            this.chtOrientation.Location = new System.Drawing.Point(403, 12);
+            this.chtOrientation.Location = new System.Drawing.Point(403, 7);
             this.chtOrientation.Name = "chtOrientation";
             series6.BorderWidth = 3;
             series6.ChartArea = "chaOrientationData";
@@ -238,7 +240,7 @@
             this.chtDirection.ChartAreas.Add(chartArea5);
             legend3.Name = "Legend1";
             this.chtDirection.Legends.Add(legend3);
-            this.chtDirection.Location = new System.Drawing.Point(794, 12);
+            this.chtDirection.Location = new System.Drawing.Point(794, 7);
             this.chtDirection.Name = "chtDirection";
             series9.BorderWidth = 3;
             series9.ChartArea = "chaDirectionData";
@@ -271,7 +273,7 @@
             // txtLog
             // 
             this.txtLog.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtLog.Location = new System.Drawing.Point(794, 230);
+            this.txtLog.Location = new System.Drawing.Point(794, 225);
             this.txtLog.Multiline = true;
             this.txtLog.Name = "txtLog";
             this.txtLog.Size = new System.Drawing.Size(385, 212);
@@ -280,7 +282,7 @@
             // cmbPort
             // 
             this.cmbPort.FormattingEnabled = true;
-            this.cmbPort.Location = new System.Drawing.Point(487, 478);
+            this.cmbPort.Location = new System.Drawing.Point(487, 473);
             this.cmbPort.Name = "cmbPort";
             this.cmbPort.Size = new System.Drawing.Size(136, 21);
             this.cmbPort.TabIndex = 6;
@@ -294,7 +296,7 @@
             // btnConnect
             // 
             this.btnConnect.Enabled = false;
-            this.btnConnect.Location = new System.Drawing.Point(629, 478);
+            this.btnConnect.Location = new System.Drawing.Point(629, 473);
             this.btnConnect.Name = "btnConnect";
             this.btnConnect.Size = new System.Drawing.Size(123, 21);
             this.btnConnect.TabIndex = 7;
@@ -305,12 +307,12 @@
             // tmrUpdate
             // 
             this.tmrUpdate.Enabled = true;
-            this.tmrUpdate.Interval = 10;
+            this.tmrUpdate.Interval = 5;
             this.tmrUpdate.Tick += new System.EventHandler(this.tmrUpdate_Tick);
             // 
             // llblFourWalledCubicle
             // 
-            this.llblFourWalledCubicle.Location = new System.Drawing.Point(12, 502);
+            this.llblFourWalledCubicle.Location = new System.Drawing.Point(12, 497);
             this.llblFourWalledCubicle.Name = "llblFourWalledCubicle";
             this.llblFourWalledCubicle.Size = new System.Drawing.Size(141, 13);
             this.llblFourWalledCubicle.TabIndex = 9;
@@ -321,7 +323,7 @@
             // 
             // llblLUFALib
             // 
-            this.llblLUFALib.Location = new System.Drawing.Point(1034, 502);
+            this.llblLUFALib.Location = new System.Drawing.Point(1034, 497);
             this.llblLUFALib.Name = "llblLUFALib";
             this.llblLUFALib.Size = new System.Drawing.Size(144, 13);
             this.llblLUFALib.TabIndex = 10;
@@ -333,7 +335,7 @@
             // pictureBox1
             // 
             this.pictureBox1.Image = global::RobotSensorStream.Properties.Resources.LUFA_thumb;
-            this.pictureBox1.Location = new System.Drawing.Point(1037, 448);
+            this.pictureBox1.Location = new System.Drawing.Point(1037, 443);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(141, 51);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -343,7 +345,7 @@
             // pbLUFA
             // 
             this.pbLUFA.Image = global::RobotSensorStream.Properties.Resources.FourWalledCubicle;
-            this.pbLUFA.Location = new System.Drawing.Point(12, 448);
+            this.pbLUFA.Location = new System.Drawing.Point(12, 443);
             this.pbLUFA.Name = "pbLUFA";
             this.pbLUFA.Size = new System.Drawing.Size(141, 51);
             this.pbLUFA.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -353,31 +355,40 @@
             // btnRefreshPorts
             // 
             this.btnRefreshPorts.Image = global::RobotSensorStream.Properties.Resources.action_refresh_blue;
-            this.btnRefreshPorts.Location = new System.Drawing.Point(453, 478);
+            this.btnRefreshPorts.Location = new System.Drawing.Point(453, 473);
             this.btnRefreshPorts.Name = "btnRefreshPorts";
             this.btnRefreshPorts.Size = new System.Drawing.Size(28, 21);
             this.btnRefreshPorts.TabIndex = 8;
             this.btnRefreshPorts.UseVisualStyleBackColor = true;
             this.btnRefreshPorts.Click += new System.EventHandler(this.btnRefreshPorts_Click);
             // 
+            // pnlUIPositioner
+            // 
+            this.pnlUIPositioner.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.pnlUIPositioner.Controls.Add(this.pictureBox1);
+            this.pnlUIPositioner.Controls.Add(this.pbLUFA);
+            this.pnlUIPositioner.Controls.Add(this.llblLUFALib);
+            this.pnlUIPositioner.Controls.Add(this.llblFourWalledCubicle);
+            this.pnlUIPositioner.Controls.Add(this.btnRefreshPorts);
+            this.pnlUIPositioner.Controls.Add(this.btnConnect);
+            this.pnlUIPositioner.Controls.Add(this.cmbPort);
+            this.pnlUIPositioner.Controls.Add(this.txtLog);
+            this.pnlUIPositioner.Controls.Add(this.chtDirection);
+            this.pnlUIPositioner.Controls.Add(this.chtOrientation);
+            this.pnlUIPositioner.Controls.Add(this.chtAcceleration);
+            this.pnlUIPositioner.Controls.Add(this.chtPressure);
+            this.pnlUIPositioner.Controls.Add(this.chtTemperature);
+            this.pnlUIPositioner.Location = new System.Drawing.Point(0, 5);
+            this.pnlUIPositioner.Name = "pnlUIPositioner";
+            this.pnlUIPositioner.Size = new System.Drawing.Size(1190, 518);
+            this.pnlUIPositioner.TabIndex = 13;
+            // 
             // frmSensorStream
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1192, 524);
-            this.Controls.Add(this.pictureBox1);
-            this.Controls.Add(this.pbLUFA);
-            this.Controls.Add(this.llblLUFALib);
-            this.Controls.Add(this.llblFourWalledCubicle);
-            this.Controls.Add(this.btnRefreshPorts);
-            this.Controls.Add(this.btnConnect);
-            this.Controls.Add(this.cmbPort);
-            this.Controls.Add(this.txtLog);
-            this.Controls.Add(this.chtDirection);
-            this.Controls.Add(this.chtOrientation);
-            this.Controls.Add(this.chtAcceleration);
-            this.Controls.Add(this.chtPressure);
-            this.Controls.Add(this.chtTemperature);
+            this.Controls.Add(this.pnlUIPositioner);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "frmSensorStream";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -390,8 +401,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.chtDirection)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbLUFA)).EndInit();
+            this.pnlUIPositioner.ResumeLayout(false);
+            this.pnlUIPositioner.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -412,6 +424,7 @@
         private System.Windows.Forms.LinkLabel llblLUFALib;
         private System.Windows.Forms.PictureBox pbLUFA;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.Panel pnlUIPositioner;
     }
 }
 

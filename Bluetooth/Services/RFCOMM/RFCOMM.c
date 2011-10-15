@@ -12,6 +12,11 @@
   All rights reserved.
 */
 
+/** \file
+ *
+ *  Bluetooth RFCOMM service, for wireless serial ports.
+ */
+
 #include "RFCOMM.h"
 
 /** 8-Bit CRC table used by the FCS field of each RFCOMM encoded frame, sourced from the ETSI TS 101 369 V7.2.0

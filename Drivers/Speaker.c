@@ -28,6 +28,11 @@
   this software.
 */
 
+/** \file
+ *
+ *  Driver for the robot's PWM controlled speaker.
+ */
+
 #include "Speaker.h"
 
 /** Note sequence for to signal a connection in progress. */

@@ -12,6 +12,11 @@
   All rights reserved.
 */
 
+/** \file
+ *
+ *  Header file for HID.c.
+ */
+
 #ifndef _HID_SERVICE_H_
 #define _HID_SERVICE_H_
 

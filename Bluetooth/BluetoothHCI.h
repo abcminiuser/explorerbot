@@ -12,6 +12,11 @@
   All rights reserved.
 */
 
+/** \file
+ *
+ *  Header file for BluetoothHCI.c.
+ */
+
 #ifndef _BLUETOOTH_HCI_H_
 #define _BLUETOOTH_HCI_H_
 
@@ -69,9 +74,9 @@
 		bool Bluetooth_HCI_Disconnect(BT_StackConfig_t* const StackState,
 		                              BT_HCI_Connection_t* const HCIConnection);
 									  
-		bool HCI_SendPacket(BT_StackConfig_t* const StackState,
-		                    BT_HCI_Connection_t* const HCIConnection,
-		                    const uint16_t Length,
-		                    const void* Data);
+		bool Bluetooth_HCI_SendPacket(BT_StackConfig_t* const StackState,
+		                              BT_HCI_Connection_t* const HCIConnection,
+		                              const uint16_t Length,
+		                              const void* Data);
 
 #endif

@@ -28,6 +28,11 @@
   this software.
 */
 
+/** \file
+ *
+ *  Sensor driver platform, to expose a common API for the control of the robot's various sensors.
+ */
+
 #include "Sensors.h"
 
 /** Global sensor information structure, holding the last retrieved sensor values. */

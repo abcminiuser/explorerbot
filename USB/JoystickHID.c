@@ -28,6 +28,11 @@
   this software.
 */
 
+/** \file
+ *
+ *  USB transport management for USB HID Joystick devices.
+ */
+
 #include "JoystickHID.h"
 
 /** Processed HID report descriptor items structure, containing information on each HID report element */

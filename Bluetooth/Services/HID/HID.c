@@ -12,6 +12,11 @@
   All rights reserved.
 */
 
+/** \file
+ *
+ *  Bluetooth Human Interface Device (HID) service.
+ */
+
 #include "HID.h"
 
 void HID_Init(BT_StackConfig_t* const StackState)

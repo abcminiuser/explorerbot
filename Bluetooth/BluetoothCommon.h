@@ -12,6 +12,11 @@
   All rights reserved.
 */
 
+/** \file
+ *
+ *  Common definitions for the Bluetooth stack.
+ */
+
 #ifndef _BLUETOOTH_COMMON_H_
 #define _BLUETOOTH_COMMON_H_
 
@@ -31,7 +36,7 @@
 		/** Default maximum transmission unit size for a L2CAP channel packet. */
 		#define BT_DEFAULT_L2CAP_CHANNEL_MTU      1024
 		
-		/** Tick length interval that \ref Bluetooth_Tick() is called at. */
+		/** Tick length interval that \ref Bluetooth_TickElapsed() is called at. */
 		#define BT_TICK_MS                        SYSTEM_TICK_MS
 
 	/* Enums: */

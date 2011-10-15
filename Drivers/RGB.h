@@ -28,6 +28,11 @@
   this software.
 */
 
+/** \file
+ *
+ *  Header file for RGB.c.
+ */
+ 
 #ifndef _RGB_H_
 #define _RGB_H_
 
@@ -48,7 +53,7 @@
 			RGB_COLOUR_White        = (RGB_COLOUR_Red  | RGB_COLOUR_Green | RGB_COLOUR_Blue),
 		};
 		
-		/** Enum for the possible status, which can be used by \ref RGB_SetColor() in favour of a direct colour value. */
+		/** Enum for the possible status, which can be used by \ref RGB_SetColour() in favour of a direct colour value. */
 		enum RGB_Colour_Aliases_t
 		{
 			RGB_ALIAS_Disconnected  = RGB_COLOUR_White,

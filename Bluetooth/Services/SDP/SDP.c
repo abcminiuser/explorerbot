@@ -12,6 +12,11 @@
   All rights reserved.
 */
 
+/** \file
+ *
+ *  Bluetooth Service Discovery Protocol (SDP) service.
+ */
+
 #include "SDP.h"
 
 /** Linked list of service attribute tables registered with the SDP service. */
@@ -21,6 +26,11 @@ static SDP_ServiceEntry_t* RegisteredServices = NULL;
 const UUID_t BaseUUID PROGMEM = {0x00000000, BASE_80BIT_UUID};
 
 
+/** Registers the given service entry node with the SDP server, so that remote devices may query
+ *  the added service's attribute table.
+ *
+ *  \param[in] ServiceEntry  Pointer to the service table node to register with the SDP service
+ */
 void SDP_RegisterService(SDP_ServiceEntry_t* const ServiceEntry)
 {
 	SDP_ServiceEntry_t* CurrentService = RegisteredServices;
@@ -43,6 +53,11 @@ void SDP_RegisterService(SDP_ServiceEntry_t* const ServiceEntry)
 	ServiceEntry->NextService   = NULL;
 }
 
+/** Unregisters the given service entry node with the SDP server, so that remote devices cannot query
+ *  the service's attribute table if it was previously registered.
+ *
+ *  \param[in] ServiceEntry  Pointer to the service table node to register with the SDP service
+ */
 void SDP_UnregisterService(SDP_ServiceEntry_t* const ServiceEntry)
 {
 	SDP_ServiceEntry_t* CurrentService = RegisteredServices;
@@ -338,8 +353,9 @@ static uint8_t SDP_GetUUIDList(uint8_t UUIDList[][UUID_SIZE_BYTES],
 
 /** Retrieves the Attribute table for the given UUID list if it exists.
  *
- *  \param[in] UUIDList            List of UUIDs which must be matched within the service attribute table
- *  \param[in] TotalUUIDs          Total number of UUIDs stored in the UUID list
+ *  \param[in] ServiceEntry  Pointer to the service entry whose attribute table is to be examined
+ *  \param[in] UUIDList      List of UUIDs which must be matched within the service attribute table
+ *  \param[in] TotalUUIDs    Total number of UUIDs stored in the UUID list
  *
  *  \return True if all the UUIDs given in the UUID list appear in the given attribute table, false otherwise
  */
@@ -396,7 +412,7 @@ static uint16_t SDP_AddAttributeToResponse(const uint16_t AttributeID,
 
 /** Retrieves a pointer to the value of the given Attribute ID from the given Attribute table.
  *
- *  \param[in] AttributeTable  Pointer to the Attribute table to search in
+ *  \param[in] ServiceEntry    Pointer to the service entry whose attribute table is to be examined
  *  \param[in] AttributeID     Attribute ID to search for within the table
  *
  *  \return Pointer to the start of the Attribute's value if found within the table, NULL otherwise
@@ -417,9 +433,10 @@ static void* SDP_GetAttributeValue(const SDP_ServiceEntry_t* const ServiceEntry,
 
 /** Adds all the Attributes in the given service table to the response that appear in the Attribute table.
  *
+ *  \param[in]  ServiceEntry     Pointer to the service entry whose attribute table is to be examined
  *  \param[in]  AttributeList    Pointer to a list of Attribute ranges
  *  \param[in]  TotalAttributes  Number of Attributes stored in the Attribute list
- *  \param[out] BufferPos       Pointer to the output buffer position where the retrieved attributes are to be stored
+ *  \param[out] BufferPos        Pointer to the output buffer position where the retrieved attributes are to be stored
  *
  *  \return Number of bytes added to the output buffer
  */

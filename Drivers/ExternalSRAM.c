@@ -28,7 +28,13 @@
   this software.
 */
 
+/** \file
+ *
+ *  Driver for the robot's external SRAM memory IC.
+ */
+
 #include "ExternalSRAM.h"
+
 
 /** Initializes the external SRAM hardware driver ready for use. This must be called before
  *  attempting to read to or write from external SRAM memory.

@@ -82,51 +82,6 @@ void SDP_UnregisterService(SDP_ServiceEntry_t* const ServiceEntry)
 	  CurrentService->NextService = CurrentService->NextService->NextService;
 }
 
-void SDP_Init(BT_StackConfig_t* const StackState)
-{
-	/* Reset list of registered service attribute tables for the current stack */
-	if (RegisteredServices != NULL)
-	{
-		SDP_ServiceEntry_t* PreviousService = NULL;
-		SDP_ServiceEntry_t* CurrentService  = RegisteredServices;
-		
-		/* Search through the registered service list nodes */
-		while (CurrentService != NULL)
-		{
-			/* Check if the current regisered service is registered to the stack being re-initialized */
-			if (CurrentService->Stack == StackState)
-			{
-				/* Check if we are altering the root service node, special-case the removal */
-				if (!(PreviousService))
-				  RegisteredServices = CurrentService->NextService;
-				else
-				  PreviousService->NextService = CurrentService->NextService;
-			}
-			
-			/* Save reference to previous node for node removal, transverse linked list to next registered service */
-			PreviousService = CurrentService;
-			CurrentService  = CurrentService->NextService;
-		}
-	}
-}
-
-void SDP_Manage(BT_StackConfig_t* const StackState)
-{
-
-}
-
-void SDP_ChannelOpened(BT_StackConfig_t* const StackState,
-                       BT_L2CAP_Channel_t* const Channel)
-{
-	
-}
-
-void SDP_ChannelClosed(BT_StackConfig_t* const StackState,
-                       BT_L2CAP_Channel_t* const Channel)
-{
-	
-}
-
 /** Retrieves the size of a Data Element container from the current input buffer, and advances the input buffer
  *  pointer to the start of the Data Element's contents.
  *
@@ -704,6 +659,51 @@ static void SDP_ServiceSearchAttribute(BT_StackConfig_t* const StackState,
 
 	/* Send the completed response packet to the sender */
 	Bluetooth_L2CAP_SendPacket(StackState, Channel, (sizeof(ResponsePacket.SDPHeader) + be16_to_cpu(ResponsePacket.SDPHeader.ParameterLength)), &ResponsePacket);
+}
+
+void SDP_Init(BT_StackConfig_t* const StackState)
+{
+	/* Reset list of registered service attribute tables for the current stack */
+	if (RegisteredServices != NULL)
+	{
+		SDP_ServiceEntry_t* PreviousService = NULL;
+		SDP_ServiceEntry_t* CurrentService  = RegisteredServices;
+		
+		/* Search through the registered service list nodes */
+		while (CurrentService != NULL)
+		{
+			/* Check if the current regisered service is registered to the stack being re-initialized */
+			if (CurrentService->Stack == StackState)
+			{
+				/* Check if we are altering the root service node, special-case the removal */
+				if (!(PreviousService))
+				  RegisteredServices = CurrentService->NextService;
+				else
+				  PreviousService->NextService = CurrentService->NextService;
+			}
+			
+			/* Save reference to previous node for node removal, transverse linked list to next registered service */
+			PreviousService = CurrentService;
+			CurrentService  = CurrentService->NextService;
+		}
+	}
+}
+
+void SDP_Manage(BT_StackConfig_t* const StackState)
+{
+
+}
+
+void SDP_ChannelOpened(BT_StackConfig_t* const StackState,
+                       BT_L2CAP_Channel_t* const Channel)
+{
+	
+}
+
+void SDP_ChannelClosed(BT_StackConfig_t* const StackState,
+                       BT_L2CAP_Channel_t* const Channel)
+{
+	
 }
 
 void SDP_ProcessPacket(BT_StackConfig_t* const StackState,

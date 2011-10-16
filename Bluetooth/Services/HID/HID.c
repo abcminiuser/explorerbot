@@ -19,16 +19,6 @@
 
 #include "HID.h"
 
-void HID_Init(BT_StackConfig_t* const StackState)
-{
-
-}
-
-void HID_Manage(BT_StackConfig_t* const StackState)
-{
-
-}
-
 static void HID_CtlPacket(BT_StackConfig_t* const StackState,
                           BT_L2CAP_Channel_t* const Channel,
                           uint16_t Length,
@@ -62,6 +52,16 @@ static void HID_IntPacket(BT_StackConfig_t* const StackState,
 			CALLBACK_HID_ReportReceived(StackState, Channel, (Data[0] & ~HID_TRANSTYPE_MASK), (Length - 1), &Data[1]);
 			break;
 	}
+}
+
+void HID_Init(BT_StackConfig_t* const StackState)
+{
+
+}
+
+void HID_Manage(BT_StackConfig_t* const StackState)
+{
+
 }
 
 void HID_ChannelOpened(BT_StackConfig_t* const StackState,

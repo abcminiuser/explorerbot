@@ -202,85 +202,6 @@ static void RFCOMM_SendControlFrame(BT_StackConfig_t* const StackState,
 	RFCOMM_SendFrame(StackState, ACLChannel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_UIH, sizeof(ResponsePacket), &ResponsePacket);
 }
 
-void RFCOMM_Init(BT_StackConfig_t* const StackState)
-{
-	/* Reset the RFCOMM channel structures, to invalidate any configured RFCOMM channels */
-	for (uint8_t i = 0; i < RFCOMM_MAX_OPEN_CHANNELS; i++)
-	{
-		if (!(RFCOMM_ChannelListValid) || (RFCOMM_Channels[i].Stack == StackState))
-		  RFCOMM_Channels[i].State = RFCOMM_Channel_Closed;
-	}
-
-	/* Mark the channel table as having been globally initialized at least once */
-	RFCOMM_ChannelListValid = true;
-	
-	/* Register the RFCOMM virtual serial port service with the SDP service */
-	SDP_RegisterService(&ServiceEntry_RFCOMMSerialPort);
-}
-
-void RFCOMM_Manage(BT_StackConfig_t* const StackState)
-{
-	for (uint8_t i = 0; i < RFCOMM_MAX_OPEN_CHANNELS; i++)
-	{
-		RFCOMM_Channel_t* RFCOMMChannel = &RFCOMM_Channels[i];
-		
-		/* Ignore channels allocated to different stack instances */
-		if (RFCOMMChannel->Stack != StackState)
-		  continue;
-
-		if (RFCOMMChannel->State == RFCOMM_Channel_Configure)
-		{
-			/* Check if the local signals have not yet been sent on the current channel */
-			if (!(RFCOMMChannel->ConfigFlags & RFCOMM_CONFIG_LOCALSIGNALSSENT) &&
-			    (RFCOMMChannel->ConfigFlags & RFCOMM_CONFIG_ABMMODESET))
-			{
-				RFCOMM_MSC_Parameters_t MSCommand;
-				MSCommand.Address = (RFCOMM_Address_t){.DLCI = RFCOMMChannel->DLCI, .EA = true, .CR = false};
-				MSCommand.Signals = RFCOMMChannel->DataLink.LocalSignals;
-				
-				/* Send the MSC command to the remote device */
-				RFCOMM_SendControlFrame(StackState, RFCOMMChannel->ACLChannel, RFCOMM_Control_ModemStatus, true, sizeof(MSCommand), &MSCommand);
-
-				/* Indicate that the local signals have now been sent */
-				RFCOMMChannel->ConfigFlags |= RFCOMM_CONFIG_LOCALSIGNALSSENT;
-			}
-
-			/* If signals have been configured in both directions, progress to the open state */
-			if ((RFCOMMChannel->ConfigFlags & (RFCOMM_CONFIG_REMOTESIGNALS | RFCOMM_CONFIG_LOCALSIGNALS)) ==
-			                                  (RFCOMM_CONFIG_REMOTESIGNALS | RFCOMM_CONFIG_LOCALSIGNALS))
-			{
-				RFCOMMChannel->State = RFCOMM_Channel_Open;
-				EVENT_RFCOMM_ChannelStateChange(StackState, RFCOMMChannel);
-			}
-		}		
-	}
-}
-
-void RFCOMM_ChannelOpened(BT_StackConfig_t* const StackState,
-                          BT_L2CAP_Channel_t* const Channel)
-{
-	BT_HCI_Connection_t* Connection = Bluetooth_HCI_FindConnection(StackState, NULL, Channel->ConnectionHandle);
-
-	/* If the RFCOMM session was initiated by the local device, attempt to reset the remote multiplexer ready for new channels */
-	if (Connection && Connection->LocallyInitiated)
-	  RFCOMM_SendFrame(StackState, Channel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_SABM, 0, NULL);
-}
-
-void RFCOMM_ChannelClosed(BT_StackConfig_t* const StackState,
-                          BT_L2CAP_Channel_t* const Channel)
-{
-	for (uint8_t i = 0; i < RFCOMM_MAX_OPEN_CHANNELS; i++)
-	{
-		RFCOMM_Channel_t* RFCOMMChannel = &RFCOMM_Channels[i];
-		
-		if (RFCOMMChannel->ACLChannel == Channel)
-		{
-			RFCOMMChannel->State = RFCOMM_Channel_Closed;
-			EVENT_RFCOMM_ChannelStateChange(StackState, RFCOMMChannel);
-		}
-	}
-}
-
 static void RFCOMM_ProcessTestCommand(BT_StackConfig_t* const StackState,
                                       BT_L2CAP_Channel_t* const ACLChannel,
                                       RFCOMM_Command_t* const CommandHeader,
@@ -612,6 +533,85 @@ static void RFCOMM_ProcessUIH(BT_StackConfig_t* const StackState,
 	}
 
 	CALLBACK_RFCOMM_DataReceived(StackState, RFCOMMChannel, FrameDataLen, FrameData);
+}
+
+void RFCOMM_Init(BT_StackConfig_t* const StackState)
+{
+	/* Reset the RFCOMM channel structures, to invalidate any configured RFCOMM channels */
+	for (uint8_t i = 0; i < RFCOMM_MAX_OPEN_CHANNELS; i++)
+	{
+		if (!(RFCOMM_ChannelListValid) || (RFCOMM_Channels[i].Stack == StackState))
+		  RFCOMM_Channels[i].State = RFCOMM_Channel_Closed;
+	}
+
+	/* Mark the channel table as having been globally initialized at least once */
+	RFCOMM_ChannelListValid = true;
+	
+	/* Register the RFCOMM virtual serial port service with the SDP service */
+	SDP_RegisterService(&ServiceEntry_RFCOMMSerialPort);
+}
+
+void RFCOMM_Manage(BT_StackConfig_t* const StackState)
+{
+	for (uint8_t i = 0; i < RFCOMM_MAX_OPEN_CHANNELS; i++)
+	{
+		RFCOMM_Channel_t* RFCOMMChannel = &RFCOMM_Channels[i];
+		
+		/* Ignore channels allocated to different stack instances */
+		if (RFCOMMChannel->Stack != StackState)
+		  continue;
+
+		if (RFCOMMChannel->State == RFCOMM_Channel_Configure)
+		{
+			/* Check if the local signals have not yet been sent on the current channel */
+			if (!(RFCOMMChannel->ConfigFlags & RFCOMM_CONFIG_LOCALSIGNALSSENT) &&
+			    (RFCOMMChannel->ConfigFlags & RFCOMM_CONFIG_ABMMODESET))
+			{
+				RFCOMM_MSC_Parameters_t MSCommand;
+				MSCommand.Address = (RFCOMM_Address_t){.DLCI = RFCOMMChannel->DLCI, .EA = true, .CR = false};
+				MSCommand.Signals = RFCOMMChannel->DataLink.LocalSignals;
+				
+				/* Send the MSC command to the remote device */
+				RFCOMM_SendControlFrame(StackState, RFCOMMChannel->ACLChannel, RFCOMM_Control_ModemStatus, true, sizeof(MSCommand), &MSCommand);
+
+				/* Indicate that the local signals have now been sent */
+				RFCOMMChannel->ConfigFlags |= RFCOMM_CONFIG_LOCALSIGNALSSENT;
+			}
+
+			/* If signals have been configured in both directions, progress to the open state */
+			if ((RFCOMMChannel->ConfigFlags & (RFCOMM_CONFIG_REMOTESIGNALS | RFCOMM_CONFIG_LOCALSIGNALS)) ==
+			                                  (RFCOMM_CONFIG_REMOTESIGNALS | RFCOMM_CONFIG_LOCALSIGNALS))
+			{
+				RFCOMMChannel->State = RFCOMM_Channel_Open;
+				EVENT_RFCOMM_ChannelStateChange(StackState, RFCOMMChannel);
+			}
+		}		
+	}
+}
+
+void RFCOMM_ChannelOpened(BT_StackConfig_t* const StackState,
+                          BT_L2CAP_Channel_t* const Channel)
+{
+	BT_HCI_Connection_t* Connection = Bluetooth_HCI_FindConnection(StackState, NULL, Channel->ConnectionHandle);
+
+	/* If the RFCOMM session was initiated by the local device, attempt to reset the remote multiplexer ready for new channels */
+	if (Connection && Connection->LocallyInitiated)
+	  RFCOMM_SendFrame(StackState, Channel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_SABM, 0, NULL);
+}
+
+void RFCOMM_ChannelClosed(BT_StackConfig_t* const StackState,
+                          BT_L2CAP_Channel_t* const Channel)
+{
+	for (uint8_t i = 0; i < RFCOMM_MAX_OPEN_CHANNELS; i++)
+	{
+		RFCOMM_Channel_t* RFCOMMChannel = &RFCOMM_Channels[i];
+		
+		if (RFCOMMChannel->ACLChannel == Channel)
+		{
+			RFCOMMChannel->State = RFCOMM_Channel_Closed;
+			EVENT_RFCOMM_ChannelStateChange(StackState, RFCOMMChannel);
+		}
+	}
 }
 
 void RFCOMM_ProcessPacket(BT_StackConfig_t* const StackState,

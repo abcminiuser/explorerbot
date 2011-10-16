@@ -201,10 +201,6 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 	else if (HCIEventHeader->EventCode == EVENT_CONNECTION_REQUEST)
 	{
 		BT_HCIEvent_ConnectionRequest_t* ConnectionRequestEventHeader = (BT_HCIEvent_ConnectionRequest_t*)&HCIEventHeader->Parameters;
-				
-		/* Must first copy the Remote BDADDR to a temporary buffer so we can overwrite it in the packet buffer */
-		uint8_t RemoteBDADDR[BT_BDADDR_LEN];
-		memcpy(RemoteBDADDR, ConnectionRequestEventHeader->RemoteBDADDR, BT_BDADDR_LEN);
 
 		/* Try to create a new connection handle for the connection request */
 		BT_HCI_Connection_t* Connection      = Bluetooth_HCI_NewConnection(StackState, ConnectionRequestEventHeader->RemoteBDADDR, ConnectionRequestEventHeader->LinkType);		
@@ -214,33 +210,29 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 		if (Connection)
 		  RejectionReason = CALLBACK_Bluetooth_ConnectionRequest(StackState, Connection) ? 0 : HCI_ERROR_UNACCEPTABLE_BDADDR;
 		
-		BT_HCICommand_Header_t* HCICommandHeader = (BT_HCICommand_Header_t*)StackState->Config.PacketBuffer;
-
 		/* If a rejection reason was given, reject the request, otherwise send a connection request accept */
 		if (RejectionReason)
 		{
-			HCICommandHeader->OpCode          = CPU_TO_LE16(OGF_LINK_CONTROL | OCF_LINK_CONTROL_REJECT_CONNECTION_REQUEST),
-			HCICommandHeader->ParameterLength = sizeof(BT_HCICommand_RejectConnectionReq_t);
-			
-			BT_HCICommand_RejectConnectionReq_t* HCIRejectConnectionHeader = (BT_HCICommand_RejectConnectionReq_t*)&HCICommandHeader->Parameters;
-			memcpy(HCIRejectConnectionHeader->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
-			HCIRejectConnectionHeader->Reason = RejectionReason;
+			BT_HCICommand_RejectConnectionReq_t HCIRejectConnectionHeader;
+
+			memcpy(HCIRejectConnectionHeader.RemoteBDADDR, ConnectionRequestEventHeader->RemoteBDADDR, BT_BDADDR_LEN);
+			HCIRejectConnectionHeader.Reason = RejectionReason;
 			
 			/* Mark the connection as free again as it was rejected */
 			if (Connection)
 			  Connection->State = HCI_CONSTATE_Closed;
+
+			Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_REJECT_CONNECTION_REQUEST), sizeof(HCIRejectConnectionHeader), &HCIRejectConnectionHeader);			
 		}
 		else
 		{
-			HCICommandHeader->OpCode          = CPU_TO_LE16(OGF_LINK_CONTROL | OCF_LINK_CONTROL_ACCEPT_CONNECTION_REQUEST),
-			HCICommandHeader->ParameterLength = sizeof(BT_HCICommand_AcceptConnectionReq_t);
-			
-			BT_HCICommand_AcceptConnectionReq_t* HCIAcceptConnectionHeader = (BT_HCICommand_AcceptConnectionReq_t*)&HCICommandHeader->Parameters;
-			memcpy(HCIAcceptConnectionHeader->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
-			HCIAcceptConnectionHeader->SlaveRole = true;
-		}
+			BT_HCICommand_AcceptConnectionReq_t HCIAcceptConnectionHeader;
 
-		CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCICommand, (sizeof(BT_HCICommand_Header_t) + HCICommandHeader->ParameterLength));
+			memcpy(HCIAcceptConnectionHeader.RemoteBDADDR, ConnectionRequestEventHeader->RemoteBDADDR, BT_BDADDR_LEN);
+			HCIAcceptConnectionHeader.SlaveRole = true;
+			
+			Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_ACCEPT_CONNECTION_REQUEST), sizeof(HCIAcceptConnectionHeader), &HCIAcceptConnectionHeader);			
+		}
 	}
 	else if (HCIEventHeader->EventCode == EVENT_CONNECTION_COMPLETE)
 	{
@@ -283,50 +275,34 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 	{
 		BT_HCIEvent_PinCodeReq_t* PINCodeRequestEventHeader = (BT_HCIEvent_PinCodeReq_t*)&HCIEventHeader->Parameters;		
 
-		/* Must first copy the Remote BDADDR to a temporary buffer so we can overwrite it in the packet buffer */
-		uint8_t RemoteBDADDR[BT_BDADDR_LEN];
-		memcpy(RemoteBDADDR, PINCodeRequestEventHeader->RemoteBDADDR, BT_BDADDR_LEN);
-
-		BT_HCICommand_Header_t* HCICommandHeader = (BT_HCICommand_Header_t*)StackState->Config.PacketBuffer;
-		
 		/* Check if a PIN code has been set of one or more characters */
 		if ((StackState->Config.PINCode != NULL) && strlen(StackState->Config.PINCode))
 		{
-			HCICommandHeader->OpCode          = CPU_TO_LE16(OGF_LINK_CONTROL | OCF_LINK_CONTROL_PIN_CODE_REQUEST_REPLY);
-			HCICommandHeader->ParameterLength = sizeof(BT_HCICommand_PinCodeACKResp_t);
+			BT_HCICommand_PinCodeACKResp_t PINKeyACKResponse;
 			
-			BT_HCICommand_PinCodeACKResp_t* PINKeyACKResponse = (BT_HCICommand_PinCodeACKResp_t*)&HCICommandHeader->Parameters;
-			memcpy(PINKeyACKResponse->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
-			PINKeyACKResponse->PINCodeLength = MIN(strlen(StackState->Config.PINCode), sizeof(PINKeyACKResponse->PINCode));
-			strlcpy((void*)PINKeyACKResponse->PINCode, StackState->Config.PINCode, sizeof(PINKeyACKResponse->PINCode));
+			memcpy(PINKeyACKResponse.RemoteBDADDR, PINCodeRequestEventHeader->RemoteBDADDR, BT_BDADDR_LEN);
+			PINKeyACKResponse.PINCodeLength = MIN(strlen(StackState->Config.PINCode), sizeof(PINKeyACKResponse.PINCode));
+			strlcpy((void*)PINKeyACKResponse.PINCode, StackState->Config.PINCode, sizeof(PINKeyACKResponse.PINCode));
+			
+			Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_PIN_CODE_REQUEST_REPLY), sizeof(PINKeyACKResponse), &PINKeyACKResponse);
 		}
 		else
 		{
-			HCICommandHeader->OpCode          = CPU_TO_LE16(OGF_LINK_CONTROL | OCF_LINK_CONTROL_PIN_CODE_REQUEST_NEG_REPLY);
-			HCICommandHeader->ParameterLength = sizeof(BT_HCICommand_PinCodeNAKResp_t);
-			
-			BT_HCICommand_PinCodeNAKResp_t* PINKeyNAKResponse = (BT_HCICommand_PinCodeNAKResp_t*)&HCICommandHeader->Parameters;
-			memcpy(PINKeyNAKResponse->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
-		}
+			BT_HCICommand_PinCodeNAKResp_t PINKeyNAKResponse;
 
-		CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCICommand, (sizeof(BT_HCICommand_Header_t) + HCICommandHeader->ParameterLength));
+			memcpy(PINKeyNAKResponse.RemoteBDADDR, PINCodeRequestEventHeader->RemoteBDADDR, BT_BDADDR_LEN);			
+			
+			Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_PIN_CODE_REQUEST_NEG_REPLY), sizeof(PINKeyNAKResponse), &PINKeyNAKResponse);
+		}
 	}
 	else if (HCIEventHeader->EventCode == EVENT_LINK_KEY_REQUEST)
 	{
-		BT_HCIEvent_LinkKeyReq_t* LinkKeyRequestEventHeader = (BT_HCIEvent_LinkKeyReq_t*)&HCIEventHeader->Parameters;
+		BT_HCIEvent_LinkKeyReq_t*      LinkKeyRequestEventHeader = (BT_HCIEvent_LinkKeyReq_t*)&HCIEventHeader->Parameters;
+		BT_HCICommand_LinkKeyNAKResp_t LinkKeyRequestNAKHeader;
 
-		/* Must first copy the Remote BDADDR to a temporary buffer so we can overwrite it in the packet buffer */
-		uint8_t RemoteBDADDR[BT_BDADDR_LEN];
-		memcpy(RemoteBDADDR, LinkKeyRequestEventHeader->RemoteBDADDR, BT_BDADDR_LEN);
+		memcpy(LinkKeyRequestNAKHeader.RemoteBDADDR, LinkKeyRequestEventHeader->RemoteBDADDR, BT_BDADDR_LEN);
 
-		BT_HCICommand_Header_t* HCICommandHeader = (BT_HCICommand_Header_t*)StackState->Config.PacketBuffer;
-		HCICommandHeader->OpCode          = CPU_TO_LE16(OGF_LINK_CONTROL | OCF_LINK_CONTROL_LINK_KEY_REQUEST_NEG_REPLY),
-		HCICommandHeader->ParameterLength = sizeof(BT_HCICommand_LinkKeyNAKResp_t);
-		
-		BT_HCICommand_LinkKeyNAKResp_t* LinkKeyRequestNAKHeader = (BT_HCICommand_LinkKeyNAKResp_t*)&HCICommandHeader->Parameters;
-		memcpy(LinkKeyRequestNAKHeader->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
-		
-		CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCICommand, (sizeof(BT_HCICommand_Header_t) + HCICommandHeader->ParameterLength));
+		Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_LINK_KEY_REQUEST_NEG_REPLY), sizeof(LinkKeyRequestNAKHeader), &LinkKeyRequestNAKHeader);
 	}	
 }
 
@@ -356,59 +332,45 @@ void Bluetooth_HCI_ProcessDataPacket(BT_StackConfig_t* const StackState)
  */
 bool Bluetooth_HCI_Manage(BT_StackConfig_t* const StackState)
 {
-	BT_HCICommand_Header_t* HCICommandHeader = (BT_HCICommand_Header_t*)StackState->Config.PacketBuffer;
-
 	/* Only process HCI state transitions (one action per transition) when the controller is willing to accept a new command */
 	if (!(StackState->State.HCI.StateTransition) || !(StackState->State.HCI.CommandPackets))
 	  return false;
 	
 	/* Reset HCI layer timeout counter */
 	StackState->State.HCI.TicksElapsed = 0;
-
-	/* Null out the OpCode to signify no packet should be sent */
-	HCICommandHeader->OpCode = 0;
+	
+	uint8_t ParamBuffer[3];
 	
 	/* Determine if a packet needs to be sent based on the current HCI state */
 	switch (StackState->State.HCI.State)
 	{
 		case HCISTATE_Init_Reset:
-			HCICommandHeader->OpCode          = CPU_TO_LE16(OGF_CTRLR_BASEBAND | OCF_CTRLR_BASEBAND_RESET);
-			HCICommandHeader->ParameterLength = 0;
+			Bluetooth_HCI_SendControlPacket(StackState, (OGF_CTRLR_BASEBAND | OCF_CTRLR_BASEBAND_RESET), 0, NULL);
 			break;
 		case HCISTATE_Init_ReadBufferSize:
-			HCICommandHeader->OpCode          = CPU_TO_LE16(OGF_CTRLR_INFORMATIONAL | OCF_CTRLR_INFORMATIONAL_READBUFFERSIZE),
-			HCICommandHeader->ParameterLength = 0;
+			Bluetooth_HCI_SendControlPacket(StackState, (OGF_CTRLR_INFORMATIONAL | OCF_CTRLR_INFORMATIONAL_READBUFFERSIZE), 0, NULL);
 			break;
 		case HCISTATE_Init_GetBDADDR:
-			HCICommandHeader->OpCode          = CPU_TO_LE16(OGF_CTRLR_INFORMATIONAL | OCF_CTRLR_INFORMATIONAL_READBDADDR),
-			HCICommandHeader->ParameterLength = 0;
+			Bluetooth_HCI_SendControlPacket(StackState, (OGF_CTRLR_INFORMATIONAL | OCF_CTRLR_INFORMATIONAL_READBDADDR), 0, NULL);
 			break;
 		case HCISTATE_Init_SetLocalName:
-			HCICommandHeader->OpCode          = CPU_TO_LE16(OGF_CTRLR_BASEBAND | OCF_CTRLR_BASEBAND_WRITE_LOCAL_NAME),
-			HCICommandHeader->ParameterLength = 248;	
-			strlcpy((void*)&HCICommandHeader->Parameters, StackState->Config.Name, HCICommandHeader->ParameterLength);
+			Bluetooth_HCI_SendControlPacket(StackState, (OGF_CTRLR_BASEBAND | OCF_CTRLR_BASEBAND_WRITE_LOCAL_NAME), 248, StackState->Config.Name);
 			break;
 		case HCISTATE_Init_SetDeviceClass:
-			HCICommandHeader->OpCode          = CPU_TO_LE16(OGF_CTRLR_BASEBAND | OCF_CTRLR_BASEBAND_WRITE_CLASS_OF_DEVICE),
-			HCICommandHeader->ParameterLength = 3;
-			HCICommandHeader->Parameters[0]   = (StackState->Config.Class & 0xFF);
-			HCICommandHeader->Parameters[1]   = (StackState->Config.Class >> 8);
-			HCICommandHeader->Parameters[2]   = (StackState->Config.Class >> 16);
+			ParamBuffer[0] = (StackState->Config.Class & 0xFF);
+			ParamBuffer[1] = (StackState->Config.Class >> 8);
+			ParamBuffer[2] = (StackState->Config.Class >> 16);
+			Bluetooth_HCI_SendControlPacket(StackState, (OGF_CTRLR_BASEBAND | OCF_CTRLR_BASEBAND_WRITE_CLASS_OF_DEVICE), 3, ParamBuffer);
 			break;
 		case HCISTATE_Init_SetScanEnable:
-			HCICommandHeader->OpCode          = CPU_TO_LE16(OGF_CTRLR_BASEBAND | OCF_CTRLR_BASEBAND_WRITE_SCAN_ENABLE),
-			HCICommandHeader->ParameterLength = 1;
-			HCICommandHeader->Parameters[0]   = (StackState->Config.Discoverable ? BT_SCANMODE_InquiryAndPageScans : BT_SCANMODE_NoScansEnabled);
+			ParamBuffer[0] = (StackState->Config.Discoverable ? BT_SCANMODE_InquiryAndPageScans : BT_SCANMODE_NoScansEnabled);
+			Bluetooth_HCI_SendControlPacket(StackState, (OGF_CTRLR_BASEBAND | OCF_CTRLR_BASEBAND_WRITE_CLASS_OF_DEVICE), 1, ParamBuffer);
 			break;
 		case HCISTATE_Idle:
 			EVENT_Bluetooth_InitComplete(StackState);
 			break;
 	}
-	
-	/* If a new OpCode has been loaded, send the Bluetooth command to the transciever */
-	if (HCICommandHeader->OpCode)
-	  CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCICommand, (sizeof(BT_HCICommand_Header_t) + HCICommandHeader->ParameterLength));
-	
+
 	StackState->State.HCI.StateTransition = false;
 	return true;
 }
@@ -431,7 +393,7 @@ BT_HCI_Connection_t* Bluetooth_HCI_Connect(BT_StackConfig_t* const StackState,
 
 	/* Abort if not enough space in the controller for the command */
 	if (!(StackState->State.HCI.CommandPackets))
-	  return false;
+	  return NULL;
 
 	/* Only ACL connections are implemented at present, reject other types */
 	if (LinkType != LINK_TYPE_ACL)
@@ -448,20 +410,22 @@ BT_HCI_Connection_t* Bluetooth_HCI_Connect(BT_StackConfig_t* const StackState,
 	HCIConnection->State                 = HCI_CONSTATE_Connecting;
 	HCIConnection->LocallyInitiated      = true;
 	
-	BT_HCICommand_Header_t* HCICommandHeader = (BT_HCICommand_Header_t*)StackState->Config.PacketBuffer;
-	HCICommandHeader->OpCode             = CPU_TO_LE16(OGF_LINK_CONTROL | OCF_LINK_CONTROL_CREATE_CONNECTION),
-	HCICommandHeader->ParameterLength    = sizeof(BT_HCICommand_CreateConnection_t);
-	
 	/* Fill out HCI connection parameters - assume role switch allowed for now, and all packet types supported */
-	BT_HCICommand_CreateConnection_t* CreateConnectHeader = (BT_HCICommand_CreateConnection_t*)&HCICommandHeader->Parameters;
-	memcpy(CreateConnectHeader->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
-	CreateConnectHeader->PacketType      = CPU_TO_LE16(0xCC18);
-	CreateConnectHeader->PageScanMode    = 1;
-	CreateConnectHeader->Reserved        = 0;
-	CreateConnectHeader->ClockOffset     = CPU_TO_LE16(0);
-	CreateConnectHeader->AllowRoleSwitch = true;
+	BT_HCICommand_CreateConnection_t CreateConnectHeader;
+	memcpy(CreateConnectHeader.RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
+	CreateConnectHeader.PacketType      = CPU_TO_LE16(0xCC18);
+	CreateConnectHeader.PageScanMode    = 1;
+	CreateConnectHeader.Reserved        = 0;
+	CreateConnectHeader.ClockOffset     = CPU_TO_LE16(0);
+	CreateConnectHeader.AllowRoleSwitch = true;
 	
-	CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCICommand, (sizeof(BT_HCICommand_Header_t) + HCICommandHeader->ParameterLength));
+	/* If the command packet failed to send, kill the created channel object */
+	if (!(Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_CREATE_CONNECTION), sizeof(CreateConnectHeader), &CreateConnectHeader)))
+	{
+		HCIConnection->State = HCI_CONSTATE_Closed;
+		return NULL;
+	}
+	
 	return HCIConnection;
 }
 
@@ -478,40 +442,57 @@ bool Bluetooth_HCI_Disconnect(BT_StackConfig_t* const StackState,
 	/* Disallow connections until the stack is ready */
 	if (StackState->State.HCI.State != HCISTATE_Idle)
 	  return false;
-
-	/* Abort if not enough space in the controller for the command */
-	if (!(StackState->State.HCI.CommandPackets))
-	  return false;
 	  
 	/* Abort if invalid connection handle was given */
 	if (!(HCIConnection))
 	  return false;
-	  
-	BT_HCICommand_Header_t* HCICommandHeader = (BT_HCICommand_Header_t*)StackState->Config.PacketBuffer;
+
+	struct 
+	{
+		uint16_t ConnectionHandle;
+		uint8_t  Reason;
+	} DisconnectParams;
+	
+	DisconnectParams.ConnectionHandle = cpu_to_le16(HCIConnection->Handle);
+	DisconnectParams.Reason           = 0x13;
 
 	switch (HCIConnection->State)
 	{
 		case HCI_CONSTATE_Connecting:
 			/* Can only terminate connections initiated from the local device (not remote devices) */
 			if (!(HCIConnection->LocallyInitiated))
-			  break;
+			  return false;
 		
-			HCICommandHeader->OpCode           = CPU_TO_LE16(OGF_LINK_CONTROL | OCF_LINK_CONTROL_CREATE_CONNECTION_CANCEL),
-			HCICommandHeader->ParameterLength  = BT_BDADDR_LEN;
-			memcpy(&HCICommandHeader->Parameters[0], HCIConnection->RemoteBDADDR, BT_BDADDR_LEN);
-			break;
+			return Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_CREATE_CONNECTION_CANCEL), BT_BDADDR_LEN, HCIConnection->RemoteBDADDR);
 		case HCI_CONSTATE_Connected:
-			HCICommandHeader->OpCode           = CPU_TO_LE16(OGF_LINK_CONTROL | OCF_LINK_CONTROL_DISCONNECT),
-			HCICommandHeader->ParameterLength  = 3;
-			HCICommandHeader->Parameters[0]    = (HCIConnection->Handle & 0xFF);		
-			HCICommandHeader->Parameters[1]    = (HCIConnection->Handle >> 8);		
-			HCICommandHeader->Parameters[2]    = 0x00;
-			break;
-		default:
-			return true;			
+			return Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_DISCONNECT), sizeof(DisconnectParams), &DisconnectParams);
 	}
-	
-	CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCICommand, (sizeof(BT_HCICommand_Header_t) + HCICommandHeader->ParameterLength));
+
+	return true;
+}
+
+/** Sends a HCI command packet to the Bluetooth adapter for transmittion to a remote device.
+ *
+ *  \return Boolean \c true if the data was sent, \c false otherwise.
+ */ 
+bool Bluetooth_HCI_SendControlPacket(BT_StackConfig_t* const StackState,
+                                     const uint16_t OpCode,
+		                             const uint8_t Length,
+		                             const void* Data)
+{
+	/* Abort if not enough space in the controller for the command */
+	if (!(StackState->State.HCI.CommandPackets))
+	  return false;
+
+	BT_HCICommand_Header_t* HCICommandHeader = (BT_HCICommand_Header_t*)StackState->Config.PacketBuffer;
+	HCICommandHeader->OpCode          = cpu_to_le16(OpCode),
+	HCICommandHeader->ParameterLength = Length;
+	memcpy(&HCICommandHeader->Parameters[0], Data, Length);
+
+	/* Keep track of how many command packets can be queued into the controller */
+	StackState->State.HCI.CommandPackets--;
+
+	CALLBACK_Bluetooth_SendPacket(StackState, BLUETOOTH_PACKET_HCICommand, (sizeof(BT_HCICommand_Header_t) + Length));
 	return true;
 }
 

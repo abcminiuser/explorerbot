@@ -186,17 +186,16 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 	}
 	else if (HCIEventHeader->EventCode == EVENT_NUM_PACKETS_COMPLETE)
 	{
-		uint16_t* CurrentPacketInfo = (uint16_t*)&HCIEventHeader->Parameters[1];
+		BT_HCIEvent_NumPacketsComplete_t* CurrentPacketInfo = (BT_HCIEvent_NumPacketsComplete_t*)&HCIEventHeader->Parameters;
 		
 		/* For each connection reported in the event, find the associated connection object and decrease the number of
 		 * queued packets by the number of completed packets reported for each connection */
-		for (uint8_t i = 0; i < HCIEventHeader->Parameters[0]; i++)
+		for (uint8_t i = 0; i < CurrentPacketInfo->Handles; i++)
 		{
-			BT_HCI_Connection_t* Connection = Bluetooth_HCI_FindConnection(StackState, 0, *(CurrentPacketInfo++));			
-			uint16_t             PacketsCompleted = *(CurrentPacketInfo++);
-			
+			BT_HCI_Connection_t* Connection = Bluetooth_HCI_FindConnection(StackState, 0, CurrentPacketInfo->PacketInfo[i].Handle);
+
 			if (Connection)
-			  Connection->DataPacketsQueued -= PacketsCompleted;
+			  Connection->DataPacketsQueued -= CurrentPacketInfo->PacketInfo[i].PacketsCompleted;
 		}
 	}
 	else if (HCIEventHeader->EventCode == EVENT_CONNECTION_REQUEST)

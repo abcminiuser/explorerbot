@@ -73,6 +73,17 @@
 			uint16_t Opcode; /**< OpCode of the operation that has completed. */
 			uint8_t  Parameters[]; /**< Optional parameters associated with the completed command. */
 		} ATTR_PACKED BT_HCIEvent_CommandComplete_t;
+
+		/** HCI Number of Packets Complete Event structure. */
+		typedef struct
+		{
+			uint8_t  Handles; /**< Number of connection handles reported in the event. */
+			struct
+			{
+				uint16_t Handle; /**< HCI connection handle being reported. */
+				uint16_t PacketsCompleted; /**< Number of HCI data packets which have been completed  by the controller. */
+			} PacketInfo[]; /**< List of HCI connection handles and completed HCI data packets. */
+		} ATTR_PACKED BT_HCIEvent_NumPacketsComplete_t;
 		
 		/** HCI Connection Request Event structure. */
 		typedef struct

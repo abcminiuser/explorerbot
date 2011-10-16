@@ -192,7 +192,7 @@
 				uint16_t MTU;
 				uint8_t  LocalSignals;
 				uint8_t  RemoteSignals;
-			} DataLink;
+			} ATTR_PACKED DataLink;
 			
 			RFCOMM_PortConfig_t PortConfig;
 		} RFCOMM_Channel_t;

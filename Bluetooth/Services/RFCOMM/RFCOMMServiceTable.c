@@ -36,7 +36,7 @@ static const struct
 	{
 		SDP_ItemUUID_t     SerialPortUUID;
 	} UUIDList;
-} PROGMEM SerialPort_Attribute_ServiceClassIDs =
+} ATTR_PACKED PROGMEM SerialPort_Attribute_ServiceClassIDs =
 	{
 		SDP_ITEMSEQUENCE8BIT(sizeof(SerialPort_Attribute_ServiceClassIDs.UUIDList)),
 		{
@@ -66,7 +66,7 @@ static const struct
 			SDP_Item8Bit_t ControlChannel;
 		} RFCOMM;
 	} Protocols;
-} PROGMEM SerialPort_Attribute_ProtocolDescriptor =
+} ATTR_PACKED PROGMEM SerialPort_Attribute_ProtocolDescriptor =
 	{
 		SDP_ITEMSEQUENCE8BIT(sizeof(SerialPort_Attribute_ProtocolDescriptor.Protocols)),
 		{
@@ -94,7 +94,7 @@ static const struct
 	{
 		SDP_ItemUUID_t     PublicBrowseGroupUUID;
 	} UUIDList;
-} PROGMEM SerialPort_Attribute_BrowseGroupList =
+} ATTR_PACKED PROGMEM SerialPort_Attribute_BrowseGroupList =
 	{
 		SDP_ITEMSEQUENCE8BIT(sizeof(SerialPort_Attribute_BrowseGroupList.UUIDList)),
 		{
@@ -114,7 +114,7 @@ static const struct
 		SDP_Item16Bit_t    EncodingID;
 		SDP_Item16Bit_t    OffsetID;
 	} LanguageEncoding;
-} PROGMEM SerialPort_Attribute_LanguageBaseIDOffset =
+} ATTR_PACKED PROGMEM SerialPort_Attribute_LanguageBaseIDOffset =
 	{
 		SDP_ITEMSEQUENCE8BIT(sizeof(SerialPort_Attribute_LanguageBaseIDOffset.LanguageEncoding)),
 		{
@@ -129,7 +129,7 @@ static const struct
 {
 	SDP_ItemString8Bit_t Text_Header;
 	char                 Text[];
-} PROGMEM SerialPort_Attribute_ServiceName =
+} ATTR_PACKED PROGMEM SerialPort_Attribute_ServiceName =
 	{
 		SDP_ITEMSTRING("Wireless Serial Port"),
 	};
@@ -139,7 +139,7 @@ static const struct
 {
 	SDP_ItemString8Bit_t Text_Header;
 	char                 Text[];
-} PROGMEM SerialPort_Attribute_ServiceDescription =
+} ATTR_PACKED PROGMEM SerialPort_Attribute_ServiceDescription =
 	{
 		SDP_ITEMSTRING("Wireless Serial Port Service"),
 	};

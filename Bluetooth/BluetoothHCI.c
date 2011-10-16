@@ -451,7 +451,7 @@ bool Bluetooth_HCI_Disconnect(BT_StackConfig_t* const StackState,
 	{
 		uint16_t ConnectionHandle;
 		uint8_t  Reason;
-	} DisconnectParams;
+	} ATTR_PACKED DisconnectParams;
 	
 	DisconnectParams.ConnectionHandle = cpu_to_le16(HCIConnection->Handle);
 	DisconnectParams.Reason           = HCI_ERROR_REMOTE_USER_TERMINATED_CONN;

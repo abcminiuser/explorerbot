@@ -458,7 +458,7 @@ static void SDP_ServiceSearch(BT_StackConfig_t* const StackState,
 		uint16_t           TotalServiceRecordCount;
 		uint16_t           CurrentServiceRecordCount;
 		uint8_t            ResponseData[200];
-	} ResponsePacket;
+	} ATTR_PACKED ResponsePacket;
 
 	uint8_t AddedServiceHandles = 0;
 
@@ -537,7 +537,7 @@ static void SDP_ServiceAttribute(BT_StackConfig_t* const StackState,
 		BT_SDP_PDUHeader_t SDPHeader;
 		uint16_t           AttributeListByteCount;
 		uint8_t            ResponseData[200];
-	} ResponsePacket;
+	} ATTR_PACKED ResponsePacket;
 
 	/* Create a pointer to the buffer to indicate the current location for response data to be added */
 	void* CurrResponsePos = ResponsePacket.ResponseData;
@@ -618,7 +618,7 @@ static void SDP_ServiceSearchAttribute(BT_StackConfig_t* const StackState,
 		BT_SDP_PDUHeader_t SDPHeader;
 		uint16_t           AttributeListByteCount;
 		uint8_t            ResponseData[200];
-	} ResponsePacket;
+	} ATTR_PACKED ResponsePacket;
 
 	void* CurrResponsePos = ResponsePacket.ResponseData;
 	

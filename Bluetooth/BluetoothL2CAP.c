@@ -160,7 +160,7 @@ static inline void Bluetooth_L2CAP_Signal_ConnRequest(BT_StackConfig_t* const St
 	{
 		BT_Signal_Header_t         SignalCommandHeader;
 		BT_Signal_ConnectionResp_t ConnectionResponse;
-	} ResponsePacket;
+	} ATTR_PACKED ResponsePacket;
 
 	/*  Fill out the Signal Command header in the response packet */
 	ResponsePacket.SignalCommandHeader.Code              = BT_SIGNAL_CONNECTION_RESPONSE;
@@ -203,7 +203,7 @@ static inline void Bluetooth_L2CAP_Signal_EchoReq(BT_StackConfig_t* const StackS
 	struct
 	{
 		BT_Signal_Header_t SignalCommandHeader;
-	} ResponsePacket;
+	} ATTR_PACKED ResponsePacket;
 
 	/* Fill out the Signal Command header in the response packet */
 	ResponsePacket.SignalCommandHeader.Code       = BT_SIGNAL_ECHO_RESPONSE;
@@ -226,7 +226,7 @@ static inline void Bluetooth_L2CAP_Signal_DisconnectionReq(BT_StackConfig_t* con
 	{
 		BT_Signal_Header_t            SignalCommandHeader;
 		BT_Signal_DisconnectionResp_t DisconnectionResponse;
-	} ResponsePacket;
+	} ATTR_PACKED ResponsePacket;
 
 	/* Fill out the Signal Command header in the response packet */
 	ResponsePacket.SignalCommandHeader.Code       = BT_SIGNAL_DISCONNECTION_RESPONSE;
@@ -275,7 +275,7 @@ static inline void Bluetooth_L2CAP_Signal_InformationReq(BT_StackConfig_t* const
 		BT_Signal_Header_t          SignalCommandHeader;
 		BT_Signal_InformationResp_t InformationResponse;
 		uint8_t                     Data[4];
-	} ResponsePacket;
+	} ATTR_PACKED ResponsePacket;
 
 	uint8_t DataLen = 0;
 
@@ -357,7 +357,7 @@ static inline void Bluetooth_L2CAP_Signal_ConfigReq(BT_StackConfig_t* const Stac
 	{
 		BT_Signal_Header_t            SignalCommandHeader;
 		BT_Signal_ConfigurationResp_t ConfigurationResponse;
-	} ResponsePacket;
+	} ATTR_PACKED ResponsePacket;
 
 	/* Fill out the Signal Command header in the response packet */
 	ResponsePacket.SignalCommandHeader.Code            = BT_SIGNAL_CONFIGURATION_RESPONSE;
@@ -516,7 +516,7 @@ bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 				BT_Config_Option_Header_t Header;
 				uint16_t Value;
 			} Option_LocalMTU;
-		} PacketData;
+		} ATTR_PACKED PacketData;
 
 		/* Fill out the Signal Command header in the response packet */
 		PacketData.SignalCommandHeader.Code       = BT_SIGNAL_CONFIGURATION_REQUEST;
@@ -565,7 +565,7 @@ BT_L2CAP_Channel_t* const Bluetooth_L2CAP_OpenChannel(BT_StackConfig_t* const St
 	{
 		BT_Signal_Header_t        SignalCommandHeader;
 		BT_Signal_ConnectionReq_t ConnectionRequest;
-	} PacketData;
+	} ATTR_PACKED PacketData;
 
 	/* Fill out the Signal Command header in the response packet */
 	PacketData.SignalCommandHeader.Code        = BT_SIGNAL_CONNECTION_REQUEST;
@@ -601,7 +601,7 @@ void Bluetooth_L2CAP_CloseChannel(BT_StackConfig_t* const StackState,
 	{
 		BT_Signal_Header_t           SignalCommandHeader;
 		BT_Signal_DisconnectionReq_t DisconnectionRequest;
-	} PacketData;
+	} ATTR_PACKED PacketData;
 
 	/* Fill out the Signal Command header in the response packet */
 	PacketData.SignalCommandHeader.Code       = BT_SIGNAL_DISCONNECTION_REQUEST;
@@ -647,7 +647,7 @@ bool Bluetooth_L2CAP_SendPacket(BT_StackConfig_t* const StackState,
 	{
 		BT_DataPacket_Header_t L2CAPDataHeader;
 		uint8_t                Data[BytesInPacket];
-	} FirstPacket;
+	} ATTR_PACKED FirstPacket;
 
 	FirstPacket.L2CAPDataHeader.PayloadLength      = cpu_to_le16(Length);
 	FirstPacket.L2CAPDataHeader.DestinationChannel = cpu_to_le16(L2CAPChannel->RemoteNumber);

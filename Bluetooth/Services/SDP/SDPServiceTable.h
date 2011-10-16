@@ -102,7 +102,7 @@
 			uint16_t C; /**< Bits 48-63 of the UUID. */
 			uint16_t D; /**< Bits 64-79 of the UUID. */
 			uint8_t  E[6]; /**< Bits 80-127 of the UUID. */
-		} UUID_t;
+		} ATTR_PACKED UUID_t;
 		
 		/** Structure for the association of attribute ID values to an attribute value in FLASH. A table of these
 		 *  structures can then be built up for each supported UUID service within the device.
@@ -111,42 +111,42 @@
 		{
 			uint16_t    AttributeID; /**< Attribute ID of the table element which the UUID service supports. */
 			const void* Data; /**< Pointer to the attribute data, located in PROGMEM memory space. */
-		} SDP_ServiceAttributeTable_t;
+		} ATTR_PACKED SDP_ServiceAttributeTable_t;
 
 		/** Structure for a list of Data Elements containing 8-bit integers, for service attributes requiring such lists. */
 		typedef struct
 		{
 			uint8_t Header; /**< Data Element header, should be (SDP_DATATYPE_UnsignedInt | SDP_DATASIZE_8Bit). */
 			uint8_t Value; /**< Value to store in the list Data Element. */
-		} SDP_Item8Bit_t;
+		} ATTR_PACKED SDP_Item8Bit_t;
 
 		/** Structure for a list of Data Elements containing 16-bit integers, for service attributes requiring such lists. */
 		typedef struct
 		{
 			uint8_t  Header; /**< Data Element header, should be (SDP_DATATYPE_UnsignedInt | SDP_DATASIZE_16Bit). */
 			uint16_t Value; /**< Value to store in the list Data Element. */
-		} SDP_Item16Bit_t;
+		} ATTR_PACKED SDP_Item16Bit_t;
 
 		/** Structure for a list of Data Elements containing 32-bit integers, for service attributes requiring such lists. */
 		typedef struct
 		{
 			uint8_t  Header; /**< Data Element header, should be (SDP_DATATYPE_UnsignedInt | SDP_DATASIZE_32Bit). */
 			uint32_t Value; /**< Value to store in the list Data Element. */
-		} SDP_Item32Bit_t;
+		} ATTR_PACKED SDP_Item32Bit_t;
 
 		/** Structure for a list of Data Elements containing 64-bit integers, for service attributes requiring such lists. */
 		typedef struct
 		{
 			uint8_t  Header; /**< Data Element header, should be (SDP_DATATYPE_UnsignedInt | SDP_DATASIZE_64Bit). */
 			uint64_t Value; /**< Value to store in the list Data Element. */
-		} SDP_Item64Bit_t;
+		} ATTR_PACKED SDP_Item64Bit_t;
 
 		/** Structure for a list of Data Elements containing 128-bit UUIDs, for service attributes requiring UUID lists. */
 		typedef struct
 		{
 			uint8_t Header; /**< Data Element header, should be (SDP_DATATYPE_UUID | SDP_DATASIZE_128Bit). */
 			UUID_t  UUID; /**< UUID to store in the list Data Element. */
-		} SDP_ItemUUID_t;
+		} ATTR_PACKED SDP_ItemUUID_t;
 
 		/** Structure for a list of Data Elements containing a string of maximum length 255, for service attributes requiring strings.
 		 *
@@ -156,20 +156,20 @@
 		{
 			uint8_t Header; /**< Data Element header, should be (SDP_DATATYPE_String | SDP_DATASIZE_Variable8Bit). */
 			uint8_t Length; /**< Length of the string, in bytes. */
-		} SDP_ItemString8Bit_t;
+		} ATTR_PACKED SDP_ItemString8Bit_t;
 
 		/** Structure for a list of Data Elements containing child elements, for service attributes requiring such lists. */
 		typedef struct
 		{
 			uint8_t Header; /**< Data Element header, should be (SDP_DATATYPE_Sequence | SDP_DATASIZE_Variable8Bit). */
 			uint8_t Size; /**< Size of the inner Data Element sequence. */
-		} SDP_ItemSequence8Bit_t;
+		} ATTR_PACKED SDP_ItemSequence8Bit_t;
 
 		/** Structure for a list of Data Elements containing child elements, for service attributes requiring such lists. */
 		typedef struct
 		{
 			uint8_t  Header; /**< Data Element header, should be (SDP_DATATYPE_Sequence | SDP_DATASIZE_Variable16Bit). */
 			uint16_t Size; /**< Size of the inner Data Element sequence. */
-		} SDP_ItemSequence16Bit_t;
+		} ATTR_PACKED SDP_ItemSequence16Bit_t;
 		
 #endif

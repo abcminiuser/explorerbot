@@ -129,7 +129,7 @@ static void RFCOMM_SendFrame(BT_StackConfig_t* const StackState,
 		uint8_t         Size[(DataLen < 128) ? 1 : 2];
 		uint8_t         Data[DataLen];
 		uint8_t         FCS;
-	} ResponsePacket;
+	} ATTR_PACKED ResponsePacket;
 	
 	/* Abort if invalid ACL connection handle is given */
 	if (!(ACLChannel))
@@ -191,7 +191,7 @@ static void RFCOMM_SendControlFrame(BT_StackConfig_t* const StackState,
 		RFCOMM_Command_t CommandHeader;
 		uint8_t          Length;
 		uint8_t          Data[DataLen];
-	} ResponsePacket;
+	} ATTR_PACKED ResponsePacket;
 	
 	/* Fill out the control header and copy over the payload */
 	ResponsePacket.CommandHeader = (RFCOMM_Command_t){.Command = Command, .EA = true, .CR = CR};

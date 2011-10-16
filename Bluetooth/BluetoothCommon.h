@@ -99,6 +99,7 @@
 			uint16_t PSM; /**< Protocol used on the channel. */
 			uint16_t LocalMTU; /**< MTU of data sent from the connected device to the local device. */
 			uint16_t RemoteMTU; /**< MTU of data sent from the local device to the connected device. */
+			bool     LocallyInitiated; /**< Boolean true if the channel was initiated by the local device, false if remotely initiated. */
 		} BT_L2CAP_Channel_t;
 
 		/** Type define for a Bluetooth Stack instance, used to contain the complete stack state for a Bluetooth adapter. */

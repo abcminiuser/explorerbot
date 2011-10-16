@@ -111,6 +111,7 @@ static BT_L2CAP_Channel_t* const Bluetooth_L2CAP_NewChannel(BT_StackConfig_t* co
 		CurrentChannel->RemoteMTU        = 0xFFFF;
 		CurrentChannel->State            = L2CAP_CHANSTATE_New;
 		CurrentChannel->PSM              = PSM;
+		CurrentChannel->LocallyInitiated = false;
 		
 		/* Wrap the allocated channel number back to the starting address when all channel indexes have been allocated */
 		if (StackState->State.L2CAP.LastAllocatedChannel++ == 0xFF)
@@ -556,8 +557,9 @@ BT_L2CAP_Channel_t* const Bluetooth_L2CAP_OpenChannel(BT_StackConfig_t* const St
 	if (!(L2CAPChannel))
 	  return NULL;
 
-	/* Update the channel state to indicate it is waiting for a connection response */
-	L2CAPChannel->State = L2CAP_CHANSTATE_WaitConnectRsp;
+	/* Update the channel state to indicate it was locally initiated and is waiting for a connection response */
+	L2CAPChannel->State            = L2CAP_CHANSTATE_WaitConnectRsp;
+	L2CAPChannel->LocallyInitiated = true;
 
 	struct
 	{

@@ -245,7 +245,7 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 		if (Connection)
 		{
 			Connection->Handle = (le16_to_cpu(ConnectionCompleteEventHeader->Handle) & BT_HCI_CONNECTION_HANDLE_MASK);
-			Connection->State  = (ConnectionCompleteEventHeader->Status == 0x00) ? HCI_CONSTATE_Connected : HCI_CONSTATE_Failed;
+			Connection->State  = (ConnectionCompleteEventHeader->Status == HCI_ERROR_SUCCESS) ? HCI_CONSTATE_Connected : HCI_CONSTATE_Failed;
 			
 			/* Fire user application callback to signal the connection completion */
 			EVENT_Bluetooth_ConnectionStateChange(StackState, Connection);
@@ -454,7 +454,7 @@ bool Bluetooth_HCI_Disconnect(BT_StackConfig_t* const StackState,
 	} DisconnectParams;
 	
 	DisconnectParams.ConnectionHandle = cpu_to_le16(HCIConnection->Handle);
-	DisconnectParams.Reason           = 0x13;
+	DisconnectParams.Reason           = HCI_ERROR_REMOTE_USER_TERMINATED_CONN;
 
 	switch (HCIConnection->State)
 	{

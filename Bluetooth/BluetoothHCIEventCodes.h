@@ -78,8 +78,10 @@
 
 		/** \name Bluetooth HCI connection error codes. */
 		//@{
+		#define HCI_ERROR_SUCCESS                              0x00
 		#define HCI_ERROR_LIMITED_RESOURCES                    0x0D
 		#define HCI_ERROR_UNACCEPTABLE_BDADDR                  0x0F
+		#define HCI_ERROR_REMOTE_USER_TERMINATED_CONN          0x13
 		//@}
 		
 #endif

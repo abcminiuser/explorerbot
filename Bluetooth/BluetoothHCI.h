@@ -74,6 +74,10 @@
 		bool Bluetooth_HCI_Disconnect(BT_StackConfig_t* const StackState,
 		                              BT_HCI_Connection_t* const HCIConnection);
 									  
+		bool Bluetooth_HCI_SendControlPacket(BT_StackConfig_t* const StackState,
+                                             const uint16_t OpCode,
+		                                     const uint8_t Length,
+		                                     const void* Data);
 		bool Bluetooth_HCI_SendPacket(BT_StackConfig_t* const StackState,
 		                              BT_HCI_Connection_t* const HCIConnection,
 		                              const uint16_t Length,

@@ -129,7 +129,7 @@
 				
 				struct
 				{
-					uint8_t             LastAllocatedChannel; /**< Index of the last allocated L2CAP channel. */
+					uint16_t            LastAllocatedChannel; /**< Index of the last allocated L2CAP channel. */
 					BT_L2CAP_Channel_t  Channels[BT_MAX_LOGICAL_CHANNELS]; /**< L2CAP channel state information list. */
 				} L2CAP; /**< L2CAP layer channel state information. */
 			} State; /**< Stack state information, managed by the Bluetooth stack internally. */

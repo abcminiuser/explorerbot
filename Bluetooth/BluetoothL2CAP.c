@@ -114,7 +114,7 @@ static BT_L2CAP_Channel_t* const Bluetooth_L2CAP_NewChannel(BT_StackConfig_t* co
 		CurrentChannel->LocallyInitiated = false;
 		
 		/* Wrap the allocated channel number back to the starting address when all channel indexes have been allocated */
-		if (StackState->State.L2CAP.LastAllocatedChannel++ == 0xFF)
+		if (StackState->State.L2CAP.LastAllocatedChannel++ == 0xFFFF)
 		  StackState->State.L2CAP.LastAllocatedChannel = BT_CHANNEL_BASEOFFSET;
 		  
 		return CurrentChannel;

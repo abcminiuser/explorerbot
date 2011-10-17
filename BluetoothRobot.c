@@ -305,9 +305,11 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 		return;
 	}
 
-	if (!(Joystick_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData)) &&
-	    !(BluetoothAdapter_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData)) &&
-	    !(MassStorage_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData)))
+	Joystick_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData);
+	BluetoothAdapter_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData);
+	MassStorage_ConfigurePipes(&DeviceDescriptor, ConfigDescriptorSize, ConfigDescriptorData);
+	
+	if (!(Joystick_HID_Interface.State.IsActive) && !(Disk_MS_Interface.State.IsActive) && !(BluetoothAdapter_IsActive))
 	{
 		LCD_WriteString_P(PSTR("\fERR: Unknown USB"));
 		RGB_SetColour(RGB_ALIAS_Error);

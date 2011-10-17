@@ -90,7 +90,7 @@
 			SensorData_t Orientation; /**< Robot orientation (gyroscope) sensor descriptor. */
 			SensorData_t Pressure;  /**< Robot air pressure sensor descriptor. */
 			SensorData_t Temperature; /**< Robot temperature sensor descriptor. */
-		} Sensor_t;
+		} ATTR_PACKED Sensor_t;
 	
 	/* Inline Functions */
 		/** Writes a given buffer of bytes to the given sensor, over the I2C bus.

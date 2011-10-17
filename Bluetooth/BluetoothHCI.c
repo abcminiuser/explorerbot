@@ -364,7 +364,7 @@ bool Bluetooth_HCI_Manage(BT_StackConfig_t* const StackState)
 			break;
 		case HCISTATE_Init_SetScanEnable:
 			ParamBuffer[0] = (StackState->Config.Discoverable ? BT_SCANMODE_InquiryAndPageScans : BT_SCANMODE_NoScansEnabled);
-			Bluetooth_HCI_SendControlPacket(StackState, (OGF_CTRLR_BASEBAND | OCF_CTRLR_BASEBAND_WRITE_CLASS_OF_DEVICE), 1, ParamBuffer);
+			Bluetooth_HCI_SendControlPacket(StackState, (OGF_CTRLR_BASEBAND | OCF_CTRLR_BASEBAND_WRITE_SCAN_ENABLE), 1, ParamBuffer);
 			break;
 		case HCISTATE_Idle:
 			EVENT_Bluetooth_InitComplete(StackState);

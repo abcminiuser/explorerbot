@@ -284,15 +284,20 @@ static inline void Bluetooth_L2CAP_Signal_InformationReq(BT_StackConfig_t* const
 	{
 		case BT_INFOREQ_MTU:
 			ResponsePacket.InformationResponse.Result = CPU_TO_LE16(BT_INFORMATION_SUCCESSFUL);
-			DataLen = 2;
 
-			*((uint16_t*)&ResponsePacket.Data) = CPU_TO_LE16(BT_DEFAULT_L2CAP_CHANNEL_MTU);
+			DataLen = 2;		
+			ResponsePacket.Data[0] = (BT_DEFAULT_L2CAP_CHANNEL_MTU & 0xFF);
+			ResponsePacket.Data[1] = (BT_DEFAULT_L2CAP_CHANNEL_MTU >> 8);
 			break;
 		case BT_INFOREQ_EXTENDEDFEATURES:
 			ResponsePacket.InformationResponse.Result = CPU_TO_LE16(BT_INFORMATION_SUCCESSFUL);
+			
+			/* Indicate no extended features are currently supported */
 			DataLen = 4;
-
-			*((uint32_t*)&ResponsePacket.Data) = CPU_TO_LE32(0);
+			ResponsePacket.Data[0] = (0UL & 0xFF);
+			ResponsePacket.Data[1] = (0UL >> 8);
+			ResponsePacket.Data[2] = (0UL >> 16);
+			ResponsePacket.Data[3] = (0UL >> 24);
 			break;
 		default:
 			ResponsePacket.InformationResponse.Result = CPU_TO_LE16(BT_INFORMATION_NOTSUPPORTED);

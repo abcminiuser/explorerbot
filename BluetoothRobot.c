@@ -164,8 +164,9 @@ void SetupHardware(void)
 	JTAG_DISABLE();
 	
 	/* Disable unused peripheral modules */
-	PRR0 = ((1 << PRADC)  | (1 << PRSPI));
+	PRR0 = ((1 << PRADC) | (1 << PRSPI));
 	PRR1 = (1 << PRUSART1);
+	ACSR = (1 << ACD);
 	
 	/* Enable system update tick timer */
 	TCCR3B = ((1 << WGM32) | (1 << CS31) | (1 << CS30));

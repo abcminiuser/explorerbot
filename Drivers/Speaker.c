@@ -91,7 +91,8 @@ void Speaker_Init(void)
 {
 	DDRB |= (1 << 7);
 
-	TCCR0A = ((1 << COM0A0) | (1 << WGM01));
+	TCCR0A = (1 << WGM01);
+	TCCR0B = ((1 << CS02) | (1 << CS00));
 
 	Speaker_SetPWM(0);
 }

@@ -112,7 +112,7 @@ void Bluetooth_HCI_Init(BT_StackConfig_t* const StackState)
 void Bluetooth_HCI_TickElapsed(BT_StackConfig_t* const StackState)
 {
 	/* If the stack's HCI timeout period has expired, reset it and fire a new state transition */
-	if (StackState->State.HCI.TicksElapsed++ == (2000 / BT_TICK_MS))
+	if (StackState->State.HCI.TicksElapsed++ == (BT_HCI_COMMAND_TIMEOUT_MS / BT_TICK_MS))
 	{
 		StackState->State.HCI.TicksElapsed    = 0;
 		StackState->State.HCI.StateTransition = true;

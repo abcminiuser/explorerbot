@@ -125,8 +125,8 @@ static BT_L2CAP_Channel_t* const Bluetooth_L2CAP_NewChannel(BT_StackConfig_t* co
 }
 
 static bool Bluetooth_L2CAP_SendSignalPacket(BT_StackConfig_t* const StackState,
-                                             BT_HCI_Connection_t* HCIConnection,
-                                             uint16_t Length,
+                                             BT_HCI_Connection_t* const HCIConnection,
+                                             const uint16_t Length,
                                              void* Data)
 {
 	/* Construct a temporary channel object with the signalling channel indexes */

@@ -33,6 +33,9 @@
 	/* Macros: */
 		/** Mask for a HCI connection handle value to remove all HCI packet connection flags, leaving only the unique handle value. */
 		#define BT_HCI_CONNECTION_HANDLE_MASK     0x0EFF
+		
+		/** Number of milliseconds before an issued HCI command times out and is re-tried. */
+		#define BT_HCI_COMMAND_TIMEOUT_MS         1000
 	
 	/* Enums: */
 		/** Enum for the possible device connection states. */

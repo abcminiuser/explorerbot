@@ -141,41 +141,48 @@ void Joystick_USBTask(void)
 		uint8_t JoystickReport[Joystick_HID_Interface.State.LargestReportSize];
 		HID_Host_ReceiveReport(&Joystick_HID_Interface, &JoystickReport);
 
-		/* Determine direction being pressed on the joystick */
-		if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.Forward)       && Joystick_HIDReportItemMappings.Forward->Value)
-		  Motors_SetChannelSpeed( MAX_MOTOR_POWER,  MAX_MOTOR_POWER);
-		else if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.Backward) && Joystick_HIDReportItemMappings.Backward->Value)
-		  Motors_SetChannelSpeed(-MAX_MOTOR_POWER, -MAX_MOTOR_POWER);
-		else if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.Left)     && Joystick_HIDReportItemMappings.Left->Value)
-		  Motors_SetChannelSpeed(-MAX_MOTOR_POWER,  MAX_MOTOR_POWER);
+		uint8_t MotorX           = 1;
+		uint8_t MotorY           = 1;
+		bool    Headlights       = false;
+		bool    HeadlightsToggle = false;
+		bool    Horn             = false;
+		bool    NoveltyHorn      = false;
+	
+		/* Left/Right */
+		if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.Left)          && Joystick_HIDReportItemMappings.Left->Value)
+		  MotorX = 0;
 		else if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.Right)    && Joystick_HIDReportItemMappings.Right->Value)
-		  Motors_SetChannelSpeed( MAX_MOTOR_POWER, -MAX_MOTOR_POWER);
-		else
-		  Motors_SetChannelSpeed(0, 0);
-		  
+		  MotorX = 2;
+
+		/* Forward/Backward */
+		if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.Forward)       && Joystick_HIDReportItemMappings.Forward->Value)
+		  MotorY = 0;		  
+		else if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.Backward) && Joystick_HIDReportItemMappings.Backward->Value)
+		  MotorY = 2;
+
 		/* Determine if headlight button is currently pressed or not */
 		if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.Headlights))
-		  Headlights_SetState(Joystick_HIDReportItemMappings.Headlights->Value != 0);
+		  Headlights = (Joystick_HIDReportItemMappings.Headlights->Value != 0);
 
 		/* Determine if headlight toggle button is currently pressed or not */
 		if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.HeadlightToggle))
 		{
 			/* Toggle on rising button edge */
-			if ((Joystick_HIDReportItemMappings.HeadlightToggle->PreviousValue == 0) && Joystick_HIDReportItemMappings.HeadlightToggle->Value)
-			  Headlights_ToggleState();
+			HeadlightsToggle = ((Joystick_HIDReportItemMappings.HeadlightToggle->PreviousValue == 0) && Joystick_HIDReportItemMappings.HeadlightToggle->Value);
 		}
 
 		/* Determine if horn button is currently pressed or not */
 		if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.Horn))
-		  Speaker_Tone((Joystick_HIDReportItemMappings.Horn->Value) ? 30 : 0);
+		  Horn = true;
 
 		/* Determine if novelty horn button is currently pressed or not */
 		if (USB_GetHIDReportItemInfo(JoystickReport, Joystick_HIDReportItemMappings.NoveltyHorn))
 		{
 			/* Activate on rising button edge */
-			if ((Joystick_HIDReportItemMappings.NoveltyHorn->PreviousValue == 0) && Joystick_HIDReportItemMappings.NoveltyHorn->Value)
-			  Speaker_PlaySequence(SPEAKER_SEQUENCE_LaCucaracha);
+			NoveltyHorn = ((Joystick_HIDReportItemMappings.NoveltyHorn->PreviousValue == 0) && Joystick_HIDReportItemMappings.NoveltyHorn->Value);
 		}
+		
+		ProcessUserControl(MotorX, MotorY, Horn, NoveltyHorn, Headlights, HeadlightsToggle);
 	}
 
 	/* Run the HID Class Driver service task on the HID Joystick interface */

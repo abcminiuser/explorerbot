@@ -66,7 +66,13 @@
 		void SetupHardware(void);
 		void StartupSequence(void);
 		void CheckSensors(void);
-
+		void ProcessUserControl(const int8_t MotorX,
+		                        const int8_t MotorY,
+		                        const bool Horn,
+		                        const bool NoveltyHorn,
+		                        const bool Headlights,
+		                        const bool HeadlightsToggle);
+						 
 		void EVENT_USB_Host_HostError(const uint8_t ErrorCode);
 		void EVENT_USB_Host_DeviceAttached(void);
 		void EVENT_USB_Host_DeviceUnattached(void);

@@ -290,25 +290,7 @@ void CALLBACK_HID_ReportReceived(BT_StackConfig_t* const StackState,
 			PrevButtons = *((uint16_t*)&Data[2]);
 		}
 		
-		/* Table to map the controller direction coordinates to a pair of motor power coordinates */
-		static const struct { int8_t Left; int8_t Right; } MotorPowerMap[3][3] =
-			{
-				{{ 0, 1},{ 1, 1},{ 1, 0}},
-				{{-1, 1},{ 0, 0},{ 1,-1}},
-				{{0, -1},{-1,-1},{-1, 0}},
-			};
-		
-		/* Change robot hardware states to match the values in the controller report */
-		Motors_SetChannelSpeed((MotorPowerMap[MotorY][MotorX].Left  * (int16_t)MAX_MOTOR_POWER),
-		                       (MotorPowerMap[MotorY][MotorX].Right * (int16_t)MAX_MOTOR_POWER));
-		Headlights_SetState(Headlights);
-		Speaker_Tone(Horn ? 30 : 0);
-
-		if (HeadlightsToggle)
-		  Headlights_ToggleState();
-		
-		if (NoveltyHorn)
-		  Speaker_PlaySequence(SPEAKER_SEQUENCE_LaCucaracha);
+		ProcessUserControl(MotorX, MotorY, Horn, NoveltyHorn, Headlights, HeadlightsToggle);
 	}
 }
 

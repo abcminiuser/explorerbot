@@ -45,6 +45,7 @@ void Bluetooth_L2CAP_NotifyHCIDisconnection(BT_StackConfig_t* const StackState,
 			}
 			else
 			{
+				/* Channel not open, but may be in another state (connecting?) - force it closed */
 				CurrentChannel->State = L2CAP_CHANSTATE_Closed;
 			}
 		}
@@ -640,7 +641,7 @@ bool Bluetooth_L2CAP_SendPacket(BT_StackConfig_t* const StackState,
 
 	BT_HCI_Connection_t* HCIConnection = Bluetooth_HCI_FindConnection(StackState, NULL, L2CAPChannel->ConnectionHandle);
 
-	/* If an open device connection with the correct connection handle was not foumd, abort */
+	/* If an open device connection with the correct connection handle was not found, abort */
 	if (!(HCIConnection))
 	  return false;
 

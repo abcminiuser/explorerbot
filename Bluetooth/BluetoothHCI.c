@@ -80,6 +80,7 @@ static BT_HCI_Connection_t* const Bluetooth_HCI_NewConnection(BT_StackConfig_t* 
 		{
 			memcpy(Connection->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
 			Connection->State             = HCI_CONSTATE_New;
+			Connection->DataPacketsQueued = 0;
 			Connection->LinkType          = LinkType;
 			Connection->CurrentIdentifier = 0x01;
 			Connection->LocallyInitiated  = false;
@@ -195,7 +196,7 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 			BT_HCI_Connection_t* Connection = Bluetooth_HCI_FindConnection(StackState, 0, CurrentPacketInfo->PacketInfo[i].Handle);
 
 			if (Connection)
-			  Connection->DataPacketsQueued -= CurrentPacketInfo->PacketInfo[i].PacketsCompleted;
+			  Connection->DataPacketsQueued -= le16_to_cpu(CurrentPacketInfo->PacketInfo[i].PacketsCompleted);
 		}
 	}
 	else if (HCIEventHeader->EventCode == EVENT_CONNECTION_REQUEST)
@@ -521,9 +522,9 @@ bool Bluetooth_HCI_SendPacket(BT_StackConfig_t* const StackState,
 	if (!(HCIConnection) || (HCIConnection->State != HCI_CONSTATE_Connected))
 	  return false;
 	  
-	if (HCIConnection->DataPacketsQueued == StackState->State.HCI.ACLDataPackets)
-	  return false;
-	  
+//	if (HCIConnection->DataPacketsQueued == StackState->State.HCI.ACLDataPackets)
+//	  return false;
+	
 	/* Keep track of how many packets have been queued into the controller for the connection to prevent buffer overrun */
 	HCIConnection->DataPacketsQueued++;
 

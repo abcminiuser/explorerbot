@@ -473,6 +473,11 @@ bool Bluetooth_HCI_Disconnect(BT_StackConfig_t* const StackState,
 
 /** Sends a HCI command packet to the Bluetooth adapter for transmittion to a remote device.
  *
+ *  \param[in, out] StackState Pointer to a Bluetooth Stack state table.
+ *  \param[in]      OpCode     HCI command operation to send to the controller.
+ *  \param[in]      Length     Length of the command parameters to send in bytes.
+ *  \param[in]      Data       Command data to send to the Bluetooth controller.
+ *
  *  \return Boolean \c true if the data was sent, \c false otherwise.
  */ 
 bool Bluetooth_HCI_SendControlPacket(BT_StackConfig_t* const StackState,

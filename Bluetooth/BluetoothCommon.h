@@ -171,13 +171,22 @@
 		                                       BT_L2CAP_Channel_t* const Channel);
 	
 	/* User Implemented Callback Event Functions: */
-		/** User application event callback, fired when the Bluetooth stack initialization has completed. */
+		/** User application event callback, fired when the Bluetooth stack initialization has completed.
+		 *
+		 *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.
+		 */
 		void EVENT_Bluetooth_InitComplete(BT_StackConfig_t* const StackState);
 
-		/** User application event callback, fired when the Bluetooth stack initialization process has started, so that the user services may be initialized. */
+		/** User application event callback, fired when the Bluetooth stack initialization process has started, so that the user services may be initialized.
+		 *
+		 *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.
+		 */
 		void EVENT_Bluetooth_InitServices(BT_StackConfig_t* const StackState);
 
-		/** User application event callback, fired when the Bluetooth stack management routine has been run, and the user services may be managed. */
+		/** User application event callback, fired when the Bluetooth stack management routine has been run, and the user services may be managed.
+		 *
+		 *  \param[in, out] StackState  Pointer to a Bluetooth Stack state table.
+		 */
 		void EVENT_Bluetooth_ManageServices(BT_StackConfig_t* const StackState);
 
 		/** User application event callback, fired when the Bluetooth stack has changed the state of a connection to a remote device.

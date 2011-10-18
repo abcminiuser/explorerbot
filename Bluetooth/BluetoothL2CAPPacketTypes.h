@@ -41,6 +41,13 @@
 			uint8_t  Data[]; /**< Trailing packet data. */
 		} ATTR_PACKED BT_Signal_Header_t;
 
+		/** Command Rejection signaling command structure, to reject invalid commands. */
+		typedef struct
+		{
+			uint16_t Reason; /**< Reason the command was rejected. */
+			uint16_t Data[]; /**< Data associated with the rejection reason. */
+		} ATTR_PACKED BT_Signal_CommandRej_t;
+
 		/** Connection Request signaling command structure, for channel connection requests. */
 		typedef struct
 		{

@@ -22,19 +22,18 @@
 
 	/* Includes: */
 		#include <LUFA/Common/Common.h>
-		
-		#include "Drivers/LCD.h"
 
 	/* Defines: */
 		/** Length of a Bluetooth device address in bytes. */
 		#define BT_BDADDR_LEN                     6
 		
 		/** Maximum number of simultaneous device connections. */
-		#define BT_MAX_DEVICE_CONNECTIONS         2
+		#define BT_MAX_DEVICE_CONNECTIONS         3
 		
 		/** Maximum number of simultaneous L2CAP logical channels. */
-		#define BT_MAX_LOGICAL_CHANNELS           8
+		#define BT_MAX_LOGICAL_CHANNELS           (BT_MAX_DEVICE_CONNECTIONS * 8)
 		
+		/** Maximum number of queued L2CAP signalling commands. */
 		#define BT_MAX_QUEUED_L2CAP_EVENTS        10
 
 		/** Default maximum transmission unit size for a L2CAP channel packet. */
@@ -76,31 +75,37 @@
 			LINK_TYPE_eSCO                        = 0x02, /**< Bluetooth link type for an Extended SCO link. */
 		};
 
+		/** Enum for the possible internal L2CAP Bluetooth event codes. */
 		enum BT_L2CAP_Events_t
 		{
-			L2CAP_EVENT_OpenChannelReq            = 0,
-			L2CAP_EVENT_CloseChannelReq           = 1,
-			L2CAP_EVENT_SendConfigReq             = 2,
-			L2CAP_EVENT_ConnectReq                = 3,
-			L2CAP_EVENT_ConnectRsp                = 4,
-			L2CAP_EVENT_ConfigReq                 = 5,
-			L2CAP_EVENT_ConfigRsp                 = 6,
-			L2CAP_EVENT_DisconnectReq             = 7,
-			L2CAP_EVENT_DisconnectRsp             = 8,
-			L2CAP_EVENT_InvalidChannel            = 9,
-			L2CAP_EVENT_EchoReq                   = 10,
-			L2CAP_EVENT_InformationReq            = 11,
+			L2CAP_EVENT_OpenChannelReq            = 0,  /**< User-initiated channel open event. */
+			L2CAP_EVENT_CloseChannelReq           = 1,  /**< User-initiated channel close event. */
+			L2CAP_EVENT_SendConfigReq             = 2,  /**< Send local channel configuration event. */
+			L2CAP_EVENT_ConnectReq                = 3,  /**< Remote channel connection event. */
+			L2CAP_EVENT_ConnectRsp                = 4,  /**< Remote channel connection response event. */
+			L2CAP_EVENT_ConfigReq                 = 5,  /**< Remote channel configuration event. */
+			L2CAP_EVENT_ConfigRsp                 = 6,  /**< Remote channel configuration response event. */
+			L2CAP_EVENT_DisconnectReq             = 7,  /**< Remote channel disconnection event. */
+			L2CAP_EVENT_DisconnectRsp             = 8,  /**< Remote channel disconnection response event. */
+			L2CAP_EVENT_CommandRej                = 9,  /**< L2CAP signalling command reject event. */
+			L2CAP_EVENT_EchoReq                   = 10, /**< L2CAP echo event. */
+			L2CAP_EVENT_InformationReq            = 11, /**< L2CAP information request event. */
 		};
 
 	/* Type Defines: */
+		/** Type define for a queued L2CAP event. As the L2AP layer receives commands from remote devices and from the 
+		 *  user application, events are generated and queued for later processing. This queue allows for events to be
+		 *  deferred until such time that there is adequate space in the data packet buffers, to prevent buffer overruns
+		 *  or lost command packets.
+		 */
 		typedef struct
 		{
-			uint8_t  Event;
-			uint16_t ConnectionHandle;
-			uint8_t  Identifier;
-			uint16_t SourceChannel;
-			uint16_t DestinationChannel;
-			uint8_t  Result;
+			uint8_t  Event; /**< Event code for the given L2AP event. */
+			uint16_t ConnectionHandle; /**< HCI Connection handle for the given event's response (if any). */
+			uint8_t  Identifier; /**< L2CAP signalling identifier for the given event's response (if any). */
+			uint16_t SourceChannel; /**< Source channel of the event's initiator (if any). */
+			uint16_t DestinationChannel; /**< Destination channel of the event's initiator (if any). */
+			uint8_t  Result; /**< Result of the event (if any). */
 		} BT_L2CAP_Event_t;
 
 		/** Type define for a Bluetooth HCI connection information structure.  This structure contains all the relevant

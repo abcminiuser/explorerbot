@@ -30,6 +30,25 @@
 void Bluetooth_L2CAP_NotifyHCIDisconnection(BT_StackConfig_t* const StackState,
                                             const uint16_t ConnectionHandle)
 {
+	uint8_t EventIndex = 0;
+	
+	/* Need to remove any pending L2CAP signal events that belong to the terminated connection */
+	while (EventIndex < StackState->State.L2CAP.PendingEvents)
+	{
+		BT_L2CAP_Event_t* Event = &StackState->State.L2CAP.Events[EventIndex];
+		
+		/* Current queued event is associated with the now terminated connection, dequeue it */
+		if (Event->ConnectionHandle == ConnectionHandle)
+		{
+			memmove(&StackState->State.L2CAP.Events[EventIndex], &StackState->State.L2CAP.Events[EventIndex + 1], sizeof(BT_L2CAP_Event_t) * (StackState->State.L2CAP.PendingEvents - EventIndex));
+			StackState->State.L2CAP.PendingEvents--;
+			continue;
+		}
+
+		EventIndex++;
+	}
+
+	/* Need to close any channel objects associated with the terminated connection, and notify the user */
 	for (uint8_t i = 0; i < BT_MAX_LOGICAL_CHANNELS; i++)
 	{
 		BT_L2CAP_Channel_t* CurrentChannel = &StackState->State.L2CAP.Channels[i];
@@ -296,10 +315,12 @@ static inline void Bluetooth_L2CAP_Signal_ConfigReq(BT_StackConfig_t* const Stac
 	/* Find the existing channel in the channel table if it exists */
 	BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, HCIConnection->Handle, le16_to_cpu(ConfigurationRequest->DestinationChannel), 0);
 
-	if (!(L2CAPChannel))
+	if (!(L2CAPChannel) || (L2CAPChannel->State == L2CAP_CHANSTATE_WaitConnectRsp))
 	{
-		Event->Event              = L2CAP_EVENT_InvalidChannel;
+		Event->Event              = L2CAP_EVENT_CommandRej;
+		Event->SourceChannel      = 0;
 		Event->DestinationChannel = ConfigurationRequest->DestinationChannel;
+		Event->Result             = BT_CMDREJ_INVALID_CHANNEL_ID;
 		return;
 	}
 	
@@ -352,6 +373,19 @@ static inline void Bluetooth_L2CAP_Signal_ConfigRsp(BT_StackConfig_t* const Stac
 	Event->Event         = L2CAP_EVENT_ConfigRsp;
 	Event->SourceChannel = ConfigurationResponse->SourceChannel;
 	Event->Result        = ConfigurationResponse->Result;
+}
+
+static inline void Bluetooth_L2CAP_Signal_CommandRej(BT_StackConfig_t* const StackState,
+                                                     BT_HCI_Connection_t* const HCIConnection,
+                                                     BT_Signal_Header_t* const SignalCommandHeader)
+{
+	BT_L2CAP_Event_t* Event = Bluetooth_L2CAP_NewEvent(StackState, HCIConnection->Handle, SignalCommandHeader->Identifier);
+	
+	if (!(Event))
+	  return;
+
+	Event->Event  = L2CAP_EVENT_CommandRej;
+	Event->Result = BT_CMDREJ_COMMAND_UNKNOWN;
 }
 
 /** Initalizes the Bluetooth L2CAP layer, ready for new channel connections.
@@ -410,6 +444,9 @@ void Bluetooth_L2CAP_ProcessPacket(BT_StackConfig_t* const StackState,
 			case BT_SIGNAL_INFORMATION_REQUEST:
 				Bluetooth_L2CAP_Signal_InformationReq(StackState, HCIConnection, SignalCommandHeader);
 				break;
+			default:
+				Bluetooth_L2CAP_Signal_CommandRej(StackState, HCIConnection, SignalCommandHeader);
+				break;
 		}
 	}
 	else
@@ -431,11 +468,13 @@ void Bluetooth_L2CAP_ProcessPacket(BT_StackConfig_t* const StackState,
  */
 bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 {
+	/* Check if there are any pending events in the L2CAP event queue */
 	if (StackState->State.L2CAP.PendingEvents)
 	{
 		BT_L2CAP_Event_t* Event        = &StackState->State.L2CAP.Events[0];
 		bool              DequeueEvent = true;
 	
+		/* Determine and process the next queued L2CAP event in the event queue, sending command packets as needed */
 		if (Event->Event == L2CAP_EVENT_EchoReq)
 		{		
 			DequeueEvent = Bluetooth_L2CAP_SendSignalPacket(StackState, Event->ConnectionHandle, BT_SIGNAL_ECHO_RESPONSE, Event->Identifier, 0, NULL);
@@ -478,9 +517,26 @@ bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 			DequeueEvent = Bluetooth_L2CAP_SendSignalPacket(StackState, Event->ConnectionHandle, BT_SIGNAL_INFORMATION_RESPONSE, Event->Identifier,
 											                (sizeof(ResponsePacket.InformationResponse) + DataLen), &ResponsePacket);		
 		}
-		else if (Event->Event == L2CAP_EVENT_InvalidChannel)
+		else if (Event->Event == L2CAP_EVENT_CommandRej)
 		{
-			// TODO
+			struct
+			{
+				BT_Signal_CommandRej_t RejectionRequest;
+				uint16_t               Data[2];
+			} ATTR_PACKED ResponsePacket;
+			uint8_t DataLen = 0;
+			
+			ResponsePacket.RejectionRequest.Reason = cpu_to_le16(Event->Result);
+			
+			if (Event->Result == BT_CMDREJ_INVALID_CHANNEL_ID)
+			{
+				ResponsePacket.Data[0] = cpu_to_le16(Event->SourceChannel);
+				ResponsePacket.Data[1] = cpu_to_le16(Event->SourceChannel);
+				DataLen = 4;
+			}
+			
+			DequeueEvent = Bluetooth_L2CAP_SendSignalPacket(StackState, Event->ConnectionHandle, BT_SIGNAL_COMMAND_REJECT, Event->Identifier,
+											                (sizeof(ResponsePacket.RejectionRequest) + DataLen), &ResponsePacket);			
 		}		
 		else if (Event->Event == L2CAP_EVENT_OpenChannelReq)
 		{
@@ -634,7 +690,7 @@ bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 	
 		/* If the event was processed, dequeue it from the event queue */
 		if (DequeueEvent)
-		{		
+		{
 			memmove(&StackState->State.L2CAP.Events[0], &StackState->State.L2CAP.Events[1], sizeof(BT_L2CAP_Event_t) * StackState->State.L2CAP.PendingEvents);
 			StackState->State.L2CAP.PendingEvents--;
 			return true;
@@ -705,8 +761,8 @@ BT_L2CAP_Channel_t* const Bluetooth_L2CAP_OpenChannel(BT_StackConfig_t* const St
 		return NULL;
 	}
 
-	Event->Event         = L2CAP_EVENT_OpenChannelReq;
-	Event->SourceChannel = L2CAPChannel->LocalNumber;
+	Event->Event            = L2CAP_EVENT_OpenChannelReq;
+	Event->SourceChannel    = L2CAPChannel->LocalNumber;
 	Event->ConnectionHandle = HCIConnection->Handle;
 
 	return L2CAPChannel;
@@ -765,6 +821,7 @@ bool Bluetooth_L2CAP_SendPacket(BT_StackConfig_t* const StackState,
 	if (!(HCIConnection))
 	  return false;
 
+	/* Check if there is any space in the buffer for the current connection */
 	if (HCIConnection->DataPacketsQueued == StackState->State.HCI.ACLDataPackets)
 	  return false;
 	

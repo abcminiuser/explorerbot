@@ -68,9 +68,16 @@
 		#define BT_CONFIGURATION_UNKNOWNOPTIONS   0x0003
 		//@}
 
+		/** \name Bluetooth L2CAP Command Rejection reason codes. */
+		//@{
+		#define BT_CMDREJ_COMMAND_UNKNOWN         0x0000
+		#define BT_CMDREJ_SIGNAL_MTU_EXCEEDED     0x0001
+		#define BT_CMDREJ_INVALID_CHANNEL_ID      0x0002
+		//@}
+
 		/** \name Bluetooth L2CAP Channel Configuration option parameter indexes. */
 		//@{
-		#define BT_CONFIG_OPTION_MTU              1
+		#define BT_CONFIG_OPTION_MTU              0x01
 		//@}
 		
 #endif

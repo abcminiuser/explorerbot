@@ -116,7 +116,7 @@ static RFCOMM_Channel_t* const RFCOMM_NewChannel(BT_StackConfig_t* const StackSt
 	return NULL;
 }
 
-static void RFCOMM_SendFrame(BT_StackConfig_t* const StackState,
+static bool RFCOMM_SendFrame(BT_StackConfig_t* const StackState,
                              BT_L2CAP_Channel_t* const ACLChannel,
                              const uint8_t DLCI,
                              uint8_t Control,
@@ -133,13 +133,13 @@ static void RFCOMM_SendFrame(BT_StackConfig_t* const StackState,
 	
 	/* Abort if invalid ACL connection handle is given */
 	if (!(ACLChannel))
-	  return;
+	  return false;
 
 	BT_HCI_Connection_t* HCIConnection = Bluetooth_HCI_FindConnection(StackState, NULL, ACLChannel->ConnectionHandle);
 
 	/* Sanity check the HCI connection - if missing, abort */
 	if (!(HCIConnection))
-	  return;
+	  return false;
 
 	bool CommandResp = HCIConnection->LocallyInitiated;
 
@@ -176,10 +176,10 @@ static void RFCOMM_SendFrame(BT_StackConfig_t* const StackState,
 	ResponsePacket.FCS = RFCOMM_ComputeFCS(&ResponsePacket, CRCLength);
 
 	/* Send the completed response packet to the sender */
-	Bluetooth_L2CAP_SendPacket(StackState, ACLChannel, sizeof(ResponsePacket), &ResponsePacket);
+	return Bluetooth_L2CAP_SendPacket(StackState, ACLChannel, sizeof(ResponsePacket), &ResponsePacket);
 }
 
-static void RFCOMM_SendControlFrame(BT_StackConfig_t* const StackState,
+static bool RFCOMM_SendControlFrame(BT_StackConfig_t* const StackState,
                                     BT_L2CAP_Channel_t* const ACLChannel,
                                     const uint8_t Command,
                                     const bool CR,
@@ -199,7 +199,7 @@ static void RFCOMM_SendControlFrame(BT_StackConfig_t* const StackState,
 	memcpy(&ResponsePacket.Data, Data, DataLen);
 
 	/* Send the constructed control frame encapsulated as a UIH frame */
-	RFCOMM_SendFrame(StackState, ACLChannel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_UIH, sizeof(ResponsePacket), &ResponsePacket);
+	return RFCOMM_SendFrame(StackState, ACLChannel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_UIH, sizeof(ResponsePacket), &ResponsePacket);
 }
 
 static void RFCOMM_ProcessTestCommand(BT_StackConfig_t* const StackState,
@@ -572,10 +572,11 @@ void RFCOMM_Manage(BT_StackConfig_t* const StackState)
 				MSCommand.Signals = RFCOMMChannel->DataLink.LocalSignals;
 				
 				/* Send the MSC command to the remote device */
-				RFCOMM_SendControlFrame(StackState, RFCOMMChannel->ACLChannel, RFCOMM_Control_ModemStatus, true, sizeof(MSCommand), &MSCommand);
-
-				/* Indicate that the local signals have now been sent */
-				RFCOMMChannel->ConfigFlags |= RFCOMM_CONFIG_LOCALSIGNALSSENT;
+				if (RFCOMM_SendControlFrame(StackState, RFCOMMChannel->ACLChannel, RFCOMM_Control_ModemStatus, true, sizeof(MSCommand), &MSCommand))
+				{
+					/* Indicate that the local signals have now been sent */
+					RFCOMMChannel->ConfigFlags |= RFCOMM_CONFIG_LOCALSIGNALSSENT;
+				}
 			}
 
 			/* If signals have been configured in both directions, progress to the open state */
@@ -657,6 +658,5 @@ bool RFCOMM_SendData(RFCOMM_Channel_t* const RFCOMMChannel,
 	  return false;
 
 	/* Send the channel data to the remote device */
-	RFCOMM_SendFrame(RFCOMMChannel->Stack, RFCOMMChannel->ACLChannel, RFCOMMChannel->DLCI, RFCOMM_Frame_UIH, DataLen, Data);
-	return true;
+	return RFCOMM_SendFrame(RFCOMMChannel->Stack, RFCOMMChannel->ACLChannel, RFCOMMChannel->DLCI, RFCOMM_Frame_UIH, DataLen, Data);
 }

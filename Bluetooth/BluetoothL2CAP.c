@@ -35,12 +35,12 @@ void Bluetooth_L2CAP_NotifyHCIDisconnection(BT_StackConfig_t* const StackState,
 	/* Need to remove any pending L2CAP signal events that belong to the terminated connection */
 	while (EventIndex < StackState->State.L2CAP.PendingEvents)
 	{
-		BT_L2CAP_Event_t* Event = &StackState->State.L2CAP.Events[EventIndex];
+		BT_L2CAP_Event_t* CurrentEvent = &StackState->State.L2CAP.Events[EventIndex];
 		
 		/* Current queued event is associated with the now terminated connection, dequeue it */
-		if (Event->ConnectionHandle == ConnectionHandle)
+		if (CurrentEvent->ConnectionHandle == ConnectionHandle)
 		{
-			memmove(&StackState->State.L2CAP.Events[EventIndex], &StackState->State.L2CAP.Events[EventIndex + 1], sizeof(BT_L2CAP_Event_t) * (StackState->State.L2CAP.PendingEvents - EventIndex));
+			memmove(&StackState->State.L2CAP.Events[EventIndex], &StackState->State.L2CAP.Events[EventIndex + 1], (sizeof(BT_L2CAP_Event_t) * (StackState->State.L2CAP.PendingEvents - EventIndex)));
 			StackState->State.L2CAP.PendingEvents--;
 			continue;
 		}
@@ -56,17 +56,15 @@ void Bluetooth_L2CAP_NotifyHCIDisconnection(BT_StackConfig_t* const StackState,
 		/* Clear any open connections that are associated with the destroyed connection handle */
 		if (CurrentChannel->ConnectionHandle == ConnectionHandle)
 		{
-			/* Notify the user of the closed connection if it is currently open */
-			if (CurrentChannel->State == L2CAP_CHANSTATE_Open)
-			{
-				CurrentChannel->State = L2CAP_CHANSTATE_Closed;
-				EVENT_Bluetooth_ChannelStateChange(StackState, CurrentChannel);
-			}
-			else
-			{
-				/* Channel not open, but may be in another state (connecting?) - force it closed */
-				CurrentChannel->State = L2CAP_CHANSTATE_Closed;
-			}
+			/* Check if we need to notify the user of a channel close event */
+			bool MustNotify = (CurrentChannel->State == L2CAP_CHANSTATE_Open);
+			
+			/* Mark the channel as being fully closed - do this before notifying the user app, so that channel object is in the correct state */
+			CurrentChannel->State = L2CAP_CHANSTATE_Closed;
+			
+			/* Notify the user of the closed connection if it was currently open */
+			if (MustNotify)
+			  EVENT_Bluetooth_ChannelStateChange(StackState, CurrentChannel);
 		}
 	}
 }
@@ -211,7 +209,7 @@ static inline void Bluetooth_L2CAP_Signal_InformationReq(BT_StackConfig_t* const
 	  return;
 
 	Event->Event         = L2CAP_EVENT_InformationReq;
-	Event->SourceChannel = InformationRequest->InfoType;
+	Event->SourceChannel = le16_to_cpu(InformationRequest->InfoType);
 }
 
 static inline void Bluetooth_L2CAP_Signal_ConnectReq(BT_StackConfig_t* const StackState,
@@ -236,7 +234,7 @@ static inline void Bluetooth_L2CAP_Signal_ConnectReq(BT_StackConfig_t* const Sta
 	  RejectionReason = CALLBACK_Bluetooth_ChannelRequest(StackState, HCIConnection, L2CAPChannel) ? BT_CONNECTION_SUCCESSFUL : BT_CONNECTION_REFUSED_PSM;
 
 	Event->Event              = L2CAP_EVENT_ConnectReq;
-	Event->SourceChannel      = ConnectionRequest->SourceChannel;
+	Event->SourceChannel      = le16_to_cpu(ConnectionRequest->SourceChannel);
 	Event->Result             = RejectionReason;
 }
 
@@ -257,8 +255,8 @@ static inline void Bluetooth_L2CAP_Signal_ConnectRsp(BT_StackConfig_t* const Sta
 		  return;
 		  
 		Event->Event              = L2CAP_EVENT_ConnectRsp;
-		Event->SourceChannel      = ConnectionResponse->SourceChannel;
-		Event->DestinationChannel = ConnectionResponse->DestinationChannel;
+		Event->SourceChannel      = le16_to_cpu(ConnectionResponse->SourceChannel);
+		Event->DestinationChannel = le16_to_cpu(ConnectionResponse->DestinationChannel);
 	}
 }
 
@@ -274,8 +272,8 @@ static inline void Bluetooth_L2CAP_Signal_DisconnectReq(BT_StackConfig_t* const 
 	  return;
 	  
 	Event->Event              = L2CAP_EVENT_DisconnectReq;
-	Event->SourceChannel      = DisconnectionRequest->SourceChannel;
-	Event->DestinationChannel = DisconnectionRequest->DestinationChannel;
+	Event->SourceChannel      = le16_to_cpu(DisconnectionRequest->SourceChannel);
+	Event->DestinationChannel = le16_to_cpu(DisconnectionRequest->DestinationChannel);
 }
 
 static inline void Bluetooth_L2CAP_Signal_DisconnectRsp(BT_StackConfig_t* const StackState,
@@ -296,8 +294,8 @@ static inline void Bluetooth_L2CAP_Signal_DisconnectRsp(BT_StackConfig_t* const 
 		  return;
 		  
 		Event->Event              = L2CAP_EVENT_DisconnectRsp;
-		Event->SourceChannel      = DisconnectionResponse->SourceChannel;
-		Event->DestinationChannel = DisconnectionResponse->DestinationChannel;
+		Event->SourceChannel      = le16_to_cpu(DisconnectionResponse->SourceChannel);
+		Event->DestinationChannel = le16_to_cpu(DisconnectionResponse->DestinationChannel);
 	}
 }
 
@@ -319,7 +317,7 @@ static inline void Bluetooth_L2CAP_Signal_ConfigReq(BT_StackConfig_t* const Stac
 	{
 		Event->Event              = L2CAP_EVENT_CommandRej;
 		Event->SourceChannel      = 0;
-		Event->DestinationChannel = ConfigurationRequest->DestinationChannel;
+		Event->DestinationChannel = le16_to_cpu(ConfigurationRequest->DestinationChannel);
 		Event->Result             = BT_CMDREJ_INVALID_CHANNEL_ID;
 		return;
 	}
@@ -349,7 +347,7 @@ static inline void Bluetooth_L2CAP_Signal_ConfigReq(BT_StackConfig_t* const Stac
 	}
 	  
 	Event->Event              = L2CAP_EVENT_ConfigReq;
-	Event->DestinationChannel = ConfigurationRequest->DestinationChannel;
+	Event->DestinationChannel = le16_to_cpu(ConfigurationRequest->DestinationChannel);
 	Event->Result             = (OptionsAcceptable) ? BT_CONFIGURATION_SUCCESSFUL : BT_CONFIGURATION_UNKNOWNOPTIONS;
 }
 
@@ -371,8 +369,8 @@ static inline void Bluetooth_L2CAP_Signal_ConfigRsp(BT_StackConfig_t* const Stac
 	  return;
 
 	Event->Event         = L2CAP_EVENT_ConfigRsp;
-	Event->SourceChannel = ConfigurationResponse->SourceChannel;
-	Event->Result        = ConfigurationResponse->Result;
+	Event->SourceChannel = le16_to_cpu(ConfigurationResponse->SourceChannel);
+	Event->Result        = le16_to_cpu(ConfigurationResponse->Result);
 }
 
 static inline void Bluetooth_L2CAP_Signal_CommandRej(BT_StackConfig_t* const StackState,
@@ -489,7 +487,7 @@ bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 			uint8_t DataLen = 0;
 
 			/* Retrieve the requested information and store it in the outgoing packet, if found */
-			switch (le16_to_cpu(Event->SourceChannel))
+			switch (Event->SourceChannel)
 			{
 				case BT_INFOREQ_MTU:
 					ResponsePacket.InformationResponse.Result = CPU_TO_LE16(BT_INFORMATION_SUCCESSFUL);
@@ -512,7 +510,7 @@ bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 					break;
 			}
 
-			ResponsePacket.InformationResponse.InfoType = Event->SourceChannel;
+			ResponsePacket.InformationResponse.InfoType = cpu_to_le16(Event->SourceChannel);
 			
 			DequeueEvent = Bluetooth_L2CAP_SendSignalPacket(StackState, Event->ConnectionHandle, BT_SIGNAL_INFORMATION_RESPONSE, Event->Identifier,
 											                (sizeof(ResponsePacket.InformationResponse) + DataLen), &ResponsePacket);		
@@ -540,11 +538,11 @@ bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 		}		
 		else if (Event->Event == L2CAP_EVENT_OpenChannelReq)
 		{
-			BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, Event->ConnectionHandle, le16_to_cpu(Event->SourceChannel), 0);
+			BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, Event->ConnectionHandle, Event->SourceChannel, 0);
 			
 			BT_Signal_ConnectionReq_t ConnectionRequest;
 			ConnectionRequest.PSM                  = cpu_to_le16(L2CAPChannel->PSM);
-			ConnectionRequest.SourceChannel        = Event->SourceChannel;
+			ConnectionRequest.SourceChannel        = cpu_to_le16(L2CAPChannel->LocalNumber);
 				
 			DequeueEvent = Bluetooth_L2CAP_SendSignalPacket(StackState, Event->ConnectionHandle, BT_SIGNAL_CONNECTION_REQUEST, Event->Identifier,
 			                                                sizeof(ConnectionRequest), &ConnectionRequest);
@@ -553,11 +551,11 @@ bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 		}
 		else if (Event->Event == L2CAP_EVENT_CloseChannelReq)
 		{
-			BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, Event->ConnectionHandle, le16_to_cpu(Event->SourceChannel), 0);
+			BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, Event->ConnectionHandle, Event->SourceChannel, 0);
 		
 			BT_Signal_DisconnectionReq_t DisconnectionRequest;
-			DisconnectionRequest.DestinationChannel = Event->DestinationChannel;
-			DisconnectionRequest.SourceChannel      = Event->SourceChannel;
+			DisconnectionRequest.DestinationChannel = cpu_to_le16(Event->DestinationChannel);
+			DisconnectionRequest.SourceChannel      = cpu_to_le16(Event->SourceChannel);
 
 			DequeueEvent = Bluetooth_L2CAP_SendSignalPacket(StackState, Event->ConnectionHandle, BT_SIGNAL_DISCONNECTION_REQUEST, Event->Identifier,
 			                                                sizeof(DisconnectionRequest), &DisconnectionRequest);
@@ -566,7 +564,7 @@ bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 		}
 		else if (Event->Event == L2CAP_EVENT_SendConfigReq)
 		{
-			BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, Event->ConnectionHandle, le16_to_cpu(Event->SourceChannel), 0);
+			BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, Event->ConnectionHandle, Event->SourceChannel, 0);
 
 			struct
 			{
@@ -589,36 +587,36 @@ bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 		}
 		else if (Event->Event == L2CAP_EVENT_ConnectReq)
 		{
-			BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, Event->ConnectionHandle, 0, le16_to_cpu(Event->SourceChannel));
+			BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, Event->ConnectionHandle, 0, Event->SourceChannel);
 
 			BT_Signal_ConnectionResp_t ConnectionResponse;
 			ConnectionResponse.DestinationChannel = (L2CAPChannel) ? cpu_to_le16(L2CAPChannel->LocalNumber) : 0;
-			ConnectionResponse.SourceChannel      = Event->SourceChannel;
+			ConnectionResponse.SourceChannel      = cpu_to_le16(Event->SourceChannel);
 			ConnectionResponse.Result             = cpu_to_le16(Event->Result);
 			ConnectionResponse.Status             = 0x00;
 			
 			DequeueEvent = Bluetooth_L2CAP_SendSignalPacket(StackState, Event->ConnectionHandle, BT_SIGNAL_CONNECTION_RESPONSE, Event->Identifier,
 			                                                sizeof(ConnectionResponse), &ConnectionResponse);
 			if ((DequeueEvent) && (L2CAPChannel))
-			  L2CAPChannel->State = (Event->Result == CPU_TO_LE16(BT_CONNECTION_SUCCESSFUL)) ? L2CAP_CHANSTATE_Config_WaitConfig : L2CAP_CHANSTATE_Closed;
+			  L2CAPChannel->State = (Event->Result == BT_CONNECTION_SUCCESSFUL) ? L2CAP_CHANSTATE_Config_WaitConfig : L2CAP_CHANSTATE_Closed;
 		}
 		else if (Event->Event == L2CAP_EVENT_ConnectRsp)
 		{
-			BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, Event->ConnectionHandle, le16_to_cpu(Event->SourceChannel), 0);
+			BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, Event->ConnectionHandle, Event->SourceChannel, 0);
 
 			if (L2CAPChannel)
 			{
-				L2CAPChannel->RemoteNumber = le16_to_cpu(Event->DestinationChannel);
+				L2CAPChannel->RemoteNumber = Event->DestinationChannel;
 				
-				if (Event->Result == CPU_TO_LE16(BT_CONNECTION_SUCCESSFUL))
+				if (Event->Result == BT_CONNECTION_SUCCESSFUL)
 				  L2CAPChannel->State = L2CAP_CHANSTATE_Config_WaitConfig;
-				else if (Event->Result != CPU_TO_LE16(BT_CONNECTION_PENDING))
+				else if (Event->Result != BT_CONNECTION_PENDING)
 				  L2CAPChannel->State = L2CAP_CHANSTATE_Closed;
 			}
 		}
 		else if (Event->Event == L2CAP_EVENT_ConfigReq)
 		{
-			BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, Event->ConnectionHandle, le16_to_cpu(Event->DestinationChannel), 0);
+			BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, Event->ConnectionHandle, Event->DestinationChannel, 0);
 
 			BT_Signal_ConfigurationResp_t ConfigurationResponse;
 			ConfigurationResponse.SourceChannel = cpu_to_le16(L2CAPChannel->RemoteNumber);
@@ -627,7 +625,7 @@ bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 
 			DequeueEvent = Bluetooth_L2CAP_SendSignalPacket(StackState, Event->ConnectionHandle, BT_SIGNAL_CONFIGURATION_RESPONSE, Event->Identifier,
 			                                                sizeof(ConfigurationResponse), &ConfigurationResponse);			
-			if ((DequeueEvent) && (L2CAPChannel) && (Event->Result == CPU_TO_LE16(BT_CONFIGURATION_SUCCESSFUL)))
+			if ((DequeueEvent) && (L2CAPChannel) && (Event->Result == BT_CONFIGURATION_SUCCESSFUL))
 			{
 				if (L2CAPChannel->State == L2CAP_CHANSTATE_Config_WaitReq)
 				{
@@ -646,9 +644,9 @@ bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 		}
 		else if (Event->Event == L2CAP_EVENT_ConfigRsp)
 		{
-			BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, Event->ConnectionHandle, le16_to_cpu(Event->SourceChannel), 0);
+			BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, Event->ConnectionHandle, Event->SourceChannel, 0);
 			
-			if ((L2CAPChannel) && (Event->Result == CPU_TO_LE16(BT_CONFIGURATION_SUCCESSFUL)))
+			if ((L2CAPChannel) && (Event->Result == BT_CONFIGURATION_SUCCESSFUL))
 			{
 				if (L2CAPChannel->State == L2CAP_CHANSTATE_Config_WaitReqResp)
 				{
@@ -663,11 +661,11 @@ bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 		}
 		else if (Event->Event == L2CAP_EVENT_DisconnectReq)
 		{
-			BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, Event->ConnectionHandle, le16_to_cpu(Event->DestinationChannel), 0);
+			BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, Event->ConnectionHandle, Event->DestinationChannel, 0);
 
 			BT_Signal_DisconnectionResp_t DisconnectionResponse;
-			DisconnectionResponse.DestinationChannel = Event->SourceChannel;
-			DisconnectionResponse.SourceChannel      = Event->DestinationChannel;
+			DisconnectionResponse.DestinationChannel = cpu_to_le16(Event->SourceChannel);
+			DisconnectionResponse.SourceChannel      = cpu_to_le16(Event->DestinationChannel);
 
 			Bluetooth_L2CAP_SendSignalPacket(StackState, Event->ConnectionHandle, BT_SIGNAL_DISCONNECTION_RESPONSE, Event->Identifier,
 	                                         sizeof(DisconnectionResponse), &DisconnectionResponse);
@@ -679,7 +677,7 @@ bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 		}
 		else if (Event->Event == L2CAP_EVENT_DisconnectRsp)
 		{
-			BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, Event->ConnectionHandle, le16_to_cpu(Event->DestinationChannel), 0);
+			BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, Event->ConnectionHandle, Event->DestinationChannel, 0);
 			
 			if ((L2CAPChannel) && (L2CAPChannel->State == L2CAP_CHANSTATE_WaitDisconnectRsp))
 			{

@@ -95,43 +95,43 @@ namespace RobotSensorStream
 
         private void tmrUpdate_Tick(object sender, EventArgs e)
         {
-            if (ReceivedLines.Count == 0)
-                return;
-
-            // Line Format: <Compass X>, <Compass Y>, <Compass Z>, <Acc X>, <Acc Y>, <Acc Z>,  <Gyro X>, <Gyro Y>, <Gyro Z>, Pressure, Temperature
-            Log("DATA> " + ReceivedLines.Peek());
-
-            String[] SensorValues = ReceivedLines.Pop().Split(new char[] { ',' });
-            Double CurrentSensorValue;
-
-            /* Convert compass data to human readable units and add it to the graph */
-            for (int i = 0; i < 3; i++)
+            while (ReceivedLines.Count > 0)
             {
-                if (Double.TryParse(SensorValues[0 + i], out CurrentSensorValue))
-                    AddChartPoint(chtDirection.Series[i].Points, CurrentSensorValue * (1229 / (double)0xFFF));
+                // Line Format: <Compass X>, <Compass Y>, <Compass Z>, <Acc X>, <Acc Y>, <Acc Z>,  <Gyro X>, <Gyro Y>, <Gyro Z>, Pressure, Temperature
+                Log("DATA> " + ReceivedLines.Peek());
+
+                String[] SensorValues = ReceivedLines.Pop().Split(new char[] { ',' });
+                Double CurrentSensorValue;
+
+                /* Convert compass data to human readable units and add it to the graph */
+                for (int i = 0; i < 3; i++)
+                {
+                    if (Double.TryParse(SensorValues[0 + i], out CurrentSensorValue))
+                        AddChartPoint(chtDirection.Series[i].Points, CurrentSensorValue * (1229 / (double)0xFFF));
+                }
+
+                /* Convert accelerometer data to human readable units and add it to the graph */
+                for (int i = 0; i < 3; i++)
+                {
+                    if (Double.TryParse(SensorValues[3 + i], out CurrentSensorValue))
+                        AddChartPoint(chtAcceleration.Series[i].Points, CurrentSensorValue * (2 / (double)0x1FF));
+                }
+
+                /* Convert gyroscope data to human readable units and add it to the graph */
+                for (int i = 0; i < 3; i++)
+                {
+                    if (Double.TryParse(SensorValues[6 + i], out CurrentSensorValue))
+                        AddChartPoint(chtOrientation.Series[i].Points, (CurrentSensorValue / (double)14.375));
+                }
+
+                /* Convert pressure data to human readable units and add it to the graph */
+                if (Double.TryParse(SensorValues[9], out CurrentSensorValue))
+                    AddChartPoint(chtPressure.Series[0].Points, CurrentSensorValue);
+
+                /* Convert temperature data to human readable units and add it to the graph */
+                if (Double.TryParse(SensorValues[10], out CurrentSensorValue))
+                    AddChartPoint(chtTemperature.Series[0].Points, (35 + ((13200 + CurrentSensorValue) / (double)280)));
             }
-
-            /* Convert accelerometer data to human readable units and add it to the graph */
-            for (int i = 0; i < 3; i++)
-            {
-                if (Double.TryParse(SensorValues[3 + i], out CurrentSensorValue))
-                    AddChartPoint(chtAcceleration.Series[i].Points, CurrentSensorValue * (2 / (double)0x1FF));
-            }
-
-            /* Convert gyroscope data to human readable units and add it to the graph */
-            for (int i = 0; i < 3; i++)
-            {
-                if (Double.TryParse(SensorValues[6 + i], out CurrentSensorValue))
-                    AddChartPoint(chtOrientation.Series[i].Points, (CurrentSensorValue / (double)14.375));
-            }
-
-            /* Convert pressure data to human readable units and add it to the graph */
-            if (Double.TryParse(SensorValues[9], out CurrentSensorValue))
-                AddChartPoint(chtPressure.Series[0].Points, CurrentSensorValue);
-
-            /* Convert temperature data to human readable units and add it to the graph */
-            if (Double.TryParse(SensorValues[10], out CurrentSensorValue))
-                AddChartPoint(chtTemperature.Series[0].Points, (35 + ((13200 + CurrentSensorValue) / (double)280)));
         }
 
         private void cmbPort_SelectedIndexChanged(object sender, EventArgs e)

@@ -305,8 +305,35 @@ static inline void Bluetooth_L2CAP_Signal_ConfigReq(BT_StackConfig_t* const Stac
 	/* Find the existing channel in the channel table if it exists */
 	BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, HCIConnection->Handle, le16_to_cpu(ConfigurationRequest->DestinationChannel), 0);
 
-	/* Only look at the channel configuration options if a valid channel entry for the local channel number was found */
-	if (L2CAPChannel)
+	if (!(L2CAPChannel))
+	  return;
+	
+	// TODO: MASSIVE options sent with Wiimote?
+	uint16_t OptionsLength     = (le16_to_cpu(SignalCommandHeader->Length) - sizeof(*ConfigurationRequest));
+	uint8_t  OptionsPos        = 0;
+	bool     OptionsAcceptable = true;
+		
+	/* Process the channel configuration options, abort if a mandatory unknown option is encountered */
+	while ((OptionsPos < OptionsLength) && OptionsAcceptable)
+	{
+		BT_Config_Option_Header_t* OptionHeader = (BT_Config_Option_Header_t*)&ConfigurationRequest->Options[OptionsPos];
+		
+		switch (OptionHeader->Type & 0xEF)
+		{
+			case BT_CONFIG_OPTION_MTU:
+				L2CAPChannel->RemoteMTU = (((uint16_t)OptionHeader->Data[1] << 8) | OptionHeader->Data[0]);
+				break;
+			default:
+				if (OptionHeader->Type & (1 << 7))
+				  OptionsAcceptable = false;
+				break;
+		}
+
+		/* Progress to the next option in the packet */
+		OptionsPos += (sizeof(*OptionHeader) + OptionHeader->Length);
+	}
+
+	if (OptionsAcceptable)
 	{
 		/* Update channel state based on the current state */
 		switch (L2CAPChannel->State)
@@ -322,27 +349,12 @@ static inline void Bluetooth_L2CAP_Signal_ConfigReq(BT_StackConfig_t* const Stac
 				EVENT_Bluetooth_ChannelStateChange(StackState, L2CAPChannel);
 				break;
 		}
-		
-		uint8_t* OptionsPos = (uint8_t*)ConfigurationRequest->Options;
-		uint8_t* OptionsEnd = (uint8_t*)((intptr_t)OptionsPos + (SignalCommandHeader->Length - sizeof(ConfigurationRequest)));
-
-		while (OptionsPos < OptionsEnd)
-		{
-			BT_Config_Option_Header_t* OptionHeader = (BT_Config_Option_Header_t*)OptionsPos;
-			
-			/* Store the remote MTU option's value if present */
-			if (OptionHeader->Type == BT_CONFIG_OPTION_MTU)
-			  L2CAPChannel->RemoteMTU = le16_to_cpu(*((uint16_t*)OptionHeader->Data));
-
-			/* Progress to the next option in the packet */
-			OptionsPos += (sizeof(BT_Config_Option_Header_t) + OptionHeader->Length);			
-		}
 	}
-
+	
 	BT_Signal_ConfigurationResp_t ConfigurationResponse;
 	ConfigurationResponse.SourceChannel = cpu_to_le16(L2CAPChannel->RemoteNumber);
 	ConfigurationResponse.Flags         = 0x00;
-	ConfigurationResponse.Result        = (L2CAPChannel != NULL) ? CPU_TO_LE16(BT_CONFIGURATION_SUCCESSFUL) : CPU_TO_LE16(BT_CONFIGURATION_REJECTED);
+	ConfigurationResponse.Result        = (OptionsAcceptable) ? CPU_TO_LE16(BT_CONFIGURATION_SUCCESSFUL) : CPU_TO_LE16(BT_CONFIGURATION_UNKNOWNOPTIONS);
 	
 	Bluetooth_L2CAP_SendSignalPacket(StackState, HCIConnection, BT_SIGNAL_CONFIGURATION_RESPONSE, SignalCommandHeader->Identifier,
 	                                 sizeof(ConfigurationResponse), &ConfigurationResponse);
@@ -586,6 +598,9 @@ bool Bluetooth_L2CAP_SendPacket(BT_StackConfig_t* const StackState,
 	/* If an open device connection with the correct connection handle was not found, abort */
 	if (!(HCIConnection))
 	  return false;
+
+//	if (HCIConnection->DataPacketsQueued == StackState->State.HCI.ACLDataPackets)
+//	  return false;
 
 	/* Determine the length of the first fragment (includes L2CAP data packet header) */
 	uint16_t BytesInPacket  = MIN(Length, (L2CAPChannel->RemoteMTU - sizeof(BT_DataPacket_Header_t)));

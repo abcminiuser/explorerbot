@@ -60,9 +60,10 @@
 		#define BT_CONNECTION_REFUSED_RESOURCES   0x0004
 		//@}
 
-		/** \name Bluetooth L2CAP Channel Configuration parameter indexes. */
+		/** \name Bluetooth L2CAP Channel Configuration error codes. */
 		//@{
 		#define BT_CONFIGURATION_SUCCESSFUL       0x0000
+		#define BT_CONFIGURATION_REJECTED_PARAMS  0x0002
 		#define BT_CONFIGURATION_REJECTED         0x0002
 		#define BT_CONFIGURATION_UNKNOWNOPTIONS   0x0003
 		//@}

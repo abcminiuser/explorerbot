@@ -62,9 +62,9 @@
 			                                            *   from the remote end has not yet been accepted.
 			                                            */
 			L2CAP_CHANSTATE_Open                  = 9, /**< Channel is open and ready to send or receive data */
-			L2CAP_CHANSTATE_WaitDisconnect        = 10, /**< A disconnection request has been sent, but not yet acknowledged. */
+			L2CAP_CHANSTATE_WaitDisconnectRsp     = 10, /**< A disconnection request has been sent, but not yet acknowledged. */
 		};
-
+		
 	/* Function Prototypes: */
 		void Bluetooth_L2CAP_NotifyHCIDisconnection(BT_StackConfig_t* const StackState,
 		                                            const uint16_t ConnectionHandle);

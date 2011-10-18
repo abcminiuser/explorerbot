@@ -522,8 +522,8 @@ bool Bluetooth_HCI_SendPacket(BT_StackConfig_t* const StackState,
 	if (!(HCIConnection) || (HCIConnection->State != HCI_CONSTATE_Connected))
 	  return false;
 	  
-//	if (HCIConnection->DataPacketsQueued == StackState->State.HCI.ACLDataPackets)
-//	  return false;
+	if (HCIConnection->DataPacketsQueued == StackState->State.HCI.ACLDataPackets)
+	  return false;
 	
 	/* Keep track of how many packets have been queued into the controller for the connection to prevent buffer overrun */
 	HCIConnection->DataPacketsQueued++;

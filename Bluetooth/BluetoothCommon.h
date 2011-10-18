@@ -22,6 +22,8 @@
 
 	/* Includes: */
 		#include <LUFA/Common/Common.h>
+		
+		#include "Drivers/LCD.h"
 
 	/* Defines: */
 		/** Length of a Bluetooth device address in bytes. */
@@ -32,6 +34,8 @@
 		
 		/** Maximum number of simultaneous L2CAP logical channels. */
 		#define BT_MAX_LOGICAL_CHANNELS           8
+		
+		#define BT_MAX_QUEUED_L2CAP_EVENTS        10
 
 		/** Default maximum transmission unit size for a L2CAP channel packet. */
 		#define BT_DEFAULT_L2CAP_CHANNEL_MTU      1024
@@ -72,7 +76,33 @@
 			LINK_TYPE_eSCO                        = 0x02, /**< Bluetooth link type for an Extended SCO link. */
 		};
 
+		enum BT_L2CAP_Events_t
+		{
+			L2CAP_EVENT_OpenChannelReq            = 0,
+			L2CAP_EVENT_CloseChannelReq           = 1,
+			L2CAP_EVENT_SendConfigReq             = 2,
+			L2CAP_EVENT_ConnectReq                = 3,
+			L2CAP_EVENT_ConnectRsp                = 4,
+			L2CAP_EVENT_ConfigReq                 = 5,
+			L2CAP_EVENT_ConfigRsp                 = 6,
+			L2CAP_EVENT_DisconnectReq             = 7,
+			L2CAP_EVENT_DisconnectRsp             = 8,
+			L2CAP_EVENT_InvalidChannel            = 9,
+			L2CAP_EVENT_EchoReq                   = 10,
+			L2CAP_EVENT_InformationReq            = 11,
+		};
+
 	/* Type Defines: */
+		typedef struct
+		{
+			uint8_t  Event;
+			uint16_t ConnectionHandle;
+			uint8_t  Identifier;
+			uint16_t SourceChannel;
+			uint16_t DestinationChannel;
+			uint8_t  Result;
+		} BT_L2CAP_Event_t;
+
 		/** Type define for a Bluetooth HCI connection information structure.  This structure contains all the relevant
 		 *  information on a HCI channel for data transmission and reception by the stack.
 		 */
@@ -131,6 +161,8 @@
 				{
 					uint16_t            LastAllocatedChannel; /**< Index of the last allocated L2CAP channel. */
 					BT_L2CAP_Channel_t  Channels[BT_MAX_LOGICAL_CHANNELS]; /**< L2CAP channel state information list. */
+					uint8_t             PendingEvents;
+					BT_L2CAP_Event_t    Events[BT_MAX_QUEUED_L2CAP_EVENTS];
 				} L2CAP; /**< L2CAP layer channel state information. */
 			} State; /**< Stack state information, managed by the Bluetooth stack internally. */
 		} BT_StackConfig_t;

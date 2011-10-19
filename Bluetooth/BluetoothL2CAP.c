@@ -821,7 +821,17 @@ bool Bluetooth_L2CAP_SendPacket(BT_StackConfig_t* const StackState,
 
 	/* Check if there is any space in the buffer for the current connection */
 	if (HCIConnection->DataPacketsQueued == StackState->State.HCI.ACLDataPackets)
-	  return false;
+	{
+		/* HORENDOUSLY UGLY HACK -- If the device's ACL data buffers are full, wait for a fixed period to give them time to
+		   empty before continuing. This needs to be replaced by a reliable packet buffering system in the transport or HCI
+		   layers. Ideally this would listen for packet completion events from the controller instead to only delay for the
+		   required period, however this isn't possible with the Bluetooth transports as defined - you can't listen for events
+		   only.
+		*/
+		// TODO: FIXME
+		_delay_ms(5);
+		// return false;
+	}
 	
 	/* Determine the length of the first fragment (includes L2CAP data packet header) */
 	uint16_t BytesInPacket  = MIN(Length, (L2CAPChannel->RemoteMTU - sizeof(BT_DataPacket_Header_t)));

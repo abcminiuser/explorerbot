@@ -135,13 +135,7 @@ static bool RFCOMM_SendFrame(BT_StackConfig_t* const StackState,
 	if (!(ACLChannel))
 	  return false;
 
-	BT_HCI_Connection_t* HCIConnection = Bluetooth_HCI_FindConnection(StackState, NULL, ACLChannel->ConnectionHandle);
-
-	/* Sanity check the HCI connection - if missing, abort */
-	if (!(HCIConnection))
-	  return false;
-
-	bool CommandResp = HCIConnection->LocallyInitiated;
+	bool CommandResp = ACLChannel->LocallyInitiated;
 
 	if ((Control == RFCOMM_Frame_UA) || (Control == RFCOMM_Frame_DM))
 	  CommandResp = !(CommandResp);
@@ -593,10 +587,8 @@ void RFCOMM_Manage(BT_StackConfig_t* const StackState)
 void RFCOMM_ChannelOpened(BT_StackConfig_t* const StackState,
                           BT_L2CAP_Channel_t* const Channel)
 {
-	BT_HCI_Connection_t* Connection = Bluetooth_HCI_FindConnection(StackState, NULL, Channel->ConnectionHandle);
-
 	/* If the RFCOMM session was initiated by the local device, attempt to reset the remote multiplexer ready for new channels */
-	if (Connection && Connection->LocallyInitiated)
+	if (Channel->LocallyInitiated)
 	  RFCOMM_SendFrame(StackState, Channel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_SABM, 0, NULL);
 }
 

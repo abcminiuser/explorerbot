@@ -88,7 +88,7 @@
 		/** HCI Connection Request Event structure. */
 		typedef struct
 		{
-			uint8_t  RemoteBDADDR[BT_BDADDR_LEN]; /**< Bluetooth BDADDR of the remote device. */
+			BDADDR_t RemoteBDADDR; /**< Bluetooth BDADDR of the remote device. */
 			uint8_t  ServiceClass; /**< Service class of the remote device, a \c DEVICE_CLASS_SERVICE_* value. */
 			uint16_t MajorMinorClass; /**< Major and Minor classes of the remote device, one or more \c DEVICE_CLASS_* masks. */
 			uint8_t  LinkType; /**< Link type to be established, a value from \ref BT_LinkTypes_t. */
@@ -99,7 +99,7 @@
 		{
 			uint8_t  Status; /**< Status of the HCI connection. */
 			uint16_t Handle; /**< HCI connection handle for the completed HCI connection. */
-			uint8_t  RemoteBDADDR[BT_BDADDR_LEN]; /**< Bluetooth BDADDR of the remote device. */
+			BDADDR_t RemoteBDADDR; /**< Bluetooth BDADDR of the remote device. */
 			uint8_t  LinkType; /**< Link type for the HCI connection, a value from \ref BT_LinkTypes_t. */
 			uint8_t  EncryptionEnabled; /**< Indicates if encryption is enabled for the established connection. */
 		} ATTR_PACKED BT_HCIEvent_ConnectionComplete_t;
@@ -115,25 +115,25 @@
 		/** HCI Link Key Request Command structure. */
 		typedef struct
 		{
-			uint8_t  RemoteBDADDR[BT_BDADDR_LEN]; /**< Bluetooth BDADDR of the remote device. */
+			BDADDR_t RemoteBDADDR; /**< Bluetooth BDADDR of the remote device. */
 		} ATTR_PACKED BT_HCIEvent_LinkKeyReq_t;
 
 		/** HCI Link Key Negative Acknowledge Command structure. */
 		typedef struct
 		{
-			uint8_t  RemoteBDADDR[BT_BDADDR_LEN]; /**< Bluetooth BDADDR of the remote device. */
+			BDADDR_t RemoteBDADDR; /**< Bluetooth BDADDR of the remote device. */
 		} ATTR_PACKED BT_HCICommand_LinkKeyNAKResp_t;
 
 		/** HCI PIN Code Request Command structure. */
 		typedef struct
 		{
-			uint8_t  RemoteBDADDR[BT_BDADDR_LEN]; /**< Bluetooth BDADDR of the remote device. */
+			BDADDR_t RemoteBDADDR; /**< Bluetooth BDADDR of the remote device. */
 		} ATTR_PACKED BT_HCIEvent_PinCodeReq_t;
 
 		/** HCI PIN Code Acknowledge Command structure. */
 		typedef struct
 		{
-			uint8_t  RemoteBDADDR[BT_BDADDR_LEN]; /**< Bluetooth BDADDR of the remote device. */
+			BDADDR_t RemoteBDADDR; /**< Bluetooth BDADDR of the remote device. */
 			uint8_t  PINCodeLength; /**< Length of the device's authentication PIN code, in octets. */
 			char     PINCode[16]; /**< PIN authentication code for the local device. */
 		} ATTR_PACKED BT_HCICommand_PinCodeACKResp_t;
@@ -141,27 +141,27 @@
 		/** HCI PIN Code Negative Acknowledge Command structure. */
 		typedef struct
 		{
-			uint8_t  RemoteBDADDR[BT_BDADDR_LEN]; /**< Bluetooth BDADDR of the remote device. */
+			BDADDR_t RemoteBDADDR; /**< Bluetooth BDADDR of the remote device. */
 		} ATTR_PACKED BT_HCICommand_PinCodeNAKResp_t;
 
 		/** HCI Connection Accept Command structure. */
 		typedef struct
 		{
-			uint8_t  RemoteBDADDR[BT_BDADDR_LEN]; /**< Bluetooth BDADDR of the remote device. */
+			BDADDR_t RemoteBDADDR; /**< Bluetooth BDADDR of the remote device. */
 			uint8_t  SlaveRole; /**< Role for the local device in the connection establishment. */
 		} ATTR_PACKED BT_HCICommand_AcceptConnectionReq_t;
 
 		/** HCI Connection Rejection Command structure. */
 		typedef struct
 		{
-			uint8_t  RemoteBDADDR[BT_BDADDR_LEN]; /**< Bluetooth BDADDR of the remote device. */
+			BDADDR_t RemoteBDADDR; /**< Bluetooth BDADDR of the remote device. */
 			uint8_t  Reason; /**< Connection rejection reason value, a \c HCI_ERROR_* value. */
 		} ATTR_PACKED BT_HCICommand_RejectConnectionReq_t;
 
 		/** HCI Create Connection Command structure. */
 		typedef struct
 		{
-			uint8_t  RemoteBDADDR[BT_BDADDR_LEN]; /**< Bluetooth BDADDR of the remote device. */
+			BDADDR_t RemoteBDADDR; /**< Bluetooth BDADDR of the remote device. */
 			uint16_t PacketType; /**< Bluetooth low level packet type to use for the connection (see Bluetooth specification). */
 			uint8_t  PageScanMode; /**< Page scan repition mode. */
 			uint8_t  Reserved; /**< Must be set to zero to maintain compatibility. */

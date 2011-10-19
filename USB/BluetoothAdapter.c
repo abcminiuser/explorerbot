@@ -52,10 +52,10 @@ static BT_StackConfig_t BluetoothAdapter_Stack =
 bool BluetoothAdapter_IsActive;
 
 /** Last connected Bluetooth adapter BDADDR, stored in EEPROM */
-uint8_t BluetoothAdapter_LastLocalBDADDR[BT_BDADDR_LEN] EEMEM;
+BDADDR_t BluetoothAdapter_LastLocalBDADDR EEMEM;
 
 /** Bluetooth BDADDR of a device to connect to on demand, stored in EEPROM */
-uint8_t BluetoothAdapter_RemoteBDADDR[BT_BDADDR_LEN] EEMEM;
+BDADDR_t BluetoothAdapter_RemoteBDADDR EEMEM;
 
 
 /** Attempts to configure the system pipes for the attached Bluetooth adapter.
@@ -180,10 +180,10 @@ bool BluetoothAdapter_PostConfiguration(void)
  */
 BT_HCI_Connection_t* BluetoothAdapter_ConnectToRemoteDevice(void)
 {
-	uint8_t RemoteBDADDR[BT_BDADDR_LEN];
+	BDADDR_t RemoteBDADDR;
 	
 	/* Retrieve the remote device's BDADDR saved in EEPROM, attempt a connection */
-	eeprom_read_block(RemoteBDADDR, BluetoothAdapter_RemoteBDADDR, BT_BDADDR_LEN);
+	eeprom_read_block(RemoteBDADDR, BluetoothAdapter_RemoteBDADDR, sizeof(BDADDR_t));
 	return Bluetooth_HCI_Connect(&BluetoothAdapter_Stack, RemoteBDADDR, LINK_TYPE_ACL);
 }
 
@@ -289,5 +289,5 @@ void CALLBACK_Bluetooth_SendPacket(BT_StackConfig_t* const StackState,
 void EVENT_Bluetooth_InitComplete(BT_StackConfig_t* const StackState)
 {
 	/* Save the local BDADDR of the connected Bluetooth adapter for later use */
-	eeprom_update_block(BluetoothAdapter_Stack.State.HCI.LocalBDADDR, BluetoothAdapter_LastLocalBDADDR, BT_BDADDR_LEN);
+	eeprom_update_block(BluetoothAdapter_Stack.State.HCI.LocalBDADDR, BluetoothAdapter_LastLocalBDADDR, sizeof(BDADDR_t));
 }

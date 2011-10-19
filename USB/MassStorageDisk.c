@@ -123,23 +123,23 @@ static bool MassStorage_ParseRemoteBDADDRFile(void)
 		f_read(&DiskRemAddrFile, LineBuffer, sizeof(LineBuffer), &BytesRead);
 		
 		/* Parse the file's hexadecimal data to retrieve the address octets */
-		int RemoteBDADDR[BT_BDADDR_LEN];
+		int RemoteBDADDR[sizeof(BDADDR_t)];
 		sscanf(LineBuffer, "%x:%x:%x:%x:%x:%x", &RemoteBDADDR[0], &RemoteBDADDR[1], &RemoteBDADDR[2], &RemoteBDADDR[3], &RemoteBDADDR[4], &RemoteBDADDR[5]);
 
 		/* Save the remote device address to EEPROM for later use - note, must loop per address octet, to discard upper byte from each 16-bit integer */
-		for (uint8_t i = 0; i < BT_BDADDR_LEN; i++)
+		for (uint8_t i = 0; i < sizeof(BDADDR_t); i++)
 		  eeprom_update_byte(&BluetoothAdapter_RemoteBDADDR[i], RemoteBDADDR[i]);
 
 		f_close(&DiskRemAddrFile);
 	}
 	else if (ErrorCode == FR_NO_FILE)
 	{
-		uint8_t  RemoteBDADDR[BT_BDADDR_LEN];
+		BDADDR_t RemoteBDADDR;
 		char     LineBuffer[50];
 		uint16_t BytesWritten = 0;
 
 		/* Retrieve the remote device's BDADDR saved in EEPROM, attempt a connection */
-		eeprom_read_block(RemoteBDADDR, BluetoothAdapter_RemoteBDADDR, BT_BDADDR_LEN);
+		eeprom_read_block(RemoteBDADDR, BluetoothAdapter_RemoteBDADDR, sizeof(BDADDR_t));
 
 		ErrorCode = f_open(&DiskRemAddrFile, REMADDR_FILENAME, (FA_CREATE_NEW | FA_WRITE));
 		

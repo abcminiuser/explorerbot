@@ -114,8 +114,8 @@ bool Joystick_PostConfiguration(void)
 	if (Joystick_IsPS3Controller)
 	{
 		/* Read out the latest inserted bluetooth adapter address stored in EEPROM */
-		uint8_t TempAddress[BT_BDADDR_LEN];
-		eeprom_read_block(TempAddress, BluetoothAdapter_LastLocalBDADDR, sizeof(TempAddress));
+		BDADDR_t TempAddress;
+		eeprom_read_block(TempAddress, BluetoothAdapter_LastLocalBDADDR, sizeof(BDADDR_t));
 
 		/* Send PS3 bluetooth host pair request report to the adapter */
 		uint8_t PS3AdapterPairRequest[]    = {0x01, 0x00, TempAddress[5], TempAddress[4], TempAddress[3], TempAddress[2], TempAddress[1], TempAddress[0]};

@@ -24,22 +24,19 @@
 		#include <LUFA/Common/Common.h>
 
 	/* Defines: */
-		/** Length of a Bluetooth device address in bytes. */
-		#define BT_BDADDR_LEN                     6
-		
-		/** Maximum number of simultaneous device connections. */
+		/** Maximum number of simultaneous device connections (user-configurable). */
 		#define BT_MAX_DEVICE_CONNECTIONS         3
 		
-		/** Maximum number of simultaneous L2CAP logical channels. */
+		/** Maximum number of simultaneous L2CAP logical channels (user-configurable). */
 		#define BT_MAX_LOGICAL_CHANNELS           (BT_MAX_DEVICE_CONNECTIONS * 8)
 		
-		/** Maximum number of queued L2CAP signalling commands. */
+		/** Maximum number of queued L2CAP signalling commands (user-configurable). */
 		#define BT_MAX_QUEUED_L2CAP_EVENTS        10
 
-		/** Default maximum transmission unit size for a L2CAP channel packet. */
+		/** Default maximum transmission unit size for a L2CAP channel packet (user-configurable). */
 		#define BT_DEFAULT_L2CAP_CHANNEL_MTU      1024
 		
-		/** Tick length interval that \ref Bluetooth_TickElapsed() is called at. */
+		/** Tick length interval that \ref Bluetooth_TickElapsed() is called at (user-configurable). */
 		#define BT_TICK_MS                        SYSTEM_TICK_MS
 
 	/* Enums: */
@@ -93,6 +90,12 @@
 		};
 
 	/* Type Defines: */
+		/** Type define for a Bluetooth Device Address.
+		 *
+		 *  \note This is an array type, and thus is not passed by value between functions.
+		 */
+		typedef uint8_t BDADDR_t[6];
+		
 		/** Type define for a queued L2CAP event. As the L2AP layer receives commands from remote devices and from the 
 		 *  user application, events are generated and queued for later processing. This queue allows for events to be
 		 *  deferred until such time that there is adequate space in the data packet buffers, to prevent buffer overruns
@@ -114,7 +117,7 @@
 		typedef struct
 		{
 			uint8_t  State; /**< Current connection state, a value from the \ref BT_HCIStates_t enum. */
-			uint8_t  RemoteBDADDR[BT_BDADDR_LEN]; /**< Remote Bluetooth device's BDADDR for the connection. */
+			BDADDR_t RemoteBDADDR; /**< Remote Bluetooth device's BDADDR for the connection. */
 			uint16_t DataPacketsQueued; /**< Number of data packets queued by the controller for this connection. */
 			uint16_t Handle; /**< Bluetooth HCI layer connection handle in the adapter for the connection. */
 			uint8_t  LinkType; /**< Link type of the connection, a value from the \ref BT_LinkTypes_t enum. */
@@ -158,7 +161,7 @@
 					uint8_t             CommandPackets; /**< Number of allowable HCI command packets which can be sent to the controller. */
 					uint16_t            ACLDataPackets; /**< Number of allowable ACL data packets which can be sent to the controller. */
 					uint16_t            TicksElapsed; /**< Number of ticks that has elapsed since the last command was sent. */
-					uint8_t             LocalBDADDR[BT_BDADDR_LEN]; /**< Address of the local Bluetooth adapter attached to this stack instance. */
+					BDADDR_t            LocalBDADDR; /**< Address of the local Bluetooth adapter attached to this stack instance. */
 					BT_HCI_Connection_t Connections[BT_MAX_DEVICE_CONNECTIONS]; /**< HCI connection state information list. */
 				} HCI; /**< HCI layer connection state information. */
 				

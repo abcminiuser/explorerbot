@@ -47,7 +47,7 @@ BT_HCI_Connection_t* const Bluetooth_HCI_FindConnection(BT_StackConfig_t* const 
 		/* Check search parameter; if BDADDR specified search by remote device address, otherwise by handle */
 		if (RemoteBDADDR != NULL)
 		{
-			if (memcmp(Connection->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN) == 0)
+			if (memcmp(Connection->RemoteBDADDR, RemoteBDADDR, sizeof(BDADDR_t)) == 0)
 			  return Connection;
 		}
 		else
@@ -78,7 +78,7 @@ static BT_HCI_Connection_t* const Bluetooth_HCI_NewConnection(BT_StackConfig_t* 
 
 		if (Connection->State == HCI_CONSTATE_Closed)
 		{
-			memcpy(Connection->RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
+			memcpy(Connection->RemoteBDADDR, RemoteBDADDR, sizeof(BDADDR_t));
 			Connection->State             = HCI_CONSTATE_New;
 			Connection->DataPacketsQueued = 0;
 			Connection->LinkType          = LinkType;
@@ -158,7 +158,7 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 					NextHCIState = HCISTATE_Init_SetLocalName;
 
 					/* Copy over the returned local device address to the stack state buffer */
-					memcpy(StackState->State.HCI.LocalBDADDR, &CommandCompleteHeader->Parameters[1], BT_BDADDR_LEN);				
+					memcpy(StackState->State.HCI.LocalBDADDR, &CommandCompleteHeader->Parameters[1], sizeof(BDADDR_t));				
 				}
 				break;
 			case HCISTATE_Init_SetLocalName:
@@ -216,7 +216,7 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 		{
 			BT_HCICommand_RejectConnectionReq_t HCIRejectConnectionHeader;
 
-			memcpy(HCIRejectConnectionHeader.RemoteBDADDR, ConnectionRequestEventHeader->RemoteBDADDR, BT_BDADDR_LEN);
+			memcpy(HCIRejectConnectionHeader.RemoteBDADDR, ConnectionRequestEventHeader->RemoteBDADDR, sizeof(BDADDR_t));
 			HCIRejectConnectionHeader.Reason = RejectionReason;
 			
 			/* Mark the connection as free again as it was rejected */
@@ -229,7 +229,7 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 		{
 			BT_HCICommand_AcceptConnectionReq_t HCIAcceptConnectionHeader;
 
-			memcpy(HCIAcceptConnectionHeader.RemoteBDADDR, ConnectionRequestEventHeader->RemoteBDADDR, BT_BDADDR_LEN);
+			memcpy(HCIAcceptConnectionHeader.RemoteBDADDR, ConnectionRequestEventHeader->RemoteBDADDR, sizeof(BDADDR_t));
 			HCIAcceptConnectionHeader.SlaveRole = true;
 			
 			Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_ACCEPT_CONNECTION_REQUEST), sizeof(HCIAcceptConnectionHeader), &HCIAcceptConnectionHeader);			
@@ -281,7 +281,7 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 		{
 			BT_HCICommand_PinCodeACKResp_t PINKeyACKResponse;
 			
-			memcpy(PINKeyACKResponse.RemoteBDADDR, PINCodeRequestEventHeader->RemoteBDADDR, BT_BDADDR_LEN);
+			memcpy(PINKeyACKResponse.RemoteBDADDR, PINCodeRequestEventHeader->RemoteBDADDR, sizeof(BDADDR_t));
 			PINKeyACKResponse.PINCodeLength = MIN(strlen(StackState->Config.PINCode), sizeof(PINKeyACKResponse.PINCode));
 			strlcpy((void*)PINKeyACKResponse.PINCode, StackState->Config.PINCode, sizeof(PINKeyACKResponse.PINCode));
 			
@@ -291,7 +291,7 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 		{
 			BT_HCICommand_PinCodeNAKResp_t PINKeyNAKResponse;
 
-			memcpy(PINKeyNAKResponse.RemoteBDADDR, PINCodeRequestEventHeader->RemoteBDADDR, BT_BDADDR_LEN);			
+			memcpy(PINKeyNAKResponse.RemoteBDADDR, PINCodeRequestEventHeader->RemoteBDADDR, sizeof(BDADDR_t));			
 			
 			Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_PIN_CODE_REQUEST_NEG_REPLY), sizeof(PINKeyNAKResponse), &PINKeyNAKResponse);
 		}
@@ -301,7 +301,7 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 		BT_HCIEvent_LinkKeyReq_t*      LinkKeyRequestEventHeader = (BT_HCIEvent_LinkKeyReq_t*)&HCIEventHeader->Parameters;
 		BT_HCICommand_LinkKeyNAKResp_t LinkKeyRequestNAKHeader;
 
-		memcpy(LinkKeyRequestNAKHeader.RemoteBDADDR, LinkKeyRequestEventHeader->RemoteBDADDR, BT_BDADDR_LEN);
+		memcpy(LinkKeyRequestNAKHeader.RemoteBDADDR, LinkKeyRequestEventHeader->RemoteBDADDR, sizeof(BDADDR_t));
 
 		Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_LINK_KEY_REQUEST_NEG_REPLY), sizeof(LinkKeyRequestNAKHeader), &LinkKeyRequestNAKHeader);
 	}	
@@ -413,7 +413,7 @@ BT_HCI_Connection_t* Bluetooth_HCI_Connect(BT_StackConfig_t* const StackState,
 	
 	/* Fill out HCI connection parameters - assume role switch allowed for now, and all packet types supported */
 	BT_HCICommand_CreateConnection_t CreateConnectHeader;
-	memcpy(CreateConnectHeader.RemoteBDADDR, RemoteBDADDR, BT_BDADDR_LEN);
+	memcpy(CreateConnectHeader.RemoteBDADDR, RemoteBDADDR, sizeof(BDADDR_t));
 	CreateConnectHeader.PacketType      = CPU_TO_LE16(0xCC18);
 	CreateConnectHeader.PageScanMode    = 1;
 	CreateConnectHeader.Reserved        = 0;
@@ -464,7 +464,7 @@ bool Bluetooth_HCI_Disconnect(BT_StackConfig_t* const StackState,
 			if (!(HCIConnection->LocallyInitiated))
 			  return false;
 		
-			return Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_CREATE_CONNECTION_CANCEL), BT_BDADDR_LEN, HCIConnection->RemoteBDADDR);
+			return Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_CREATE_CONNECTION_CANCEL), sizeof(BDADDR_t), HCIConnection->RemoteBDADDR);
 		case HCI_CONSTATE_Connected:
 			return Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_DISCONNECT), sizeof(DisconnectParams), &DisconnectParams);
 	}

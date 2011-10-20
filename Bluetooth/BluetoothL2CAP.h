@@ -39,9 +39,6 @@
 		/** Bluetooth specification defined channel number for connectionless data. */
 		#define BT_CHANNEL_CONNECTIONLESS         0x0002
 		
-		/** HCI connection flag to automatically flush packets to the receiver. */
-		#define BT_L2CAP_FIRST_AUTOFLUSH          (1 << 13)
-
 	/* Enums: */
 		/** Enum for the possible states for a Bluetooth L2CAP channel. */
 		enum BT_L2CAP_ChannelStates_t

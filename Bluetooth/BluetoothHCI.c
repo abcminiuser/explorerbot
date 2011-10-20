@@ -513,6 +513,7 @@ bool Bluetooth_HCI_SendControlPacket(BT_StackConfig_t* const StackState,
  */ 
 bool Bluetooth_HCI_SendPacket(BT_StackConfig_t* const StackState,
                               BT_HCI_Connection_t* const HCIConnection,
+                              const bool PacketContinuation,
 		                      const uint16_t Length,
 		                      const void* Data)
 {
@@ -522,14 +523,14 @@ bool Bluetooth_HCI_SendPacket(BT_StackConfig_t* const StackState,
 	if (!(HCIConnection) || (HCIConnection->State != HCI_CONSTATE_Connected))
 	  return false;
 	  
-	if (HCIConnection->DataPacketsQueued == StackState->State.HCI.ACLDataPackets)
-	  return false;
+//	if (HCIConnection->DataPacketsQueued == StackState->State.HCI.ACLDataPackets)
+//		return false;
 	
 	/* Keep track of how many packets have been queued into the controller for the connection to prevent buffer overrun */
 	HCIConnection->DataPacketsQueued++;
 
 	BT_HCIData_Header_t* HCIDataHeader = (BT_HCIData_Header_t*)StackState->Config.PacketBuffer;
-	HCIDataHeader->Handle     = cpu_to_le16(HCIConnection->Handle | BT_L2CAP_FIRST_AUTOFLUSH);
+	HCIDataHeader->Handle     = cpu_to_le16(HCIConnection->Handle | (PacketContinuation ? BT_L2CAP_PACKET_CONTINUATION : BT_L2CAP_FIRST_AUTOFLUSH));
 	HCIDataHeader->DataLength = cpu_to_le16(Length);
 	memcpy(HCIDataHeader->Data, Data, Length);
 

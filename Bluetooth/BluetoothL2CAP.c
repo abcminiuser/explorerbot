@@ -150,8 +150,11 @@ static BT_L2CAP_Event_t* Bluetooth_L2CAP_NewEvent(BT_StackConfig_t* const StackS
 	
 	BT_L2CAP_Event_t* Event = &StackState->State.L2CAP.Events[StackState->State.L2CAP.PendingEvents++];
 	
-	Event->ConnectionHandle = ConnectionHandle;
-	Event->Identifier       = Identifier;	
+	Event->ConnectionHandle   = ConnectionHandle;
+	Event->Identifier         = Identifier;
+	Event->SourceChannel      = 0;
+	Event->DestinationChannel = 0;
+	Event->Result             = 0;
 	return Event;
 }
 
@@ -466,6 +469,13 @@ void Bluetooth_L2CAP_ProcessPacket(BT_StackConfig_t* const StackState,
  */
 bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 {
+	static uint8_t PEND;
+	
+	if (PEND != StackState->State.L2CAP.PendingEvents)
+	  LCD_WriteFormattedString("\fPending %d", StackState->State.L2CAP.PendingEvents);
+	
+	PEND = StackState->State.L2CAP.PendingEvents;
+
 	/* Check if there are any pending events in the L2CAP event queue */
 	if (StackState->State.L2CAP.PendingEvents)
 	{
@@ -667,13 +677,13 @@ bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 			DisconnectionResponse.DestinationChannel = cpu_to_le16(Event->SourceChannel);
 			DisconnectionResponse.SourceChannel      = cpu_to_le16(Event->DestinationChannel);
 
-			Bluetooth_L2CAP_SendSignalPacket(StackState, Event->ConnectionHandle, BT_SIGNAL_DISCONNECTION_RESPONSE, Event->Identifier,
-	                                         sizeof(DisconnectionResponse), &DisconnectionResponse);
+			DequeueEvent = Bluetooth_L2CAP_SendSignalPacket(StackState, Event->ConnectionHandle, BT_SIGNAL_DISCONNECTION_RESPONSE, Event->Identifier,
+	                                                        sizeof(DisconnectionResponse), &DisconnectionResponse);
 			if ((DequeueEvent) && (L2CAPChannel))
 			{
 				L2CAPChannel->State = L2CAP_CHANSTATE_Closed;
 				EVENT_Bluetooth_ChannelStateChange(StackState, L2CAPChannel);
-			}		
+			}
 		}
 		else if (Event->Event == L2CAP_EVENT_DisconnectRsp)
 		{
@@ -820,18 +830,8 @@ bool Bluetooth_L2CAP_SendPacket(BT_StackConfig_t* const StackState,
 	  return false;
 
 	/* Check if there is any space in the buffer for the current connection */
-	if (HCIConnection->DataPacketsQueued == StackState->State.HCI.ACLDataPackets)
-	{
-		/* HORENDOUSLY UGLY HACK -- If the device's ACL data buffers are full, wait for a fixed period to give them time to
-		   empty before continuing. This needs to be replaced by a reliable packet buffering system in the transport or HCI
-		   layers. Ideally this would listen for packet completion events from the controller instead to only delay for the
-		   required period, however this isn't possible with the Bluetooth transports as defined - you can't listen for events
-		   only.
-		*/
-		// TODO: FIXME
-		_delay_ms(5);
-		// return false;
-	}
+//	if (HCIConnection->DataPacketsQueued == StackState->State.HCI.ACLDataPackets)
+//	  return false;
 	
 	/* Determine the length of the first fragment (includes L2CAP data packet header) */
 	uint16_t BytesInPacket  = MIN(Length, (L2CAPChannel->RemoteMTU - sizeof(BT_DataPacket_Header_t)));
@@ -847,7 +847,7 @@ bool Bluetooth_L2CAP_SendPacket(BT_StackConfig_t* const StackState,
 	FirstPacket.L2CAPDataHeader.DestinationChannel = cpu_to_le16(L2CAPChannel->RemoteNumber);
 	memcpy(FirstPacket.Data, Data, BytesInPacket);
 	
-	if (!(Bluetooth_HCI_SendPacket(StackState, HCIConnection, sizeof(FirstPacket), &FirstPacket)))
+	if (!(Bluetooth_HCI_SendPacket(StackState, HCIConnection, false, sizeof(FirstPacket), &FirstPacket)))
 	  return false;
 
 	BytesRemaining -= BytesInPacket;
@@ -859,7 +859,7 @@ bool Bluetooth_L2CAP_SendPacket(BT_StackConfig_t* const StackState,
 		/* Determine the length of the next fragment */
 		BytesInPacket = MIN(BytesRemaining, L2CAPChannel->RemoteMTU);
 		
-		if (!(Bluetooth_HCI_SendPacket(StackState, HCIConnection, BytesInPacket, Data)))
+		if (!(Bluetooth_HCI_SendPacket(StackState, HCIConnection, true, BytesInPacket, Data)))
 		  return false;
 
 		BytesRemaining -= BytesInPacket;

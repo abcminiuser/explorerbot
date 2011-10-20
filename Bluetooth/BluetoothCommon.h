@@ -22,6 +22,8 @@
 
 	/* Includes: */
 		#include <LUFA/Common/Common.h>
+		
+		#include "Drivers/LCD.h"
 
 	/* Defines: */
 		/** Maximum number of simultaneous device connections (user-configurable). */

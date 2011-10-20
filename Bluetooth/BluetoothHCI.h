@@ -37,6 +37,12 @@
 		/** Number of milliseconds before an issued HCI command times out and is re-tried. */
 		#define BT_HCI_COMMAND_TIMEOUT_MS         1000
 	
+		/** HCI connection flag to automatically flush packets to the receiver. */
+		#define BT_L2CAP_FIRST_AUTOFLUSH          (2 << 12)
+		
+		/** HCI connection flag to indicate a continuation of a higher layer packet. */
+		#define BT_L2CAP_PACKET_CONTINUATION      (1 << 12)
+
 	/* Enums: */
 		/** Enum for the possible device connection states. */
 		enum BT_HCI_ConnectionStates_t
@@ -83,6 +89,7 @@
 		                                     const void* Data);
 		bool Bluetooth_HCI_SendPacket(BT_StackConfig_t* const StackState,
 		                              BT_HCI_Connection_t* const HCIConnection,
+		                              const bool PacketContinuation,
 		                              const uint16_t Length,
 		                              const void* Data);
 

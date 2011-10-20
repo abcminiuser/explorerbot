@@ -162,10 +162,10 @@ void EVENT_Bluetooth_DataReceived(BT_StackConfig_t* const StackState,
 			RFCOMM_ProcessPacket(StackState, Channel, Length, Data);
 			break;		
 		default:
-			LCD_WriteFormattedString_P(PSTR("\fL2CAP DATA:%04X\n"
+			LCD_WriteFormattedString_P(PSTR("\fL2CAP Recv:%04X\n"
 			                                  "PSM:%04X C:%04X"), Length, Channel->PSM, Channel->LocalNumber);
 			break;
-	}	
+	}
 }
 
 void EVENT_RFCOMM_ChannelStateChange(BT_StackConfig_t* const StackState,
@@ -177,13 +177,6 @@ void EVENT_RFCOMM_ChannelStateChange(BT_StackConfig_t* const StackState,
 		case RFCOMM_Channel_Open:
 			/* Save the handle to the opened RFCOMM channel object, so we can write to it later */
 			RFCOMM_SensorStream = Channel;
-
-			/* Construct the sensor CSV header line(s) */
-			char    LineBuffer[200];
-			uint8_t LineLength = Sensors_WriteSensorCSVHeader(LineBuffer);
-
-			/* Write sensor CSV data to the virtual serial port */
-			RFCOMM_SendData(RFCOMM_SensorStream, LineLength, LineBuffer);
 			break;
 		case RFCOMM_Channel_Closed:
 			/* Delete the handle to the now closed RFCOMM channel object, to prevent us from trying to write to it */

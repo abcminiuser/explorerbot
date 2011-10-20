@@ -248,7 +248,7 @@ static void RFCOMM_ProcessMSCommand(BT_StackConfig_t* const StackState,
 		}
 		
 		/* Save the new channel signals to the channel state structure */
-		RFCOMMChannel->DataLink.RemoteSignals = MSCParams->Signals;
+		RFCOMMChannel->DataLink.RemoteSignals = (MSCParams->Signals & ~0x01);
 		RFCOMMChannel->ConfigFlags |= RFCOMM_CONFIG_REMOTESIGNALS;
 		
 		/* Send the MSC response to the remote device (echo sent data to confirm) */
@@ -563,7 +563,7 @@ void RFCOMM_Manage(BT_StackConfig_t* const StackState)
 			{
 				RFCOMM_MSC_Parameters_t MSCommand;
 				MSCommand.Address = (RFCOMM_Address_t){.DLCI = RFCOMMChannel->DLCI, .EA = true, .CR = false};
-				MSCommand.Signals = RFCOMMChannel->DataLink.LocalSignals;
+				MSCommand.Signals = (RFCOMMChannel->DataLink.LocalSignals | 0x01);
 				
 				/* Send the MSC command to the remote device */
 				if (RFCOMM_SendControlFrame(StackState, RFCOMMChannel->ACLChannel, RFCOMM_Control_ModemStatus, true, sizeof(MSCommand), &MSCommand))

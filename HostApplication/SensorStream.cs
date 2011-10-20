@@ -59,7 +59,7 @@ namespace RobotSensorStream
             {
                 try
                 {
-                    Log("Closing port " + cmbPort.Text);
+                    Log("Closing port " + cmbPort.Text + "...");
                     spSerialPort.Close();
                     Log("Closed port " + cmbPort.Text);
                 }

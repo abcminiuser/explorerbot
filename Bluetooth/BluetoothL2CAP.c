@@ -469,13 +469,6 @@ void Bluetooth_L2CAP_ProcessPacket(BT_StackConfig_t* const StackState,
  */
 bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 {
-	static uint8_t PEND;
-	
-	if (PEND != StackState->State.L2CAP.PendingEvents)
-	  LCD_WriteFormattedString("\fPending %d", StackState->State.L2CAP.PendingEvents);
-	
-	PEND = StackState->State.L2CAP.PendingEvents;
-
 	/* Check if there are any pending events in the L2CAP event queue */
 	if (StackState->State.L2CAP.PendingEvents)
 	{

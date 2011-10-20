@@ -57,11 +57,20 @@ namespace RobotSensorStream
         {
             if (spSerialPort.IsOpen)
             {
-                Log("Closing port " + cmbPort.Text);
-                spSerialPort.Close();
-                Log("Closed port " + cmbPort.Text);
+                try
+                {
+                    Log("Closing port " + cmbPort.Text);
+                    spSerialPort.Close();
+                    Log("Closed port " + cmbPort.Text);
+                }
+                catch (Exception ex)
+                {
+                    Log("Could not close port " + cmbPort.Text + " (" + ex.Message + ")");
+                    return;
+                }
 
                 btnConnect.Text = "Connect";
+                cmbPort.Enabled = true;
             }
             else
             {
@@ -85,6 +94,7 @@ namespace RobotSensorStream
                 }
 
                 btnConnect.Text = "Disconnect";
+                cmbPort.Enabled = false;
             }
         }
 

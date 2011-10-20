@@ -82,6 +82,14 @@ void SDP_UnregisterService(SDP_ServiceEntry_t* const ServiceEntry)
 	  CurrentService->NextService = CurrentService->NextService->NextService;
 }
 
+static bool SDP_SendFrame(BT_StackConfig_t* const StackState,
+                          BT_L2CAP_Channel_t* const Channel,
+                          const uint16_t Length,
+                          const void* const Data)
+{
+	return Bluetooth_L2CAP_SendPacket(StackState, Channel, Length, Data);
+}
+
 /** Retrieves the size of a Data Element container from the current input buffer, and advances the input buffer
  *  pointer to the start of the Data Element's contents.
  *
@@ -510,7 +518,7 @@ static void SDP_ServiceSearch(BT_StackConfig_t* const StackState,
 	                                                       ((uintptr_t)CurrResponsePos - (uintptr_t)ResponsePacket.ResponseData));
 
 	/* Send the completed response packet to the sender */
-	Bluetooth_L2CAP_SendPacket(StackState, Channel, (sizeof(ResponsePacket.SDPHeader) + be16_to_cpu(ResponsePacket.SDPHeader.ParameterLength)), &ResponsePacket);
+	SDP_SendFrame(StackState, Channel, (sizeof(ResponsePacket.SDPHeader) + be16_to_cpu(ResponsePacket.SDPHeader.ParameterLength)), &ResponsePacket);
 }
 
 static void SDP_ServiceAttribute(BT_StackConfig_t* const StackState,
@@ -590,7 +598,7 @@ static void SDP_ServiceAttribute(BT_StackConfig_t* const StackState,
 	ResponsePacket.SDPHeader.ParameterLength = cpu_to_be16(sizeof(ResponsePacket.AttributeListByteCount) + be16_to_cpu(ResponsePacket.AttributeListByteCount) + sizeof(uint8_t));
 
 	/* Send the completed response packet to the sender */
-	Bluetooth_L2CAP_SendPacket(StackState, Channel, (sizeof(ResponsePacket.SDPHeader) + be16_to_cpu(ResponsePacket.SDPHeader.ParameterLength)), &ResponsePacket);
+	SDP_SendFrame(StackState, Channel, (sizeof(ResponsePacket.SDPHeader) + be16_to_cpu(ResponsePacket.SDPHeader.ParameterLength)), &ResponsePacket);
 }
 
 static void SDP_ServiceSearchAttribute(BT_StackConfig_t* const StackState,
@@ -658,7 +666,7 @@ static void SDP_ServiceSearchAttribute(BT_StackConfig_t* const StackState,
 	ResponsePacket.SDPHeader.ParameterLength = cpu_to_be16(sizeof(ResponsePacket.AttributeListByteCount) + be16_to_cpu(ResponsePacket.AttributeListByteCount) + sizeof(uint8_t));
 
 	/* Send the completed response packet to the sender */
-	Bluetooth_L2CAP_SendPacket(StackState, Channel, (sizeof(ResponsePacket.SDPHeader) + be16_to_cpu(ResponsePacket.SDPHeader.ParameterLength)), &ResponsePacket);
+	SDP_SendFrame(StackState, Channel, (sizeof(ResponsePacket.SDPHeader) + be16_to_cpu(ResponsePacket.SDPHeader.ParameterLength)), &ResponsePacket);
 }
 
 void SDP_Init(BT_StackConfig_t* const StackState)

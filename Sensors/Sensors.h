@@ -44,6 +44,8 @@
 		#include "ITG3200.h"
 		#include "BMA150.h"
 		#include "BMP085.h"
+		
+		#include "SensorsCommon.h"
 
 	/* Function Prototypes: */
 		void    Sensors_Init(void);

@@ -222,13 +222,12 @@ void CheckSensors(void)
 
 /** Updates the robot's hardware to match the control command given from the user.
  *
- *  \param[in]  MotorX            Motor X value coordinate in the direction map.
- *  \param[in]  MotorY            Motor Y value coordinate in the direction map.
+ *  \param[in]  MotorX            Motor X value coordinate in the direction map (3x3 matrix).
+ *  \param[in]  MotorY            Motor Y value coordinate in the direction map (3x3 matrix).
  *  \param[in]  Horn              Turns on the robot's momentary horn.
  *  \param[in]  NoveltyHorn       Turns on the robot's novelty horn.
  *  \param[in]  Headlights        Turns on the robot's momentary headlights.
  *  \param[in]  HeadlightsToggle  Toggles the robot's headlights on/off.
- 
  */
 void ProcessUserControl(const int8_t MotorX,
                         const int8_t MotorY,

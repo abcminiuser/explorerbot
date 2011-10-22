@@ -39,6 +39,10 @@
 static const char* SensorName = "Compass";
 
 
+/** Starts a new conversion of the AK8975 compass sensor.
+ *
+ *  \param[in, out] CompassSensorInfo  Pointer to the compass sensor information entry describing the sensor.
+ */
 static void AK8975_StartConversion(SensorData_t* const CompassSensorInfo)
 {
 	uint8_t PacketBuffer[1];
@@ -52,6 +56,11 @@ static void AK8975_StartConversion(SensorData_t* const CompassSensorInfo)
 	Sensor_WriteBytes(AK8975_ADDRESS, AK8975_REG_CNTL, PacketBuffer, 1);
 }
 
+/** Initializes the AK8975 compass sensor ready for use, if it is available. This function will configure the
+ *  sensor with the default configuration parameters, and trigger the first sensor conversion.
+ *
+ *  \param[in, out] CompassSensorInfo  Pointer to the compass sensor information entry describing the sensor.
+ */
 void AK8975_Init(SensorData_t* const CompassSensorInfo)
 {
 	uint8_t PacketBuffer[1];
@@ -78,6 +87,11 @@ void AK8975_Init(SensorData_t* const CompassSensorInfo)
 	AK8975_StartConversion(CompassSensorInfo);
 }
 
+/** Updates the AK8975 compass sensor's data values from the sensor, if a conversion has completed. Once updated, the
+ *  next sensor conversion is automatically started.
+ *
+ *  \param[in, out] CompassSensorInfo  Pointer to the compass sensor information entry describing the sensor.
+ */
 void AK8975_Update(SensorData_t* const CompassSensorInfo)
 {
 	uint8_t PacketBuffer[6];

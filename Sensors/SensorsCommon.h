@@ -37,8 +37,6 @@
 #define _SENSORS_COMMON_H_
 
 	/* Includes: */
-		#include <avr/pgmspace.h>
-	
 		#include <stdint.h>
 		#include <stdbool.h>
 

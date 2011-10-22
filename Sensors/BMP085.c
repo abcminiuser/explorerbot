@@ -39,11 +39,15 @@
 static const char* SensorName = "Pressure";
 
 
+/** Starts a new conversion of the BMP085 sensor.
+ *
+ *  \param[in, out] PressureSensorInfo  Pointer to the pressure sensor information entry describing the sensor.
+ */
 static void BMP085_StartConversion(SensorData_t* const PressureSensorInfo)
 {
 	uint8_t PacketBuffer[1];
 
-	/* Abort if Compass sensor not connected and initialized */
+	/* Abort if Pressure sensor not connected and initialized */
 	if (!(PressureSensorInfo->Connected))
 	  return;
 
@@ -52,6 +56,11 @@ static void BMP085_StartConversion(SensorData_t* const PressureSensorInfo)
 	Sensor_WriteBytes(BMP085_ADDRESS, BMP085_CONTROL_REG, PacketBuffer, 1);
 }
 
+/** Initializes the BMP085 pressure sensor ready for use, if it is available. This function will configure the
+ *  sensor with the default configuration parameters, and trigger the first sensor conversion.
+ *
+ *  \param[in, out] PressureSensorInfo  Pointer to the pressure sensor information entry describing the sensor.
+ */
 void BMP085_Init(SensorData_t* const PressureSensorInfo)
 {
 	uint8_t PacketBuffer[1];
@@ -83,6 +92,11 @@ void BMP085_Init(SensorData_t* const PressureSensorInfo)
 	BMP085_StartConversion(PressureSensorInfo);
 }
 
+/** Updates the BMP085 pressure sensor's data values from the sensor, if a conversion has completed. Once updated, the
+ *  next sensor conversion is automatically started.
+ *
+ *  \param[in, out] PressureSensorInfo  Pointer to the pressure sensor information entry describing the sensor.
+ */
 void BMP085_Update(SensorData_t* const PressureSensorInfo)
 {
 	uint8_t PacketBuffer[3];

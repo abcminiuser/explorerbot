@@ -504,10 +504,11 @@ bool Bluetooth_HCI_SendControlPacket(BT_StackConfig_t* const StackState,
 
 /** Sends a HCI data packet to the Bluetooth adapter for transmittion to a remote device.
  *
- *  \param[in, out] StackState     Pointer to a Bluetooth Stack state table.
- *  \param[in, out] HCIConnection  Handle of the HCI connection to send the data on.
- *  \param[in]      Length         Length of the data to send in bytes.
- *  \param[in]      Data           Data to send through the nominated HCI connection.
+ *  \param[in, out] StackState          Pointer to a Bluetooth Stack state table.
+ *  \param[in, out] HCIConnection       Handle of the HCI connection to send the data on.
+ *  \param[in]      PacketContinuation  Boolean \c true if this is a continuation of a higher layer message, \c false otherwise.
+ *  \param[in]      Length              Length of the data to send in bytes.
+ *  \param[in]      Data                Data to send through the nominated HCI connection.
  *
  *  \return Boolean \c true if the data was sent, \c false otherwise.
  */ 

@@ -42,6 +42,15 @@ static const char* SensorNameGyro = "Gyroscope";
 static const char* SensorNameTemp = "Temperature";
 
 
+/** Initializes the ITG3200 gyroscope sensor ready for use, if it is available. This function will configure the
+ *  sensor with the default configuration parameters, and trigger the first sensor conversion.
+ *
+ *  As the ITG3200 also contains an in-built temperature sensor, this may optionally be read as a second sensor
+ *  item.
+ *
+ *  \param[in, out] GyroSensorInfo  Pointer to the gyroscope sensor information entry describing the sensor.
+ *  \param[in, out] TempSensorInfo  Pointer to the temperature sensor information entry describing the sensor (or \c NULL if not desired).
+ */
 void ITG3200_Init(SensorData_t* const GyroSensorInfo,
 		          SensorData_t* const TempSensorInfo)
 {
@@ -105,6 +114,12 @@ void ITG3200_Init(SensorData_t* const GyroSensorInfo,
 	  return;
 }
 
+/** Updates the ITG3200 gyroscope sensor's data values from the sensor, if a conversion has completed. Once updated, the
+ *  next sensor conversion is automatically started.
+ *
+ *  \param[in, out] GyroSensorInfo  Pointer to the gyroscope sensor information entry describing the sensor.
+ *  \param[in, out] TempSensorInfo  Pointer to the temperature sensor information entry describing the sensor (or \c NULL if not desired).
+ */
 void ITG3200_Update(SensorData_t* const GyroSensorInfo,
 		            SensorData_t* const TempSensorInfo)
 {

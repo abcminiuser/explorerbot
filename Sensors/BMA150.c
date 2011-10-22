@@ -38,7 +38,11 @@
 /** Human readable name for the sensor. */
 static const char* SensorName = "Accelerometer";
 
-
+/** Initializes the BMA150 accelerometer sensor ready for use, if it is available. This function will configure the
+ *  sensor with the default configuration parameters, and trigger the first sensor conversion.
+ *
+ *  \param[in, out] AccelSensorInfo  Pointer to the accelerometer sensor information entry describing the sensor.
+ */
 void BMA150_Init(SensorData_t* const AccelSensorInfo)
 {
 	uint8_t PacketBuffer[1];
@@ -88,6 +92,11 @@ void BMA150_Init(SensorData_t* const AccelSensorInfo)
 	  return;	  
 }
 
+/** Updates the BMA150 accelerometer sensor's data values from the sensor, if a conversion has completed. Once updated, the
+ *  next sensor conversion is automatically started.
+ *
+ *  \param[in, out] AccelSensorInfo  Pointer to the accelerometer sensor information entry describing the sensor.
+ */
 void BMA150_Update(SensorData_t* const AccelSensorInfo)
 {	
 	uint8_t PacketBuffer[6];

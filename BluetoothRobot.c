@@ -138,7 +138,7 @@ int main(void)
 				}
 
 				/* Write the sensor data to the attached wireless serial port (if available) */
-				if (RFCOMM_SensorStream)
+				if (RFCOMM_SensorStream && (RFCOMM_SensorStream->DataLink.RemoteSignals & RFCOMM_SIGNAL_RTR))
 				  RFCOMM_SendData(RFCOMM_SensorStream, LineLength, LineBuffer);				
 			}			
 		}

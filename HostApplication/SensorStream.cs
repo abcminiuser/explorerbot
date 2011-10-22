@@ -110,7 +110,7 @@ namespace RobotSensorStream
                 // Line Format: <Compass X>, <Compass Y>, <Compass Z>, <Acc X>, <Acc Y>, <Acc Z>,  <Gyro X>, <Gyro Y>, <Gyro Z>, Pressure, Temperature
                 Log("DATA> " + ReceivedLines.Peek());
 
-                String[] SensorValues = ReceivedLines.Pop().Split(new char[] { ',' });
+                String[] SensorValues = ReceivedLines.Pop().Split(',');
                 Double CurrentSensorValue;
 
                 /* Convert compass data to human readable units and add it to the graph */

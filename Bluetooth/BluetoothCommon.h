@@ -80,15 +80,16 @@
 			L2CAP_EVENT_OpenChannelReq            = 0,  /**< User-initiated channel open event. */
 			L2CAP_EVENT_CloseChannelReq           = 1,  /**< User-initiated channel close event. */
 			L2CAP_EVENT_SendConfigReq             = 2,  /**< Send local channel configuration event. */
-			L2CAP_EVENT_ConnectReq                = 3,  /**< Remote channel connection event. */
-			L2CAP_EVENT_ConnectRsp                = 4,  /**< Remote channel connection response event. */
-			L2CAP_EVENT_ConfigReq                 = 5,  /**< Remote channel configuration event. */
-			L2CAP_EVENT_ConfigRsp                 = 6,  /**< Remote channel configuration response event. */
-			L2CAP_EVENT_DisconnectReq             = 7,  /**< Remote channel disconnection event. */
-			L2CAP_EVENT_DisconnectRsp             = 8,  /**< Remote channel disconnection response event. */
-			L2CAP_EVENT_CommandRej                = 9,  /**< L2CAP signalling command reject event. */
-			L2CAP_EVENT_EchoReq                   = 10, /**< L2CAP echo event. */
-			L2CAP_EVENT_InformationReq            = 11, /**< L2CAP information request event. */
+			L2CAP_EVENT_SendRejectReq             = 3,  /**< Send command rejection event. */
+			L2CAP_EVENT_ConnectReq                = 4,  /**< Remote channel connection event. */
+			L2CAP_EVENT_ConnectRsp                = 5,  /**< Remote channel connection response event. */
+			L2CAP_EVENT_ConfigReq                 = 6,  /**< Remote channel configuration event. */
+			L2CAP_EVENT_ConfigRsp                 = 7,  /**< Remote channel configuration response event. */
+			L2CAP_EVENT_DisconnectReq             = 8,  /**< Remote channel disconnection event. */
+			L2CAP_EVENT_DisconnectRsp             = 9,  /**< Remote channel disconnection response event. */
+			L2CAP_EVENT_CommandRej                = 10, /**< L2CAP signalling command reject event. */
+			L2CAP_EVENT_EchoReq                   = 11, /**< L2CAP echo event. */
+			L2CAP_EVENT_InformationReq            = 12, /**< L2CAP information request event. */
 		};
 
 	/* Type Defines: */
@@ -108,8 +109,8 @@
 			uint8_t  Event; /**< Event code for the given L2AP event. */
 			uint16_t ConnectionHandle; /**< HCI Connection handle for the given event's response (if any). */
 			uint8_t  Identifier; /**< L2CAP signalling identifier for the given event's response (if any). */
-			uint16_t SourceChannel; /**< Source channel of the event's initiator (if any). */
-			uint16_t DestinationChannel; /**< Destination channel of the event's initiator (if any). */
+			uint16_t LocalNumber; /**< Local L2CAP channel related to the event (if any). */
+			uint16_t RemoteNumber; /**< Remote L2CAP channel related to the event (if any). */
 			uint8_t  Result; /**< Result of the event (if any). */
 		} BT_L2CAP_Event_t;
 

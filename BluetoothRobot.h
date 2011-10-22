@@ -61,6 +61,9 @@
 	/* Macros: */
 		/** Update interval that sensor update and logging functions will be called at. */
 		#define SENSOR_UPDATE_TICKS   (100 / SYSTEM_TICK_MS)
+		
+		/** Frequency of the robot's momentary horn, in Hz. */
+		#define HORN_FREQUENCY_HZ     500
 
 	/* Function Prototypes: */
 		void SetupHardware(void);

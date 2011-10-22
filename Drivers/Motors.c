@@ -54,18 +54,15 @@ void Motors_Init(void)
 
 /** Sets the current speed of the robot motors.
  *
- *  \param[in] LeftPower   Motor power to set the left channel to, a value between 0 (off) and \ref MAX_MOTOR_POWER.
- *  \param[in] RightPower  Motor power to set the left channel to, a value between 0 (off) and \ref MAX_MOTOR_POWER.
+ *  \param[in] LeftPower   Motor power to set the left channel to, a value between 0 (off) and +/- \ref MAX_MOTOR_POWER.
+ *  \param[in] RightPower  Motor power to set the left channel to, a value between 0 (off) and +/- \ref MAX_MOTOR_POWER.
  */
 void Motors_SetChannelSpeed(const int16_t LeftPower, const int16_t RightPower)
 {
-	bool     LeftDirection  = (LeftPower  <= 0);
-	bool     RightDirection = (RightPower <= 0);
-	uint16_t LeftPWMValue   = abs(LeftPower);
-	uint16_t RightPWMValue  = abs(RightPower);
-
-	bool     LeftDirChange  = LeftDirection  ? (PORTD & (1 << 4)) : !(PORTD & (1 << 4));
-	bool     RightDirChange = RightDirection ? (PORTD & (1 << 3)) : !(PORTD & (1 << 3));
+	bool     LeftDirection  = (LeftPower  > 0);
+	bool     RightDirection = (RightPower > 0);
+	bool     LeftDirChange  = LeftDirection  ? !(PORTD & (1 << 4)) : (PORTD & (1 << 4));
+	bool     RightDirChange = RightDirection ? !(PORTD & (1 << 3)) : (PORTD & (1 << 3));
 
 	/* If motor channel off or direction switching, disable the PWM output completely */
 	if (LeftDirChange || !(LeftPower))
@@ -84,35 +81,28 @@ void Motors_SetChannelSpeed(const int16_t LeftPower, const int16_t RightPower)
 	/* Delay on direction change to wait until slow inverter transistors have finished switching to prevent voltage rail dips */
 	if (LeftDirChange || RightDirChange)
 	  Delay_MS(5);
-	
-	/* DANGER: DO NOT REMOVE SPEED LIMITER BELOW - PREVENTS OVERCURRENT/OVERVOLTAGE OF MOTOR */
-	if (LeftPWMValue > MAX_MOTOR_POWER)
-	  LeftPWMValue = MAX_MOTOR_POWER;
-
-	/* DANGER: DO NOT REMOVE SPEED LIMITER BELOW - PREVENTS OVERCURRENT/OVERVOLTAGE OF MOTOR */
-	if (RightPWMValue > MAX_MOTOR_POWER)
-	  RightPWMValue = MAX_MOTOR_POWER;
 
 	/* Set direction pin for left motor channel */
 	if (LeftDirection)
-	  PORTD &= ~(1 << 4);
-	else
 	  PORTD |=  (1 << 4);
+	else
+	  PORTD &= ~(1 << 4);
 
 	/* Set direction pin for right motor channel */
 	if (RightDirection)
-	  PORTD &= ~(1 << 3);
-	else
 	  PORTD |=  (1 << 3);
+	else
+	  PORTD &= ~(1 << 3);
 
-	OCR1B = LeftPWMValue;
-	OCR1A = RightPWMValue;
+	/* Update motor PWM speed duty cycles, clamp to maximum allowable values */
+	OCR1B = MIN(MAX_MOTOR_POWER, abs(LeftPower));
+	OCR1A = MIN(MAX_MOTOR_POWER, abs(RightPower));
 
 	/* If channel power non-zero, re-activate the PWM output */
-	if (LeftPower != 0)
+	if (LeftPower)
 	  TCCR1A |= (1 << COM1B1);
 
 	/* If channel power non-zero, re-activate the PWM output */
-	if (RightPower != 0)
+	if (RightPower)
 	  TCCR1A |= (1 << COM1A1);
 }

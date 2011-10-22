@@ -216,7 +216,7 @@ void CheckSensors(void)
 	                                                       (Sensors.Acceleration.Connected ? '\2' : '\1'),
 	                                                       (Sensors.Orientation.Connected  ? '\2' : '\1'),
 	                                                       (Sensors.Pressure.Connected     ? '\2' : '\1'));
-												 
+
 	Delay_MS(1500);
 }
 
@@ -236,7 +236,9 @@ void ProcessUserControl(const int8_t MotorX,
                         const bool Headlights,
                         const bool HeadlightsToggle)
 {
-	/* Table to map the controller direction coordinates to a pair of motor power coordinates */
+	static bool HeadlightsLatched = false;
+
+	/* Table to map the controller direction coordinates to a pair of motor power coordinates (3x3 matrix), centered at coordinate (1, 1) */
 	static const struct { int8_t Left; int8_t Right; } MotorPowerMap[3][3] =
 		{
 			{{  0,  1}, {  1,  1}, {  1,  0}},
@@ -248,14 +250,14 @@ void ProcessUserControl(const int8_t MotorX,
 	Motors_SetChannelSpeed((MotorPowerMap[MotorY][MotorX].Left  * (int16_t)MAX_MOTOR_POWER),
 	                       (MotorPowerMap[MotorY][MotorX].Right * (int16_t)MAX_MOTOR_POWER));
 
-	Headlights_SetState(Headlights);
-	Speaker_Tone(Horn ? SPEAKER_HZ(500) : 0);
-	
 	if (HeadlightsToggle)
-	  Headlights_ToggleState();
+	  HeadlightsLatched = !(HeadlightsLatched);
 		
 	if (NoveltyHorn)
-	  Speaker_PlaySequence(SPEAKER_SEQUENCE_LaCucaracha);\
+	  Speaker_PlaySequence(SPEAKER_SEQUENCE_LaCucaracha);
+
+	Headlights_SetState(HeadlightsLatched || Headlights);
+	Speaker_Tone(Horn ? SPEAKER_HZ(HORN_FREQUENCY_HZ) : 0);	
 }
 
 /** Event handler for the USB_DeviceAttached event. This indicates that a device has been attached to the host, and

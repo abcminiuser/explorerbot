@@ -35,9 +35,6 @@
 
 #include "Headlights.h"
 
-/** Indicates if the headlights are currently latched on via \ref Headlights_ToggleState(), so that calls to \ref Headlights_SetState() are ignored. */
-static bool Headlights_LatchedState = false;
-
 
 /** Initializes the Headlights hardware driver ready for use. This must be called
  *  before any other functions in the Headlights driver.
@@ -49,22 +46,14 @@ void Headlights_Init(void)
 	Headlights_SetState(false);
 }
 
-/** Turns on or off the robot Headlights, if they are not currently latched on via \ref Headlights_ToggleState().
+/** Turns on or off the robot Headlights.
  *
  *  \param[in] HeadlightsOn  Boolean \c true to turn the headlights on, \c false to turn headlights off.
  */
 void Headlights_SetState(const bool HeadlightsOn)
 {
-	if (HeadlightsOn || Headlights_LatchedState)
+	if (HeadlightsOn)
 	  PORTD |=  (1 << 5);
 	else
 	  PORTD &= ~(1 << 5);
-}
-
-/** Toggles on or off the robot Headlights.
- */
-void Headlights_ToggleState(void)
-{
-	Headlights_LatchedState = !Headlights_LatchedState;
-	PORTD ^= (1 << 5);
 }

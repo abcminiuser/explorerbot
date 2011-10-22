@@ -237,7 +237,7 @@ static inline void Bluetooth_L2CAP_Signal_ConnectReq(BT_StackConfig_t* const Sta
 	  RejectionReason = CALLBACK_Bluetooth_ChannelRequest(StackState, HCIConnection, L2CAPChannel) ? BT_CONNECTION_SUCCESSFUL : BT_CONNECTION_REFUSED_PSM;
 
 	Event->Event        = L2CAP_EVENT_ConnectReq;
-	Event->LocalNumber  = le16_to_cpu(L2CAPChannel->LocalNumber);
+	Event->LocalNumber  = L2CAPChannel->LocalNumber;
 	Event->RemoteNumber = le16_to_cpu(ConnectionRequest->SourceChannel);
 	Event->Result       = RejectionReason;
 }
@@ -252,15 +252,18 @@ static inline void Bluetooth_L2CAP_Signal_ConnectRsp(BT_StackConfig_t* const Sta
 	BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, HCIConnection->Handle, le16_to_cpu(ConnectionResponse->SourceChannel), 0);
 
 	if (L2CAPChannel)
-	{		
+	{
+		/* Save the now established connection's remote channel number allocated by the remote device */
+		L2CAPChannel->RemoteNumber = le16_to_cpu(ConnectionResponse->DestinationChannel);
+	
 		BT_L2CAP_Event_t* Event = Bluetooth_L2CAP_NewEvent(StackState, HCIConnection->Handle, SignalCommandHeader->Identifier);
 		
 		if (!(Event))
 		  return;
 		  
 		Event->Event        = L2CAP_EVENT_ConnectRsp;
-		Event->RemoteNumber = le16_to_cpu(L2CAPChannel->RemoteNumber);
-		Event->LocalNumber  = le16_to_cpu(L2CAPChannel->LocalNumber);
+		Event->RemoteNumber = L2CAPChannel->RemoteNumber;
+		Event->LocalNumber  = L2CAPChannel->LocalNumber;
 	}
 }
 
@@ -298,8 +301,8 @@ static inline void Bluetooth_L2CAP_Signal_DisconnectRsp(BT_StackConfig_t* const 
 		  return;
 		  
 		Event->Event        = L2CAP_EVENT_DisconnectRsp;
-		Event->LocalNumber  = le16_to_cpu(L2CAPChannel->LocalNumber);
-		Event->RemoteNumber = le16_to_cpu(L2CAPChannel->RemoteNumber);
+		Event->LocalNumber  = L2CAPChannel->LocalNumber;
+		Event->RemoteNumber = L2CAPChannel->RemoteNumber;
 	}
 }
 
@@ -372,7 +375,7 @@ static inline void Bluetooth_L2CAP_Signal_ConfigRsp(BT_StackConfig_t* const Stac
 	  return;
 
 	Event->Event       = L2CAP_EVENT_ConfigRsp;
-	Event->LocalNumber = le16_to_cpu(ConfigurationResponse->SourceChannel);
+	Event->LocalNumber = L2CAPChannel->LocalNumber;
 	Event->Result      = le16_to_cpu(ConfigurationResponse->Result);
 }
 
@@ -479,6 +482,7 @@ bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 		BT_L2CAP_Event_t* Event        = &StackState->State.L2CAP.Events[0];
 		bool              DequeueEvent = true;
 	
+		/* Look up the event's associated channel (if one exists) by the local channel number */
 		BT_L2CAP_Channel_t* L2CAPChannel = Bluetooth_L2CAP_FindChannel(StackState, Event->ConnectionHandle, Event->LocalNumber, 0);
 
 		/* Determine and process the next queued L2CAP event in the event queue, sending command packets as needed */
@@ -605,8 +609,6 @@ bool Bluetooth_L2CAP_Manage(BT_StackConfig_t* const StackState)
 		{
 			if (L2CAPChannel)
 			{
-				L2CAPChannel->RemoteNumber = Event->RemoteNumber;
-				
 				if (Event->Result == BT_CONNECTION_SUCCESSFUL)
 				  L2CAPChannel->State = L2CAP_CHANSTATE_Config_WaitConfig;
 				else if (Event->Result != BT_CONNECTION_PENDING)

@@ -1,0 +1,73 @@
+%%
+%% This is file `eso-pic.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% eso-pic.dtx  (with options: `package')
+%% 
+%% This file is part of the package `eso-pic' for use with LaTeX2e.
+%% 
+%% Function: Output picture code on every page.
+%% 
+%% Copyright (C) 1999 Rolf Niepraschk.
+%% 
+%% This program can be redistributed and/or modified
+%% under the terms of the LaTeX Project Public License
+%% distributed from CTAN archives in directory
+%% macros/latex/base/lppl.txt; either version 1 of
+%% the License, or (at your option) any later version.
+%% 
+%% Please send error reports and suggestions for improvements to
+%%   Rolf Niepraschk <niepraschk@ptb.de>.
+%% 
+%% \CharacterTable
+%%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%%   Digits        \0\1\2\3\4\5\6\7\8\9
+%%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%%   Dollar        \$     Percent       \%     Ampersand     \&
+%%   Acute accent  \'     Left paren    \(     Right paren   \)
+%%   Asterisk      \*     Plus          \+     Comma         \,
+%%   Minus         \-     Point         \.     Solidus       \/
+%%   Colon         \:     Semicolon     \;     Less than     \<
+%%   Equals        \=     Greater than  \>     Question mark \?
+%%   Commercial at \@     Left bracket  \[     Backslash     \\
+%%   Right bracket \]     Circumflex    \^     Underscore    \_
+%%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%%   Right brace   \}     Tilde         \~}
+%%
+\NeedsTeXFormat{LaTeX2e}[1995/01/25]
+
+\ProvidesPackage{eso-pic}[2001/07/20 v0.7 eso-pic (RN)]
+
+\RequirePackage{everyshi}[1995/01/25]
+
+\newcommand{\ESO@HookI}{}\newcommand{\ESO@HookII}{}
+\newcommand{\AddToShipoutPicture}{%
+  \@ifstar{\g@addto@macro\ESO@HookII}{\g@addto@macro\ESO@HookI}}
+\newcommand{\ClearShipoutPicture}{\let\ESO@HookI\@empty}
+\newcommand{\@ShipoutPicture}{%
+  \bgroup
+    \@tempswafalse%
+    \ifx\ESO@HookI\@empty\else\@tempswatrue\fi%
+    \ifx\ESO@HookII\@empty\else\@tempswatrue\fi%
+    \if@tempswa%
+      \@tempdima=1in\@tempdimb=-\@tempdima%
+      \advance\@tempdimb\paperheight\unitlength=1pt%
+      \global\setbox\@cclv\vbox{%
+        \vbox{%
+          \let\protect\relax
+          \pictur@(0,0)(\strip@pt\@tempdima,\strip@pt\@tempdimb)%
+            \ESO@HookI\ESO@HookII\global\let\ESO@HookII\@empty%
+          \endpicture}%
+        \box\@cclv%
+      }%
+    \fi
+  \egroup
+}
+
+\EveryShipout{\@ShipoutPicture}
+\endinput
+%%
+%% End of file `eso-pic.sty'.

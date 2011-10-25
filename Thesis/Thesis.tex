@@ -22,10 +22,8 @@
 \frontmatter	  % Begin Roman style (i, ii, iii, iv...) page numbering
 
 % Set up the Title Page
-\title  {Embedded Bluetooth Stack}
-\authors  {\texorpdfstring
-						{\href{mailto:dean@fourwalledcubicle.com}{Dean Camera}}
-						{Dean Camera}}
+\title      {Embedded Bluetooth Stack}
+\authors    {\texorpdfstring {\href{mailto:dean@fourwalledcubicle.com}{Dean Camera}} {Dean Camera}}
 \addresses  {\groupname\\\deptname\\\univname}  % Do not change this here, instead these must be set in the "Thesis.cls" file, please look through it instead
 \date       {\today}
 \subject    {}
@@ -42,26 +40,22 @@
 
 \pagestyle{fancy}  % Finally, use the "fancy" page style to implement the FancyHdr headers
 %% ---------------------------------------------------------------- 
-
-
-% The Abstract Page
 \addtotoc{Abstract}  % Add the "Abstract" page entry to the Contents
 \abstract{
-\addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
+	\addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
 
-%TODO - Abstract Text
-
+	%TODO - Abstract Text
 }
 
 \clearpage  % Abstract ended, start a new page
 %% ----------------------------------------------------------------
-
 \setstretch{1.3}  % Reset the line-spacing to 1.3 for body text (if it has changed)
 
 % The Acknowledgements page, for thanking everyone
 \acknowledgements{
-\addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
-
+	\addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
+	
+	% TODO - Acknowledgements
 }
 \clearpage  % End of the Acknowledgements
 %% ----------------------------------------------------------------
@@ -79,12 +73,7 @@
 \mainmatter
 \pagestyle{fancy}
 
-% Include the chapters of the thesis, as separate files
-% Just uncomment the lines as you write the chapters
-
-\input{./Chapters/Chapter1} % Introduction
-
-% TODO - Additional Chapters here
+	\input{./Chapters/Chapter1}
 
 %% ----------------------------------------------------------------
 \setstretch{1.5}  % Set the line spacing to 1.5, this makes the following tables easier to read
@@ -92,19 +81,15 @@
 \lhead{\emph{Abbreviations}}  % Set the left side page header to "Abbreviations"
 \listofsymbols{ll}  % Include a list of Abbreviations (a table of two columns)
 {
-% \textbf{Acronym} & \textbf{W}hat (it) \textbf{S}tands \textbf{F}or \\
-
-% TODO - Abbreviations
-
+	% \textbf{Acronym} & \textbf{W}hat (it) \textbf{S}tands \textbf{F}or \\
+	
+	% TODO - Abbreviations
 }
 %% ----------------------------------------------------------------
-% Now begin the Appendices, including them as separate files
-
 \addtocontents{toc}{\vspace{1em}} % Add a gap in the Contents, for aesthetics
-
 \appendix % Cue to tell LaTeX that the following 'chapters' are Appendices
 
-% TODO - Appendicies
+	\input{./Appendices/Schematics}
 
 \addtocontents{toc}{\vspace{2em}}  % Add a gap in the Contents, for aesthetics
 \backmatter

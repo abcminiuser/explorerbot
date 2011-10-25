@@ -161,12 +161,6 @@
 \DEPARTMENT  {\texorpdfstring{\href{http://www.latrobe.edu.au/ee}
                 {DEPARTMENT OF ELECTRONIC ENGINEERING}}
                 {DEPARTMENT OF ELECTRONIC ENGINEERING}}
-\group       {\texorpdfstring{\href{Research Group Web Site URL Here (include http://)}
-                {Research Group Name}}
-                {Research Group Name}}
-\GROUP       {\texorpdfstring{\href{Research Group Web Site URL Here (include http://)}
-                {RESEARCH GROUP NAME (IN BLOCK CAPITALS)}}
-                {RESEARCH GROUP NAME (IN BLOCK CAPITALS)}}
 \faculty     {\texorpdfstring{\href{http://www.latrobe.edu.au/scitecheng/}
                 {Faculty of Science, Technology and Engineering}}
                 {Faculty of Science, Technology and Engineering}}

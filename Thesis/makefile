@@ -1,8 +1,20 @@
 OUTPUT_DIR = Output
 
-all:
-	$(shell mkdir $(OUTPUT_DIR) 2>/dev/null)
-	pdflatex -c-style-errors --output-directory=$(OUTPUT_DIR) Thesis.tex
+
+# Build the LaTeX document.
+all: outputdir pdf
 	
+# Remove output directory.
 clean:
 	rm -rf $(OUTPUT_DIR)
+
+
+
+# Create LaTeX output directory.
+outputdir:
+	$(shell mkdir $(OUTPUT_DIR) 2>/dev/null)
+	
+# Generate PDF output from LaTeX input files.
+pdf:
+	pdflatex -quiet -c-style-errors --output-directory=$(OUTPUT_DIR) Thesis.tex
+	pdflatex -quiet -c-style-errors --output-directory=$(OUTPUT_DIR) Thesis.tex

@@ -2,16 +2,63 @@
 \label{Chapter1}
 \lhead{Chapter 1. \emph{Overview}}
 
-% TODO
+In almost all modern portable consumer devices, Bluetooth plays a large role; it is available in
+the vast majority of mobile phones and their associated accessories, in cars, in laptops and, most
+recently, in mobile tablet PCs. Bluetooth as a technology gives a standardized low power wireless
+communications standard from the baseband up to the higher level services, allowing implementing
+devices to communicate with one another in a manufacturer-agnostic way. This freeing of consumers
+from the proprietary short range wireless solutions (such as \emph{ZigBee}) has helped make Bluetooth
+the wireless communication system of choice for many applications.
 
 \section{Project Background}
 
-% TODO
+Despite this ubiquity, Bluetooth remains firmly in the realm of systems containing large amounts of
+RAM, storage, processing power and - in many cases - full operating system stacks. For small-scale
+embedded devices with tiny 8-bit processors, clock speeds in the tens of MHz (or even less) and RAM
+measured in kilobytes, Bluetooth remains impractical either due to its expense or the lack of suitable
+software.
+
+However, existing solutions do exist. System designers can integrate off-the-shelf Bluetooth solutions
+in their products; small hardware modules containing the Bluetooth baseband and a fixed-function
+microprocessor, which handles the complex onion-like layers of the various Bluetooth stack components.
+These modules are generally fixed function however, making them unsuitable in applications where a specific 
+or even custom Bluetooth service is required. In addition, such modules are generally significantly more
+expensive than the product's main processor, negating its cost/benefit ratio where a more powerful
+system processor could be substituted to manage the entire application including the Bluetooth component.
+
+These turn-key modules are made all the less attractive when one considers the cost of a raw Bluetooth
+baseband IC module, without an integrated processor to manage the software stack; these are generally
+available from multiple vendors at costs measured in the sub-US\$5 range. This indicates that the main cost
+of the complete modular solutions lies not in the physical hardware, but the IP of the Bluetooth software
+stack. If such a stack could be made widely available for use in embedded systems, this fixed-cost vendor
+lock-in could be avoided and cheaper Bluetooth enabled systems developed for both hobbyist and commercial
+use.
 
 \section{Project Brief}
 
 % TODO
 
+% Explain project - embedded stack and robot
+
 \section{Design Goals}
+
+For such a stack to be useful in an embedded environment, it must be able to conform
+to the restrictions such an environment imposes. Specfically, the completed stack must
+minimize its compiled and working set footprints, reduce or eliminate the need for
+dynamic memory allocation, and minimize its hardware dependencies to suit as wide a
+range of processors of differing capabilities as possible.
+
+The design goals of the complete stack were therefore set to:
+
+\begin{itemize}
+	\item Use as little RAM as possible
+	\item Compile to as small a binary as is practical
+	\item Offer a framework upon which services can be added to suit a particular application
+	\item Provide asynchronous events to which the user application can respond to
+	\item Allow for a variable number of simultaneous connections and logical channels to/from remote devices
+	\item Have no requirement for dynamic memory allocation on the heap
+	\item Be fully decoupled from the physical transport to the Bluetooth Adapter
+	\item Be endian-correct regardless of native processor endianness
+\end{itemize}
 
 % TODO

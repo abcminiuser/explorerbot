@@ -239,7 +239,7 @@
     {\normalsize \facname \par}
     {\normalsize \deptname \par}
     \bigskip
-    {\normalsize Bachelor of Computer Science\textbackslash\par}
+    {\normalsize Bachelor of Computer Science/\par}
     {\normalsize Bachelor of Electronics Engineering\par}
     \bigskip
     {\normalsize\bf \@title \par}

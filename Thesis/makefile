@@ -16,5 +16,5 @@ outputdir:
 	
 # Generate PDF output from LaTeX input files.
 pdf:
-	pdflatex -quiet -c-style-errors --output-directory=$(OUTPUT_DIR) Thesis.tex
 	pdflatex -c-style-errors --output-directory=$(OUTPUT_DIR) Thesis.tex
+	pdflatex -quiet --output-directory=$(OUTPUT_DIR) Thesis.tex

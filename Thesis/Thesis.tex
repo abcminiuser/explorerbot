@@ -12,6 +12,7 @@
 \usepackage{vector}  % Allows "\bvec{}" and "\buvec{}" for "blackboard" style bold vectors in maths
 \usepackage[final]{pdfpages} % Allows for importing of pdfs
 \usepackage{listings} % Alows for code inclusions
+\usepackage{float}
 \lstset{	language=c,breaklines=false,tabsize=3}
 \hypersetup{urlcolor=black, colorlinks=true}  % Colours hyperlinks in black to avoid distractions.
 \newcommand{\superscript}[1]{\ensuremath{^{\textrm{#1}}}}
@@ -69,9 +70,9 @@
 	
 	Special thanks to Robert Ross for his 3D modeling contributions to the project, without which the project's final
 	robot design would be all the poorer.
-	Thank you to the wider AVR community for their interest and support for the project, and to Matt from {\i Opendous Inc.}
 	
-	for his contribution of free {\it Micropendous} AVR microcontroller boards used in the final robot prototype.
+	Thank you to the wider AVR community for their interest and support for the project, and to Matt from \textit{\href{http://www.micropendous.org}{Opendous Inc.}}
+	for his contribution of the free \textit{"Micropendous"} AVR microcontroller boards used in the final robot prototype.
 }
 \clearpage  % End of the Acknowledgements
 %% ----------------------------------------------------------------
@@ -108,6 +109,7 @@
 	\textbf{HID} & \textbf{H}uman \textbf{I}nterface \textbf{D}evice \\
 	\textbf{I\textsuperscript{2}C} & \textbf{I}nter \textbf{I}ntegrated \textbf{C}ircuit Bus \\
 	\textbf{L2CAP} & Bluetooth \textbf{L}ogical \textbf{L}ink \textbf{C}ontrol and \textbf{A}daption \textbf{P}rotocol \\
+	\textbf{LED} & \textbf{L}ight \textbf{E}mitting \textbf{D}iode \\
 	\textbf{LUFA} & \textbf{L}ightweight \textbf{U}SB \textbf{F}ramework for \textbf{A}VRs \\
 	\textbf{PWM} & \textbf{P}ulse \textbf{W}idth \textbf{M}odulation \\
 	\textbf{RTOS} & \textbf{R}eal \textbf{T}ime \textbf{O}perating \textbf{S}ystem \\

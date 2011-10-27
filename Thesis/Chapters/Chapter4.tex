@@ -61,7 +61,33 @@ As the AT90USB1287 and associated USB components are difficult to source in sing
 
 \subsection{User Interface}
 
-% TODO
+For interaction with the user, the robot contains several components, detailed below.
+
+\subsubsection{RGB Status LED}
+
+For primary status indication, a surface mount RGB LED indicates the current status of the robot. Due to a lack of free PWM channels on the AVR microcontroller, the three LED subcomponents are wired directly to standard GPIO ports. While this prevents PWM fading from producing a many-bit custom colour from the LED, a three bit colour space is possible giving a total of 7 possible colours (and no colour when all the LED subcomponents are turned off). For the purposes of status indication, this is in practice more than enough for basic status indication.
+
+To achieve a somewhat uniform brightness, the three LEDs were adjusted with current limiting resistors to consume an equal amount of current (approx. 5mA). As the RGB status LED shares the same I/O pins as the microcontroller's JTAG port for programmign and debugging, the RGB LED's common annode was connected via a removable wire link to ensure that it could be taken out-of-circuit if it proved to intefere with the debugger during development.
+
+\subsubsection{LCD Display}
+
+For situations where more information needs to be communicated to the user than is possible via the RGB status LED, a 16x2 Alphanumeric LCD display - based on the well known HD44780 chipset - was added to the design. Due to the limited number of GPIO pins avaliable on the microcontroller, the LCD was wired in 4-bit mode, with the lower 4 data pins on the LCD being wired directly to ground. While this doubled the time required to send a byte to the LCD (as bytes then need to be split into a pair of 4-bit nibbles) the high speed of the processor meant that in practise this had little or no effect to the overal speed of the system.
+
+The LCD backlight was wired through a driver transistor to a spare PWM channel on the AVR microcontroller, allowing for 8-bit PWM brightness control to reduce power consumption of the backlight when not in use.
+
+\subsubsection{Buttons}
+
+A pair of standard PCB round buttons were added to the design, for user input. These buttons were wired directly to the microcontroller's GPIO pins; internal pull-up resistors in the microcontroller takes care of maintaining a defined logic level on the pins when the buttons are released, while software handles the debouncing of the button signals.
+
+\subsection{Headlights}
+
+To provide illumination of the area immediately ahead of the robot, a pair of high intensity white LEDs were added to the schematic, connected to a single common driver transistor and driven by a GPIO pin of the microcontroller. To ensure maximum illumination, the LEDs were driven at just under their full 20mA rating when turned on. These "headlights" were then mounted on the front of the robot chassis.
+
+\subsection{Speaker}
+
+A small PCB Piezo speaker was added to the robot, in order to provide both audio feedback for important events (such as Bluetooth connections and disconnections) as well as to act as a miniature horn to attract the attention of any organic obstacles to encourage then to move away from the robot's line of motion. Rather than mounting the speaker directly onto the PCB, it was determined that a better location was in between the two frontal headlight LEDs, with the speaker then connected back to the PCB via flyleads. This arrangement made the directional speaker point in the orientation most suited to a car horn, i.e. towards the front of the robot.
+
+To drive the speaker, a standard NPN transistor was employed to provide sufficient current, driven from an 8-bit PWM timer output GPIO pin of the AVR microcontroller.
 
 \subsection{Motor Controller}
 
@@ -85,7 +111,7 @@ Initially, only an ADG3308 8-channel Bidirectional Level Converter IC was used, 
 
 \subsubsection{Atmel Sensor Boards}
 
-By designing the robot around the commercially available Atmel sensor boards for sensor feedback, the design of the robot was considerably simplified and the total unit cost lowered. The \textit{Atmel Pressure One} board contains a Bosch BMP085 Pressure Sensor IC for air pressure sensing, while the Atmel \textit{Inertial One} contains a 3-Axis ITG3200 Gyroscope, 3-Axis BMA150 Accelerometer and 3-Axis AK8975 Compass IC. As several of the sensors also contain a digital temperature sensor in addition to the primary sensor (for calibration and stability feedback) this functionality was also used by the robot to measure the environmental temperature in real time.
+By designing the robot around the commercially available Atmel sensor boards for sensor feedback, the design of the robot was considerably simplified and the total unit cost lowered. The \textit{Atmel Pressure One} board contains a Bosch BMP085 Pressure Sensor IC for air pressure sensing, while the Atmel \textit{Inertial One} contains a 3-Axis ITG3200 Gyroscope, 3-Axis BMA150 Accelerometer and 3-Axis AK8975 Compass IC (see Figure \ref{fig:atmelsensorboards}). As several of the sensors also contain a digital temperature sensor in addition to the primary sensor (for calibration and stability feedback) this functionality was also used by the robot to measure the environmental temperature in real time.
 
 \begin{figure}
 	\centering
@@ -93,6 +119,6 @@ By designing the robot around the commercially available Atmel sensor boards for
 		\includegraphics[height=70mm]{./Figures/Pressure1.jpg}
 	\rule{35em}{0.5pt}
 	\caption[Atmel Sensor Boards]{The Atmel \emph{Inertial One} (left) and \emph{Pressure One} (Right) Sensor Boards (Image courtesy \textit{Atmel Corp.})}
-	\label{fig:micropendous}
+	\label{fig:atmelsensorboards}
 \end{figure}
 

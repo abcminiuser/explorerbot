@@ -43,9 +43,9 @@ In the section, the various hardware components of the constructed robot are det
 
 \subsection{Microprocessor}
 
-Due to the author's familiarity with the Atmel line of \textit{AVR} Microcontrollers, one of the avaliable models in this line-up was chosen to serve in the robot as the main processor, the AT90USB1287. This 8-bit microcontroller contains 128KB of non-voltatile FLASH memory for program storage, 4KB of non-voltatile EEPROM for user application parameter storage and 8KB of internal SRAM for scratch memory. A 16MHz clock (provided by an external crystal) was selected for the design as this offered the fastest possible speed the chip was capable of, while still allowing the hardware USB host controller inside the chip to function normally. As a trade-off, this higher clock speed put a constraint on the main logic level voltage; at 16MHz, the AVR microcontroller requires 5V to be within the datasheet's specifications.
+Due to the author's familiarity with the Atmel line of \textit{AVR} branded microcontrollers, one of the avaliable models in this line-up was chosen to serve in the robot as the main processor, the AT90USB1287. This 8-bit microcontroller contains 128KB of non-voltatile FLASH memory for program storage, 4KB of non-voltatile EEPROM for user application parameter storage and 8KB of internal SRAM for scratch memory. A 16MHz clock (provided by an external crystal) was selected for the design as this offered the fastest possible speed the chip was capable of, while still allowing the hardware USB host controller inside the chip to function normally. As a trade-off, this higher clock speed put a constraint on the main logic level voltage; at 16MHz, the AVR microcontroller required 5V to be within the datasheet's specifications.
 
-As the AT90USB1287 and associated USB components are difficult to source in single quantities at reasonable prices, the use of a commercial module containing this chip was selected instead: the \textit{Micropendous-A} board (see Figure \ref{fig:micropendous}). This board contains the surface mount AVR microcontroller and associated USB components, along with an external 128KB SRAM chip attached to the AVR's external memory bus interface. As the Bluetooth stack required a large temporary buffer for incoming fragments, the selection of this board proved ideal for the intended purpose.
+As the AT90USB1287 and associated USB components are difficult to source in single quantities at reasonable prices, the use of a commercial breakout module containing this chip was selected instead: the \textit{Micropendous-A} board (see Figure \ref{fig:micropendous}). This board contains the surface mount AVR microcontroller and associated USB components, along with an external 128KB SRAM chip attached to the AVR's external memory bus interface. As the Bluetooth stack required a large temporary buffer for incoming fragments, the selection of this board proved ideal for the intended purpose.
 
 \begin{figure}
 	\centering
@@ -57,7 +57,11 @@ As the AT90USB1287 and associated USB components are difficult to source in sing
 
 \subsection{Primary Power Supply}
 
-% TODO
+As the vast majority of the robot's hardware operated at a fixed 5V level, a power supply was required to reduce the Lithium Ion battery's raw 7.2V (nominal) voltage down to the 5V level needed to power the various components. Due to the use of battery power in the project, reducing power consumption where possible was a large concern; thus, a switchmode design was chosen for maximum voltage conversion efficiency. A conventional linear regulator was considered for the design, but rejected due to the prohibitably large amount of power this would waste (approximately .45W, assuming an average 200mA operating current).
+
+The regulator selected for the project was the M2595S-5.0, a fixed-function switchmode regulator capable of outputing a fixed 5V rail at loads of up to 3A. While the robot design would not consume even a fifth of this power, the overhead ensured that the power supply would remain robust and the output within the tollerances of the system components regardless of the load demanded. The exact schematic used in the final robot power supply design was taken from the regulator component's datasheet to ensure correct operation.
+
+% TODO - diagrams showing layout and schematic of power supply
 
 \subsection{User Interface}
 
@@ -65,13 +69,13 @@ For interaction with the user, the robot contains several components, detailed b
 
 \subsubsection{RGB Status LED}
 
-For primary status indication, a surface mount RGB LED indicates the current status of the robot. Due to a lack of free PWM channels on the AVR microcontroller, the three LED subcomponents are wired directly to standard GPIO ports. While this prevents PWM fading from producing a many-bit custom colour from the LED, a three bit colour space is possible giving a total of 7 possible colours (and no colour when all the LED subcomponents are turned off). For the purposes of status indication, this is in practice more than enough for basic status indication.
+For primary status indication, a surface mount RGB LED indicates the current status of the robot. Due to a lack of free PWM channels on the AVR microcontroller, the three LED subcomponents are wired directly to standard GPIO ports. While this prevents PWM fading from producing a many-bit custom colour from the LED, a three bit colour space is possible giving a total of 7 possible colours (and no colour when all the LED subcomponents are turned off). For the purposes of the created robot, this is in practice more than enough for basic status indication.
 
-To achieve a somewhat uniform brightness, the three LEDs were adjusted with current limiting resistors to consume an equal amount of current (approx. 5mA). As the RGB status LED shares the same I/O pins as the microcontroller's JTAG port for programmign and debugging, the RGB LED's common annode was connected via a removable wire link to ensure that it could be taken out-of-circuit if it proved to intefere with the debugger during development.
+To achieve a somewhat uniform brightness, the three LEDs were adjusted with current limiting resistors to consume an equal amount of current (approx. 5mA) despite differing forward voltages. As the RGB status LED shares the same I/O pins as the microcontroller's JTAG port for programmign and debugging, the RGB LED's common annode was connected via a removable wire link to ensure that it could be taken out-of-circuit if it proved to intefere with the external hardware debugger during development.
 
 \subsubsection{LCD Display}
 
-For situations where more information needs to be communicated to the user than is possible via the RGB status LED, a 16x2 Alphanumeric LCD display - based on the well known HD44780 chipset - was added to the design. Due to the limited number of GPIO pins avaliable on the microcontroller, the LCD was wired in 4-bit mode, with the lower 4 data pins on the LCD being wired directly to ground. While this doubled the time required to send a byte to the LCD (as bytes then need to be split into a pair of 4-bit nibbles) the high speed of the processor meant that in practise this had little or no effect to the overal speed of the system.
+For situations where more information needs to be communicated to the user than is possible via the RGB status LED, a 16x2 Alphanumeric LCD display - compatible with the well known Hitatchi HD44780 chipset - was added to the design. Due to the limited number of GPIO pins avaliable on the microcontroller, the LCD was wired in 4-bit mode, with the lower 4 data pins on the LCD being wired directly to ground. While this doubled the time required to send a byte to the LCD (as bytes then need to be split into a pair of 4-bit nibbles) the high speed of the processor meant that in practice this had little or no effect to the overall speed of the system.
 
 The LCD backlight was wired through a driver transistor to a spare PWM channel on the AVR microcontroller, allowing for 8-bit PWM brightness control to reduce power consumption of the backlight when not in use.
 
@@ -101,17 +105,23 @@ To provide a measure of feedback from the robot, a number of sensors were added 
 
 While the main system logic and user interface components run from the main switch-mode 5V power supply, the sensor boards were required to run at a fixed 3.3V level, without the possibility of conversion to suit the higher rail voltage.
 
-For this reason, and to reduce the amount of noise on the sensor power supply for maximum precision, a desision was made to add a secondary power supply, running from the 5V rail, to step down the voltage to the 3.3V required by the sensor boards. For maximum noise reduction, a conventonal Low Dropout (LDO) style regular was used.
+For this reason, and to reduce the amount of noise on the sensor power supply for maximum precision, a desision was made to add a secondary power supply, running from the 5V rail, to step down the voltage to the 3.3V required by the sensor boards. For best results, an ADP3308 Low Dropout (LDO) style regular was used as this provided both low output rail noise and minimal wasted power.
 
 \subsubsection{Level Converters}
 
 Due to the differing bus voltages between the sensor boards (3.3V) and the main processor (5V), level conversion of the I\textsuperscript{2}C bus and sensor interrupt/control lines was required. While only a unidirectional buffer was strictly needed for each of the sensor interrupt/control lines, it was decided to use a bidirectional converter to ease the board routing.
 
-Initially, only an ADG3308 8-channel Bidirectional Level Converter IC was used, for both the sensor interrupt/control lines, as well as the I\textsuperscript{2}C bus. However, after further analysis it was discovered that the level translater would not meet the timing requirements of the I\textsuperscript{2}C bus, neccesitating the addition of a secondary dedicated TI PCA9306 fixed function I\textsuperscript{2}C bus level converter IC in the second revision of the board. As a bonus, the use of the later chip allowed the I\textsuperscript{2}C bus to be driven at the "Fast" I\textsuperscript{2}C speed of 200KHz for minimal latency and maximum throughput.
+Initially, only an ADG3308 8-channel Bidirectional Level Converter IC was used, for both the sensor interrupt/control lines, as well as the I\textsuperscript{2}C bus. However, after further analysis it was discovered that the level translater would not meet the timing requirements of the I\textsuperscript{2}C bus, neccesitating the addition of a secondary dedicated Texas Instruments PCA9306 fixed function I\textsuperscript{2}C bus level converter IC in the second revision of the board. As a bonus, the use of the later chip allowed the I\textsuperscript{2}C bus to be driven at the "Fast" I\textsuperscript{2}C speed of 200KHz for minimal latency and maximum throughput.
+
+The board routing complexity was reduced slightly by swapping the functions of the PCA9306 bus level translatator's SDA and SCL pins on both sides of the IC; this modification (allowable as indicated in the device's datasheet) prevented the need to introduce additional board vias and longer trace routes.
+
+% TODO - schematic showing swapped pin functions
 
 \subsubsection{Atmel Sensor Boards}
 
-By designing the robot around the commercially available Atmel sensor boards for sensor feedback, the design of the robot was considerably simplified and the total unit cost lowered. The \textit{Atmel Pressure One} board contains a Bosch BMP085 Pressure Sensor IC for air pressure sensing, while the Atmel \textit{Inertial One} contains a 3-Axis ITG3200 Gyroscope, 3-Axis BMA150 Accelerometer and 3-Axis AK8975 Compass IC (see Figure \ref{fig:atmelsensorboards}). As several of the sensors also contain a digital temperature sensor in addition to the primary sensor (for calibration and stability feedback) this functionality was also used by the robot to measure the environmental temperature in real time.
+By designing the robot around a pair of commercially available Atmel sensor boards for environmental feedback, the design of the robot was considerably simplified and the total unit cost lowered. The \textit{Atmel Pressure One} board contains a Bosch BMP085 Pressure Sensor IC for air pressure sensing, while the Atmel \textit{Inertial One} contains a 3-Axis ITG3200 Gyroscope, 3-Axis BMA150 Accelerometer and 3-Axis AK8975 Compass IC (see Figure \ref{fig:atmelsensorboards}). As several of the sensors also contain a digital temperature sensor in addition to the primary sensor (for calibration and stability feedback) this functionality was also used by the robot to measure the environmental temperature in real time.
+
+Each sensor IC is driven by the main microcontroller of the robot over the level converted I\textsuperscript{2}C bus and one or more interrupt/control lines.
 
 \begin{figure}
 	\centering

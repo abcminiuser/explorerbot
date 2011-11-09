@@ -2,19 +2,19 @@
 \label{Chapter1}
 \lhead{Chapter 1. \emph{Overview}}
 
-In almost all modern portable consumer devices, Bluetooth plays a large role; it is available in the vast majority of mobile phones and their associated accessories, in cars, in laptops and, most recently, in mobile tablet PCs. Bluetooth as a technology gives a standardized low power wireless communications standard from the baseband up to the higher level services, allowing implementing devices to communicate with one another in a manufacturer-agnostic way. This freeing of consumers from the proprietary short range wireless solutions (such as \textit{ZigBee}) has helped make Bluetooth the wireless communication system of choice for many applications.
+In almost all modern portable consumer devices, Bluetooth plays a large role; it is available in the vast majority of mobile phones and their associated accessories, in cars, in laptops and, most recently, in mobile tablet PCs. Bluetooth as a technology gives system designers a low power wireless communications standard from the baseband up to the higher level abstract services, allowing implementing devices to communicate with one another in a manufacturer-agnostic way. This freeing of consumers from the proprietary short range wireless solutions (such as \textit{ZigBee}) has helped make Bluetooth the wireless communication system of choice for many applications.
 
 \section{Project Background}
 
-Despite this ubiquity, Bluetooth remains firmly in the realm of systems containing large amounts of RAM, storage, processing power and - in many cases - full operating system stacks. For small-scale embedded devices with tiny 8-bit processors, clock speeds in the tens of MHz (or even less) and RAM measured in kilobytes, Bluetooth remains impractical either due to its expense or the lack of suitable software.
+Despite this ubiquity, Bluetooth remains firmly in the realm of systems containing large amounts of RAM and FLASH memories, processing power and - in many cases - full operating system stacks. For small-scale embedded devices with tiny 8-bit processors, clock speeds in the tens of MHz (or even less) and RAM measured in kilobytes, Bluetooth remains impractical; either due to its expense or the lack of suitable software.
 
-However, existing solutions do exist. System designers can integrate off-the-shelf Bluetooth solutions in their products; small hardware modules containing the Bluetooth baseband and a fixed-function microprocessor, which handles the complex onion-like layers of the various Bluetooth stack components. These modules are generally fixed function however, making them unsuitable in applications where a specific or even custom Bluetooth service is required. In addition, such modules are generally significantly more expensive than the product's main processor, negating its cost/benefit ratio where a more powerful system processor could be substituted to manage the entire application including the Bluetooth component.
+However, existing solutions do exist. System designers can integrate off-the-shelf Bluetooth solutions in their products; small hardware modules containing the Bluetooth baseband and a fixed-function microprocessor. This microprocessor then handles the complex onion-like layers of the various Bluetooth stack components, offloading the computational load and implementation complexity from the main system processor. These modules are generally ridgid in their functionality however, making them unsuitable in applications where a specific or even custom Bluetooth service is required. In addition, such modules are generally significantly more expensive than the product's main processor, negating its cost/benefit ratio where a more powerful system processor could be substituted to manage the entire application including the Bluetooth component.
 
-These turn-key modules are made all the less attractive when one considers the cost of a raw Bluetooth baseband IC module, without an integrated processor to manage the software stack; these are generally available from multiple vendors at costs measured in the sub-US\$5 range. This indicates that the main cost of the complete modular solutions lies not in the physical hardware, but the IP of the Bluetooth software stack. If such a stack could be made widely available for use in embedded systems, this fixed-cost vendor lock-in could be avoided and cheaper Bluetooth enabled systems developed for both hobbyist and commercial use.
+These turn-key modules are made all the less attractive when one considers the cost of a raw Bluetooth baseband IC module. Without an integrated processor to manage the software stack, these are generally available from multiple vendors at costs measured in the sub-US\$5 range. This indicates that the main cost of the complete modular solutions lies not in the physical hardware, but the IP of the Bluetooth software stack. If such a stack could be made widely available for use in embedded systems, this fixed-cost vendor lock-in could be avoided and cheaper Bluetooth enabled systems developed for both hobbyist and commercial use.
 
 \section{Project Brief}
 
-To help fill this gap in the marketplace for a cheap, open source Bluetooth stack aimed at the low to mid-range embedded market, it is proposed that a new stack be designed from scratch specifically for this market segment. This stack would offer a base amount of functionality suitable for integration into new or existing embedded systems, to extend the system functionality to include wireless Bluetooth communications.
+To help fill the identified gap in the marketplace for a cheap, open source Bluetooth stack aimed at the low to mid-range embedded market, it is proposed that a new stack be designed from scratch specifically for this market segment. This stack would offer a base amount of functionality suitable for integration into new or existing embedded systems, to extend the system functionality to include wireless Bluetooth communications.
 
 At a minimum, a functional Bluetooth stack needs to have at least four components:
 
@@ -43,7 +43,7 @@ With the combination of the software \emph{(the stack)} and hardware \emph{(the 
 
 \section{Design Goals}
 
-The design goals of the project were split into two parts \emph{(software and hardware)} in order to seperate the testing platform hardware goals from those of the logical Bluetooth stack.
+The design goals of the project were split into two distinct parts, consisting of the software Bluetooth Stack implementation, and the physical robot hardware design. This seperation of the testing platform hardware goals from those of the logical Bluetooth stack allowed for the clearest representation of the project as a whole.
 
 \subsection{Software Goals}
 
@@ -60,19 +60,22 @@ The design goals of the complete software stack were therefore set to:
 	\item Have no requirement for dynamic memory allocation on the heap
 	\item Be fully decoupled from the physical transport to the Bluetooth Adapter
 	\item Be endian-correct regardless of native processor endianness
+	\item Maintain a level of compatibility with Bluetooth Version 2.1 specification as maintained by the Bluetooth \textit{Special Interest Group} (SIG)
 \end{itemize}
+
+While at the point of the project's design and development a newer Bluetooth 3.0 version standard was available, a decision was made to implement the slightly older - and far more popular - version 2.1 of the Bluetooth specification. This decision was made due to the abundance of cheap Bluetooth 2.1 compatible hardware already of the market (and, conversely, the lack of cheap and widely available Bluetooth 3.0 hardware). In addition, the aim of the project was set to produce a \textit{compatible} rather than fully \textit{compliant} stack, due to the significantly increased development complexity of the latter for little additional benefit.
 
 \subsection{Hardware Goals}
 
-To make a useful, visual and functional testing platform, a decision was made to produce a small, battery powered robot. This robot would serve as a both a testing platform for the completed stack to verify its correct operation in a real-world environment during development, and to function as a reference application of the completed stack.
+To make a useful, visual and functional testing platform, a decision was made to produce a small, battery powered robot. This robot would serve as both a testing platform for the completed stack to verify its correct operation in a real-world environment during development, and to function as a reference application of the completed stack.
 
-In order to fully demonstrate the capabilities of the Bluetooth stack, the robot would have to include both locally initiated Bluetooth connections, as well as accept remotely initiated connections. In addition, data would have to be both received and processed by the device, as well as sent to a remote device.
+In order to fully demonstrate the capabilities of the Bluetooth stack, the robot would have to include both locally initiated Bluetooth connections, as well as accept remotely initiated connections. In addition to this requirement, data would have to be both received and sent to and from a remote device to demonstrate full duplex communications.
 
 A set of design goals was thus created for the robot:
 
 \begin{itemize}
 	\item Allow the user to initiate a connection to a remote device via the robot
-	\item Accept incoming connections from remote Bluetooth devices, including authentication
+	\item Accept incoming connections from remote Bluetooth devices, including some level of authentication
 	\item Consume data received from remote Bluetooth device(s) via one or more Bluetooth services
 	\item Produce data to be transmitted to remote Bluetooth device(s) via one or more Bluetooth services
 	\item Visually indicate status and debug messages via a display mechanism, for debugging

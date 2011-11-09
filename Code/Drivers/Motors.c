@@ -59,10 +59,10 @@ void Motors_Init(void)
  */
 void Motors_SetChannelSpeed(const int16_t LeftPower, const int16_t RightPower)
 {
-	bool     LeftDirection  = (LeftPower  > 0);
-	bool     RightDirection = (RightPower > 0);
-	bool     LeftDirChange  = LeftDirection  ? !(PORTD & (1 << 4)) : (PORTD & (1 << 4));
-	bool     RightDirChange = RightDirection ? !(PORTD & (1 << 3)) : (PORTD & (1 << 3));
+	bool LeftDirection  = (LeftPower  >= 0);
+	bool RightDirection = (RightPower >= 0);
+	bool LeftDirChange  = LeftDirection  ? !(PORTD & (1 << 4)) : (PORTD & (1 << 4));
+	bool RightDirChange = RightDirection ? !(PORTD & (1 << 3)) : (PORTD & (1 << 3));
 
 	/* If motor channel off or direction switching, disable the PWM output completely */
 	if (LeftDirChange || !(LeftPower))

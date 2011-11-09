@@ -42,6 +42,7 @@
 int main(void)
 {
 	SetupHardware();
+	
 	StartupSequence();
 	CheckSensors();
 

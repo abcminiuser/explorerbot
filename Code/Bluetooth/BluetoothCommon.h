@@ -27,10 +27,10 @@
 
 	/* Defines: */
 		/** Maximum number of simultaneous device connections (user-configurable). */
-		#define BT_MAX_DEVICE_CONNECTIONS         3
+		#define BT_MAX_DEVICE_CONNECTIONS         5
 		
 		/** Maximum number of simultaneous L2CAP logical channels (user-configurable). */
-		#define BT_MAX_LOGICAL_CHANNELS           (BT_MAX_DEVICE_CONNECTIONS * 8)
+		#define BT_MAX_LOGICAL_CHANNELS           (BT_MAX_DEVICE_CONNECTIONS * 5)
 		
 		/** Maximum number of queued L2CAP signalling commands (user-configurable). */
 		#define BT_MAX_QUEUED_L2CAP_EVENTS        10

@@ -47,7 +47,7 @@ Due to the author's familiarity with the Atmel line of \textit{AVR} branded micr
 
 As the AT90USB1287 and associated USB components are difficult to source in single quantities at reasonable prices, the use of a commercial breakout module containing this chip was selected instead: the \textit{Micropendous-A} board (see Figure \ref{fig:micropendous}). This board contains the surface mount AVR microcontroller and associated USB components, along with an external 128KB SRAM chip attached to the AVR's external memory bus interface. As the Bluetooth stack required a large temporary buffer for incoming fragments, the selection of this board proved ideal for the intended purpose.
 
-\begin{figure}
+\begin{figure}[h]
 	\centering
 		\includegraphics[width=100mm]{./Figures/MicropendousA.jpg}
 	\rule{35em}{0.5pt}
@@ -59,9 +59,15 @@ As the AT90USB1287 and associated USB components are difficult to source in sing
 
 As the vast majority of the robot's hardware operated at a fixed 5V level, a power supply was required to reduce the Lithium Ion battery's raw 7.2V (nominal) voltage down to the 5V level needed to power the various components. Due to the use of battery power in the project, reducing power consumption where possible was a large concern; thus, a switchmode design was chosen for maximum voltage conversion efficiency. A conventional linear regulator was considered for the design, but rejected due to the prohibitably large amount of power this would waste (approximately .45W, assuming an average 200mA operating current).
 
-The regulator selected for the project was the M2595S-5.0, a fixed-function switchmode regulator capable of outputing a fixed 5V rail at loads of up to 3A. While the robot design would not consume even a fifth of this power, the overhead ensured that the power supply would remain robust and the output within the tollerances of the system components regardless of the load demanded. The exact schematic used in the final robot power supply design was taken from the regulator component's datasheet to ensure correct operation.
+The regulator selected for the project was the M2595S-5.0, a fixed-function switchmode regulator capable of outputing a fixed 5V rail at loads of up to 3A. While the robot design would not consume even a fifth of this power, the overhead in the specifications ensured that the power supply would remain robust and the output within the tollerances of the system components regardless of the load demanded. The exact schematic used in the final robot power supply design (see Figure \ref{fig:mainpowersupply}) was taken from the regulator component's datasheet to ensure correct operation.
 
-% TODO - diagrams showing layout and schematic of power supply
+\begin{figure}[h]
+	\centering
+		\includegraphics[width=150mm]{./Figures/MainPowerSupply.png}
+	\rule{35em}{0.5pt}
+	\caption[Main Power Supply Schematic]{Schematic of the robot's main 5V switchmode power supply.}
+	\label{fig:mainpowersupply}
+\end{figure}
 
 \subsection{User Interface}
 
@@ -89,7 +95,16 @@ To provide illumination of the area immediately ahead of the robot, a pair of hi
 
 \subsection{Speaker}
 
-A small PCB Piezo speaker was added to the robot, in order to provide both audio feedback for important events (such as Bluetooth connections and disconnections) as well as to act as a miniature horn to attract the attention of any organic obstacles to encourage then to move away from the robot's line of motion. Rather than mounting the speaker directly onto the PCB, it was determined that a better location was in between the two frontal headlight LEDs, with the speaker then connected back to the PCB via flyleads. This arrangement made the directional speaker point in the orientation most suited to a car horn, i.e. towards the front of the robot.
+A small PCB Piezo speaker was added to the robot, in order to provide both audio feedback for important events (such as Bluetooth connections and disconnections) as well as to act as a miniature horn to attract the attention of any organic obstacles to encourage then to move away from the robot's line of motion. Rather than mounting the speaker directly onto the PCB, it was determined that a better location was in between the two frontal headlight LEDs, with the speaker then connected back to the PCB via flyleads. This arrangement made the directional speaker point in the orientation most suited to a car horn, i.e. towards the front of the robot (see Figure \ref{fig:speakermouting}).
+
+\begin{figure}[h]
+	\centering
+		\includegraphics[width=55mm]{./Figures/SpeakerSchematic.png}
+		\includegraphics[width=60mm]{./Figures/RobotFront.png}
+	\rule{35em}{0.5pt}
+	\caption[Speaker Schematic and Mouting Photo]{Schematic of the robot's piezo speaker (\textit{left}) and photo showing the mouting in the robot prototype (\textit{right}).}
+	\label{fig:robotspeaker}
+\end{figure}
 
 To drive the speaker, a standard NPN transistor was employed to provide sufficient current, driven from an 8-bit PWM timer output GPIO pin of the AVR microcontroller.
 
@@ -113,17 +128,33 @@ Due to the differing bus voltages between the sensor boards (3.3V) and the main 
 
 Initially, only an ADG3308 8-channel Bidirectional Level Converter IC was used, for both the sensor interrupt/control lines, as well as the I\textsuperscript{2}C bus. However, after further analysis it was discovered that the level translater would not meet the timing requirements of the I\textsuperscript{2}C bus, neccesitating the addition of a secondary dedicated Texas Instruments PCA9306 fixed function I\textsuperscript{2}C bus level converter IC in the second revision of the board. As a bonus, the use of the later chip allowed the I\textsuperscript{2}C bus to be driven at the "Fast" I\textsuperscript{2}C speed of 200KHz for minimal latency and maximum throughput.
 
-The board routing complexity was reduced slightly by swapping the functions of the PCA9306 bus level translatator's SDA and SCL pins on both sides of the IC; this modification (allowable as indicated in the device's datasheet) prevented the need to introduce additional board vias and longer trace routes.
+Unusually, the ADG3308 level converter IC required that its enable pin (located on the low voltage side of the translator) be connected to the higher logic level for the chip to become active (see \ref{fig:ADG3308schematic}). This odd placement of the enable pin resulted in a non-optimal breaking of the ground plane underneath the chip to accomodate the required route, as the space between the chip package pins on the top layer was used to carry the 3.3V power bus to the sensor boards (see Figure \ref{fig:ADG3308routing}).
 
-% TODO - schematic showing swapped pin functions
+\begin{figure}[h]
+	\centering
+		\includegraphics[width=120mm]{./Figures/LevelTranslatorSchematic.png}
+	\rule{35em}{0.5pt}
+	\caption[Bidirectional Level Translator Schematic]{Schematic of the ADG3308, showing the unusual placement of the enable pin.}
+	\label{fig:ADG3308schematic}
+\end{figure}
+
+The board routing complexity was reduced slightly by swapping the functions of the PCA9306 bus level translatator's SDA and SCL pins (see Figure \ref{fig:PCA9306schematic}) on both sides of the IC; this modification (allowable as indicated in the device's datasheet) prevented the need to introduce additional board vias and longer trace routes.
+
+\begin{figure}[h]
+	\centering
+		\includegraphics[width=50mm]{./Figures/LevelConverterRouting.png}
+	\rule{35em}{0.5pt}
+	\caption[Bidirectional Level Translator Routing]{Routing of the ADG3308, showing the 3.3V bus (red) and 5V enable (blue) routes.}
+	\label{fig:PCA9306routing}
+\end{figure}
 
 \subsubsection{Atmel Sensor Boards}
 
 By designing the robot around a pair of commercially available Atmel sensor boards for environmental feedback, the design of the robot was considerably simplified and the total unit cost lowered. The \textit{Atmel Pressure One} board contains a Bosch BMP085 Pressure Sensor IC for air pressure sensing, while the Atmel \textit{Inertial One} contains a 3-Axis ITG3200 Gyroscope, 3-Axis BMA150 Accelerometer and 3-Axis AK8975 Compass IC (see Figure \ref{fig:atmelsensorboards}). As several of the sensors also contain a digital temperature sensor in addition to the primary sensor (for calibration and stability feedback) this functionality was also used by the robot to measure the environmental temperature in real time.
 
-Each sensor IC is driven by the main microcontroller of the robot over the level converted I\textsuperscript{2}C bus and one or more interrupt/control lines.
+Each sensor IC is driven by the main microcontroller of the robot over the level converted I\textsuperscript{2}C bus and one or more digital interrupt/control lines. The Atmel sensor board modules all use an identical form factor, with one standard .1" 2x5 female header located at one end of the board reserved for the mounted sensor's digital I/O pins, and another located at the opposite end of the board reserved for analogue sensor pinouts. As none of the sensor boards used contained analogue sensor outputs, the second female header consisted only of non-connected pins, and a matching male header was placed on the board for mechanical stability only.
 
-\begin{figure}
+\begin{figure}[h]
 	\centering
 		\includegraphics[height=70mm]{./Figures/Inertial1.jpg}
 		\includegraphics[height=70mm]{./Figures/Pressure1.jpg}

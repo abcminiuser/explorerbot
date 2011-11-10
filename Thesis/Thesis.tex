@@ -14,7 +14,9 @@
 \usepackage{listings} % Alows for code inclusions
 \usepackage{float}
 \usepackage[section]{placeins}
-\lstset{	language=c,breaklines=false,tabsize=3}
+
+% Configuration and command definitions
+\lstset{language=c,breaklines=false,tabsize=3}
 \hypersetup{urlcolor=black, colorlinks=true}  % Colours hyperlinks in black to avoid distractions.
 \newcommand{\superscript}[1]{\ensuremath{^{\textrm{#1}}}}
 \newcommand{\subscript}[1]{\ensuremath{_{\textrm{#1}}}}
@@ -24,12 +26,16 @@
 \frontmatter	  % Begin Roman style (i, ii, iii, iv...) page numbering
 
 % Set up the Title Page
-\title      {Embedded Bluetooth Stack}
-\authors    {\texorpdfstring{\href{mailto:dean@fourwalledcubicle.com}{Dean Camera}} {Dean Camera}}
-\addresses  {\groupname\\\deptname\\\univname}  % Do not change this here, instead these must be set in the "Thesis.cls" file, please look through it instead
-\date       {\today}
-\subject    {}
-\keywords   {}
+\title        {Embedded Bluetooth Stack}
+\authors      {\texorpdfstring{\href{mailto:dean@fourwalledcubicle.com}{Dean Camera}} {Dean Camera}}
+\addresses    {\groupname\\\deptname\\\univname}  % Do not change this here, instead these must be set in the "Thesis.cls" file, please look through it instead
+\authordegree {Bachelor of Computer Science/ \\ Bachelor of Electronics Engineering}
+\thesistype   {Undergraduate Thesis}
+\date         {\today}
+\subject      {}
+\keywords     {}
+\supervisor   {Prof. John Devlin}
+\cosupervisor {Robert Ross}
 
 \maketitle
 %% ----------------------------------------------------------------
@@ -56,10 +62,10 @@
 	closed-source, which otherwise prevent their use in applications where Bluetooth technology would be
 	both desired and applicable.
 	
-	To combat this deficiency, the aim of this project is to designed and produce a free, open source, small
-	footprint Bluetooth stack aimed to suit small embedded environments. This project will to allow for Bluetooth
-	technology to be directly integrated into small scale products at a low cost, while remaining fully functional
-	and extensible.
+	To combat this deficiency in the marketplace, the aim of this project is to designed and produce a free,
+	open source, small footprint Bluetooth stack aimed to suit small embedded environments. This project will
+	to allow for Bluetooth technology to be directly integrated into small scale products at a low cost, while
+	remaining fully functional and extensible.
 }
 
 \clearpage  % Abstract ended, start a new page

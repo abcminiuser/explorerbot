@@ -131,6 +131,7 @@
    \let\\\space
 }
 \newcommand*{\supervisor}[1]{\def\supname{#1}}
+\newcommand*{\cosupervisor}[1]{\def\cosupname{#1}}
 \newcommand*{\examiner}[1]{\def\examname{#1}}
 \newcommand*{\degree}[1]{\def\degreename{#1}}
 \newcommand*{\authors}[1]{\def\authornames{#1}}
@@ -145,31 +146,36 @@
 \newcommand*{\FACULTY}[1]{\def\FACNAME{#1}}
 \newcommand*{\subject}[1]{\def\subjectname{#1}}
 \newcommand*{\keywords}[1]{\def\keywordnames{#1}}
-\supervisor  {}
-\examiner    {}
-\degree      {}
-\authors     {}
-\university  {\texorpdfstring{\href{http://www.latrobe.edu.au}
+\newcommand*{\thesistype}[1]{\def\thesisdoctype{#1}}
+\newcommand*{\authordegree}[1]{\def\authordegreename{#1}}
+\authordegree {}
+\supervisor   {}
+\cosupervisor {}
+\examiner     {}
+\degree       {}
+\authors      {}
+\thesistype   {}
+\university   {\texorpdfstring{\href{http://www.latrobe.edu.au}
                 {La Trobe University}}
                 {La Trobe Univesrity}}
-\UNIVERSITY  {\texorpdfstring{\href{http://www.latrobe.edu.au}
+\UNIVERSITY   {\texorpdfstring{\href{http://www.latrobe.edu.au}
                 {LA TROBE UNIVERSITY}}
                 {LA TROBE UNIVERSITY}}
-\department  {\texorpdfstring{\href{http://www.latrobe.edu.au/ee}
+\department   {\texorpdfstring{\href{http://www.latrobe.edu.au/ee}
                 {Department of Electronic Engineering}}
                 {Department of Electronic Engineering}}
-\DEPARTMENT  {\texorpdfstring{\href{http://www.latrobe.edu.au/ee}
+\DEPARTMENT   {\texorpdfstring{\href{http://www.latrobe.edu.au/ee}
                 {DEPARTMENT OF ELECTRONIC ENGINEERING}}
                 {DEPARTMENT OF ELECTRONIC ENGINEERING}}
-\faculty     {\texorpdfstring{\href{http://www.latrobe.edu.au/scitecheng/}
+\faculty      {\texorpdfstring{\href{http://www.latrobe.edu.au/scitecheng/}
                 {Faculty of Science, Technology and Engineering}}
                 {Faculty of Science, Technology and Engineering}}
-\FACULTY     {\texorpdfstring{\href{http://www.latrobe.edu.au/scitecheng/}
+\FACULTY      {\texorpdfstring{\href{http://www.latrobe.edu.au/scitecheng/}
                 {FACULTY OF SCIENCE, TECHONOLOGY AND ENGINEERING}}
                 {FACULTY OF SCIENCE, TECHONOLOGY AND ENGINEERING}}
-\addresses   {}
-\subject     {}
-\keywords    {}
+\addresses    {}
+\subject      {}
+\keywords     {}
 \renewcommand\maketitle{
   \btypeout{Title Page}
   \hypersetup{pdftitle={\@title}}
@@ -194,7 +200,7 @@
       \smallskip
       {\LARGE \authornames \par}
       \vfill
-      {\large Undergraduate Thesis \par}
+      {\large \thesisdoctype \par}
       \bigskip
       \bigskip
       {\large in the \par}
@@ -205,8 +211,8 @@
       \bigskip
       {\Large \@date \par}
       \bigskip
-      {\large Supervisor: Prof. John Devlin \par}
-      {\large Co-Supervisor: Robert Ross \par}
+      {\large Supervisor: \supname \par}
+      {\large Co-Supervisor: \cosupname \par}
     \end{center}
     \par
     \@thanks
@@ -239,8 +245,7 @@
     {\normalsize \facname \par}
     {\normalsize \deptname \par}
     \bigskip
-    {\normalsize Bachelor of Computer Science/\par}
-    {\normalsize Bachelor of Electronics Engineering\par}
+    {\normalsize \authordegreename \par}
     \bigskip
     {\normalsize\bf \@title \par}
     \medskip

@@ -1,6 +1,6 @@
-\chapter{Hardware Implementation}
+\chapter{Robot Hardware Implementation}
 \label{Chapter 4}
-\lhead{Chapter 4. \emph{Hardware Implementation}}
+\lhead{Chapter 4. \emph{Robot Hardware Implementation}}
 
 To help demonstrate the usefulness of the stack in a practical manner, a robot was designed and constructed. This robot, named the \emph{ExplorerBot}, was then used to give a practical reference implementation of a full project utilizing the custom embedded Bluetooth stack in a real-world environment.
 
@@ -34,7 +34,7 @@ In the section, the various hardware components of the constructed robot are det
 \begin{figure}[H]
 	\vspace{1em}
 	\centering
-		\includegraphics[width=140mm]{./Figures/BlockDiagram.png}
+		\includegraphics[width=140mm]{./Figures/HardwareBlockDiagram.png}
 	\rule{35em}{0.5pt}
 	\caption[Hardware Block Diagram]{Robot Hardware Block Diagram}
 	\label{fig:robotblockhw}
@@ -47,7 +47,7 @@ Due to the author's familiarity with the Atmel line of \textit{AVR} branded micr
 
 As the AT90USB1287 and associated USB components are difficult to source in single quantities at reasonable prices, the use of a commercial breakout module containing this chip was selected instead: the \textit{Micropendous-A} board (see Figure \ref{fig:micropendous}). This board contains the surface mount AVR microcontroller and associated USB components, along with an external 128KB SRAM chip attached to the AVR's external memory bus interface. As the Bluetooth stack required a large temporary buffer for incoming fragments, the selection of this board proved ideal for the intended purpose.
 
-\begin{figure}[H]
+\begin{figure}[tbph]
 	\vspace{1em}
 	\centering
 		\includegraphics[width=100mm]{./Figures/MicropendousA.jpg}
@@ -157,7 +157,7 @@ To correctly drive the L298N's PWM inputs, it was necessary to construct a logic
 
 \begin{figure}[tbph]
 	\centering
-		\includegraphics[width=55mm]{./Figures/PWMDriver.png}
+		\includegraphics[width=55mm]{./Figures/HBridgeSchematic.png}
 	\rule{35em}{0.5pt}
 	\caption[Motor H-Bridge Schematic]{Schematic of the L298N H-Bridge circuit used.}
 	\label{fig:hbridge}
@@ -173,9 +173,10 @@ To correctly drive the L298N's PWM inputs, it was necessary to construct a logic
 
 \begin{figure}[tbph]
 	\centering
-		\includegraphics[width=55mm]{./Figures/FlybackDiodes.png}
+		\includegraphics[width=55mm]{./Figures/FlybackDiodeSchematic.png}
+		\includegraphics[width=80mm]{./Figures/FlybackDiodes.png}
 	\rule{35em}{0.5pt}
-	\caption[Motor Flyback Diodes Schematic]{Schematic of the external flyback diodes used on on of the robot's motors.}
+	\caption[Motor Flyback Diodes]{Partial schematic \textit{(left)} and photo \textit{(right)} of the external flyback diodes added in the second PCB revision to the robot's motors.}
 	\label{fig:flybackdiodes}
 \end{figure}
 
@@ -204,7 +205,7 @@ Unusually, the ADG3308 level converter IC required that its enable pin (located 
 	\centering
 		\includegraphics[width=120mm]{./Figures/LevelTranslatorSchematic.png}
 	\rule{35em}{0.5pt}
-	\caption[Bidirectional Level Translator Schematic]{Schematic of the ADG3308, showing the unusual placement of the enable pin.}
+	\caption[Bidirectional Level Translator Schematic]{Schematic of the ADG3308, showing the unusual placement of the VCC-Y level active high enable pin.}
 	\label{fig:ADG3308schematic}
 \end{figure}
 

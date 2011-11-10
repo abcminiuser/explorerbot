@@ -6,7 +6,7 @@ To help demonstrate the usefulness of the stack in a practical manner, a robot w
 
 \section{Hardware Overview}
 
-The completed robot design for the project contains many useful capabilties for both mobility and exploration. Built on top of a pre-fabricated (including raw DC motors and gearing) "Tank" style hobby robot base, the \emph{ExplorerBot} robot implements the following features:
+The completed robot design for the project contains many useful capabilities for both mobility and exploration. Built on top of a pre-fabricated (including raw DC motors and gearing) "Tank" style hobby robot base, the \emph{ExplorerBot} robot implements the following features:
 
 \begin{itemize}
 	\item Primary switch-mode based 5V power supply
@@ -25,7 +25,7 @@ The completed robot design for the project contains many useful capabilties for 
 
 The complete robot design was created in the \textit{Altium Designer} software, including both the schematic design and board routing. Surface mount components were chosen where possible to reduce the board space required, and two board layers used as this proved to offer the lowest cost/time ratio. The final board design measured 10cm x 15cm, however much of this board space is relatively unused; with optimization, this board space could be reduced considerably.
 
-To get the best results in the construction of the robot, the boards were manufactured commercially. This process ensured the manufactured board's quality while also provided solder mask and silkscreen to reduce the potential for error in the robot's construction.
+To get the best results in the construction of the robot, the boards were manufactured commercially. This process ensured the manufactured board's quality while also provided solder mask and silk-screen to reduce the potential for error in the robot's construction.
 
 \section{Hardware Modules}
 
@@ -43,7 +43,7 @@ In the section, the various hardware components of the constructed robot are det
 \FloatBarrier
 \subsection{Microprocessor}
 
-Due to the author's familiarity with the Atmel line of \textit{AVR} branded microcontrollers, one of the avaliable models in this line-up was chosen to serve in the robot as the main processor, the AT90USB1287. This 8-bit microcontroller contains 128KB of non-voltatile FLASH memory for program storage, 4KB of non-voltatile EEPROM for user application parameter storage and 8KB of internal SRAM for scratch memory. A 16MHz clock (provided by an external crystal) was selected for the design as this offered the fastest possible speed the chip was capable of, while still allowing the hardware USB host controller inside the chip to function normally. As a trade-off, this higher clock speed put a constraint on the main logic level voltage; at 16MHz, the AVR microcontroller required 5V to be within the datasheet's specifications.
+Due to the author's familiarity with the Atmel line of \textit{AVR} branded microcontrollers, one of the available models in this line-up was chosen to serve in the robot as the main processor, the AT90USB1287. This 8-bit microcontroller contains 128KB of non-volatile FLASH memory for program storage, 4KB of non-volatile EEPROM for user application parameter storage and 8KB of internal SRAM for scratch memory. A 16MHz clock (provided by an external crystal) was selected for the design as this offered the fastest possible speed the chip was capable of, while still allowing the hardware USB host controller inside the chip to function normally. As a trade-off, this higher clock speed put a constraint on the main logic level voltage; at 16MHz, the AVR microcontroller required 5V to be within the datasheet's specifications.
 
 As the AT90USB1287 and associated USB components are difficult to source in single quantities at reasonable prices, the use of a commercial breakout module containing this chip was selected instead: the \textit{Micropendous-A} board (see Figure \ref{fig:micropendous}). This board contains the surface mount AVR microcontroller and associated USB components, along with an external 128KB SRAM chip attached to the AVR's external memory bus interface. As the Bluetooth stack required a large temporary buffer for incoming fragments, the selection of this board proved ideal for the intended purpose.
 
@@ -59,15 +59,15 @@ As the AT90USB1287 and associated USB components are difficult to source in sing
 \FloatBarrier
 \subsection{Primary Power Supply}
 
-As the vast majority of the robot's hardware operated at a fixed 5V level, a power supply was required to reduce the Lithium Ion battery's raw 7.2V (nominal) voltage down to the 5V level needed to power the various components. Due to the use of battery power in the project, reducing power consumption where possible was a large concern; thus, a switchmode design was chosen for maximum voltage conversion efficiency. A conventional linear regulator was considered for the design, but rejected due to the prohibitably large amount of power this would waste (approximately .45W, assuming an average 200mA operating current).
+As the vast majority of the robot's hardware operated at a fixed 5V level, a power supply was required to reduce the Lithium Ion battery's raw 7.2V (nominal) voltage down to the 5V level needed to power the various components. Due to the use of battery power in the project, reducing power consumption where possible was a large concern; thus, a switch-mode design was chosen for maximum voltage conversion efficiency. A conventional linear regulator was considered for the design, but rejected due to the prohibitively large amount of power this would waste (approximately .45W, assuming an average 200mA operating current).
 
-The regulator selected for the project was the M2595S-5.0, a fixed-function switchmode regulator capable of outputing a fixed 5V rail at loads of up to 3A. While the robot design would not consume even a fifth of this power, the overhead in the specifications ensured that the power supply would remain robust and the output within the tollerances of the system components regardless of the load demanded. The exact schematic used in the final robot power supply design (see Figure \ref{fig:mainpowersupply}) was taken from the regulator component's datasheet to ensure correct operation.
+The regulator selected for the project was the M2595S-5.0, a fixed-function switch-mode regulator capable of outputting a fixed 5V rail at loads of up to 3A. While the robot design would not consume even a fifth of this power, the overhead in the specifications ensured that the power supply would remain robust and the output within the tolerances of the system components regardless of the load demanded. The exact schematic used in the final robot power supply design (see Figure \ref{fig:mainpowersupply}) was taken from the regulator component's datasheet to ensure correct operation.
 
 \begin{figure}[tbph]
 	\centering
 		\includegraphics[width=150mm]{./Figures/MainPowerSupply.png}
 	\rule{35em}{0.5pt}
-	\caption[Main Power Supply Schematic]{Schematic of the robot's main 5V switchmode power supply.}
+	\caption[Main Power Supply Schematic]{Schematic of the robot's main 5V switch-mode power supply.}
 	\label{fig:mainpowersupply}
 \end{figure}
 
@@ -79,7 +79,7 @@ For interaction with the user, the robot contains several components, detailed b
 \FloatBarrier
 \subsubsection{RGB Status LED}
 
-For primary status indication, a surface mount RGB LED indicates the current status of the robot. Due to a lack of free PWM channels on the AVR microcontroller, the three LED subcomponents are wired directly to standard GPIO ports. While this design prevented PWM fading of the individual LED subcomponents to produce a many-bit custom colour from the LED, a three bit colour space is possible giving a total of 8 possible colour states (see Table \ref{tab:rgbcolours}). For the purposes of the created robot, this is in practice more than enough for basic status indication.
+For primary status indication, a surface mount RGB LED indicates the current status of the robot. Due to a lack of free PWM channels on the AVR microcontroller, the three LED sub-components are wired directly to standard GPIO ports. While this design prevented PWM fading of the individual LED subcomponents to produce a many-bit custom colour from the LED, a three bit colour space is possible giving a total of 8 possible colour states (see Table \ref{tab:rgbcolours}). For the purposes of the created robot, this is in practice more than enough for basic status indication.
 
 \begin{table}[H]
 	\begin{center}
@@ -101,20 +101,20 @@ For primary status indication, a surface mount RGB LED indicates the current sta
 	\end{center}
 \end{table}
 
-To achieve a somewhat uniform brightness, the three LEDs were adjusted with current limiting resistors to consume an equal amount of current (approx. 5mA) despite differing forward voltages. As the RGB status LED shares the same I/O pins as the microcontroller's JTAG port for programming and debugging, the RGB LED's common annode was connected via a removable wire link (see Figure \ref{fig:rgbwirelink}) to ensure that it could be taken out-of-circuit if it proved to intefere with the external hardware debugger during development.
+To achieve a somewhat uniform brightness, the three LEDs were adjusted with current limiting resistors to consume an equal amount of current (approx. 5mA) despite differing forward voltages. As the RGB status LED shares the same I/O pins as the microcontroller's JTAG port for programming and debugging, the RGB LED's common anode was connected via a removable wire link (see Figure \ref{fig:rgbwirelink}) to ensure that it could be taken out-of-circuit if it proved to interfere with the external hardware debugger during development.
 
 \begin{figure}[tbph]
 	\centering
 		\includegraphics[width=40mm]{./Figures/RGBWireLink.png}
 	\rule{35em}{0.5pt}
-	\caption[Close-up of the RGB LED's Removable Wire Link]{Close-up of the removable wire link used to disable the RGB staus LED to prevent conflicts with the JTAG lines during programming/debugging.}
+	\caption[Close-up of the RGB LED's Removable Wire Link]{Close-up of the removable wire link used to disable the RGB status LED to prevent conflicts with the JTAG lines during programming/debugging.}
 	\label{fig:rgbwirelink}
 \end{figure}
 
 \FloatBarrier
 \subsubsection{LCD Display}
 
-For situations where more information needs to be communicated to the user than is possible via the RGB status LED, a 16x2 Alphanumeric LCD display - compatible with the well known Hitatchi HD44780 chipset - was added to the design. Due to the limited number of GPIO pins avaliable on the microcontroller, the LCD was wired in 4-bit mode, with the lower 4 data pins on the LCD being wired directly to ground. While this doubled the time required to send a byte to the LCD (as bytes then need to be split into a pair of 4-bit nibbles) the high speed of the processor meant that in practice this had little or no effect to the overall speed of the system.
+For situations where more information needs to be communicated to the user than is possible via the RGB status LED, a 16x2 Alphanumeric LCD display - compatible with the well known Hitachi HD44780 chipset - was added to the design. Due to the limited number of GPIO pins available on the microcontroller, the LCD was wired in 4-bit mode, with the lower 4 data pins on the LCD being wired directly to ground. While this doubled the time required to send a byte to the LCD (as bytes then need to be split into a pair of 4-bit nibbles) the high speed of the processor meant that in practice this had little or no effect to the overall speed of the system.
 
 The LCD backlight was wired through a driver transistor to a spare PWM channel on the AVR microcontroller, allowing for 8-bit PWM brightness control to reduce power consumption of the backlight when not in use.
 
@@ -138,7 +138,7 @@ A small PCB Piezo speaker was added to the robot, in order to provide both audio
 		\includegraphics[width=55mm]{./Figures/SpeakerSchematic.png}
 		\includegraphics[width=60mm]{./Figures/RobotFront.png}
 	\rule{35em}{0.5pt}
-	\caption[Speaker Schematic and Mouting Photo]{Schematic of the robot's piezo speaker (\textit{left}) and photo showing the mouting in the robot prototype (\textit{right}).}
+	\caption[Speaker Schematic and Mounting Photo]{Schematic of the robot's piezo speaker (\textit{left}) and photo showing the mounting in the robot prototype (\textit{right}).}
 	\label{fig:robotspeaker}
 \end{figure}
 
@@ -147,13 +147,13 @@ To drive the speaker, a standard NPN transistor was employed to provide sufficie
 \FloatBarrier
 \subsection{Motor Controller}
 
-While the plastic hobbist "tank" style robot base selected for the prototype robot contained a pair of 6V DC motors stock from the factory, it did not contain a motor control system; implementation of a suitable motor control circuit was thus required as part of the project. To prevent motor noise from being injected back into the main 5V power supply used by the sensitive microcontroller, a decision was made to instead drive the motors using the raw battery voltage. By directly powering the motors from the system battery, the main 5V logic power bus could remain relatively undisturbed by the potentially large current spikes caused by the switching on and off of the motors under load. This design had the additional benefit of a reduced the total power draw on the main power supply, reducing wasted power due to the supply's non-perfect efficiency and prolonging the operating time of the robot on a fresh battery.
+While the plastic hobbyist "tank" style robot base selected for the prototype robot contained a pair of 6V DC motors stock from the factory, it did not contain a motor control system; implementation of a suitable motor control circuit was thus required as part of the project. To prevent motor noise from being injected back into the main 5V power supply used by the sensitive microcontroller, a decision was made to instead drive the motors using the raw battery voltage. By directly powering the motors from the system battery, the main 5V logic power bus could remain relatively undisturbed by the potentially large current spikes caused by the switching on and off of the motors under load. This design had the additional benefit of a reduced the total power draw on the main power supply, reducing wasted power due to the supply's non-perfect efficiency and prolonging the operating time of the robot on a fresh battery.
 
 As the raw battery voltage (7.2V nominal) was higher than the motor's 6V maximum, a PWM circuit was thus designed so that the average power delivered to each motor would prevent the motor from burning out during use. While not used in the final robot firmware, the use of variable duty cycle PWM drive signals to the motor would allow for additional speed control of the robot's motors without a corresponding loss of torque.
 
-The motor controller design used in the project centered around the well-known conventional L298N Dual Channel Full H-Bridge Driver IC, notable for its high current drive capabilities and low-voltage logic level drive input support (see Figure \ref{fig:hbridge}). Originally the non-'N' L298 variant was selected due to its convienient internal flyback diodes, however at the time of parts ordering a cheap source for the part could not be found. Unfortunately, the original PCB design did not allow for the possibility of adding external flyback diodes, resulting in the need for a second revised PCB manufacturing run to add in space for the missing components (see Figure \ref{fig:flybackdiodes}). Due to space constraints, the L298N's current sensing capabilities for motor stall detection were not used.
+The motor controller design used in the project centered around the well-known conventional L298N Dual Channel Full H-Bridge Driver IC, notable for its high current drive capabilities and low-voltage logic level drive input support (see Figure \ref{fig:hbridge}). Originally the non-'N' L298 variant was selected due to its convenient internal flyback diodes, however at the time of parts ordering a cheap source for the part could not be found. Unfortunately, the original PCB design did not allow for the possibility of adding external flyback diodes, resulting in the need for a second revised PCB manufacturing run to add in space for the missing components (see Figure \ref{fig:flybackdiodes}). Due to space constraints, the L298N's current sensing capabilities for motor stall detection were not used.
 
-To correctly drive the L298N's PWM inputs, it was neccesary to construct a logically inverted version of the PWM signal from the main microprocessor, which would be fed into the L298's channel compliment pin in order to correctly switch on and off the correct portions of the internal H-Bridge circuit. As the chosen microcontroller did not contain enough free pins for this function, an external inverter was constructed out of discrete parts (see Figure \ref{fig:transistorinverter}). This basic logic inverter was used to invert each of the two motor PWM signals for the H-Bridge IC.
+To correctly drive the L298N's PWM inputs, it was necessary to construct a logically inverted version of the PWM signal from the main microprocessor, which would be fed into the L298's channel compliment pin in order to correctly switch on and off the correct portions of the internal H-Bridge circuit. As the chosen microcontroller did not contain enough free pins for this function, an external inverter was constructed out of discrete parts (see Figure \ref{fig:transistorinverter}). This basic logic inverter was used to invert each of the two motor PWM signals for the H-Bridge IC.
 
 \begin{figure}[tbph]
 	\centering
@@ -189,16 +189,16 @@ To provide a measure of feedback from the robot, a number of sensors were added 
 
 While the main system logic and user interface components run from the main switch-mode 5V power supply, the sensor boards were required to run at a fixed 3.3V level, without the possibility of conversion to suit the higher rail voltage.
 
-For this reason, and to reduce the amount of noise on the sensor power supply for maximum precision, a desision was made to add a secondary power supply, running from the 5V rail, to step down the voltage to the 3.3V required by the sensor boards. For best results, an ADP3308 Low Dropout (LDO) style regular was used as this provided both low output rail noise and minimal wasted power.
+For this reason, and to reduce the amount of noise on the sensor power supply for maximum precision, a decision was made to add a secondary power supply, running from the 5V rail, to step down the voltage to the 3.3V required by the sensor boards. For best results, an ADP3308 Low Dropout (LDO) style regular was used as this provided both low output rail noise and minimal wasted power.
 
 \FloatBarrier
 \subsubsection{Level Converters}
 
 Due to the differing bus voltages between the sensor boards (3.3V) and the main processor (5V), level conversion of the I\textsuperscript{2}C bus and sensor interrupt/control lines was required. While only a unidirectional buffer was strictly needed for each of the sensor interrupt/control lines, it was decided to use a bidirectional converter to ease the board routing.
 
-Initially, only an ADG3308 8-channel Bidirectional Level Converter IC was used, for both the sensor interrupt/control lines, as well as the I\textsuperscript{2}C bus. However, after further analysis it was discovered that the level translater would not meet the timing requirements of the I\textsuperscript{2}C bus, neccesitating the addition of a secondary dedicated Texas Instruments PCA9306 fixed function I\textsuperscript{2}C bus level converter IC in the second revision of the board. As a bonus, the use of the later chip allowed the I\textsuperscript{2}C bus to be driven at the "Fast" I\textsuperscript{2}C speed of 200KHz for minimal latency and maximum throughput.
+Initially, only an ADG3308 8-channel Bidirectional Level Converter IC was used, for both the sensor interrupt/control lines, as well as the I\textsuperscript{2}C bus. However, after further analysis it was discovered that the level translator would not meet the timing requirements of the I\textsuperscript{2}C bus, necessitating the addition of a secondary dedicated Texas Instruments PCA9306 fixed function I\textsuperscript{2}C bus level converter IC in the second revision of the board. As a bonus, the use of the later chip allowed the I\textsuperscript{2}C bus to be driven at the "Fast" I\textsuperscript{2}C speed of 200KHz for minimal latency and maximum throughput.
 
-Unusually, the ADG3308 level converter IC required that its enable pin (located on the low voltage side of the translator) be connected to the higher logic level for the chip to become active (see Figure \ref{fig:ADG3308schematic}). This odd placement of the enable pin resulted in a non-optimal breaking of the ground plane underneath the chip to accomodate the required route, as the space between the chip package pins on the top layer was used to carry the 3.3V power bus to the sensor boards (see Figure \ref{fig:ADG3308routing}).
+Unusually, the ADG3308 level converter IC required that its enable pin (located on the low voltage side of the translator) be connected to the higher logic level for the chip to become active (see Figure \ref{fig:ADG3308schematic}). This odd placement of the enable pin resulted in a non-optimal breaking of the ground plane underneath the chip to accommodate the required route, as the space between the chip package pins on the top layer was used to carry the 3.3V power bus to the sensor boards (see Figure \ref{fig:ADG3308routing}).
 
 \begin{figure}[tbph]
 	\centering
@@ -216,7 +216,7 @@ Unusually, the ADG3308 level converter IC required that its enable pin (located 
 	\label{fig:ADG3308routing}
 \end{figure}
 
-The board routing complexity was reduced slightly by swapping the functions of the PCA9306 bus level translatator's SDA and SCL pins (see Figure \ref{fig:PCA9306schematic}) on both sides of the IC; this modification (allowable as indicated in the device's datasheet) prevented the need to introduce additional board vias and longer trace routes.
+The board routing complexity was reduced slightly by swapping the functions of the PCA9306 bus level translator's SDA and SCL pins (see Figure \ref{fig:PCA9306schematic}) on both sides of the IC; this modification (allowable as indicated in the device's datasheet) prevented the need to introduce additional board vias and longer trace routes.
 
 \begin{figure}[tbph]
 	\centering
@@ -238,7 +238,7 @@ Each sensor IC is driven by the main microcontroller of the robot over the level
 		\includegraphics[height=70mm]{./Figures/Inertial1.jpg}
 		\includegraphics[height=70mm]{./Figures/Pressure1.jpg}
 	\rule{35em}{0.5pt}
-	\caption[Atmel Sensor Boards]{The Atmel \emph{Inertial One} (left) and \emph{Pressure One} (Right) Sensor Boards (Image courtesy \textit{Atmel Corp.})}
+	\caption[Atmel Sensor Boards]{The Atmel \emph{Inertial One} (left) and \emph{Pressure One} (Right) Sensor Boards (Image courtesy \textit{Atmel Corporation})}
 	\label{fig:atmelsensorboards}
 \end{figure}
 

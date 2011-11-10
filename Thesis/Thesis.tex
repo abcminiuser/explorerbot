@@ -16,7 +16,7 @@
 \usepackage[section]{placeins}
 
 % Configuration and command definitions
-\lstset{language=c,breaklines=false,tabsize=3}
+\lstset{language=c,breaklines=true,tabsize=3,aboveskip=1em,belowskip=1em,float=tbph,basicstyle=\ttfamily\small}
 \hypersetup{urlcolor=black, colorlinks=true}  % Colours hyperlinks in black to avoid distractions.
 \newcommand{\superscript}[1]{\ensuremath{^{\textrm{#1}}}}
 \newcommand{\subscript}[1]{\ensuremath{_{\textrm{#1}}}}
@@ -112,6 +112,7 @@
 \lhead{\emph{Abbreviations}}  % Set the left side page header to "Abbreviations"
 \listofsymbols{ll}  % Include a list of Abbreviations (a table of two columns)
 {
+	\textbf{API} & \textbf{A}pplication \textbf{P}rogramming \textbf{I}nterface \\
 	\textbf{AVR} & This isn't an acronym. Officially, at least. \\
 	\textbf{GPIO} & \textbf{G}eneral \textbf{P}urpose \textbf{I/O} \\
 	\textbf{HCI} & Bluetooth \textbf{H}ost \textbf{C}ontroller \textbf{I}nterface \\

@@ -114,9 +114,17 @@ To achieve a somewhat uniform brightness, the three LEDs were adjusted with curr
 \FloatBarrier
 \subsubsection{LCD Display}
 
-For situations where more information needs to be communicated to the user than is possible via the RGB status LED, a 16x2 Alphanumeric LCD display - compatible with the well known Hitachi HD44780 chipset - was added to the design. Due to the limited number of GPIO pins available on the microcontroller, the LCD was wired in 4-bit mode, with the lower 4 data pins on the LCD being wired directly to ground. While this doubled the time required to send a byte to the LCD (as bytes then need to be split into a pair of 4-bit nibbles) the high speed of the processor meant that in practice this had little or no effect to the overall speed of the system.
+For situations where more information needs to be communicated to the user than is possible via the RGB status LED, a 16x2 Alphanumeric LCD display - compatible with the well known Hitachi HD44780 chipset - was added to the design. Due to the limited number of GPIO pins available on the microcontroller, the LCD was wired in 4-bit mode, with the lower 4 data pins on the LCD being wired directly to ground (see Figure \ref{fig:lcdschematic}). While this doubled the time required to send a byte to the LCD (as bytes then need to be split into a pair of 4-bit nibbles) the high speed of the processor meant that in practice this had little or no effect to the overall speed of the system.
 
-The LCD backlight was wired through a driver transistor to a spare PWM channel on the AVR microcontroller, allowing for 8-bit PWM brightness control to reduce power consumption of the backlight when not in use.
+The LCD backlight was wired through a driver transistor to a spare PWM channel on the AVR microcontroller, allowing for 8-bit PWM brightness control to reduce power consumption of the backlight when not in use. As the LCD display's LED backlight had a nominal forward voltage of around 3V, a 10\ensuremath{\Omega} resistor was used to limit the maximum drive current to around 200mA.
+
+\begin{figure}[tbph]
+	\centering
+		\includegraphics[width=100mm]{LCDSchematic.png}
+	\rule{35em}{0.5pt}
+	\caption[LCD Display Schematic]{Schematic of the LCD connections, showing the 4-bit LCD data bus mode and backlight driver transistor.}
+	\label{fig:lcdschematic}
+\end{figure}
 
 \FloatBarrier
 \subsubsection{Buttons}
@@ -126,7 +134,7 @@ A pair of standard PCB round buttons were added to the design, for user input. T
 \FloatBarrier
 \subsection{Headlights}
 
-To provide illumination of the area immediately ahead of the robot, a pair of high intensity white LEDs were added to the schematic, connected to a single common driver transistor and driven by a GPIO pin of the microcontroller. To ensure maximum illumination, the LEDs were driven at just under their full 20mA rating when turned on. These "headlights" were then mounted on the front of the robot chassis.
+To provide illumination of the area immediately ahead of the robot, a pair of high intensity wide viewing angle white LEDs were added to the schematic, connected to a single common driver transistor and driven by a GPIO pin of the microcontroller. To ensure maximum illumination, the LEDs were driven at just under their full 20mA rating when turned on. These "headlights" were then mounted on the front of the robot chassis.
 
 \FloatBarrier
 \subsection{Speaker}
@@ -239,7 +247,7 @@ Each sensor IC is driven by the main microcontroller of the robot over the level
 		\includegraphics[height=70mm]{Inertial1.jpg}
 		\includegraphics[height=70mm]{Pressure1.jpg}
 	\rule{35em}{0.5pt}
-	\caption[Atmel Sensor Boards]{The Atmel \emph{Inertial One} (left) and \emph{Pressure One} (Right) Sensor Boards (Image courtesy \textit{Atmel Corporation})}
+	\caption[Atmel Sensor Boards]{The Atmel \emph{Inertial One} (left) and \emph{Pressure One} (right) Sensor Boards (Image courtesy \textit{Atmel Corporation})}
 	\label{fig:atmelsensorboards}
 \end{figure}
 

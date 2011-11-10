@@ -110,16 +110,20 @@ To drive the speaker, a standard NPN transistor was employed to provide sufficie
 
 \subsection{Motor Controller}
 
-While the plastic hobbist "tank" style robot base selected for the prototype robot contained a pair of 6V DC motors stock from the factory, it did not contain any sort of motor control system; implementation of a suitable motor control circuit was thus required as part of the project. To prevent motor noise from being injected back into the main 5V power supply used by the sensitive microcontroller, a decision was made to instead drive the motors using the raw battery voltage. By directly powering the motors from the system battery, the main 5V logic power bus could remain relatively undisturbed by the potentially large current spikes caused by the switching on and off of the motors under load. This design had the additional benefit of a reduced the total power draw on the main power supply, reducing wasted power due to the supply's non-perfect efficiency and prolonging the operating time of the robot on a fresh battery.
+While the plastic hobbist "tank" style robot base selected for the prototype robot contained a pair of 6V DC motors stock from the factory, it did not contain a motor control system; implementation of a suitable motor control circuit was thus required as part of the project. To prevent motor noise from being injected back into the main 5V power supply used by the sensitive microcontroller, a decision was made to instead drive the motors using the raw battery voltage. By directly powering the motors from the system battery, the main 5V logic power bus could remain relatively undisturbed by the potentially large current spikes caused by the switching on and off of the motors under load. This design had the additional benefit of a reduced the total power draw on the main power supply, reducing wasted power due to the supply's non-perfect efficiency and prolonging the operating time of the robot on a fresh battery.
 
-As the raw battery voltage (7.2V nominal) was higher than the motor's 6V maximum, a PWM circuit was thus designed so that the average power delivered to each motor would prevent the motor from burning out during use.
+As the raw battery voltage (7.2V nominal) was higher than the motor's 6V maximum, a PWM circuit was thus designed so that the average power delivered to each motor would prevent the motor from burning out during use. While not used in the final robot firmware, the use of variable duty cycle PWM drive signals to the motor would allow for additional speed control of the robot's motors without a corresponding loss of torque.
+
+The motor controller design used in the project centered around the well-known conventional L298N Dual Channel Full H-Bridge Driver IC, notable for its high current drive capabilities and low-voltage logic level drive input support (see Figure \ref{fig:hbridge}). Originally the non-'N' L298 variant was selected due to its convienient internal flyback diodes, however at the time of parts ordering a cheap source for the part could not be found. Unfortunately, the original PCB design did not allow for the possibility of adding external flyback diodes, resulting in the need for a second revised PCB manufacturing run to add in space for the missing components (see Figure \ref{fig:flybackdiodes}). Due to space constraints, the L298N's current sensing capabilities for motor stall detection were not used.
+
+To correctly drive the L298N's PWM inputs, it was neccesary to construct a logically inverted version of the PWM signal from the main microprocessor, which would be fed into the L298's channel compliment pin in order to correctly switch on and off the correct portions of the internal H-Bridge circuit. As the chosen microcontroller did not contain enough free pins for this function, an external inverter was constructed out of discrete parts (see Figure \ref{fig:transistorinverter}). This basic logic inverter was used to invert each of the two motor PWM signals for the H-Bridge IC.
 
 \begin{figure}[h]
 	\centering
 		\includegraphics[width=55mm]{./Figures/PWMDriver.png}
 	\rule{35em}{0.5pt}
 	\caption[Motor H-Bridge Schematic]{Schematic of the L298N H-Bridge circuit used.}
-	\label{fig:pwmdriver}
+	\label{fig:hbridge}
 \end{figure}
 
 \begin{figure}[h]
@@ -134,11 +138,9 @@ As the raw battery voltage (7.2V nominal) was higher than the motor's 6V maximum
 	\centering
 		\includegraphics[width=55mm]{./Figures/FlybackDiodes.png}
 	\rule{35em}{0.5pt}
-	\caption[Motor Flyback Diodes Schematic]{Schematic of the flyback diodes used on on of the robot's motors.}
+	\caption[Motor Flyback Diodes Schematic]{Schematic of the external flyback diodes used on on of the robot's motors.}
 	\label{fig:flybackdiodes}
 \end{figure}
-
-% TODO
 
 \subsection{Sensors}
 

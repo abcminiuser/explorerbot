@@ -198,7 +198,7 @@ Due to the differing bus voltages between the sensor boards (3.3V) and the main 
 
 Initially, only an ADG3308 8-channel Bidirectional Level Converter IC was used, for both the sensor interrupt/control lines, as well as the I\textsuperscript{2}C bus. However, after further analysis it was discovered that the level translater would not meet the timing requirements of the I\textsuperscript{2}C bus, neccesitating the addition of a secondary dedicated Texas Instruments PCA9306 fixed function I\textsuperscript{2}C bus level converter IC in the second revision of the board. As a bonus, the use of the later chip allowed the I\textsuperscript{2}C bus to be driven at the "Fast" I\textsuperscript{2}C speed of 200KHz for minimal latency and maximum throughput.
 
-Unusually, the ADG3308 level converter IC required that its enable pin (located on the low voltage side of the translator) be connected to the higher logic level for the chip to become active (see \ref{fig:ADG3308schematic}). This odd placement of the enable pin resulted in a non-optimal breaking of the ground plane underneath the chip to accomodate the required route, as the space between the chip package pins on the top layer was used to carry the 3.3V power bus to the sensor boards (see Figure \ref{fig:ADG3308routing}).
+Unusually, the ADG3308 level converter IC required that its enable pin (located on the low voltage side of the translator) be connected to the higher logic level for the chip to become active (see Figure \ref{fig:ADG3308schematic}). This odd placement of the enable pin resulted in a non-optimal breaking of the ground plane underneath the chip to accomodate the required route, as the space between the chip package pins on the top layer was used to carry the 3.3V power bus to the sensor boards (see Figure \ref{fig:ADG3308routing}).
 
 \begin{figure}[tbph]
 	\centering
@@ -208,14 +208,22 @@ Unusually, the ADG3308 level converter IC required that its enable pin (located 
 	\label{fig:ADG3308schematic}
 \end{figure}
 
-The board routing complexity was reduced slightly by swapping the functions of the PCA9306 bus level translatator's SDA and SCL pins (see Figure \ref{fig:PCA9306schematic}) on both sides of the IC; this modification (allowable as indicated in the device's datasheet) prevented the need to introduce additional board vias and longer trace routes.
-
 \begin{figure}[tbph]
 	\centering
 		\includegraphics[width=50mm]{./Figures/LevelConverterRouting.png}
 	\rule{35em}{0.5pt}
 	\caption[Bidirectional Level Translator Routing]{Routing of the ADG3308, showing the 3.3V bus (red) and 5V enable (blue) routes.}
-	\label{fig:PCA9306routing}
+	\label{fig:ADG3308routing}
+\end{figure}
+
+The board routing complexity was reduced slightly by swapping the functions of the PCA9306 bus level translatator's SDA and SCL pins (see Figure \ref{fig:PCA9306schematic}) on both sides of the IC; this modification (allowable as indicated in the device's datasheet) prevented the need to introduce additional board vias and longer trace routes.
+
+\begin{figure}[tbph]
+	\centering
+		\includegraphics[width=150mm]{./Figures/I2CTranslatorSchematic.png}
+	\rule{35em}{0.5pt}
+	\caption[I\textsuperscript{2}C Level Translator Schematic]{Schematic of the PCA9306, showing the swapped SDA and SCL pin functions.}
+	\label{fig:PCA9306schematic}
 \end{figure}
 
 \FloatBarrier

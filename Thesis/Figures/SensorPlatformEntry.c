@@ -6,8 +6,7 @@ typedef struct
 	/* Human-readable name of the sensor, stored in SRAM. */
 	const char* Name;
 	
-	/* Indicates if the sensor data is represented as a single value,
-	   or a triplicate of three axis values. */
+	/* Indicates if the sensor data is represented as a single value, or a triplicate of three axis values. */
 	bool SingleAxis;
 	
 	/* Last retrieved data from the sensor. */	
@@ -16,7 +15,7 @@ typedef struct
 		/* Sensor data if the sensor outputs a single axis value. */
 		int32_t Single;
 	
-		/* Sensor data if the sensor outputs a triplicate of three axis values. */
+		/* Sensor data if the sensor outputs three axis values. */
 		struct
 		{
 			/* X axis value of the triplicate. */

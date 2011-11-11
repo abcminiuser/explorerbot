@@ -44,12 +44,94 @@ In this section, each of the robot firmware's main software modules are listed a
 \FloatBarrier
 \subsection{Main System Control and Configuration}
 
-% TODO
+The main entry point and system loop of the firmware was contained into a single top level module. This module was then made responsible for the initial system hardware configuration, as well as the management of the main loop to dispatch the service task functions in each sub-module.
+
+\FloatBarrier
+\subsubsection{System Initialization}
+
+A series of initialization steps are followed during the hardware configuration step; first, the system watchdog (enabled if the chip was last reset through the expiry of the watchdog peripheral's timer) is disabled, the system CPU clock prescaler disabled to ensure the full 16MHz CPU clock speed is used, unused peripherals are powered down and the JTAG debug interface turned off so that the GPIO pins could be used for the RGB status LED. This latter procedure removes the ability to debug the firmware with an external JTAG debugger, however during development it was commented out.
+
+Next, the setup routine calls each hardware driver module's \lstinline{Init()} function, which serves to initialize each hardware module and configure the appropriate hardware ready for use. Finally, one of the robot's remaining 16-bit hardware timers is then configured to run at a 10ms period to serve as the master system tick for timeout management and time based events.
+
+\FloatBarrier
+\subsubsection{Start-up Tasks}
+
+Once all the system hardware is initialized, the main program flow then executes the start-up tasks; an informational message is displayed to the LCD while the RGB status LED sequences through all possible combinations, and the sensor platform is initialized to determine which sensors are currently connected. The state of each sensor is then displayed briefly onto the LCD using custom LCD character definitions before the main loop starts (see Figure \ref{fig:sensorinitlcd}).
+
+\begin{figure}[H]
+	\vspace{1em}
+	\centering
+		\includegraphics[width=70mm]{LCDSensorsOK.jpg}
+		\includegraphics[width=70mm]{LCDSensorsFail.jpg}
+	\rule{35em}{0.5pt}
+	\caption[LCD Sensor Status Information]{Photos of the LCD display showing sucessful (\textit{left}) and failed (\textit{right}) initialization.}
+	\label{fig:sensorinitlcd}
+\end{figure}
+
+\FloatBarrier
+\subsubsection{Main Program Loop}
+
+As is the case with virtually all embedded systems, the main program execution was contained in an infinite loop - each iteration of the loop would dispatch to the various sub-components of the system to manage and react to various stimuli. In the case of the robot firmware, the main loop contained three main functions; one, it checked for presses of either of the two physical buttons on the robot, two, it would check for expiry of the system tick timer to dispatch timing-related events, and three, it would execute the various hardware and software module service tasks.
+
+In the case of the two physical buttons, the first (top) button was assigned a soft-reset role, in the case of a communication failure which resulted in the robot's motors being left on and the system uncontrollable. This \textit{emergency stop} style functionality was implemented using the microcontroller's internal watchdog system to reset the microcontroller approximately 15ms after the button press was detected. The second physical button was assigned a mode-specific role, according to Table \ref{tab:buttonroles}.
+
+\begin{table}[tbph]
+	\vspace{1em}
+	\begin{center}
+		\begin{tabular}{ | l | l | }
+			\hline
+			\textbf{Mode} & \textbf{Function} \\ \hline
+
+			Bluetooth Mode & Initiates a connection to stored Bluetooth device address \\ \hline
+			HID Mode & \textit{Unused} \\ \hline
+			Mass Storage Mode & Enables sensor logging to the attached flash drive \\ \hline
+		\end{tabular}
+		\caption[Mode Specific Button Roles]{Table showing the function of the mode-specific physical pushbutton.}
+		\label{tab:buttonroles}
+	\end{center}
+\end{table}
+
+Each time the main loop detected that the system update tick timer period had elapsed, it would notify all timing-dependant hardware modules of this fact; for example, the LCD driver relies on these updates to automatically fade the LCD backlight brightness after a given period of inactivity. Also performed in this section is the update of the sensor values via the sensor platform at regular intervals, and the logging of this data either to the attached Mass Storage USB disk (if logging is enabled) or an established virtual serial connection to a remote PC via Bluetooth.
 
 \FloatBarrier
 \subsection{Hardware Drivers}
 
 At the point at which the abstract software in the device needed to interact with the physical board hardware, a set of hardware abstraction drivers was created. These drivers served to encapsulate the functionality of the physical hardware and expose that functionality to the rest of the firmware via a set of basic control API functions. Not every driver sought to expose all the possibile abilities of the hardware; due to time constraints only those features actually required by the prototype robot firmware were implemented in most cases.
+
+\FloatBarrier
+\subsubsection{Buttons Driver}
+
+The hardware for the board button driver was, as expected, very simple; no debouncing was implemented in the driver itself, as this was not found to be neccesary in the firmware - adequate debouncing could be achieved elsewhere in the code instead via the software flags the buttons controlled.
+
+As a result, the completed button driver implementation was trivial, consisting only of a configuration routine to configure the appropriate GPIO lines as inputs with the microcontroller's internal pull-up resistors enabled, and a status routine to read and mask out the appropriate port lines.
+
+\FloatBarrier
+\subsubsection{External SRAM Driver}
+
+While the selected AT90USB1287 microcontroller contained 8KB of SRAM internally for stack, global variables and other working-set data, an external 128KB SRAM IC was mounted externally on the microcontroller board. This memory was attached to the AVR's external memory interface bus, and could then be used to extend the SRAM memory space at the cost of an extra CPU cycle for each external bus access.
+
+Unfortunately, while this external SRAM memory use a 17-bit address, the AVR's external memory bus interface is only 16-bits wide. As a result, a small software shim driver was required to perform manual bank swapping when required to select one of the two halves of memory. This means that the external 128KB memory is divided into two 64KB memory banks, only one of which may be selected at one time.
+
+\FloatBarrier
+\subsubsection{Headlights Driver}
+
+Like the button driver, the headlight driver contained only a thin wrapper around the GPIO pin used to control the robot's headlights. Latching of the headlight state was achieved through the GPIO hardware itself; once set to a particular state, the headlights would remain in that state (illuminated or not) until changed by a subsequent call to the module's update routine.
+
+\FloatBarrier
+\subsubsection{LCD Driver}
+
+The LCD chosen for the robot contained a chipset compatible with the HD44780 display controller, common to many embedded systems where complex graphics are not required. As a result, there is already a plethora of LCD drivers available on the internet from hobbyists and from most microcontroller silicon vendors. Despite this, a simple custom LCD driver was written from scratch for the project, to ensure that as much of the project as was practical remained under the sole author's copyright and distribution control.
+
+Despite the direct hardware connection to the LCD display's \textit{R/W} pin (for read/write control) the final driver code used a more basic hard-coded busy-wait delay method to ensure the display's timing was met. This practise proved to be the easiest to implement however for better performance this would have to be re-written as a polling scheme of the LCD controller's busy flag.
+
+\FloatBarrier
+\subsubsection{Motor Driver}
+
+\FloatBarrier
+\subsubsection{RGB LED Driver}
+
+\FloatBarrier
+\subsubsection{Speaker Driver}
 
 \FloatBarrier
 \subsection{Sensor Platform}
@@ -81,7 +163,27 @@ Of note is the use of a C \textit{union} to contain the retrieved sensor data, a
 \FloatBarrier
 \subsubsection{Individual Sensor Drivers}
 
-Each individual sensor connected to the board requires an individual sensor driver, specific to that make and model of sensor IC.
+Each individual sensor connected to the board requires a custom sensor driver, specific to that make and model of sensor IC. Unique to each sensor is the sequence required to set up the sensor to a known set of default configuration parameters (see Table \ref{tab:sensorconfig}), as well as the exact command set, address of the I\superscript{2}C bus, and optional use of control/interrupt GPIO lines used in the sensor's operation.
+
+\begin{table}[tbph]
+	\vspace{1em}
+	\begin{center}
+		\begin{tabular}{ | l | l | l | l | }
+			\hline
+			\textbf{Sensor}	& \textbf{Type}	& \textbf{I\superscript{2}C Address} & \textbf{Settings} \\ \hline
+
+			AK8975 & Direction & 0x0C & N/A \\ \hline
+			BMA150 & Acceleration & 0x38 & \vtop{\hbox{\strut 25Hz bandwidth,} \hbox{\strut +/-2g range,} \hbox{\strut Interrupt line enabled}} \\ \hline
+			BMP085 & Pressure & 0x77 & N/A \\ \hline
+			ITG3200 & Orientation & 0x68 & \vtop{\hbox{\strut 100Hz at an internal sampling rate of 1KHz, } \hbox{\strut Low Pass Filter to use 20Hz bandwidth,} \hbox{\strut Gyroscope X axis PLL as the clock source,} \hbox{\strut Interrupt line enabled}} \\ \hline
+			ITG3200 & Temperature & 0x68 & N/A \textit{(Virtual Sensor)} \\ \hline
+		\end{tabular}
+		\caption[Sensor Configuration]{Table showing the sensors used and their configuration properties.}
+		\label{tab:sensorconfig}
+	\end{center}
+\end{table}
+
+To ensure the interface into each individual sensor driver was as uniform as possible, the exact implementation details was hidden from external modules, with each driver exposing just two functions; an \lstinline{Init()} function to initialize the sensor, and an \lstinline{Update()} function to pull the latest values from the sensor if it has completed a conversion. To prevent slow sensors from introducing unneccesary lag into the system, the update functions would abort if the next conversion was not ready at the point in time that the function was called, and the sensor entry structure would retain the previously retrieved sensor value.
 
 \FloatBarrier
 \subsection{USB Management}

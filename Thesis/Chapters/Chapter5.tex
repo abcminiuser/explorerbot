@@ -215,6 +215,8 @@ A crucial part of the project was the ability to communicate with USB devices; t
 
 The selected stack was LUFA, the \textit{Lightweight USB Framework for AVR devices}. This stack, a personal side-project of the author, offers a rich device support in both USB host and device modes. The library contains many inbuilt drivers for the various classes of USB devices, some of which were used in the project for the HID joystick control and Mass Storage configuration and sensor logging.
 
+For the robot firmware, LUFA version 20111009 was used.
+
 \FloatBarrier
 \subsubsection{FatFS}
 
@@ -227,22 +229,38 @@ The third-party FATFs library was chosen for this task, as it offers a free, tes
 \FloatBarrier
 \subsection{USB Management}
 
-% TODO
+In order to support the various types of USB devices needed by the robot firmware, a collection of USB class-specific management layers were written. These layers, sitting in parallel on top of the LUFA USB stack, provide the routines neccesary to manage each type of supported USB device.
+
+While the LUFA USB stack provides support for several of these classes of USB devices internally, additional code was required to wrap the existing USB class driver, to extend the provided functionality and interface the driver with the rest of the system.
 
 \FloatBarrier
 \subsubsection{Bluetooth Adapters}
 
-% TODO
+The LUFA stack version used in the project did not contain a ready-made internal driver for USB Bluetooth adapters. A suitable driver was thus created specifically for the project using the USB transport specification outlined in the Bluetooth 2.1 specification document. In order to support all possible Bluetooth adapters from all silicon vendors, the driver was written to match generically on the defined \texttt{class}, \texttt{subclass} and \texttt{protocol} Device Descriptor values of \texttt{0xE0}, \texttt{0x01} and \texttt{0x01} respectively, as set by the Bluetooth specification for conformant Bluetooth adapters. By matching against these values instead of a particular Vendor ID and Product ID, the driver was able to support all devices conforming to the Bluetooth standard's USB transport interface specification without additional modifications being required.
+
+During the enumeration process of an inserted USB device, the main function calls the module's \lstinline{BluetoothAdapter_ConfigurePipes()} function to attempt to bind it to the inserted USB device. The module first validates the device descriptor to ensure the inserted device is reportedly a Bluetooth adapter. Next, the pipe configuration routine attempts to configure the USB controller's logical data pipes so that the \textit{Data In}, \textit{Data Out} and \textit{Event In} pipes are correctly connected to their matching logical endpoints within the adapter. If the driver is unable to bind to the device for any reason, the enumeration process is aborted for the Bluetooth transport driver.
+
+Periodically, the main firmware loop will call the Bluetooth transport driver's \\ \lstinline{BluetoothAdapter_USBTask()} service task if the transport driver is currently active. This service task is responsible for checking the logical data pipes for new data, and (if data is availiable) reading in the data packet before dispatching it to the Bluetooth stack. A \lstinline{CALLBACK_Bluetooth_SendPacket()} callback function from the Bluetooth stack takes care of sending packets generated from the Bluetooth stack to the Bluetooth adapter.
 
 \FloatBarrier
 \subsubsection{HID Devices}
 
-% TODO
+For local diagnostics of the system before the Bluetooth stack was completed, a local Human Interface Device (HID) driver was implemented into the firmware. This driver builds on top of the HID class driver included in the LUFA distribution used, and binds supported HID devices (such as game controllers) to the robot's physical functions. Using this driver, a USB joystick or game controller can be inserted into the robot and used to control the motors, headlights and horn.
+
+As most HID devices carry a unique physical and logical report layout, it is important to include a mechanism to correctly bind the appropriate buttons on the attached device to the correct logical function. Two seemingly identical USB joysticks can output very different report data structures to the host, requiring the use of a \textit{HID Descriptor Report Parser} to correctly parse the reports into a standard format. The HID Report Parser included in the LUFA USB stack was used for this purpose, and linked into the rest of the system. This allows the robot to maintain compatibility with virtually all HID devices containing an appropriate number of buttons.
 
 \FloatBarrier
 \subsubsection{Mass Storage Devices}
 
-% TODO
+As a means of system configuration and monitoring, a Mass Storage Device (MSD) driver was also added into the device firmware. This proved useful for both fault-finding and data logging, as data produced by the firmware could be stored onto an inserted USB flash drive. During the initial firmware development, this functionality was used to store logs of the on-board sensor outputs, to ensure the correctness of the sensor platform before the completion of the wireless serial port functionality. At a later stage, this mode was extended so that it could be used to configure the target remote Bluetooth Devive Address used in the robot's Bluetooth Mode when a remote connection was initiated by the user.
+
+To be able to read and write files on an attached USB flash disk drive, the FATFs library was linked to the LUFA Mass Storage class driver. This abstracted out the physical medium, giving a higher level file-centric view of the attached storage medium, as opposed to the direct physical sectors.
+
+When a disk is inserted, the firmware will first attempt to open an existing file called \texttt{SENSLOG.CSV} on the disk, for sensor logging in CSV format (see Listing \ref{lst:logfileparse}). If such a file does not exist, a new one is created and the sensor log header (constructed by the Sensor Platform module) is written to the start of the new file.
+
+\lstinputlisting[float=tbph,caption={Example of the Mass Storage manager code to open and write to a file on an attached USB flash disk using the FATFs library.},label={lst:logfileparse}]{./Figures/LogFileParsing.c}
+
+Additionally, the firware will attempt to open and process a second file names \texttt{REMADDR.TXT}, which holds the Bluetooth device address of the remote Bluetooth device the robot should attempt a connection to upon demand. This file is expected to contain an address of the format \texttt{XX:XX:XX:XX:XX:XX}, containing the six consecutive octets of the remote device's address, in hexadecimal format. This address is then stored into the robot's non-volatile EEPROM memory for later use when a Bluetooth adapter is subsequently inserted. If no such file exists on the attached disk, one is created and the currently stored remote device address written to it.
 
 \FloatBarrier
 \subsection{Bluetooth Management}

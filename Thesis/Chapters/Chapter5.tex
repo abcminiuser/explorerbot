@@ -110,19 +110,19 @@ As a result, the completed button driver implementation was trivial, consisting 
 
 While the selected AT90USB1287 microcontroller contained 8KB of SRAM internally for stack, global variables and other working-set data, an external 128KB SRAM IC was mounted externally on the microcontroller board. This memory was attached to the AVR's external memory interface bus, and could then be used to extend the SRAM memory space at the cost of an extra CPU cycle for each external bus access.
 
-Unfortunately, while this external SRAM memory use a 17-bit address, the AVR's external memory bus interface is only 16-bits wide. As a result, a small software shim driver was required to perform manual bank swapping when required to select one of the two halves of memory. This means that the external 128KB memory is divided into two 64KB memory banks, only one of which may be selected at one time.
+Unfortunately, while this external SRAM memory uses a 17-bit address, the AVR's external memory bus interface is only 16-bits wide. As a result, a small software shim driver was required to perform manual bank swapping when required to select one of the two halves of memory. This total 128KB of external SRAM memory was thus divided into two 64KB memory banks, only one of which could be selected at one time.
 
 \FloatBarrier
 \subsubsection{Headlights Driver}
 
-Like the button driver, the headlight driver contained only a thin wrapper around the GPIO pin used to control the robot's headlights. Latching of the headlight state was achieved through the GPIO hardware itself; once set to a particular state, the headlights would remain in that state (illuminated or not) until changed by a subsequent call to the module's update routine.
+Like the button driver, the headlight driver contained only a thin wrapper around the GPIO pin used to control the robot's headlights. Latching of the headlight state was achieved through the GPIO hardware itself; once set to a particular state, the headlights would remain in that state (illuminated or disabled) until changed by a subsequent call to the module's update routine.
 
 \FloatBarrier
 \subsubsection{LCD Driver}
 
 The LCD chosen for the robot contained a chipset compatible with the HD44780 display controller, common to many embedded systems where complex graphics are not required. As a result, there is already a plethora of LCD drivers available on the internet from hobbyists and from most microcontroller silicon vendors. Despite this, a simple custom LCD driver was written from scratch for the project, to ensure that as much of the project as was practical remained under the sole author's copyright and distribution control.
 
-While the robot hardware contained a direct hardware connection to the LCD display's \textit{R/W} pin (for read/write control) the final driver code used a more basic hard-coded busy-wait delay method to ensure the display's timing was met. This practice proved to be the easiest to implement however for better performance this would have to be re-written as a polling scheme of the LCD controller's busy flag.
+While the robot hardware contained a direct hardware connection to the LCD display's \textit{R/W} pin (for read/write control) the final driver code used a more basic hard-coded busy-wait delay method to ensure the display's timing was met. This practice proved to be the easiest to implement however for better performance this would have to be re-written as a polling scheme of the LCD controller's logical busy flag to reduce the system latency.
 
 To conserve battery life, the LCD driver implemented an optional auto-dimming feature for the LCD backlight; when enabled, the display backlight would remain at full brightness after any updates for several seconds, before being faded gradually down to half brightness. This feature ensured that the display remained visible even in low-light conditions, but the reduction in brightness conserved battery power from the relatively power hungry backlight.
 
@@ -133,7 +133,7 @@ To drive the external H-Bridge circuit used in the robot's motor controller hard
 
 The function to control the motor output was significantly more complex than anticipated, due to the slow switching characteristics of the inverter hardware chosen (see Chapter \ref{chp:results}). The resulting driver had to ensure that during a direction change of one or more motors, the PWM signal of the motor would be completely disabled, to prevent momentary shorts of the main battery during the switching period.
 
-Through trial and error, the motor PWM timer period was set to \lstinline{0x0FFF}, giving a frequency of around 8.1KHz at 16MHz due to the disabled prescaler and "Phase Correct" timer mode. Values below this range moved the PWM frequency noticibly into the range of human hearing, while raising this frequency reduced the efficiency of the motors and reduced the drive torque.
+Through trial and error, the motor PWM timer period was set to \lstinline{0x0FFF}, giving a frequency of around 8.1KHz at 16MHz due to the disabled prescaler and chosen \textit{"Phase Correct"} timer mode. Values below this range moved the PWM frequency noticibly into the range of human hearing, while raising this frequency reduced the efficiency of the motors and reduced the motor drive torque.
 
 \FloatBarrier
 \subsubsection{RGB LED Driver}
@@ -142,7 +142,7 @@ Like the robot headlights driver, the RGB status LED driver contained very littl
 
 \lstinputlisting[float=tbph,caption={RGB LED Driver's colour enums.},label={lst:rgbenums}]{./Figures/RGBEnums.c}
 
-Either of these two enum's values could be passed into the RGB LED driver's update routine, however in most cases the second (logical alias) versions where used to allow for easy modifications to the status colours at a later stage if desired.
+Either of these two enum's values could be passed into the RGB LED driver's update routine, however in most cases the second (logical alias) versions were used to allow for easy modifications to the status colours at a later stage if desired.
 
 \FloatBarrier
 \subsubsection{Speaker Driver}
@@ -154,20 +154,20 @@ A secondary feature of the speaker driver is the ability to play back one of sev
 \FloatBarrier
 \subsection{Sensor Platform}
 
-As the robot contained an (optional) set of physical environment sensors, a "Sensor Platform" module was created to logically encapsulate all aspects of the sensors - from initialization and updates, to data formatting of the retrieved values - into a single package that could be integrated into the rest of the project easily, but also remain extendable enough that it could also be re-used in other future projects. Comprising the sensor platform is two layers; one, the abstract sensor management layer, and two, the physical sensor drivers.
+As the robot contained an (optional) set of physical environment sensors, a \textit{"Sensor Platform"} module was created to logically encapsulate all aspects of the sensors - from initialization and updates, to data formatting of the retrieved values - into a single package that could be integrated into the rest of the project easily, but also remain extendable enough that it could also be re-used in other future projects. The sensor platform is comprised of two software layers; the abstract sensor management layer, and the physical sensor drivers.
 
 \FloatBarrier
 \subsubsection{Abstract Sensor Management}
 
-While the robot's auxiliary sensor boards (the Atmel \textit{Inertial One} and \textit{Pressure One}) contained several different sensor ICs with very different characteristics, the Sensor Platform module was designed to abstract these differences out from the rest of the firmware. This abstraction was achieved by providing a pair of simple initialization and update functions, and a consistent structure for the retrieved sensor data. An additional pair of functions were written to convert the retrieved sensor values into a Comma Separated Values (CSV) format, the retrieved data could be automatically streamed out to one or more logical consumers. Missing sensors (either not mounted or faulty) are automatically ignored by the sensor platform once the call to their initialization function has failed to complete.
+While the robot's auxiliary sensor boards (the Atmel \textit{Inertial One} and \textit{Pressure One}) contained several different sensor ICs with very different characteristics, the Sensor Platform module was designed to abstract these differences out from the rest of the firmware. This abstraction was achieved by providing a pair of simple initialization and update functions, and a consistent structure for the retrieved data from each sensor. An additional pair of functions were written to convert the retrieved sensor values into a Comma Separated Values (CSV) format. Using this method of encoding the data ensured that the retrieved data could be streamed out to one or more logical consumers in a standardized manner. Missing sensors (either not mounted or faulty) are automatically ignored by the sensor platform once the call to their initialization function has failed to complete.
 
 Unfortunately, this abstraction led to one notable problem; as each sensor has a variety of configuration parameters which are specific to that particular device (or physical property it measures) an abstract interface for sensor configuration could not easily be written. While this could be solved with additional design and planning, for the purposes of the project each sensor's configuration was instead fixed to sane defaults inside the physical sensor drivers, and no interface provided to alter these parameters on the fly externally.
 
-The C language structure used to encapsulate the state of a single sensor is shown in Listing \ref{lst:sensorentry}. This structure definition is instantiated as an array inside the sensor platform, with one entry then being dedicated to each physical property being measured (as distinct from each physical sensor IC). In the case of the ITG3200 Gyroscope, the internal temperature sensor was also used as well as the orientation data - in this particular case, the temperature sensor was assigned a second sensor structure entry in the sensor structure array.
+The C language structure used to encapsulate the state of a single sensor is shown in Listing \ref{lst:sensorentry}. This structure definition is instantiated as an array inside the sensor platform, with one entry then being dedicated to each physical property being measured (as distinct from each physical sensor IC). In the case of the ITG3200 Gyroscope sensor IC, the internal temperature sensor was used in addition to the orientation data - in this particular case, the temperature sensor was assigned a second sensor structure entry in the sensor structure array.
 
 \lstinputlisting[float=tbph,caption={Sensor Platform's Abstract Sensor entry structure definition.},label={lst:sensorentry}]{./Figures/SensorPlatformEntry.c}
 
-Of note is the use of a C \textit{union} to contain the retrieved sensor data, as either a single \lstinline{int32_t} signed 32-bit integer value, or a triplicate of three \lstinline{int16_t} signed 16-bit integers. The use of this union minimises the amount of memory used by each sensor entry, as the two styles of returned data can overlap physically in RAM as they are mutually exclusive (see Listing \ref{lst:sensorentry}). For sensors returning only a single 32-bit value, the sensor initialization function sets the corresponding \lstinline{SingleAxis} item in the structure so that the platform knows how to extract and format the retrieved data.
+Of note is the use of a C \textit{union} to contain the retrieved sensor data, as either a single \lstinline{int32_t} signed 32-bit integer value, or a triplicate of three \lstinline{int16_t} signed 16-bit integers. The use of this union minimises the amount of memory used by each sensor entry, as the two mutually exclusive styles of returned data can overlap physically in RAM (see Figure \ref{fig:sensorentry}). For sensors returning only a single 32-bit value, the sensor initialization function sets the corresponding \lstinline{SingleAxis} item in the structure so that the platform knows how to extract and format the retrieved data.
 
 \begin{figure}[tbph]
 	\vspace{1em}
@@ -201,24 +201,24 @@ Each individual sensor connected to the board requires a custom sensor driver, s
 	\end{center}
 \end{table}
 
-To ensure the interface into each individual sensor driver was as uniform as possible, the exact implementation details was hidden from external modules, with each driver exposing just two functions; an \lstinline{Init()} function to initialize the sensor, and an \lstinline{Update()} function to pull the latest values from the sensor if it has completed a conversion. To prevent slow sensors from introducing unnecessary lag into the system, the update functions would abort if the next conversion was not ready at the point in time that the function was called, and the sensor entry structure would retain the previously retrieved sensor value.
+To ensure the interface into each individual sensor driver was as uniform as possible, the exact implementation details was hidden from external modules, with each driver exposing just two functions; an \lstinline{Init()} function to initialize the sensor, and an \lstinline{Update()} function to pull the latest values from the sensor if it has completed a conversion. To prevent slow sensors from introducing unnecessary lag into the system, the update functions would abort if the next conversion was not ready at the point in time that the function was called, and the sensor entry structure would retain the previously retrieved sensor value. Each time a completed sensor data conversion was read from the sensor, a new conversion was started asynchronously.
 
 \FloatBarrier
 \subsection{Third Party Modules}
 
-While every effort was made to ensure that as much code as possible for the project was written from scratch, some allowance for third party libraries. Such libraries were used in places where the complexity of the module would hinder the project if a new implementation had to be implemented from scratch within the project's timeframe.
+While every effort was made to ensure that as much code as possible for the project was written from scratch, some allowances had to be made for third party libraries. Such libraries were used in places where the complexity of the module would hinder the project if a new implementation had to be implemented from scratch within the project's timeframe.
 
 \FloatBarrier
 \subsubsection{LUFA}
 
 A crucial part of the project was the ability to communicate with USB devices; the AVR's USB interface was to be used for both configuration and control of the robot, via a variety of USB devices. A full USB stack is a rather complicated affair; generally it takes an entire team of programmers working together and ample debugging time to produce a functional stack. Because of the short timeframe of the project, an existing stack was chosen instead.
 
-The selected stack was LUFA, a Lightweight USB Framework for AVR devices. This stack, a personal side-project of the author, offers a rich device support in both USB host and device modes. The library contains many inbuilt drivers for the various classes of USB devices, which were used in the project for the HID joystick control and Mass Storage configuration and sensor logging.
+The selected stack was LUFA, the \textit{Lightweight USB Framework for AVR devices}. This stack, a personal side-project of the author, offers a rich device support in both USB host and device modes. The library contains many inbuilt drivers for the various classes of USB devices, some of which were used in the project for the HID joystick control and Mass Storage configuration and sensor logging.
 
 \FloatBarrier
 \subsubsection{FatFS}
 
-To read and write files onto an attached Mass Storage USB device, it was neccesary to add a filesystem driver into the system, to maintain compatibility with files stored onto the disk using other devices. As the de-facto standard for embedded system filesystem is Microsoft's FAT (due to its relative simplicity when compared to more modern filesystems) a FAT compatible filesystem driver was selected for the project.
+To read and write files onto an attached Mass Storage USB device, it was neccesary to add a filesystem driver into the system. Using a standard filesystem allowed the firmware to maintain compatibility with files stored onto the disk using other devices. As the de-facto standard for embedded system filesystem is Microsoft's FAT (due to its relative simplicity when compared to more modern filesystems) a FAT compatible filesystem driver was selected for the project.
 
 The third-party FATFs library was chosen for this task, as it offers a free, tested, portable and light-weight C implementation of the FAT filesystem standard. The FATFs library is compatible with most variants of the FAT standard (including FAT16 and FAT32) making it an ideal choice for the project. Linking the FATFs library's read and write callback functions to the LUFA USB library's Mass Storage class driver section functions proved to be much easier than anticipated (see Listing \ref{lst:fatfsshim}).
 

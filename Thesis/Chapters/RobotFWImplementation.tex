@@ -1,6 +1,6 @@
 \chapter{Robot Firmware Implementation}
 \label{chp:robotfwimp}
-\lhead{Chapter 5. \emph{Robot Firmware Implementation}}
+\lhead{Chapter \ref{chp:robotfwimp}. \emph{Robot Firmware Implementation}}
 
 With the creation of the software embedded Bluetooth stack and the \textit{ExplorerBot} test robot platform hardware, it was necessary to integrate these two components into a functional prototype. By using the Bluetooth stack in a real-world, practical application while it was being developed, the quality, effectiveness and completeness of the stack could be evaluated.
 
@@ -71,7 +71,7 @@ Once all the system hardware is initialized, the main program flow then executes
 \FloatBarrier
 \subsubsection{Main Program Loop}
 
-As is the case with virtually all embedded systems, the main program execution was contained in an infinite loop - each iteration of the loop would dispatch to the various sub-components of the system to manage and react to various stimuli. In the case of the robot firmware, the main loop contained three main functions; one, it checked for presses of either of the two physical buttons on the robot, two, it would check for expiry of the system tick timer to dispatch timing-related events, and three, it would execute the various hardware and software module service tasks.
+As is the case with virtually all embedded systems, the main program execution was contained in an infinite loop; each iteration of the loop would dispatch to the various sub-components of the system to manage and react to various stimuli. In the case of the robot firmware, the main loop contained three main functions; one, it checked for presses of either of the two physical buttons on the robot, two, it would check for expiry of the system tick timer to dispatch timing-related events, and three, it would execute the various hardware and software module service tasks.
 
 In the case of the two physical buttons, the first (top) button was assigned a soft-reset role, in the case of a communication failure which resulted in the robot's motors being left on and the system uncontrollable. This \textit{emergency stop} style functionality was implemented using the microcontroller's internal watchdog system to reset the microcontroller approximately 15ms after the button press was detected. The second physical button was assigned a mode-specific role, according to Table \ref{tab:buttonroles}.
 
@@ -101,7 +101,7 @@ At the point at which the abstract software in the device needed to interact wit
 \FloatBarrier
 \subsubsection{Buttons Driver}
 
-The hardware for the board button driver was, as expected, very simple; no debouncing was implemented in the driver itself, as this was not found to be necessary in the firmware - adequate debouncing could be achieved elsewhere in the code instead via the software flags the buttons controlled.
+The hardware for the board button driver was, as expected, very simple; no debouncing was implemented in the driver itself, as this was not found to be necessary in the firmware. Adequate debouncing for the button logic could be achieved elsewhere in the code instead, via the software flags the buttons controlled.
 
 As a result, the completed button driver implementation was trivial, consisting only of a configuration routine to configure the appropriate GPIO lines as inputs with the microcontroller's internal pull-up resistors enabled, and a status routine to read and mask out the appropriate port lines.
 
@@ -154,7 +154,7 @@ A secondary feature of the speaker driver is the ability to play back one of sev
 \FloatBarrier
 \subsection{Sensor Platform}
 
-As the robot contained an (optional) set of physical environment sensors, a \textit{"Sensor Platform"} module was created to logically encapsulate all aspects of the sensors - from initialization and updates, to data formatting of the retrieved values - into a single package that could be integrated into the rest of the project easily, but also remain extendable enough that it could also be re-used in other future projects. The sensor platform is comprised of two software layers; the abstract sensor management layer, and the physical sensor drivers.
+As the robot contained an (optional) set of physical environment sensors, a \textit{"Sensor Platform"} module was created to logically encapsulate all aspects of the sensors---from initialization and updates, to data formatting of the retrieved values---into a single package that could be integrated into the rest of the project easily, but also remain extendable enough that it could also be re-used in other future projects. The sensor platform is comprised of two software layers; the abstract sensor management layer, and the physical sensor drivers.
 
 \FloatBarrier
 \subsubsection{Abstract Sensor Management}
@@ -163,7 +163,7 @@ While the robot's auxiliary sensor boards (the Atmel \textit{Inertial One} and \
 
 Unfortunately, this abstraction led to one notable problem; as each sensor has a variety of configuration parameters which are specific to that particular device (or physical property it measures) an abstract interface for sensor configuration could not easily be written. While this could be solved with additional design and planning, for the purposes of the project each sensor's configuration was instead fixed to sane defaults inside the physical sensor drivers, and no interface provided to alter these parameters on the fly externally.
 
-The C language structure used to encapsulate the state of a single sensor is shown in Listing \ref{lst:sensorentry}. This structure definition is instantiated as an array inside the sensor platform, with one entry then being dedicated to each physical property being measured (as distinct from each physical sensor IC). In the case of the ITG3200 Gyroscope sensor IC, the internal temperature sensor was used in addition to the orientation data - in this particular case, the temperature sensor was assigned a second sensor structure entry in the sensor structure array.
+The C language structure used to encapsulate the state of a single sensor is shown in Listing \ref{lst:sensorentry}. This structure definition is instantiated as an array inside the sensor platform, with one entry then being dedicated to each physical property being measured (as distinct from each physical sensor IC). In the case of the ITG3200 Gyroscope sensor IC, the internal temperature sensor was used in addition to the orientation data. In this particular case, the temperature sensor was assigned a second sensor structure entry in the sensor structure array.
 
 \lstinputlisting[float=tbph,caption={Sensor Platform's Abstract Sensor entry structure definition.},label={lst:sensorentry}]{./Figures/SensorPlatformEntry.c}
 
@@ -275,4 +275,4 @@ In some cases, a Bluetooth enabled application may peform specific filtering on 
 
 Inside this management layer, the RFCOMM service channel open and close events were hooked, so that the opened RFCOMM channel handles could be captured. This captured handle is then stored temporarily by the robot firmware and used for later streaming of the sensor data. As only one connection handle is stored by the device at any one time for this purpose, a limitation of the system is imposed; only one wireless serial port can receive sensor data at the one time.
 
-The HID service callback for packet reception was also hooked in this layer, and implemented to process incoming HID reports from Bluetooth devices. These processed reports - from game controllers, mobile phones, or other HID compliant devices - were then fed back into the main firmware module to control the robot's motors, headlights and horn hardware.
+The HID service callback for packet reception was also hooked in this layer, and implemented to process incoming HID reports from Bluetooth devices. These processed reports---from game controllers, mobile phones, or other HID compliant devices---were then fed back into the main firmware module to control the robot's motors, headlights and horn hardware.

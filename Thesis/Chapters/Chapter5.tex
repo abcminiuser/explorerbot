@@ -263,17 +263,16 @@ When a disk is inserted, the firmware will first attempt to open an existing fil
 Additionally, the firware will attempt to open and process a second file names \texttt{REMADDR.TXT}, which holds the Bluetooth device address of the remote Bluetooth device the robot should attempt a connection to upon demand. This file is expected to contain an address of the format \texttt{XX:XX:XX:XX:XX:XX}, containing the six consecutive octets of the remote device's address, in hexadecimal format. This address is then stored into the robot's non-volatile EEPROM memory for later use when a Bluetooth adapter is subsequently inserted. If no such file exists on the attached disk, one is created and the currently stored remote device address written to it.
 
 \FloatBarrier
-\subsection{Bluetooth Management}
+\subsection{Bluetooth Management Layer}
 
-% TODO
+Connecting the project's Bluetooth Stack to the rest of the robot firmware was the Bluetooth Management layer, responsible for providing the appropriate callback function implementations required by the stack. These callback functions are fired by the Bluetooth stack in response to defined events, such as connection requests, channel establishment and packet reception.
 
-\FloatBarrier
-\subsubsection{Stack Integration Layer}
+A secondary duty performed by the management software layer is the dispatch of events and data to and from the various Bluetooth services. These services, such as RFCOMM, SDP and HID, are optional in all implementations, and thus require manual integration into each project on top of the base Bluetooth stack if desired. These services must be linked to the various Bluetooth stack callback events so that they may function correctly (see Listing \ref{lst:btdatacallback}).
 
-% TODO
+\lstinputlisting[float=tbph,caption={One callback from the Bluetooth Stack, dispatching received packets to the integrated Bluetooth services.},label={lst:btdatacallback}]{./Figures/BTStackDataCallback.c}
 
-\FloatBarrier
-\subsubsection{Bluetooth Stack}
+In some cases, a Bluetooth enabled application may peform specific filtering on incoming connection and channel requests; an embedded device may be programmed to reject all but one specfic remote device, or only accept specific channel protocols. However, as the \textit{ExplorerBot} was designed to be controlled publically via any supported Bluetooth enabled device, no such filtering was performed in the request callback routines. All HCI connection and L2CAP channel event callbacks were implemented, however, to display their relevant event data onto the robot's LCD display for debugging purposes.
 
-% TODO
+Inside this management layer, the RFCOMM service channel open and close events were hooked, so that the opened RFCOMM channel handles could be captured. This captured handle is then stored temporarily by the robot firmware and used for later streaming of the sensor data. As only one connection handle is stored by the device at any one time for this purpose, a limitation of the system is imposed; only one wireless serial port can receive sensor data at the one time.
 
+The HID service callback for packet reception was also hooked in this layer, and implemented to process incoming HID reports from Bluetooth devices. These processed reports - from game controllers, mobile phones, or other HID compliant devices - were then fed back into the main firmware module to control the robot's motors, headlights and horn hardware.

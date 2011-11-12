@@ -1,5 +1,6 @@
-OUTPUT_DIR = Output
-
+DOCUMENT_NAME = Thesis
+OUTPUT_DIR    = Output
+PACKAGE_DIR   = Packages
 
 # Build the LaTeX document.
 all: outputdir pdf
@@ -16,7 +17,7 @@ outputdir:
 	
 # Generate PDF output from LaTeX input files.
 pdf:
-	pdflatex --output-directory=$(OUTPUT_DIR) Thesis.tex
-	bibtex $(OUTPUT_DIR)/Thesis
-	pdflatex -quiet --output-directory=$(OUTPUT_DIR) Thesis.tex
-	pdflatex -quiet --output-directory=$(OUTPUT_DIR) Thesis.tex
+	pdflatex --include-directory=$(PACKAGE_DIR) --output-directory=$(OUTPUT_DIR) $(DOCUMENT_NAME)
+	bibtex $(OUTPUT_DIR)/$(DOCUMENT_NAME)
+	pdflatex -quiet --include-directory=$(PACKAGE_DIR) --output-directory=$(OUTPUT_DIR) $(DOCUMENT_NAME)
+	pdflatex -quiet --include-directory=$(PACKAGE_DIR) --output-directory=$(OUTPUT_DIR) $(DOCUMENT_NAME)

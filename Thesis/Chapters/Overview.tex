@@ -35,9 +35,15 @@ These components, when put together, form the basis of a minimal Bluetooth stack
 	\label{fig:btstack}
 \end{figure}
 
-As the usefulness of an abstract piece of software is inherently low without a suitable demonstration platform, a second component of the project will be to design, develop and prototype a functional and practical device which uses the created stack. It is proposed that this hardware component be in the form of a small \textit{``ExplorerBot''} robot, able to stream local sensor data wirelessly to a remote PC for real-time graphing purposes, and to allow for remote wireless control over a Bluetooth link to a consumer Bluetooth control device, such as a current generation Game Console controller (\textit{Wii} or \textit{Playstation 3}). If possible, these two functions should be combined to allow for multiple simultaneous connections, allowing for remote control at the same time as the sensor data is logged remotely.
+As the usefulness of an abstract piece of software is inherently low without a suitable demonstration platform, a second component of the project will be to design, develop and prototype a functional and practical device which uses the created stack. It is proposed that this hardware component be in the form of a small \textit{``ExplorerBot''} robot (see Figure \ref{fig:robotoutline}), able to stream local sensor data wirelessly to a remote PC for real-time graphing purposes, and to allow for remote wireless control over a Bluetooth link to a consumer Bluetooth control device, such as a current generation Game Console controller (\textit{Wii} or \textit{Playstation 3}). If possible, these two functions should be combined to allow for multiple simultaneous connections, allowing for remote control at the same time as the sensor data is logged remotely.
 
-% TODO - Figure of robot
+\begin{figure}[H]
+	\centering
+		\includegraphics[width=60mm]{RobotOutline.png}
+	\rule{35em}{0.5pt}
+	\caption[Diagram of the proposed robot]{Diagram of the proposed robot platform.}
+	\label{fig:robotoutline}
+\end{figure}
 
 With the combination of the software \emph{(the stack)} and hardware \emph{(the robot)} components of this project, the final design should offer a complete system and test platform which can be reproduced wholesale, modified to suit a particular application or used as a reference implementation for other projects.
 

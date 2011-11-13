@@ -2,16 +2,44 @@
 \label{chp:conclusion}
 \lhead{Chapter \ref{chp:conclusion}. \emph{Conclusion}}
 
-% TODO
+The purpose of this project was to research, design and implement a functional Embedded Bluetooth Stack for inclusion in small-scale embedded environments. A secondary goal of the project was to design, manufacture and test a practical implementation of an embedded project using this stack to demonstrate the stack's completeness and praticality in a real-world environment.
+
+To date, both of these goals have been achieved to some degree; the Bluetooth stack was completed to a functional state suitable for use in some environments, and a working Bluetooth controlled robot was completed to a point where it could interact with consumer Bluetooth devices wirelessly over several protocols. Several areas of the Bluetooth stack warrant future expansion and refinement, but the code as-is demonstrates a solid platform onto which a rich variety of low-cost Bluetooth enabled devices can be implemented.
 
 \section{Project Success}
 
-% TODO
+Measuring the success of a project is a difficult task; one has to take into account the original goals of the project, the timeframes set for each goal, and make allowances for changes to these goals and project specifications in response to technical and physical challenges faced in the course of completing the project. Several unexpected delays in obtaining a correct PCB from the board manufacturer threatened to push out the timeframes alloted for the physical robot construction by several weeks, and supply problems in obtaining several parts caused delays due to the need to revise the PCB design around alternative parts.
+
+Despite these setbacks, the project can objectively be shown as a success overall --- the objectives of the project were met, and a completed working robot was produced running from the Bluetooth stack within the alloted project timeframe.
 
 \section{Future Work}
 
-% TODO
+While functional, the Bluetooth stack at the point of the project's end was not complete. Several areas have been identified for improvement, which at the point of writing prevent the stack from being used in some environments. These areas are listed below.
+
+\subsection{Reliable Packet Buffering and Retransmissions}
+
+The L2CAP layer of Bluetooth has several similarities to the TCP/IP network stack of a modern computer network; messages transmitted through an established link are considered to be reliable, that is, messages sent will attempt retransmission automatically if they are not correctly processed by the remote device. For this mechanism to function, a retransmission timer must be implemented, and an outgoing packet buffer added into the system to buffer packets and re-send them in the event that the remote end does not respond in the correct manner within the the specified timeout period.
+
+For the purposes of the project, such a reliable buffer and timeout system was not implemented due to time constraints. A special reliable event system was included in the L2CAP management layer to ensure that channels are correctly negotiated regardless of the presence or lack of such a buffering layer, however the Bluetooth services implemented on top of the L2CAP layer do not contain such a mechanism. This can result in messages sent from the upper Bluetooth services to be lost and the service put into a lock-up state until the connection to the non-responsive remote device is reset.
+
+Future stack development would implement a system where either the services are expanded to reliably manage their state internally, or the lower layers extended to require the addition of a reliable packet buffer and timeout service.
+
+\subsection{Packet Reception Fragmentation Support}
+
+A large component of modern communication systems in the concept of data packeting and fragmentation, the act of splitting up a larger communication message into a set of smaller discrete units for individual transfer. Bluetooth is no exception to this; each logical layer within the Bluetooth specification may specifiy a maximum fragment size to a remote device, above which large messages are split into smaller chunks. These fragments must then be received individually and reconstructed to obtain the original message.
+
+In the Bluetooth stack written for the project, outgoing packets are correctly fragmented into sizes appropriate for the receiving device, however received packets do not currently run through a reassembly layer. In lieu of this feature, the stack requires that the local device is capable of receiving packets in their entirety up to the maximum single packet size as defined by the Bluetooth 2.1 specifications, that of 64KB. For the stack to be considered feature complete, fragmentation reassembly support should be added at a later stage.
+
+\subsection{Expansion of Bluetooth Services}
+
+Only a small subset of the standardized Bluetooth services were implemented in the stack for the project, and of those implemented, only the specific roles (device or server) required for the robot's functionality were completed. Future expansion of the project would require the completion of the existing services for both roles, as well as the addition of other Bluetooth classes such as the Bluetooth Personal Networking (PAN) service for wireless networking.
+
+\subsection{Additional Physical Transports}
+
+The Bluetooth 2.1 specification defines additional physical transport mediums, for the transport of HCI packets between the Bluetooth Host Controller and the application Microcontroller. Callback hooks from the stack are supplied for the user-supplied implementation of any desired transport mechanism, however for the project only the USB transport was implemented. Future development of the stack should implement the most widely used transport medium---i.e. the UART serial HCI packet tranport---so that Bluetooth HCI controllers may be installed directly on the PCB alongside the main microcontroller in an embedded device.
 
 \section{Final Words}
 
-% TODO
+While the formal portion of this project is now complete, I look forward to the continuing development and discussion of the project in my spare time; now that a solid base has been written, future work may be performed at my leisure to move the project out of the academic envionment and into real-world use. The next critical step in this project is the construction of a community around the stack's development, so as to gain new ideas, bug reports and community contributions.
+
+From the development of this project I was able to gain valuable experience in building real-world projects. I was able to practice proper project time mangement and goal-based development, and experience the realities of PCB manufacturing delays, component shortages and tight deadlines. This experience has enriched my engineering abilities, and I now feel confident in moving towards my imminent professional future with these new skills and knowledge.

@@ -255,22 +255,28 @@ bool CALLBACK_HIDParser_FilterHIDReportItem(HID_ReportItem_t* const CurrentItem)
 			switch (CurrentItem->Attributes.Usage.Usage)
 			{
 				case 1:
-					Joystick_HIDReportItemMappings.Left       = CurrentItem;
+					Joystick_HIDReportItemMappings.Left        = CurrentItem;
 					return true;
 				case 2:
-					Joystick_HIDReportItemMappings.Forward    = CurrentItem;
+					Joystick_HIDReportItemMappings.Forward     = CurrentItem;
 					return true;
 				case 3:
-					Joystick_HIDReportItemMappings.Backward   = CurrentItem;
+					Joystick_HIDReportItemMappings.Backward    = CurrentItem;
 					return true;
 				case 4:
-					Joystick_HIDReportItemMappings.Right      = CurrentItem;
+					Joystick_HIDReportItemMappings.Right       = CurrentItem;
 					return true;
 				case 5:
-					Joystick_HIDReportItemMappings.Headlights = CurrentItem;
+					Joystick_HIDReportItemMappings.NoveltyHorn = CurrentItem;
+					return true;
+				case 6:
+					Joystick_HIDReportItemMappings.Horn        = CurrentItem;
 					return true;
 				case 7:
-					Joystick_HIDReportItemMappings.Horn       = CurrentItem;
+					Joystick_HIDReportItemMappings.HeadlightToggle = CurrentItem;
+					return true;
+				case 8:
+					Joystick_HIDReportItemMappings.Headlights  = CurrentItem;
 					return true;
 			}
 		}

@@ -10,7 +10,7 @@ To match the Bluetooth stack, each module was written in the C language, and tar
 
 \begin{itemize}
 	\item The \textbf{WinAVR 20100101} release download, or Windows binaries of the \textbf{GNU Shell Utilities}
-	\item The latest \textbf{AVR Toolchain} release from Atmel (included with Atmel's free \textit{AVRStudio 5} software)
+	\item The latest \textbf{AVR Toolchain} release download from Atmel (included with Atmel's free \textit{AVRStudio 5} software)
 \end{itemize}
 
 Under Debian Linux environments, the following packages are required:
@@ -140,7 +140,7 @@ Through trial and error, the motor PWM timer period was set to \lstinline{0x0FFF
 
 Like the robot headlights driver, the RGB status LED driver contained very little complexity. As a convenience, this driver exposed two sets of \lstinline{enum} values which could be used to set the colour of the RGB LED on the board. The first enum contained the literal colour names, which could be used to set a particular colour, while the second enum contained logical aliases of these colours for the various system states (see Listing \ref{lst:rgbenums}).
 
-\lstinputlisting[float=tbph,caption={RGB LED Driver's colour enums.},label={lst:rgbenums}]{./Figures/RGBEnums.c}
+\lstinputlisting[float=tbph,caption={RGB LED driver's colour enumeration aliases.},label={lst:rgbenums}]{./Figures/RGBEnums.c}
 
 Either of these two enum's values could be passed into the RGB LED driver's update routine, however in most cases the second (logical alias) versions were used to allow for easy modifications to the status colours at a later stage if desired.
 
@@ -188,12 +188,12 @@ Each individual sensor connected to the board requires a custom sensor driver, s
 	\begin{center}
 		\begin{tabular}{ | l | l | l | l | }
 			\hline
-			\textbf{Sensor}	& \textbf{Type}	& \textbf{I\superscript{2}C Address} & \textbf{Settings} \\ \hline
+			\textbf{Sensor}	& \textbf{Type}	& \textbf{Address} & \textbf{Settings} \\ \hline
 
 			AK8975 & Direction & 0x0C & N/A \\ \hline
 			BMA150 & Acceleration & 0x38 & \vtop{\hbox{\strut 25Hz bandwidth,} \hbox{\strut +/-2g range,} \hbox{\strut Interrupt line enabled}} \\ \hline
 			BMP085 & Pressure & 0x77 & N/A \\ \hline
-			ITG3200 & Orientation & 0x68 & \vtop{\hbox{\strut 100Hz at an internal sampling rate of 1KHz, } \hbox{\strut Low Pass Filter to use 20Hz bandwidth,} \hbox{\strut Gyroscope X axis PLL as the clock source,} \hbox{\strut Interrupt line enabled}} \\ \hline
+			ITG3200 & Orientation & 0x68 & \vtop{\hbox{\strut 100Hz at a 1KHz internal sampling rate,} \hbox{\strut Low Pass Filter to use 20Hz bandwidth,} \hbox{\strut Gyroscope X axis PLL as the clock source,} \hbox{\strut Interrupt line enabled}} \\ \hline
 			ITG3200 & Temperature & 0x68 & N/A \textit{(Virtual Sensor)} \\ \hline
 		\end{tabular}
 		\caption[Sensor Configuration]{Table showing the sensors used and their configuration properties.}
@@ -260,7 +260,7 @@ When a disk is inserted, the firmware will first attempt to open an existing fil
 
 \lstinputlisting[float=tbph,caption={Example of the Mass Storage manager code to open and write to a file on an attached USB flash disk using the FATFs library.},label={lst:logfileparse}]{./Figures/LogFileParsing.c}
 
-Additionally, the firmware will attempt to open and process a second file names \texttt{REMADDR.TXT}, which holds the Bluetooth device address of the remote Bluetooth device the robot should attempt a connection to upon demand. This file is expected to contain an address of the format \texttt{XX:XX:XX:XX:XX:XX}, containing the six consecutive octets of the remote device's address, in hexadecimal format. This address is then stored into the robot's non-volatile EEPROM memory for later use when a Bluetooth adapter is subsequently inserted. If no such file exists on the attached disk, one is created and the currently stored remote device address written to it.
+Additionally, the firmware will attempt to open and process a second file on the attached storage disk named \texttt{REMADDR.TXT}, which holds the Bluetooth device address of the remote Bluetooth device the robot should attempt a connection to upon demand. This file is expected to contain an address of the format \texttt{XX:XX:XX:XX:XX:XX}, containing the six consecutive octets of the remote device's address, in hexadecimal format. This address is then stored into the robot's non-volatile EEPROM memory for later use when a Bluetooth adapter is subsequently inserted. If no such file exists on the attached disk, one is created and the currently stored remote device address written to it.
 
 \FloatBarrier
 \subsection{Bluetooth Management Layer}
@@ -269,7 +269,7 @@ Connecting the project's Bluetooth Stack to the rest of the robot firmware was t
 
 A secondary duty performed by the management software layer is the dispatch of events and data to and from the various Bluetooth services. These services, such as RFCOMM, SDP and HID, are optional in all implementations, and thus require manual integration into each project on top of the base Bluetooth stack if desired. These services must be linked to the various Bluetooth stack callback events so that they may function correctly (see Listing \ref{lst:btdatacallback}).
 
-\lstinputlisting[float=tbph,caption={One callback from the Bluetooth Stack, dispatching received packets to the integrated Bluetooth services.},label={lst:btdatacallback}]{./Figures/BTStackDataCallback.c}
+\lstinputlisting[float=tbph,caption={Bluetooth Stack event callback example, dispatching received packets to the integrated Bluetooth services.},label={lst:btdatacallback}]{./Figures/BTStackDataCallback.c}
 
 In some cases, a Bluetooth enabled application may perform specific filtering on incoming connection and channel requests; an embedded device may be programmed to reject all but one specific remote device, or only accept specific channel protocols. However, as the \textit{ExplorerBot} was designed to be controlled publically via any supported Bluetooth enabled device, no such filtering was performed in the request callback routines. All HCI connection and L2CAP channel event callbacks were implemented, however, to display their relevant event data onto the robot's LCD display for debugging purposes.
 

@@ -3,13 +3,12 @@
 %% ---------------------------------------------------------------- 
 
 % Set up the document
-\documentclass[a4paper, 11pt,oneside]{Thesis}  % Use the "Thesis" style, based on the ECS Thesis style by Steve Gunn
+\documentclass[a4paper,11pt,oneside]{Thesis}  % Use the "Thesis" style, based on the ECS Thesis style by Steve Gunn
 \graphicspath{{Figures/}}  % Location of the graphics files (set up for graphics to be in PDF format)
 
 % Include any extra LaTeX packages required
 \usepackage[square, numbers, comma, sort&compress]{natbib}  % Use the "Natbib" style for the references in the Bibliography
 \usepackage{verbatim}  % Needed for the "comment" environment to make LaTeX comments
-\usepackage{vector}  % Allows "\bvec{}" and "\buvec{}" for "blackboard" style bold vectors in maths
 \usepackage[final]{pdfpages} % Allows for importing of pdfs
 \usepackage{listings} % Alows for code inclusions
 \usepackage{float}
@@ -21,8 +20,8 @@
 \newcommand{\superscript}[1]{\ensuremath{^{\textrm{#1}}}}
 \newcommand{\subscript}[1]{\ensuremath{_{\textrm{#1}}}}
 
-%% ----------------------------------------------------------------
 \begin{document}
+%% ----------------------------------------------------------------
 \frontmatter	  % Begin Roman style (i, ii, iii, iv...) page numbering
 
 % Set up the Title Page
@@ -45,7 +44,6 @@
 \fancyhead{}  % Clears all page headers and footers
 \rhead{\thepage}  % Sets the right side header to show the page number
 \lhead{}  % Clears the left side page header
-
 \pagestyle{fancy}  % Finally, use the "fancy" page style to implement the FancyHdr headers
 %% ---------------------------------------------------------------- 
 \addtotoc{Abstract}  % Add the "Abstract" page entry to the Contents
@@ -83,6 +81,7 @@
 	Thank you to the wider AVR community for their interest and support for the project, and to Matt from \textit{\href{http://www.micropendous.org}{Opendous Inc.}}
 	for his contribution of the free \textit{"Micropendous"} AVR microcontroller boards used in the final robot prototype.
 }
+
 \clearpage  % End of the Acknowledgements
 %% ----------------------------------------------------------------
 \pagestyle{fancy}  %The page style headers have been "empty" all this time, now use the "fancy" headers as defined before to bring them back
@@ -95,6 +94,12 @@
 %% ----------------------------------------------------------------
 \lhead{\emph{List of Tables}}  % Set the left side page header to "List of Tables"
 \listoftables  % Write out the List of Tables
+%% ----------------------------------------------------------------
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Code Listings}
+\lhead{\emph{List of Code Listings}}  % Set the left side page header to "List of Code Listings"
+\renewcommand\lstlistlistingname{List of Code Listings}
+\lstlistoflistings
 %% ----------------------------------------------------------------
 \mainmatter
 \pagestyle{fancy}
@@ -153,5 +158,5 @@
 \lhead{\emph{Bibliography}}  % Change the left side page header to "Bibliography"
 \bibliographystyle{unsrtnat}  % Use the "unsrtnat" BibTeX style for formatting the Bibliography
 \bibliography{Thesis}  % The references (bibliography) information are stored in the file named "Bibliography.bib"
-\end{document}  % The End
 %% ----------------------------------------------------------------
+\end{document}  % The End

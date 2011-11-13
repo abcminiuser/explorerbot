@@ -133,7 +133,7 @@ To drive the external H-Bridge circuit used in the robot's motor controller hard
 
 The function to control the motor output was significantly more complex than anticipated, due to the slow switching characteristics of the inverter hardware chosen (see Chapter \ref{chp:results}). The resulting driver had to ensure that during a direction change of one or more motors, the PWM signal of the motor would be completely disabled, to prevent momentary shorts of the main battery during the switching period.
 
-Through trial and error, the motor PWM timer period was set to \lstinline{0x0FFF}, giving a frequency of around 8.1KHz at 16MHz due to the disabled prescaler and chosen \textit{"Phase Correct"} timer mode. Values below this range moved the PWM frequency noticibly into the range of human hearing, while raising this frequency reduced the efficiency of the motors and reduced the motor drive torque.
+Through trial and error, the motor PWM timer period was set to \lstinline{0x0FFF}, giving a frequency of around 8.1KHz at 16MHz due to the disabled prescaler and chosen \textit{``Phase Correct''} timer mode. Values below this range moved the PWM frequency noticibly into the range of human hearing, while raising this frequency reduced the efficiency of the motors and reduced the motor drive torque.
 
 \FloatBarrier
 \subsubsection{RGB LED Driver}
@@ -154,7 +154,7 @@ A secondary feature of the speaker driver is the ability to play back one of sev
 \FloatBarrier
 \subsection{Sensor Platform}
 
-As the robot contained an (optional) set of physical environment sensors, a \textit{"Sensor Platform"} module was created to logically encapsulate all aspects of the sensors---from initialization and updates, to data formatting of the retrieved values---into a single package that could be integrated into the rest of the project easily, but also remain extendable enough that it could also be re-used in other future projects. The sensor platform is comprised of two software layers; the abstract sensor management layer, and the physical sensor drivers.
+As the robot contained an (optional) set of physical environment sensors, a \textit{``Sensor Platform''} module was created to logically encapsulate all aspects of the sensors---from initialization and updates, to data formatting of the retrieved values---into a single package that could be integrated into the rest of the project easily, but also remain extendable enough that it could also be re-used in other future projects. The sensor platform is comprised of two software layers; the abstract sensor management layer, and the physical sensor drivers.
 
 \FloatBarrier
 \subsubsection{Abstract Sensor Management}

@@ -6,7 +6,7 @@ To help demonstrate the usefulness of the stack in a practical manner, a robot w
 
 \section{Hardware Overview}
 
-The completed robot design for the project contains many useful capabilities for both mobility and exploration. Built on top of a pre-fabricated (including raw DC motors and gearing) "Tank" style hobby robot base, the \emph{ExplorerBot} robot implements the following features:
+The completed robot design for the project contains many useful capabilities for both mobility and exploration. Built on top of a pre-fabricated (including raw DC motors and gearing) ``Tank'' style hobby robot base, the \emph{ExplorerBot} robot implements the following features:
 
 \begin{itemize}
 	\item Primary switch-mode based 5V power supply
@@ -18,7 +18,7 @@ The completed robot design for the project contains many useful capabilities for
 	\item Level converted I\textsuperscript{2}C bus for the attached sensor(s)
 	\item Support for the Atmel \textit{Inertial One} and \textit{Pressure One} sensor boards
 	\item High intensity LED based headlights for frontal illumination
-	\item Piezo speaker for audio feedback and "horn" like functionality
+	\item Piezo speaker for audio feedback and ``horn'' like functionality
 	\item Atmel \textit{AT90USB1287} 8-Bit Microcontroller
 	\item External 128KB SRAM for temporary storage of packets to and from the Bluetooth adapter
 \end{itemize}
@@ -134,7 +134,7 @@ A pair of standard PCB round buttons were added to the design, for user input. T
 \FloatBarrier
 \subsection{Headlights}
 
-To provide illumination of the area immediately ahead of the robot, a pair of high intensity wide viewing angle white LEDs were added to the schematic, connected to a single common driver transistor and driven by a GPIO pin of the microcontroller. To ensure maximum illumination, the LEDs were driven at just under their full 20mA rating when turned on. These "headlights" were then mounted on the front of the robot chassis.
+To provide illumination of the area immediately ahead of the robot, a pair of high intensity wide viewing angle white LEDs were added to the schematic, connected to a single common driver transistor and driven by a GPIO pin of the microcontroller. To ensure maximum illumination, the LEDs were driven at just under their full 20mA rating when turned on. These ``headlights'' were then mounted on the front of the robot chassis.
 
 \FloatBarrier
 \subsection{Speaker}
@@ -155,7 +155,7 @@ To drive the speaker, a standard NPN transistor was employed to provide sufficie
 \FloatBarrier
 \subsection{Motor Controller}
 
-While the plastic hobbyist "tank" style robot base selected for the prototype robot contained a pair of 6V DC motors stock from the factory, it did not contain a motor control system; implementation of a suitable motor control circuit was thus required as part of the project. To prevent motor noise from being injected back into the main 5V power supply used by the sensitive microcontroller, the motors were instead powered directly from the raw battery voltage. By directly powering the motors from the system battery, the main 5V logic power bus could remain relatively undisturbed by the potentially large current spikes caused by the switching on and off of the motors under load. This design had the additional benefit of a reduced the total power draw on the main power supply, reducing wasted power due to the supply's non-perfect efficiency and prolonging the operating time of the robot on a fresh battery.
+While the plastic hobbyist ``tank'' style robot base selected for the prototype robot contained a pair of 6V DC motors stock from the factory, it did not contain a motor control system; implementation of a suitable motor control circuit was thus required as part of the project. To prevent motor noise from being injected back into the main 5V power supply used by the sensitive microcontroller, the motors were instead powered directly from the raw battery voltage. By directly powering the motors from the system battery, the main 5V logic power bus could remain relatively undisturbed by the potentially large current spikes caused by the switching on and off of the motors under load. This design had the additional benefit of a reduced the total power draw on the main power supply, reducing wasted power due to the supply's non-perfect efficiency and prolonging the operating time of the robot on a fresh battery.
 
 As the raw battery voltage (7.2V nominal) was higher than the motor's 6V maximum, a PWM circuit was thus designed so that the average power delivered to each motor would prevent the motor from burning out during use. While not used in the final robot firmware, the use of variable duty cycle PWM drive signals to the motor would allow for additional speed control of the robot's motors without a corresponding loss of torque.
 
@@ -205,7 +205,7 @@ For this reason, and to reduce the amount of noise on the sensor power supply fo
 
 Due to the differing bus voltages between the sensor boards (3.3V) and the main processor (5V), level conversion of the I\textsuperscript{2}C bus and sensor interrupt/control lines was required. While only a unidirectional buffer was strictly needed for each of the sensor interrupt/control lines, it was decided to use a bidirectional converter to ease the board routing.
 
-Initially, only an ADG3308 8-channel Bidirectional Level Converter IC was used, for both the sensor interrupt/control lines, as well as the I\textsuperscript{2}C bus. However, after further analysis it was discovered that the level translator would not meet the timing requirements of the I\textsuperscript{2}C bus, necessitating the addition of a secondary dedicated Texas Instruments PCA9306 fixed function I\textsuperscript{2}C bus level converter IC in the second revision of the board. As a bonus, the use of the later chip allowed the I\textsuperscript{2}C bus to be driven at the "Fast" I\textsuperscript{2}C speed of 200KHz for minimal latency and maximum throughput.
+Initially, only an ADG3308 8-channel Bidirectional Level Converter IC was used, for both the sensor interrupt/control lines, as well as the I\textsuperscript{2}C bus. However, after further analysis it was discovered that the level translator would not meet the timing requirements of the I\textsuperscript{2}C bus, necessitating the addition of a secondary dedicated Texas Instruments PCA9306 fixed function I\textsuperscript{2}C bus level converter IC in the second revision of the board. As a bonus, the use of the later chip allowed the I\textsuperscript{2}C bus to be driven at the ``Fast'' I\textsuperscript{2}C speed of 200KHz for minimal latency and maximum throughput.
 
 Unusually, the ADG3308 level converter IC required that its enable pin (located on the low voltage side of the translator) be connected to the higher logic level for the chip to become active (see Figure \ref{fig:ADG3308schematic}). This odd placement of the enable pin resulted in a non-optimal breaking of the ground plane underneath the chip to accommodate the required route, as the space between the chip package pins on the top layer was used to carry the 3.3V power bus to the sensor boards (see Figure \ref{fig:ADG3308routing}).
 

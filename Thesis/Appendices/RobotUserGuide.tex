@@ -14,7 +14,7 @@ In this section, the basic operation of the completed \textit{ExplorerBot} robot
 
 \section{Power Requirements}
 
-The robot requires a 6-9V DC input power supply, capable of supplying up to 1A of current. Ideally, a 7.2V Lithium Ion battery should be used for this purpose for maximum operating time (due to its abilitiy to supply large amount of instataneous current, used by the motors when switched on).
+The robot requires a 6-9V DC input power supply, capable of supplying up to 1A of current. Ideally, a 7.2V Lithium Ion battery should be used for this purpose for maximum operating time (due to its ability to supply large amount of instantaneous current, used by the motors when switched on).
 
 \section{Supported USB Devices}
 
@@ -22,7 +22,7 @@ Several classes of USB devices are supported by the robot firmware. Where possib
 
 \subsection{HID Class Devices}
 
-For robot control over a wired interface, USB HID class devices may be inserted into the robot's USB recepticle. Compatible HID devices must contain at least one four-way directional pad and four buttons for all robot features to be operational. The button mappings are listed in Table \ref{tab:robotbuttonmappings} below.
+For robot control over a wired interface, USB HID class devices may be inserted into the robot's USB receptacle. Compatible HID devices must contain at least one four-way directional pad and four buttons for all robot features to be operational. The button mappings are listed in Table \ref{tab:robotbuttonmappings} below.
 
 \begin{table}[H]
 	\begin{center}
@@ -53,7 +53,7 @@ Flash drives suitably formatted with a FAT32 filesystem may be used for sensor l
 
 Upon insertion, the robot will attempt to read a file named \texttt{REMADDR.TXT} from the disk. This file should contain the Bluetooth Device Address of the remote device the robot should attempt to establish a connection with while in Bluetooth mode. The format of the stored address is \texttt{XX:XX:XX:XX:XX:XX}, where each \texttt{XX} represents one of the six consecutive octets of the remote device's address in hexadecimal format. If such a file does not exist on the attached disk, a new file is created and populated with the currently stored remote device address.
 
-Also during insertion, a second file called \texttt{SENSLOG.CSV} will be opened. If this file does not exist, a new file is created and populated with the names of the robot's sensors in Comma Seperated Values (CSV) format. To begin logging of the robot's sensor data to the attached disk, press the Mode-Specific button next to the LCD.
+Also during insertion, a second file called \texttt{SENSLOG.CSV} will be opened. If this file does not exist, a new file is created and populated with the names of the robot's sensors in Comma Separated Values (CSV) format. To begin logging of the robot's sensor data to the attached disk, press the Mode-Specific button next to the LCD.
 
 \subsection{Bluetooth Adapter Devices}
 
@@ -79,11 +79,11 @@ The Human Interface Device service is implemented as a client only; the robot ac
 
 \begin{enumerate}
 	\item Sony Playstation 3 controllers,
-	\item The Sony-Ericcson z550i mobile phone, and
+	\item The Sony-Ericsson z550i mobile phone, and
 	\item Nintendo Wii controllers.
 \end{enumerate}
 
-With a client implementation of the SDP service, this service could be extended to support Bluetooth HID devices in a generic manner. In the case of the first two supported devices, connections may be established to the robot from the HID device itself. For the Nintento Wii controller, the connection must be initiated locally from the robot. The robot button mappings for these devices are shown in Table \ref{tab:robotbtbuttonmappings} below.
+With a client implementation of the SDP service, this service could be extended to support Bluetooth HID devices in a generic manner. In the case of the first two supported devices, connections may be established to the robot from the HID device itself. For the Nintendo Wii controller, the connection must be initiated locally from the robot. The robot button mappings for these devices are shown in Table \ref{tab:robotbtbuttonmappings} below.
 
 \begin{table}[H]
 	\begin{center}

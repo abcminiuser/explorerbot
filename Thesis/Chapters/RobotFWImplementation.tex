@@ -133,7 +133,7 @@ To drive the external H-Bridge circuit used in the robot's motor controller hard
 
 The function to control the motor output was significantly more complex than anticipated, due to the slow switching characteristics of the inverter hardware chosen (see Chapter \ref{chp:results}). The resulting driver had to ensure that during a direction change of one or more motors, the PWM signal of the motor would be completely disabled, to prevent momentary shorts of the main battery during the switching period.
 
-Through trial and error, the motor PWM timer period was set to \lstinline{0x0FFF}, giving a frequency of around 8.1KHz at 16MHz due to the disabled prescaler and chosen \textit{``Phase Correct''} timer mode. Values below this range moved the PWM frequency noticibly into the range of human hearing, while raising this frequency reduced the efficiency of the motors and reduced the motor drive torque.
+Through trial and error, the motor PWM timer period was set to \lstinline{0x0FFF}, giving a frequency of around 8.1KHz at 16MHz due to the disabled prescaler and chosen \textit{``Phase Correct''} timer mode. Values below this range moved the PWM frequency noticeably into the range of human hearing, while raising this frequency reduced the efficiency of the motors and reduced the motor drive torque.
 
 \FloatBarrier
 \subsubsection{RGB LED Driver}
@@ -206,12 +206,12 @@ To ensure the interface into each individual sensor driver was as uniform as pos
 \FloatBarrier
 \subsection{Third Party Modules}
 
-While every effort was made to ensure that as much code as possible for the project was written from scratch, some allowances had to be made for third party libraries. Such libraries were used in places where the complexity of the module would hinder the project if a new implementation had to be implemented from scratch within the project's timeframe.
+While every effort was made to ensure that as much code as possible for the project was written from scratch, some allowances had to be made for third party libraries. Such libraries were used in places where the complexity of the module would hinder the project if a new implementation had to be implemented from scratch within the project's time frame.
 
 \FloatBarrier
 \subsubsection{LUFA}
 
-A crucial part of the project was the ability to communicate with USB devices; the AVR's USB interface was to be used for both configuration and control of the robot, via a variety of USB devices. A full USB stack is a rather complicated affair; generally it takes an entire team of programmers working together and ample debugging time to produce a functional stack. Because of the short timeframe of the project, an existing stack was chosen instead.
+A crucial part of the project was the ability to communicate with USB devices; the AVR's USB interface was to be used for both configuration and control of the robot, via a variety of USB devices. A full USB stack is a rather complicated affair; generally it takes an entire team of programmers working together and ample debugging time to produce a functional stack. Because of the short time frame of the project, an existing stack was chosen instead.
 
 The selected stack was LUFA, the \textit{Lightweight USB Framework for AVR devices}. This stack, a personal side-project of the author, offers a rich device support in both USB host and device modes. The library contains many inbuilt drivers for the various classes of USB devices, some of which were used in the project for the HID joystick control and Mass Storage configuration and sensor logging.
 
@@ -220,7 +220,7 @@ For the robot firmware, LUFA version 20111009 was used.
 \FloatBarrier
 \subsubsection{FatFS}
 
-To read and write files onto an attached Mass Storage USB device, it was neccesary to add a filesystem driver into the system. Using a standard filesystem allowed the firmware to maintain compatibility with files stored onto the disk using other devices. As the de-facto standard for embedded system filesystem is Microsoft's FAT (due to its relative simplicity when compared to more modern filesystems) a FAT compatible filesystem driver was selected for the project.
+To read and write files onto an attached Mass Storage USB device, it was necessary to add a filesystem driver into the system. Using a standard filesystem allowed the firmware to maintain compatibility with files stored onto the disk using other devices. As the de-facto standard for embedded system filesystem is Microsoft's FAT (due to its relative simplicity when compared to more modern filesystems) a FAT compatible filesystem driver was selected for the project.
 
 The third-party FATFs library was chosen for this task, as it offers a free, tested, portable and light-weight C implementation of the FAT filesystem standard. The FATFs library is compatible with most variants of the FAT standard (including FAT16 and FAT32) making it an ideal choice for the project. Linking the FATFs library's read and write callback functions to the LUFA USB library's Mass Storage class driver section functions proved to be much easier than anticipated (see Listing \ref{lst:fatfsshim}).
 
@@ -229,7 +229,7 @@ The third-party FATFs library was chosen for this task, as it offers a free, tes
 \FloatBarrier
 \subsection{USB Management}
 
-In order to support the various types of USB devices needed by the robot firmware, a collection of USB class-specific management layers were written. These layers, sitting in parallel on top of the LUFA USB stack, provide the routines neccesary to manage each type of supported USB device.
+In order to support the various types of USB devices needed by the robot firmware, a collection of USB class-specific management layers were written. These layers, sitting in parallel on top of the LUFA USB stack, provide the routines necessary to manage each type of supported USB device.
 
 While the LUFA USB stack provides support for several of these classes of USB devices internally, additional code was required to wrap the existing USB class driver, to extend the provided functionality and interface the driver with the rest of the system.
 
@@ -240,7 +240,7 @@ The LUFA stack version used in the project did not contain a ready-made internal
 
 During the enumeration process of an inserted USB device, the main function calls the module's \lstinline{BluetoothAdapter_ConfigurePipes()} function to attempt to bind it to the inserted USB device. The module first validates the device descriptor to ensure the inserted device is reportedly a Bluetooth adapter. Next, the pipe configuration routine attempts to configure the USB controller's logical data pipes so that the \textit{Data In}, \textit{Data Out} and \textit{Event In} pipes are correctly connected to their matching logical endpoints within the adapter. If the driver is unable to bind to the device for any reason, the enumeration process is aborted for the Bluetooth transport driver.
 
-Periodically, the main firmware loop will call the Bluetooth transport driver's \\ \lstinline{BluetoothAdapter_USBTask()} service task if the transport driver is currently active. This service task is responsible for checking the logical data pipes for new data, and (if data is availiable) reading in the data packet before dispatching it to the Bluetooth stack. A \lstinline{CALLBACK_Bluetooth_SendPacket()} callback function from the Bluetooth stack takes care of sending packets generated from the Bluetooth stack to the Bluetooth adapter.
+Periodically, the main firmware loop will call the Bluetooth transport driver's \\ \lstinline{BluetoothAdapter_USBTask()} service task if the transport driver is currently active. This service task is responsible for checking the logical data pipes for new data, and (if data is available) reading in the data packet before dispatching it to the Bluetooth stack. A \lstinline{CALLBACK_Bluetooth_SendPacket()} callback function from the Bluetooth stack takes care of sending packets generated from the Bluetooth stack to the Bluetooth adapter.
 
 \FloatBarrier
 \subsubsection{HID Devices}
@@ -252,7 +252,7 @@ As most HID devices carry a unique physical and logical report layout, it is imp
 \FloatBarrier
 \subsubsection{Mass Storage Devices}
 
-As a means of system configuration and monitoring, a Mass Storage Device (MSD) driver was also added into the device firmware. This proved useful for both fault-finding and data logging, as data produced by the firmware could be stored onto an inserted USB flash drive. During the initial firmware development, this functionality was used to store logs of the on-board sensor outputs, to ensure the correctness of the sensor platform before the completion of the wireless serial port functionality. At a later stage, this mode was extended so that it could be used to configure the target remote Bluetooth Devive Address used in the robot's Bluetooth Mode when a remote connection was initiated by the user.
+As a means of system configuration and monitoring, a Mass Storage Device (MSD) driver was also added into the device firmware. This proved useful for both fault-finding and data logging, as data produced by the firmware could be stored onto an inserted USB flash drive. During the initial firmware development, this functionality was used to store logs of the on-board sensor outputs, to ensure the correctness of the sensor platform before the completion of the wireless serial port functionality. At a later stage, this mode was extended so that it could be used to configure the target remote Bluetooth Device Address used in the robot's Bluetooth Mode when a remote connection was initiated by the user.
 
 To be able to read and write files on an attached USB flash disk drive, the FATFs library was linked to the LUFA Mass Storage class driver. This abstracted out the physical medium, giving a higher level file-centric view of the attached storage medium, as opposed to the direct physical sectors.
 
@@ -260,7 +260,7 @@ When a disk is inserted, the firmware will first attempt to open an existing fil
 
 \lstinputlisting[float=tbph,caption={Example of the Mass Storage manager code to open and write to a file on an attached USB flash disk using the FATFs library.},label={lst:logfileparse}]{./Figures/LogFileParsing.c}
 
-Additionally, the firware will attempt to open and process a second file names \texttt{REMADDR.TXT}, which holds the Bluetooth device address of the remote Bluetooth device the robot should attempt a connection to upon demand. This file is expected to contain an address of the format \texttt{XX:XX:XX:XX:XX:XX}, containing the six consecutive octets of the remote device's address, in hexadecimal format. This address is then stored into the robot's non-volatile EEPROM memory for later use when a Bluetooth adapter is subsequently inserted. If no such file exists on the attached disk, one is created and the currently stored remote device address written to it.
+Additionally, the firmware will attempt to open and process a second file names \texttt{REMADDR.TXT}, which holds the Bluetooth device address of the remote Bluetooth device the robot should attempt a connection to upon demand. This file is expected to contain an address of the format \texttt{XX:XX:XX:XX:XX:XX}, containing the six consecutive octets of the remote device's address, in hexadecimal format. This address is then stored into the robot's non-volatile EEPROM memory for later use when a Bluetooth adapter is subsequently inserted. If no such file exists on the attached disk, one is created and the currently stored remote device address written to it.
 
 \FloatBarrier
 \subsection{Bluetooth Management Layer}
@@ -271,7 +271,7 @@ A secondary duty performed by the management software layer is the dispatch of e
 
 \lstinputlisting[float=tbph,caption={One callback from the Bluetooth Stack, dispatching received packets to the integrated Bluetooth services.},label={lst:btdatacallback}]{./Figures/BTStackDataCallback.c}
 
-In some cases, a Bluetooth enabled application may peform specific filtering on incoming connection and channel requests; an embedded device may be programmed to reject all but one specfic remote device, or only accept specific channel protocols. However, as the \textit{ExplorerBot} was designed to be controlled publically via any supported Bluetooth enabled device, no such filtering was performed in the request callback routines. All HCI connection and L2CAP channel event callbacks were implemented, however, to display their relevant event data onto the robot's LCD display for debugging purposes.
+In some cases, a Bluetooth enabled application may perform specific filtering on incoming connection and channel requests; an embedded device may be programmed to reject all but one specific remote device, or only accept specific channel protocols. However, as the \textit{ExplorerBot} was designed to be controlled publically via any supported Bluetooth enabled device, no such filtering was performed in the request callback routines. All HCI connection and L2CAP channel event callbacks were implemented, however, to display their relevant event data onto the robot's LCD display for debugging purposes.
 
 Inside this management layer, the RFCOMM service channel open and close events were hooked, so that the opened RFCOMM channel handles could be captured. This captured handle is then stored temporarily by the robot firmware and used for later streaming of the sensor data. As only one connection handle is stored by the device at any one time for this purpose, a limitation of the system is imposed; only one wireless serial port can receive sensor data at the one time.
 

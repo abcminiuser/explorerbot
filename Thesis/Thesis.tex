@@ -15,8 +15,9 @@
 \usepackage[section]{placeins} % Fine-grain float placement control for float barriers
 
 % Package and environment configuration
-\lstset{language=c,breaklines=true,tabsize=3,aboveskip=1em,belowskip=1em,float=tbph}
+\lstset{language=c,breaklines=true,tabsize=3,aboveskip=1em,belowskip=1em,float=tbph} % Configure the Listings module for C code by default
 \hypersetup{urlcolor=black, colorlinks=true}  % Colours hyperlinks in black to avoid distractions.
+\setcounter{tocdepth}{2} % Only show Chapters, sections and sub-sections in the Table of Contents (no deeper nested sections)
 
 % Custom command definitions
 \newcommand{\superscript}[1]{\ensuremath{^{\textrm{#1}}}}
@@ -76,12 +77,13 @@
 \acknowledgements{
 	\addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
 	
-	Special thanks to Robert Ross for his 3D modeling contributions to the project, without which the project's final
-	robot design would be all the poorer. Also thanks to Ben Rampling for his assistance in reviewing the first revision
-	of the project schematics.
+	Special thanks to Robert Ross for his 3D modeling contributions to the project, without which the project's
+	final robot design would be all the poorer. Also thanks to Ben Rampling for his expert assistance in reviewing
+	the first revision of the project schematics.
 	
-	Thank you to the wider AVR community for their interest and support for the project, and to Matt from \textit{\href{http://www.micropendous.org}{Opendous Inc.}}
-	for his contribution of the free \textit{"Micropendous"} AVR microcontroller boards used in the final robot prototype.
+	Thank you to the wider AVR community for their interest and support for the project, and to Matt from
+	\textit{\href{http://www.micropendous.org}{Opendous Inc.}} for his generous contribution of the free
+	\textit{``Micropendous''} AVR microcontroller boards used in the final robot prototype.
 }
 
 \clearpage  % End of the Acknowledgements
@@ -134,6 +136,7 @@
 	\textbf{JTAG} & \textbf{J}oint \textbf{T}est \textbf{A}ction \textbf{G}roup \\
 	\textbf{L2CAP} & Bluetooth \textbf{L}ogical \textbf{L}ink \textbf{C}ontrol and \textbf{A}daption \textbf{P}rotocol \\
 	\textbf{LCD} & \textbf{L}iquid \textbf{C}rystal \textbf{D}isplay \\
+	\textbf{LDO} & \textbf{L}ow-\textbf{D}r\textbf{o}pout \\
 	\textbf{LED} & \textbf{L}ight \textbf{E}mitting \textbf{D}iode \\
 	\textbf{LUFA} & \textbf{L}ightweight \textbf{U}SB \textbf{F}ramework for \textbf{A}VRs \\
 	\textbf{PC} & \textbf{P}ersonal \textbf{C}omputer \\

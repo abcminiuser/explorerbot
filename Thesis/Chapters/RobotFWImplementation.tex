@@ -113,7 +113,7 @@ To drive the external H-Bridge circuit used in the robot's motor controller hard
 
 The function to control the motor output was significantly more complex than anticipated, due to the slow switching characteristics of the H-Bridge and inverter hardware chosen (see Chapter \ref{chp:discussion}). The resulting driver had to ensure that during a direction change of one or more motors, the PWM signal of the motor would be completely disabled, to prevent momentary shorts of the main battery during the switching period.
 
-Through trial and error, the motor PWM timer period was set to \lstinline{0x0FFF}, giving a frequency of around 8.1KHz at 16MHz due to the disabled prescaler and chosen \textit{``Phase Correct''} timer mode. Values below this range moved the PWM frequency noticeably into the range of human hearing, while raising this frequency reduced the efficiency of the motors and reduced the motor drive torque.
+Through trial and error, the motor PWM timer period was set to \lstinline{0x0FFF}, giving a frequency of around 1.9KHz at 16MHz due to the disabled prescaler and chosen \textit{``Phase Correct''} timer mode. Values below this range moved the PWM frequency harmonics to an irritating  portion the human range of hearing, while raising this frequency reduced the efficiency of the motors and reduced the motor drive torque.
 
 \FloatBarrier
 \subsubsection{RGB LED Driver}

@@ -11,12 +11,14 @@
 \usepackage{verbatim}  % Needed for the "comment" environment to make LaTeX comments
 \usepackage[final]{pdfpages} % Allows for importing of pdfs
 \usepackage{listings} % Alows for code inclusions
-\usepackage{float}
-\usepackage[section]{placeins}
+\usepackage{float} % Float control for figures, tables, etc.
+\usepackage[section]{placeins} % Fine-grain float placement control for float barriers
 
-% Configuration and command definitions
+% Package and environment configuration
 \lstset{language=c,breaklines=true,tabsize=3,aboveskip=1em,belowskip=1em,float=tbph}
 \hypersetup{urlcolor=black, colorlinks=true}  % Colours hyperlinks in black to avoid distractions.
+
+% Custom command definitions
 \newcommand{\superscript}[1]{\ensuremath{^{\textrm{#1}}}}
 \newcommand{\subscript}[1]{\ensuremath{_{\textrm{#1}}}}
 
@@ -86,6 +88,7 @@
 %% ----------------------------------------------------------------
 \pagestyle{fancy}  %The page style headers have been "empty" all this time, now use the "fancy" headers as defined before to bring them back
 %% ----------------------------------------------------------------
+\pdfbookmark[0]{Contents}{Contents}
 \lhead{\emph{Contents}}  % Set the left side page header to "Contents"
 \tableofcontents  % Write out the Table of Contents
 %% ----------------------------------------------------------------

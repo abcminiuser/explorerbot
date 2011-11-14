@@ -131,7 +131,7 @@ To conserve battery life, the LCD driver implemented an optional auto-dimming fe
 
 To drive the external H-Bridge circuit used in the robot's motor controller hardware, a software module had to be written to correctly generate the required direction and pulse train signals. A single 16-bit hardware timer was used for this purpose, with its dual PWM outputs connected to the motor control circuit hardware.
 
-The function to control the motor output was significantly more complex than anticipated, due to the slow switching characteristics of the inverter hardware chosen (see Chapter \ref{chp:results}). The resulting driver had to ensure that during a direction change of one or more motors, the PWM signal of the motor would be completely disabled, to prevent momentary shorts of the main battery during the switching period.
+The function to control the motor output was significantly more complex than anticipated, due to the slow switching characteristics of the H-Bridge and inverter hardware chosen (see Chapter \ref{chp:discussion}). The resulting driver had to ensure that during a direction change of one or more motors, the PWM signal of the motor would be completely disabled, to prevent momentary shorts of the main battery during the switching period.
 
 Through trial and error, the motor PWM timer period was set to \lstinline{0x0FFF}, giving a frequency of around 8.1KHz at 16MHz due to the disabled prescaler and chosen \textit{``Phase Correct''} timer mode. Values below this range moved the PWM frequency noticeably into the range of human hearing, while raising this frequency reduced the efficiency of the motors and reduced the motor drive torque.
 
@@ -224,7 +224,7 @@ To read and write files onto an attached Mass Storage USB device, it was necessa
 
 The third-party FATFs library was chosen for this task, as it offers a free, tested, portable and light-weight C implementation of the FAT filesystem standard. The FATFs library is compatible with most variants of the FAT standard (including FAT16 and FAT32) making it an ideal choice for the project. Linking the FATFs library's read and write callback functions to the LUFA USB library's Mass Storage class driver section functions proved to be much easier than anticipated (see Listing \ref{lst:fatfsshim}).
 
-\lstinputlisting[float=tbph,caption={FATFs shim layer, connecting it to the LUFA USB Stack Mass Storage class driver.},label={lst:fatfsshim}]{./Figures/FATFsShim.c}
+\lstinputlisting[float=tbph,caption={FATFs code to connect the library to the LUFA Mass Storage class driver.},label={lst:fatfsshim}]{./Figures/FATFsShim.c}
 
 \FloatBarrier
 \subsection{USB Management}
@@ -258,7 +258,7 @@ To be able to read and write files on an attached USB flash disk drive, the FATF
 
 When a disk is inserted, the firmware will first attempt to open an existing file called \texttt{SENSLOG.CSV} on the disk, for sensor logging in CSV format (see Listing \ref{lst:logfileparse}). If such a file does not exist, a new one is created and the sensor log header (constructed by the Sensor Platform module) is written to the start of the new file.
 
-\lstinputlisting[float=tbph,caption={Example of the Mass Storage manager code to open and write to a file on an attached USB flash disk using the FATFs library.},label={lst:logfileparse}]{./Figures/LogFileParsing.c}
+\lstinputlisting[float=tbph,caption={Mass Storage manager code to open and write to a file on an attached USB flash disk using the FATFs library.},label={lst:logfileparse}]{./Figures/LogFileParsing.c}
 
 Additionally, the firmware will attempt to open and process a second file on the attached storage disk named \texttt{REMADDR.TXT}, which holds the Bluetooth device address of the remote Bluetooth device the robot should attempt a connection to upon demand. This file is expected to contain an address of the format \texttt{XX:XX:XX:XX:XX:XX}, containing the six consecutive octets of the remote device's address, in hexadecimal format. This address is then stored into the robot's non-volatile EEPROM memory for later use when a Bluetooth adapter is subsequently inserted. If no such file exists on the attached disk, one is created and the currently stored remote device address written to it.
 

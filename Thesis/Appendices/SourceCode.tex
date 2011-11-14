@@ -7,3 +7,23 @@ The complete project source code is available for download online, due to its si
 \section{Obtaining the Source Code}
 
 All relevant material relating to this project (including source code, schematics, and this document) may be obtained from the official project page, located at \\ \href{http://www.fourwalledcubicle.com/ExplorerBot.php}{\textit{http://www.fourwalledcubicle.com/ExplorerBot.php}}.
+
+\section{Build Dependencies}
+
+To match the Bluetooth stack, each module was written in the C language, and targeted at the free open source AVR-GCC compiler and avr-libc library. A standard \textit{makefile} included with the firmware allows for command line control over the building of the project files into a set of binaries which can then be programmed into the target microcontroller for use via the command \texttt{make all}. The following tools are required to build the firmware under Windows:
+
+\begin{itemize}
+	\item The \textbf{WinAVR 20100101} release download, or Windows binaries of the \textbf{GNU Shell Utilities}
+	\item The latest \textbf{AVR Toolchain} release download from Atmel (included with Atmel's free \textit{AVRStudio 5} software)
+\end{itemize}
+
+Under Debian Linux environments, the following packages are required:
+
+\begin{itemize}
+	\item \textbf{gcc-avr} 
+	\item \textbf{binutils-avr}
+	\item \textbf{avr-libc}
+	\item \textbf{avrdude}
+\end{itemize}
+
+Which can be installed via the command prompt using the command \texttt{sudo apt-get install gcc-avr binutils-avr avr-libc avrdude}.

@@ -1,0 +1,20 @@
+dean@dean-VirtualBox:~/Robot$ sudo hcidump l2cap
+
+HCI sniffer - Bluetooth packet analyzer ver 2.1
+device: hci0 snap_len: 1028 filter: 0x8
+< L2CAP(s): Info req: type 2
+> L2CAP(s): Info rsp: type 2 result 0
+    Extended feature mask 0x0000
+< L2CAP(s): Connect req: psm 3 scid 0x0040
+> L2CAP(s): Connect rsp: dcid 0x0040 scid 0x0040 result 0 status 0
+    Connection successful
+< L2CAP(s): Config req: dcid 0x0040 flags 0x00 clen 4
+    MTU 1013 
+> L2CAP(s): Config req: dcid 0x0040 flags 0x00 clen 4
+    MTU 1024 
+< L2CAP(s): Config rsp: scid 0x0040 flags 0x00 result 0 clen 4
+    MTU 1024 
+> L2CAP(s): Config rsp: scid 0x0040 flags 0x00 result 0 clen 0
+    Success
+< L2CAP(d): cid 0x0040 len 4 [psm 3]
+> L2CAP(d): cid 0x0040 len 4 [psm 3]

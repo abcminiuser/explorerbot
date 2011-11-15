@@ -1,0 +1,23 @@
+dean@dean-VirtualBox:~/Robot$ sudo hcidump rfcomm
+
+HCI sniffer - Bluetooth packet analyzer ver 2.1
+device: hci0 snap_len: 1028 filter: 0x10
+< RFCOMM(s): SABM: cr 1 dlci 0 pf 1 ilen 0 fcs 0x1c 
+> RFCOMM(s): UA: cr 1 dlci 0 pf 1 ilen 0 fcs 0xd7 
+< RFCOMM(s): PN CMD: cr 1 dlci 0 pf 0 ilen 10 fcs 0x70 mcc_len 8
+  dlci 2 frame_type 0 credit_flow 15 pri 7 ack_timer 0
+  frame_size 1008 max_retrans 0 credits 7
+> RFCOMM(s): PN RSP: cr 0 dlci 0 pf 0 ilen 10 fcs 0xaa mcc_len 8
+  dlci 2 frame_type 0 credit_flow 0 pri 7 ack_timer 0
+  frame_size 1008 max_retrans 0 credits 7
+< RFCOMM(s): SABM: cr 1 dlci 2 pf 1 ilen 0 fcs 0x59 
+> RFCOMM(s): UA: cr 1 dlci 2 pf 1 ilen 0 fcs 0x92 
+< RFCOMM(s): MSC CMD: cr 1 dlci 0 pf 0 ilen 4 fcs 0x70 mcc_len 2
+  dlci 2 fc 0 rtc 1 rtr 1 ic 0 dv 1 b1 1 b2 1 b3 0 len 0
+> RFCOMM(s): MSC CMD: cr 0 dlci 0 pf 0 ilen 4 fcs 0xaa mcc_len 2
+  dlci 2 fc 0 rtc 1 rtr 1 ic 0 dv 1 b1 1 b2 1 b3 0 len 0
+< RFCOMM(s): MSC RSP: cr 1 dlci 0 pf 0 ilen 4 fcs 0x70 mcc_len 2
+  dlci 2 fc 0 rtc 1 rtr 1 ic 0 dv 1 b1 1 b2 1 b3 0 len 0
+> RFCOMM(s): MSC RSP: cr 0 dlci 0 pf 0 ilen 4 fcs 0xaa mcc_len 2
+  dlci 2 fc 0 rtc 1 rtr 1 ic 0 dv 1 b1 1 b2 1 b3 0 len 0
+> RFCOMM(d): UIH: cr 0 dlci 2 pf 0 ilen 47 fcs 0x40 

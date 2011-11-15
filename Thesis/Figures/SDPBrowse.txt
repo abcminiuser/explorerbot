@@ -1,0 +1,27 @@
+dean@dean-VirtualBox:~/Robot$ sudo sdptool browse --tree
+
+Browsing 00:11:67:BE:07:26 ...
+Attribute Identifier : 0x0 - ServiceRecordHandle
+  Integer : 0x10000
+Attribute Identifier : 0x1 - ServiceClassIDList
+  Data Sequence
+    UUID128 : 0x00001101-0000-1000-8000-00805f9b-34fb
+Attribute Identifier : 0x4 - ProtocolDescriptorList
+  Data Sequence
+    Data Sequence
+      UUID128 : 0x00000100-0000-1000-8000-00805f9b-34fb
+    Data Sequence
+      UUID128 : 0x00000003-0000-1000-8000-00805f9b-34fb
+      Channel/Port (Integer) : 0x1
+Attribute Identifier : 0x5 - BrowseGroupList
+  Data Sequence
+    UUID128 : 0x00001002-0000-1000-8000-00805f9b-34fb
+Attribute Identifier : 0x6 - LanguageBaseAttributeIDList
+  Data Sequence
+    Code ISO639 (Integer) : 0x454e
+    Encoding (Integer) : 0x6a
+    Base Offset (Integer) : 0x100
+Attribute Identifier : 0x100
+  Data : 57 69 72 65 6c 65 73 73 20 53 65 72 69 61 6c 20 50 6f 72 74 00
+Attribute Identifier : 0x101
+  Data : 57 69 72 65 6c 65 73 73 20 53 65 72 69 61 6c 20 50 6f 72 74 20 53 65 72 76 69 63 65 00

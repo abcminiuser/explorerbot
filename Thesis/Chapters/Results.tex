@@ -2,9 +2,11 @@
 \label{chp:results}
 \lhead{Chapter \ref{chp:results}. \emph{Project Results}}
 
-% TODO
+In this section, the results obtained and testing procedures used in the verification of the robot are detailed.
 
 \section{System Testing}
+
+An important part of any project is an appropriate level of testing, performed at both the hardware and software levels. Without adequate testing, undiagnoised latent issues such as hardware faults and software bugs may cause incorrect system operation. By performing at least some level of system testing, issues can be found and corrected as early as possible within the project's development process.
 
 \FloatBarrier
 \subsection{Board Level Testing}
@@ -65,6 +67,54 @@ To test the board's LCD functions, a routine calling various formatting commands
 
 \FloatBarrier
 \subsection{Software Testing}
+
+At the conclusion of the hardware testing, a new set of software tests were performed on the robot firmware to ensure correct operation and compatibility with the appropriate specifications. This presented its own unique set of challenges, as suitable testing environments and testing procedures had to be developed.
+
+\FloatBarrier
+\subsubsection{USB Integration}
+
+Small software tests were performed for the the three supported USB classes; HID, Mass Storage and Bluetooth Adapters. Doubling as a test of the hardware drivers, the HID management driver was tested against a PS3 Controller and two generic HID class USB gaming controllers, to ensure that the appropriate buttons were mapped to the robot's functions. During these tests, a brown-out failure condition was observed on the USB bus when the robot's motors were switched on and off (or changed in direction) rapidly. This issue was traced back to the original ``AA'' cell bank battery's instantaneous current capabilities, and was temporarily corrected in the robot prototype with a large value capacitor on the battery input terminals (see Figure \ref{fig:mainpowercap}) until the more powerful Lithium-Ion battery pack was substituted.
+
+\begin{figure}[tbph]
+	\vspace{1em}
+	\centering
+		\includegraphics[width=60mm]{PowerCap.jpg}
+	\rule{35em}{0.5pt}
+	\caption[Temporary Main Power Input Capacitor]{Photo of the temporary main input power capacitor, to prevent brown-out conditions from motor-induced current spikes.}
+	\label{fig:mainpowercap}
+\end{figure}
+
+The Mass Storage management module (and, by extension, the FATFs library it depends upon) was tested through a procedure of disk insertial and removal, with files written to and read from the disk filesystem using dummy data. Thus verified, the complete Mass Storage management file parsing routines were checked by printing the parsed file output to the robot's LCD display.
+
+As the Bluetooth Adapter management code relied upon the upper Bluetooth Stack logical layers for correct operation, the functionality of the USB tranceiver device management could not be examined and verified until the base layers on the Bluetooth Stack were completed. However, in this phase of the software testing, the module's ability to correctly bind to compatible Bluetooth devices in a generic manner (using several adapters from different manufacturers) was tested and found to function as expected.
+
+\FloatBarrier
+\subsubsection{Sensor Platform}
+
+The sensor platform required a significant amount of time to complete and verify; the final development time was close to one and a half weeks, much more than the expected two or three days. A number of flaws were found in the written code when it was tested on the physical robot hardware, including a bug in the LUFA USB stack's I\superscript{2}C driver for packet read and writes. Timing and other issues in the written driver for the Bosch BMA150 accelerometer resulted first in no sensor output, followed by output on only one channel. The root cause of this problem was eventually tracked down to misleading datasheets, where the sensor would react correctly only if certain configuration registers were altered in specific manners to what should have been---according to the values given in the datasheet---the sensor's initial power-on defaults.
+
+During the sensor platform testing phase additional small errors relating to the formatting and endianness of the retrieved values were also identified and corrected.
+
+\FloatBarrier
+\subsubsection{Bluetooth Stack}
+
+The completed Bluetooth stack was tested in an iterative manner; as additional features and layers were completed, they were verified against existing third-party Bluetooth devices. An invaluable tool used in the verification and debugging of each layer and protocol was the Linux ``Bluez'' Bluetooth stack's \texttt{hcidump} tool, which allowed the robot's Bluetooth stack packets to be captured in real time and decoded, indicating any issues in the implementation of one or more protocols used in the device.
+
+Listing \ref{lst:hcidump} shows a fragment of a HCI layer packet capture between a virtualised Linux environment and the robot, while sucessfully establishing a new L2CAP channel between the two devices for SDP discovery.
+
+\lstinputlisting[float=tbph,caption={HCI packet capture during a L2CAP channel configuration.},label={lst:hcidump},language={bash}]{./Figures/HCIDump.txt}
+
+The RFCOMM layer was examined and verified at both the L2CAP layer and the RFCOMM service layer, using the Linux \texttt{rfcomm} utility to bind the robot's virtual serial port to a virtual device node named \texttt{/dev/rfcomm0}. Connecting to this device through a standard serial terminal emulator yielded the RFCOMM layer packet dump as shown in Listing \ref{lst:rfcommdump}, showing the successful negotiation and configuration of a new RFCOMM layer muliplexer channel.
+
+\lstinputlisting[float=tbph,caption={RFCOMM service packet capture during a multiplexer channel establishment.},label={lst:rfcommdump},language={bash}]{./Figures/RFCOMMDump.txt}
+
+Listing \ref{lst:sensorstream} shows a sample of the streaming sensor data captured from the robot.
+
+\lstinputlisting[float=tbph,caption={Captured RFCOMM streaming sensor data.},label={lst:sensorstream},language={bash}]{./Figures/SensorStream.txt}
+
+Finally, the SDP layer was verified both at the L2CAP layer packet level, and at the SDP layer using the Linux tool \texttt{sdptool}. This utility was used to browse the services offered from the robot's SDP server service, to ensure that the correct services and service attributes were being sent to the requesting device correctly. A sample of this SDP output is shown in Listing \ref{lst:sdpbrowse}.
+
+\lstinputlisting[float=tbph,caption={Capture of the services and attributes exposed by the robot's SDP server.},label={lst:sdpbrowse},language={bash}]{./Figures/SDPBrowse.txt}
 
 % TODO
 

@@ -10,7 +10,7 @@ During the development of the project, as expected a number of issues were faced
 
 \subsection{Micropendous Pinout PCB Error}
 
-After the manufacture of the first revision PCB was received some weeks after the order was placed, a problem was discovered in the board layout of the main \textit{Micropendous} microcontroller module. The pinouts of the appeared to have been shifted by one around the entire perimeter of the module. The root issue cause was traced back to the custom Altium component created for the module; for an explicable reason, Altium begins part component schematic pin numbering from pin 0, instead of the conventional pin 1. This resulted in the pin numbering around the module to be rotated by one place.
+After the manufacture of the first revision PCB was received some weeks after the order was placed, a problem was discovered in the board layout of the main \textit{Micropendous} microcontroller module: the pinouts appeared to have been shifted by one around the entire module perimeter. The root issue cause was traced back to the custom Altium component created for the module; for an explicable reason, Altium begins part component schematic pin numbering from pin 0, instead of the conventional pin 1. This resulted in the pin numbering around the module to be rotated by one place during board layout.
 
 % TODO: Figures showing incorrect and correct pinouts
 
@@ -36,7 +36,7 @@ During the testing phase of the robot, a failure of the USB AVR microcontroller'
 
 To counteract this, a delay was introduced into the robot's motor driver firmware, to disable the motor output PWM during the switching time. This delay eliminated the high switching current due to the momentary short of the battery, thus preventing the microcontroller USB interface from failing.
 
-Related to the above issue was the motor inrush current, present any time the motor was started from a stationary state. This current, present in all motors under load while the static friction in the motor is overcome, caused large current draw spikes in the main power supply, triggering a destabilization of the main switchmode regulator and thus a brownout of the main microcontroller. This issue was corrected once the main battery was switched from a series of 6 AA cell batteries to a much higher rated Lithium-Ion based battery pack.
+Related to the above issue was the motor inrush current, present any time the motor was started from a stationary state. This current, present in all motors under load while the static friction in the motor is overcome, caused large current draw spikes in the main power supply, triggering a destabilization of the main switchmode regulator and thus a brownout of the main microcontroller. This issue was corrected once the main battery was switched from a series of six ``AA'' cell batteries to a much higher rated Lithium-Ion based battery pack.
 
 \subsection{PCA9306 Physical Package}
 

@@ -73,7 +73,7 @@ At the conclusion of the hardware testing, a new set of software tests were perf
 \FloatBarrier
 \subsubsection{USB Integration}
 
-Small software tests were performed for the three supported USB classes; HID, Mass Storage and Bluetooth Adapters. Doubling as a test of the hardware drivers, the HID management driver was tested against a PS3 Controller and two generic HID class USB gaming controllers, to ensure that the appropriate buttons were mapped to the robot's functions. During these tests, a brown-out failure condition was observed on the USB bus when the robot's motors were switched on and off (or changed in direction) rapidly. This issue was traced back to the original ``AA'' cell bank battery's instantaneous current capabilities, and was temporarily corrected in the robot prototype with a large value capacitor on the battery input terminals (see Figure \ref{fig:mainpowercap}) until the more powerful Lithium-Ion battery pack was substituted.
+Small software tests were performed for the three supported USB classes; HID, Mass Storage and Bluetooth Adapters. Doubling as a test of the hardware drivers, the HID management driver was tested against a PS3 Controller and two generic HID class USB gaming controllers, to ensure that the appropriate buttons were mapped to the robot's functions. During these tests, a brown-out failure condition was observed on the USB bus when the robot's motors were switched on and off (or changed in direction) rapidly. This issue was traced back to the original ``AA'' cell bank battery's insufficient instantaneous current sourcing capabilities, and was temporarily corrected in the robot prototype with a large value capacitor on the battery input terminals (see Figure \ref{fig:mainpowercap}) until the more powerful Lithium-Ion battery pack was substituted.
 
 \begin{figure}[tbph]
 	\vspace{1em}
@@ -121,7 +121,7 @@ At the conclusion of the project time frame, much of the project goals had been 
 	\centering
 		\includegraphics[width=140mm]{BluetoothControllers.jpg}
 	\rule{35em}{0.5pt}
-	\caption[Tested Working Controllers]{Tested consumer grade Bluetooth enabled devices: \\ Playstation 3 controller \textit{(left)}, Nintendo Wii controller \textit{(middle)}, Sony-Ericsson z550i mobile phone \textit{(right)} }
+	\caption[Tested Working Controllers]{Tested consumer grade Bluetooth enabled devices: \\ Playstation 3 controller \textit{(left)}, Nintendo Wii controller \textit{(middle)}, Sony-Ericsson z550i mobile phone \textit{(right)}.}
 	\label{fig:workingbtcontrollers}
 \end{figure}
 
@@ -136,17 +136,17 @@ A simple C\# application was written to display the streaming sensor data graphi
 	\centering
 		\includegraphics[width=140mm]{SensorDataApp.png}
 	\rule{35em}{0.5pt}
-	\caption[Sensor Logging Host Application]{Sensor logging application, showing data streaming wirelessly from the connected robot via a Bluetooth virtual serial port. }
+	\caption[Sensor Logging Host Application]{Sensor logging application, showing data streaming wirelessly from the connected robot via a Bluetooth virtual serial port.}
 	\label{fig:sensorhostapp}
 \end{figure}
 
-The completed robot PCB hardware was integrated into a pre-fabricated off-the-shelf robot platform base, and linked to the two wheel mounted DC motors. Additional parts for the PCB retention clip and headlight and horn mounting were designed by the project's Co-Supervisor Robert Ross, and printed out on the University's 3D printer. This resulted in the compact and functional robot prototype shown in Figure \ref{fig:completedrobot}.
+The completed robot PCB hardware was integrated into a pre-fabricated off-the-shelf robot platform base, and linked to the two wheel mounted DC motors. Additional parts for the rear PCB retention clip and frontal headlight and horn mounting were designed by the project's Co-Supervisor Robert Ross, and printed out on the University's 3D printer. This resulted in the compact and functional robot prototype shown in Figure \ref{fig:completedrobot}.
 
 \begin{figure}[tbph]
 	\vspace{1em}
 	\centering
 		\includegraphics[width=140mm]{CompletedRobot.jpg}
 	\rule{35em}{0.5pt}
-	\caption[Photo of Completed Robot]{Photo of the completed \textit{ExplorerBot} prototype robot}
+	\caption[Photo of Completed Robot]{Photo of the completed \textit{ExplorerBot} prototype robot.}
 	\label{fig:completedrobot}
 \end{figure}

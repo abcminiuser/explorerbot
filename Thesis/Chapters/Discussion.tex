@@ -11,13 +11,13 @@ During the development of the project, as expected a number of issues were faced
 \FloatBarrier
 \subsection{Micropendous Pinout PCB Error}
 
-After the manufacture of the first revision PCB was received some weeks after the order was placed, a problem was discovered in the board layout of the main \textit{Micropendous} microcontroller module: the pinouts appeared to have been shifted by one around the entire module perimeter. The root issue cause was traced back to the custom Altium component created for the module; for an explicable reason, Altium begins part component schematic pin numbering from pin 0, instead of the conventional pin 1. This resulted in the pin numbering around the module to be rotated by one place during board layout.
+After the manufacture of the first revision PCB was received some weeks after the order was placed, a problem was discovered in the board layout of the main \textit{Micropendous} microcontroller module: the pinouts appeared to have been shifted by one around the entire module perimeter. The root issue cause was traced back to the custom Altium component created for the module; for an inexplicable reason, Altium begins part component schematic pin numbering from pin 0, instead of the conventional pin 1. This resulted in the pin numbering around the module to be rotated by one place during board layout.
 
 % TODO: Figures showing incorrect and correct pinouts
 
 Coincidentally, as the unroutable pins were marked as \textit{No-Connect} in the robot schematics (due to their unused functions) the Altium DRC module reported no schematic or routing errors. This resulted in the error not being caught until the board manufacturing had been completed, as a cursory visual inspection of the board layout before production did not catch the subtle pin numbering problem.
 
-While it is possible that the board pinouts could be corrected with manual trace cutting and re-wiring, the scale of the error---some fifty two pins---and the need for other slight board adjustments forced the decision to produce a second, corrected, version of the PCB.
+While it is possible that the board pinouts could have been corrected with manual trace cutting and re-wiring, the scale of the error---some fifty two pins---and the need for other slight board adjustments forced the decision to produce a second, corrected, version of the PCB.
 
 \FloatBarrier
 \subsection{Incorrect Transistor Pinout}
@@ -35,7 +35,7 @@ During the component ordering phase of the project, an issue was discovered; no 
 \FloatBarrier
 \subsection{Motor Induced Current Spikes}
 
-During the testing phase of the robot, a failure of the USB AVR microcontroller's USB interface was observed when the motor direction was altered rapidly. Further observation narrowed this down to the switching latency of the chosen inverter transistor (30nS) and H-Bridge (approx. 2$\mu$S). During this time, there exists the possibility of a momentary short in the system battery, if the motor PWM output signal is enabled.
+During the testing phase of the robot, a failure of the USB AVR microcontroller's USB interface was observed when the motor direction was altered rapidly. Further observation narrowed this down to the switching latency of the chosen inverter transistor (30nS) and H-Bridge (approx. 2$\mu$S). During this time both halves of the H-Bridge are enabled, resulting in the possibility of a momentary short in the system battery, if the motor PWM output signal is enabled during the switching period.
 
 To counteract this, a delay was introduced into the robot's motor driver firmware, to disable the motor output PWM during the switching time. This delay eliminated the high switching current due to the momentary short of the battery, thus preventing the microcontroller USB interface from failing.
 
@@ -44,7 +44,7 @@ Related to the above issue was the motor inrush current, present any time the mo
 \FloatBarrier
 \subsection{PCA9306 Physical Package}
 
-Despite having some familiarity with hand-soldering somewhat-small multi-pin surface mount IC components, the package used by the PCA9306 I\superscript{2}C level converter presented a serious challenge. This was due to its US-8 package; measuring just 2.7mm x 4.5mm, the component contains eight pins just .3mm wide each.
+Despite having some familiarity with hand-soldering somewhat-small multi-pin surface mount IC components, the package used by the PCA9306 I\superscript{2}C level converter presented a serious challenge. This was due to its US-8 package; measuring just 2.7mm x 4.5mm, the component contains eight pins, each just .3mm wide.
 
 Rather than risk destroying the component and waiting additional weeks for a replacement, the LaTrobe University Workshop was requested to use a hot-air gun to solder the device to the robot PCB. This ensured that the component would be correctly placed and soldered without a high risk of component damage. In future projects, relatively cheap components such as this should be ordered with one or more extras added to the quantity, so that damaged components (if any) can be replaced immediately without incurring additional delays while new components are ordered. 
 

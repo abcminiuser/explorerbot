@@ -170,9 +170,9 @@ Each individual sensor connected to the board requires a custom sensor driver, s
 			\hline
 			\textbf{Sensor}	& \textbf{Type}	& \textbf{Address} & \textbf{Settings} \\ \hline
 
-			AK8975 & Direction & 0x0C & N/A \\ \hline
+			AK8975 & Direction & 0x0C & Power-on default settings \\ \hline
 			BMA150 & Acceleration & 0x38 & \vtop{\hbox{\strut 25Hz bandwidth,} \hbox{\strut +/-2g range,} \hbox{\strut Interrupt line enabled}} \\ \hline
-			BMP085 & Pressure & 0x77 & N/A \\ \hline
+			BMP085 & Pressure & 0x77 & Power-on default settings \\ \hline
 			ITG3200 & Orientation & 0x68 & \vtop{\hbox{\strut 100Hz at a 1KHz internal sampling rate,} \hbox{\strut Low Pass Filter to use 20Hz bandwidth,} \hbox{\strut Gyroscope X axis PLL as the clock source,} \hbox{\strut Interrupt line enabled}} \\ \hline
 			ITG3200 & Temperature & 0x68 & N/A \textit{(Virtual Sensor)} \\ \hline
 		\end{tabular}

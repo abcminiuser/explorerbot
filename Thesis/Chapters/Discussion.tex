@@ -13,8 +13,6 @@ During the development of the project, as expected a number of issues were faced
 
 After the manufacture of the first revision PCB was received some weeks after the order was placed, a problem was discovered in the board layout of the main \textit{Micropendous} microcontroller module: the pinouts appeared to have been shifted by one around the entire module perimeter. The root issue cause was traced back to the custom Altium component created for the module; for an inexplicable reason, Altium begins part component schematic pin numbering from pin 0, instead of the conventional pin 1. This resulted in the pin numbering around the module to be rotated by one place during board layout.
 
-% TODO: Figures showing incorrect and correct pinouts
-
 Coincidentally, as the unroutable pins were marked as \textit{No-Connect} in the robot schematics (due to their unused functions) the Altium DRC module reported no schematic or routing errors. This resulted in the error not being caught until the board manufacturing had been completed, as a cursory visual inspection of the board layout before production did not catch the subtle pin numbering problem.
 
 While it is possible that the board pinouts could have been corrected with manual trace cutting and re-wiring, the scale of the error---some fifty two pins---and the need for other slight board adjustments forced the decision to produce a second, corrected, version of the PCB.

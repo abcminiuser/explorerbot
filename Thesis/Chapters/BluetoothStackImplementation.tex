@@ -19,9 +19,9 @@ The software layers implemented in the completed Bluetooth stack are shown in Fi
 
 Each software layer was implemented as a seperate pair of source code module files, written in the C language and targeted towards the C99 language specification. Configuration for the stack is located in the file \texttt{BluetoothCommon.h}, which must be included in the user application to operate the stack.
 
-% TODO
+By default, only the Bluetooth stack core (giving the HCI and L2CAP layers) is integrated; services must be linked into the stack manually via the provided event and callback routines (see later in this chapter) to provide service-level functionality on top of the base stack functionality. This includes the SDP server service; while generally a core requirement of most Bluetooth devices, it may be omitted in applications not exposing server role services to save space in the resulting application binary.
 
-\section{Design Restrictions}
+\section{Design Considerations}
 
 A number of design restrictions were placed on the development of the Bluetooth stack; these ensured that the completed stack remained modular, extensible and suitable for integration in a wide range of embedded systems with various capabilities, and conversely, limitations. As an unfortunate but expected side effect, a number of these restrictions complicated the software development process significantly.
 
@@ -80,7 +80,7 @@ The HCI connections and L2CAP channels for each stack instance are implemented a
 	\centering
 		\includegraphics[width=140mm]{StackObjectPools.png}
 	\rule{35em}{0.5pt}
-	\caption[Diagram of the Bluetooth stack instance object pools]{Diagram showing the HCI Connection and L2CAP object pools within a stack instance.}
+	\caption[Diagram of the Bluetooth stack instance object pools]{Diagram showing the HCI Connection and L2CAP object pools within a single Bluetooth stack instance.}
 	\label{fig:stackobjectpools}
 \end{figure}
 
@@ -97,12 +97,23 @@ This named callback function system reduces the memory footprint of the stack, a
 
 \section{Software Layer Implementation}
 
-% TODO
+In this section, the design and implementation of each individual software layer that comprises the complete Bluetooth stack is described in detail.
 
 \FloatBarrier
 \subsection{Physical Transport}
 
-% TODO
+While not part of the completed stack proper, a functional USB transport layer was completed for the project as an sample implementation in the user application and hooked into the stack via the provided APIs. The Bluetooth USB transport requires the use of four logical USB communication channels (``pipes'' in USB terminology) to the USB Bluetooth adapter; the mandatory control pipe for HCI commands, a pair of \textit{Bulk} type pipes for data packets to and from the controller, and an \textit{Interrupt} pipe for HCI event notifications.
+
+\begin{figure}[tbph]
+	\vspace{1em}
+	\centering
+		\includegraphics[width=100mm]{BluetoothUSBTransport.png}
+	\rule{35em}{0.5pt}
+	\caption[Diagram of the logical pipes within the Bluetooth USB transport.]{Diagram showing the logical USB pipes within the Bluetooth USB physical transport.}
+	\label{fig:btusbtransport}
+\end{figure}
+
+Data and event packets received from the USB Bluetooth adapter's logical pipes are written into the packet buffer indicated in the stack instance configuration, and dispatched to the stack via the \lstinline{Bluetooth_ProcessPacket()} function. There they are processed internally via the Bluetooth stack, moving up the HCI, L2CAP and user-provided service layers as appropriate. The matching \lstinline{CALLBACK_Bluetooth_SendPacket()} callback function from the stack implements the data and HCI control packet transmission code back to the adapter, sourcing the generated packets from the same packet buffer location.
 
 \FloatBarrier
 \subsection{HCI Layer}

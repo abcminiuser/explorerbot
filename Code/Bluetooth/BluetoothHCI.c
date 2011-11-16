@@ -524,6 +524,7 @@ bool Bluetooth_HCI_SendPacket(BT_StackConfig_t* const StackState,
 	if (!(HCIConnection) || (HCIConnection->State != HCI_CONSTATE_Connected))
 	  return false;
 	  
+	/* Discard and fail the packet transmission if the HCI data packet buffers are currently full */
 	if (HCIConnection->DataPacketsQueued == StackState->State.HCI.ACLDataPackets)
 		return false;
 	

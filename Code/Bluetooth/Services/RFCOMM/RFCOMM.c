@@ -300,7 +300,6 @@ static void RFCOMM_ProcessRLSCommand(BT_StackConfig_t* const StackState,
                                      RFCOMM_Command_t* const CommandHeader,
                                      uint8_t* CommandData)
 {
-	for(;;);
 	// TODO
 }
 

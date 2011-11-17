@@ -31,7 +31,8 @@
 	/* Function Prototypes: */
 		void Bluetooth_Init(BT_StackConfig_t* const StackState);
 		bool Bluetooth_ManageConnections(BT_StackConfig_t* const StackState);
-		void Bluetooth_ProcessPacket(BT_StackConfig_t* const StackState, const uint8_t Type);
+		void Bluetooth_ProcessPacket(BT_StackConfig_t* const StackState,
+		                             const uint8_t Type);
 		void Bluetooth_TickElapsed(BT_StackConfig_t* const StackState);
 
 #endif

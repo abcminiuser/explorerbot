@@ -84,7 +84,7 @@ The HCI connections and L2CAP channels for each stack instance are implemented a
 	\label{fig:stackobjectpools}
 \end{figure}
 
-To positively link one used L2CAP channel instance to its parent HCI connection object, the HCI connection's \texttt{handle} property is stored in the L2CAP channel object as a primary key. This handle value, allocated uniquely by the external Bluetooth HCI controller silicon when a new HCI connection is made, is then used to locate the HCI connection object within a stack instance from an established channel instance. While a pointer to the parent HCI object would offer a faster method of locating the associated HCI connection, this would tightly couple the HCI layer with the L2CAP layer as the former would need to alter the latter's objects if and when HCI connections are terminated.
+To positively link one used L2CAP channel instance to its parent HCI connection object, the HCI connection's \lstinline{handle} property is stored in the L2CAP channel object as a primary key. This handle value, allocated uniquely by the external Bluetooth HCI controller silicon when a new HCI connection is made, is then used to locate the HCI connection object within a stack instance from an established channel instance. While a pointer to the parent HCI object would offer a faster method of locating the associated HCI connection, this would tightly couple the HCI layer with the L2CAP layer as the former would need to alter the latter's objects if and when HCI connections are terminated.
 
 As the stack does not use heap-based dynamic memory allocation, this approach ensures that the stack contains similar levels of flexability to a dynamically allocated object approach, with only a minimal overhead. The maximum size of each object pool is set via the Bluetooth Stack's \lstinline{BT_MAX_DEVICE_CONNECTIONS} and \lstinline{BT_MAX_LOGICAL_CHANNELS} configuration defines.
 
@@ -124,9 +124,9 @@ The current HCI layer state is implemented as a state machine, which is automati
 
 \lstinputlisting[float=tbph,caption={State machine states for the HCI management layer.},label={lst:hcistates}]{./Figures/HCIStates.c}
 
-The HCI baseband controller management in the HCI layer is split into two distinct parts; an event processing routine to process commands and manage transitions between HCI states, and the state machine processing routine to execute commands based on the current HCI state. As commands must only be sent once on the transition between HCI state machine states, a flag \texttt{StateTransition} in the HCI state structure of each Bluetooth stack instance indicates if a state transition has occured within the event processing function, so that the state machine processor can issue the appropriate responses on transisiton edges only.
+The HCI baseband controller management in the HCI layer is split into two distinct parts; an event processing routine to process commands and manage transitions between HCI states, and the state machine processing routine to execute commands based on the current HCI state. As commands must only be sent once on the transition between HCI state machine states, a flag \lstinline{StateTransition} in the HCI state structure of each Bluetooth stack instance indicates if a state transition has occured within the event processing function, so that the state machine processor can issue the appropriate responses on transisiton edges only.
 
-State timeouts within each of the HCI states is managed via a \texttt{TicksElapsed} counter in the HCI state structure of each Bluetooth stack instance. This counter, incremented each time the HCI layer is notified by the user application of a tick period elapsing, forces a resend of the current HCI state's command by forcing the state transition flag \texttt{StateTransition} high when the timeout period has expired. This system ensures that HCI commands dropped during the initialisation of the module are properly re-issued.
+State timeouts within each of the HCI states is managed via a \lstinline{TicksElapsed} counter in the HCI state structure of each Bluetooth stack instance. This counter, incremented each time the HCI layer is notified by the user application of a tick period elapsing, forces a resend of the current HCI state's command by forcing the state transition flag \lstinline{StateTransition} high when the timeout period has expired. This system ensures that HCI commands dropped during the initialisation of the module are properly re-issued.
 
 If a connection is requested by a remote device, the HCI layer will issue a \\ \lstinline{CALLBACK_Bluetooth_ConnectionRequest()} callback into the user application, if space is available within the HCI connection object pool. If no space is available (i.e. all HCI channel objects are currently allocated for established connections) the connection request is silently discarded with the Bluetooth error code \lstinline{HCI_ERROR_LIMITED_RESOURCES}. If the user application accepts the connection request, the stack will issue an acceptance response to the remote device. If rejected, a suitable rejection notification is issued by the stack's HCI layer.
 
@@ -134,15 +134,45 @@ Authentication is currently implemented in a slave connection role only, as a PI
 
 Inside the HCI layer, received data packets are stripped of their HCI layer headers and passed upwards to the L2CAP layer for further processing. Packets sent from the L2CAP layer to the HCI layer undergo the opposite process; a HCI layer packet header is prefixed onto the packet contents and passed to the user application for transmission to the Bluetooth controller.
 
+As an implementation-specific detail, HCI connection destruction events (when an established HCI connection is disconnected) are notified to the L2CAP layer via the interal function \lstinline{Bluetooth_L2CAP_NotifyHCIDisconnection()}. This ensures that all associated L2CAP channels are correctly destructed once their host HCI connection is destroyed, to prevent synchronisation issues and to ensure that the L2CAP object pool is freed of any dead channel objects as soon as possible to prevent unneccesary pool exhaustion.
+
 \FloatBarrier
 \subsection{L2CAP Layer}
 
-% TODO
+The L2CAP layer, responsible for managing logical channels between devices for an established connection, was implemented in an unusual manner; due to uncertainties of the user application packet buffering scheme, the stack is not able to guarantee that packets to be sent are buffered correctly. As the L2CAP layer is used to establish communication channels between devices, it is essential that any issued channel configuration commands are delivered correctly to the remote device; delays in the channel negotiation process may cause communications to and from a remote device to fail. As a result, the L2CAP layer implemented a special event buffering scheme to ensure the reliable issuing of responses to remote devices even if a packet fails to send due to the controller's internal buffers becomming full.
+
+As L2CAP signalling packets (identifiable via their destination channel ID of \texttt{0x0001}, the defined ID for \lstinline{BT_CHANNEL_SIGNALING} packets) are received by the L2CAP layer, the request is processed and an event object created in the L2CAP Event Queue. This queue, a fixed length queue of a size configured by the stack's \lstinline{BT_MAX_QUEUED_L2CAP_EVENTS} configuration parameter, stores the events in a First-In, First-Out ordered manner within each stack instance. The implementation of this queue is a simple flat array of event structure elements, where inserted items are appended to the end of the last allocated object in the array (see Figure \ref{fig:l2capeventinsertion}). A seperate \lstinline{PendingEvents} property in the L2CAP state structure to track the number of queued events.
+
+\begin{figure}[tbph]
+	\vspace{1em}
+	\centering
+		\includegraphics[width=140mm]{L2CAPEventInsertion.png}
+	\rule{35em}{0.5pt}
+	\caption[L2CAP Event Object Queue Insertion]{Diagram showing the insertion of a new L2CAP event into the tail of the queue.}
+	\label{fig:l2capeventinsertion}
+\end{figure}
+
+Event queue removal is performed by the moving of all queue items above the head of the list leftwards in the array, to shuffle all entries one place towards the head of the queue (see Figure \ref{fig:l2capeventremoval}). L2CAP event objects are only dequeued once the transport layer confirms the transmission of the signalling packet request to the remote device. In this manner, L2CAP events maintain a reliable transport regardless of the physical transport's abilitiy to buffer excess packets.
+
+\begin{figure}[tbph]
+	\vspace{1em}
+	\centering
+		\includegraphics[width=140mm]{L2CAPEventRemoval.png}
+	\rule{35em}{0.5pt}
+	\caption[L2CAP Event Object Queue Removal]{Diagram showing the removal of the L2CAP event queue head item.}
+	\label{fig:l2capeventremoval}
+\end{figure}
+
+If too many L2CAP events are attempted to be added to the queue, the new event allocation request will fail. This scheme will preserve existing events within the queue at the expense of dropping newer events until space becomes available. Despite this limitation, with an adequate queue size (of approproximately 10 items for most applications) the queue limit should never be exceeded under normal circumstances.
 
 \FloatBarrier
 \subsection{Bluetooth Services}
 
-% TODO
+The Bluetooth services designed as part of the project were implemented seperately to the stack core; they are designed to hook into the stack APIs if desired by the user application, however they are entirely seperate entities which are not required to be built with the stack core if not needed.
+
+Bluetooth services can implement two possible roles; a \textit{client} role, or a \textit{server} role. It is possible for services to implement both roles, however this is not a requirement of the Bluetooth specification. Server role services (such as a Virtual Serial Port service server) provide a function to remote Bluetooth devices on demand, while client role services control remote service server instances (such as a termination application connecting to a remote Virtual Serial Port service server.)
+
+Each of the services designed for the stack use a common set of interface APIs; functions are provided to the user application to notify the service of channel open/close events, data packet reception, and other such common events. In addition, each service may or may not expose a set of service-specific functions and callbacks, which can be used to interact with the service's functionality from the user application.
 
 \FloatBarrier
 \subsubsection{SDP Service}

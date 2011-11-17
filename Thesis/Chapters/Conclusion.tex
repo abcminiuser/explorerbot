@@ -28,7 +28,7 @@ Future stack development would implement a system where either the services are 
 
 A large component of modern communication systems in the concept of data packeting and fragmentation, the act of splitting up a larger communication message into a set of smaller discrete units for individual transfer. Bluetooth is no exception to this; each logical layer within the Bluetooth specification may specify a maximum fragment size to a remote device, above which large messages are split into smaller chunks. These fragments must then be received individually and reconstructed to obtain the original message.
 
-In the Bluetooth stack written for the project, outgoing packets are correctly fragmented into sizes appropriate for the receiving device, however received packets do not currently run through a reassembly layer. In lieu of this feature, the stack requires that the local device is capable of receiving packets in their entirety up to the maximum single packet size as defined by the Bluetooth 2.1 specifications, that of 64KB. For the stack to be considered feature complete, fragmentation reassembly support should be added at a later stage.
+In the Bluetooth stack written for the project, outgoing packets are correctly fragmented into sizes appropriate for the receiving device, however received packets do not currently run through a reassembly layer. In lieu of this feature, the stack requires that the local device is capable of receiving packets in their entirety up to the maximum single packet size as defined by the Bluetooth 2.1 specifications, that of 64KB \cite{bt2p1specs_coresyshost}. For the stack to be considered feature complete, fragmentation reassembly support should be added at a later stage.
 
 \subsection{Expansion of Bluetooth Services}
 
@@ -36,7 +36,7 @@ Only a small subset of the standardized Bluetooth services were implemented in t
 
 \subsection{Additional Physical Transports}
 
-The Bluetooth 2.1 specification defines additional physical transport mediums, for the transport of HCI packets between the Bluetooth Host Controller and the application Microcontroller. Callback hooks from the stack are supplied for the user-supplied implementation of any desired transport mechanism, however for the project only the USB transport was implemented. Future development of the stack should implement the most widely used transport medium---i.e. the UART serial HCI packet transport---so that Bluetooth HCI controllers may be installed directly on the PCB alongside the main microcontroller in an embedded device.
+The Bluetooth 2.1 specification defines additional physical transport mediums \cite{bt2p1specs_transports}, for the transport of HCI packets between the Bluetooth Host Controller and the application Microcontroller. Callback hooks from the stack are supplied for the user-supplied implementation of any desired transport mechanism, however for the project only the USB transport was implemented. Future development of the stack should implement the most widely used transport medium---i.e. the UART serial HCI packet transport---so that Bluetooth HCI controllers may be installed directly on the PCB alongside the main microcontroller in an embedded device.
 
 \section{Final Words}
 

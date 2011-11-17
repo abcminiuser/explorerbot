@@ -88,7 +88,7 @@ As a result, the completed button driver implementation was trivial, consisting 
 \FloatBarrier
 \subsubsection{External SRAM Driver}
 
-While the selected AT90USB1287 microcontroller contained 8KB of SRAM internally for stack, global variables and other working-set data, an external 128KB SRAM IC was mounted externally on the microcontroller board. This memory was attached to the AVR's external memory interface bus, and could then be used to extend the SRAM memory space at the cost of an extra CPU cycle for each external bus access.
+While the selected AT90USB1287 microcontroller contains 8KB of SRAM internally for stack, global variables and other working-set data \cite{at90usb1287}, an external 128KB SRAM IC was mounted externally on the microcontroller board. This memory was attached to the AVR's external memory interface bus, and could then be used to extend the SRAM memory space at the cost of an extra CPU cycle for each external bus access.
 
 Unfortunately, while this external SRAM memory uses a 17-bit address, the AVR's external memory bus interface is only 16-bits wide. As a result, a small software shim driver was required to perform manual bank swapping when required to select one of the two halves of memory. This total 128KB of external SRAM memory was thus divided into two 64KB memory banks, only one of which could be selected at one time.
 
@@ -113,7 +113,7 @@ To drive the external H-Bridge circuit used in the robot's motor controller hard
 
 The function to control the motor output was significantly more complex than anticipated, due to the slow switching characteristics of the H-Bridge and inverter hardware chosen (see Chapter \ref{chp:discussion}). The resulting driver had to ensure that during a direction change of one or more motors, the PWM signal of the motor would be completely disabled, to prevent momentary shorts of the main battery during the switching period.
 
-Through trial and error, the motor PWM timer period was set to \lstinline{0x0FFF}, giving a frequency of around 1.9KHz at 16MHz due to the disabled prescaler and chosen \textit{``Phase Correct''} timer mode. Values below this range moved the PWM frequency harmonics to an irritating  portion the human range of hearing, while raising this frequency reduced the efficiency of the motors and reduced the motor drive torque.
+Through trial and error, the motor PWM timer period was set to \lstinline{0x0FFF}, giving a frequency of around 1.9KHz at 16MHz due to the disabled prescaler and chosen \textit{``Phase Correct''} timer mode. Values below this range moved the PWM frequency harmonics to an irritating portion the human range of hearing, while raising this frequency reduced the efficiency of the motors and reduced the motor drive torque.
 
 \FloatBarrier
 \subsubsection{RGB LED Driver}
@@ -193,7 +193,7 @@ While every effort was made to ensure that as much code as possible for the proj
 
 A crucial part of the project was the ability to communicate with USB devices; the AVR's USB interface was to be used for both configuration and control of the robot, via a variety of USB devices. A full USB stack is a rather complicated affair; generally it takes an entire team of programmers working together and ample debugging time to produce a functional stack. Because of the short time frame of the project, an existing stack was chosen instead.
 
-The selected stack was LUFA, the \textit{Lightweight USB Framework for AVR devices}. This stack, a personal side-project of the author, offers a rich device support in both USB host and device modes. The library contains many inbuilt drivers for the various classes of USB devices, some of which were used in the project for the HID joystick control and Mass Storage configuration and sensor logging.
+The selected stack was LUFA \cite{lufa}, the \textit{Lightweight USB Framework for AVR devices}. This stack, a personal side-project of the author, offers a rich device support in both USB host and device modes. The library contains many inbuilt drivers for the various classes of USB devices, some of which were used in the project for the HID joystick control and Mass Storage configuration and sensor logging.
 
 For the robot firmware, LUFA version 20111009 was used.
 
@@ -202,7 +202,7 @@ For the robot firmware, LUFA version 20111009 was used.
 
 To read and write files onto an attached Mass Storage USB device, it was necessary to add a filesystem driver into the system. Using a standard filesystem allowed the firmware to maintain compatibility with files stored onto the disk using other devices. As the de-facto standard for embedded system filesystem is Microsoft's FAT (due to its relative simplicity when compared to more modern filesystems) a FAT compatible filesystem driver was selected for the project.
 
-The third-party FATFs library was chosen for this task, as it offers a free, tested, portable and light-weight C implementation of the FAT filesystem standard. The FATFs library is compatible with most variants of the FAT standard (including FAT16 and FAT32) making it an ideal choice for the project. Linking the FATFs library's read and write callback functions to the LUFA USB library's Mass Storage class driver section functions proved to be much easier than anticipated (see Listing \ref{lst:fatfsshim}).
+The third-party FATFs library \cite{fatfs} was chosen for this task, as it offers a free, tested, portable and light-weight C implementation of the FAT filesystem standard. The FATFs library is compatible with most variants of the FAT standard (including FAT16 and FAT32) making it an ideal choice for the project. Linking the FATFs library's read and write callback functions to the LUFA USB library's Mass Storage class driver section functions proved to be much easier than anticipated (see Listing \ref{lst:fatfsshim}).
 
 \lstinputlisting[float=tbph,caption={FATFs code to connect the library to the LUFA Mass Storage class driver.},label={lst:fatfsshim}]{./Figures/FATFsShim.c}
 
@@ -216,7 +216,7 @@ While the LUFA USB stack provides support for several of these classes of USB de
 \FloatBarrier
 \subsubsection{Bluetooth Adapters}
 
-The LUFA stack version used in the project did not contain a ready-made internal driver for USB Bluetooth adapters. A suitable driver was thus created specifically for the project using the USB transport specification outlined in the Bluetooth 2.1 specification document. In order to support all possible Bluetooth adapters from all silicon vendors, the driver was written to match generically on the defined \texttt{class}, \texttt{subclass} and \texttt{protocol} Device Descriptor values of \texttt{0xE0}, \texttt{0x01} and \texttt{0x01} respectively, as set by the Bluetooth specification for conformant Bluetooth adapters. By matching against these values instead of a particular Vendor ID and Product ID, the driver was able to support all devices conforming to the Bluetooth standard's USB transport interface specification without additional modifications being required.
+The LUFA stack version used in the project did not contain a ready-made internal driver for USB Bluetooth adapters. A suitable driver was thus created specifically for the project using the USB transport specification outlined in the Bluetooth 2.1 specification document. In order to support all possible Bluetooth adapters from all silicon vendors, the driver was written to match generically on the defined \texttt{class}, \texttt{subclass} and \texttt{protocol} Device Descriptor values of \texttt{0xE0}, \texttt{0x01} and \texttt{0x01} respectively, as set by the Bluetooth specification for conformant Bluetooth adapters \cite{bt2p1specs_usbtransport}. By matching against these values instead of a particular Vendor ID and Product ID, the driver was able to support all devices conforming to the Bluetooth standard's USB transport interface specification without additional modifications being required.
 
 During the enumeration process of an inserted USB device, the main function calls the module's \lstinline{BluetoothAdapter_ConfigurePipes()} function to attempt to bind it to the inserted USB device. The module first validates the device descriptor to ensure the inserted device is reportedly a Bluetooth adapter. Next, the pipe configuration routine attempts to configure the USB controller's logical data pipes so that the \textit{Data In}, \textit{Data Out} and \textit{Event In} pipes are correctly connected to their matching logical endpoints within the adapter. If the driver is unable to bind to the device for any reason, the enumeration process is aborted for the Bluetooth transport driver.
 

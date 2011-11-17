@@ -17,8 +17,8 @@ outputdir:
 	
 # Generate PDF output from LaTeX input files.
 pdf:
-	pdflatex -quiet -interaction=errorstopmode --include-directory=$(PACKAGE_DIR) --output-directory=$(OUTPUT_DIR) $(DOCUMENT_NAME)
+	pdflatex -interaction=errorstopmode --include-directory=$(PACKAGE_DIR) --output-directory=$(OUTPUT_DIR) $(DOCUMENT_NAME)
 	bibtex -quiet $(OUTPUT_DIR)/$(DOCUMENT_NAME)
 	pdflatex -quiet --include-directory=$(PACKAGE_DIR) --output-directory=$(OUTPUT_DIR) $(DOCUMENT_NAME)
 	pdflatex -quiet --include-directory=$(PACKAGE_DIR) --output-directory=$(OUTPUT_DIR) $(DOCUMENT_NAME)
-	pdflatex --include-directory=$(PACKAGE_DIR) --output-directory=$(OUTPUT_DIR) $(DOCUMENT_NAME)
+	pdflatex -quiet --include-directory=$(PACKAGE_DIR) --output-directory=$(OUTPUT_DIR) $(DOCUMENT_NAME)

@@ -45,19 +45,19 @@ The design of embedded stacks based on a no-heap-allocation strategy is a comple
 
 A second complication based on the physical constraints from the execution environment is the native endianness of the processor hardware, i.e., the order in which multiple-byte data values are stored and interpreted inside the processor registers. Depending on the execution architecture, data values may be represented in Big Endian (most significant byte at the lowest address) or Little Endian (least significant byte at the lowest address) format within the CPU. Data transmitted and received at the local device to remote device boundary must undergo a encoding conversion if the endianness of the source and sink do not match.
 
-In the case of the Bluetooth specification, this was further complicated by the various layers; some layers used Little Endian encoding for exchanged data, while others selected a Big Endian format. To perform the correct encoding/decoding on each platform, a set of conversion macros were implemented at points where multi-byte values were exchanged. This ensured that regardless of the native endian format of the architecture the stack is compiled to, multi-byte values will be interpreted correctly.
+In the case of the Bluetooth specification \cite{bt2p1specs}, this was further complicated by the various layers; some layers used Little Endian encoding for exchanged data, while others selected a Big Endian format. To perform the correct encoding/decoding on each platform, a set of conversion macros were implemented at points where multi-byte values were exchanged. This ensured that regardless of the native endian format of the architecture the stack is compiled to, multi-byte values will be interpreted correctly.
 
 \FloatBarrier
 \subsection{Physical Transport Independence}
 
-As the Bluetooth 2.1 specification outlines a several possible physical transports of HCI packets between the Bluetooth transceiver silicon and the application microcontroller, it was important that the physical transport layer be made independent from the rest of the stack. By making no assumptions about the form of transport protocol used to transfer packets to and from the attached Bluetooth silicon, the user application is free to implement their own transport mechanism without having to modify the internals of the stack. One instance of the stack may run across a USB connection to an attached Bluetooth module, while another may simultaneously connect to the microcontroller over a UART link.
+As the Bluetooth 2.1 specification outlines a several possible physical transports \cite{bt2p1specs_transports} of HCI packets between the Bluetooth transceiver silicon and the application microcontroller, it was important that the physical transport layer be made independent from the rest of the stack. By making no assumptions about the form of transport protocol used to transfer packets to and from the attached Bluetooth silicon, the user application is free to implement their own transport mechanism without having to modify the internals of the stack. One instance of the stack may run across a USB connection to an attached Bluetooth module, while another may simultaneously connect to the microcontroller over a UART link.
 
 \FloatBarrier
 \subsection{Bluetooth Specification Compatibility}
 
 For a software stack to be suitable for general use, it must be designed around, and undergo a series of tests to ensure compatibility with, a particular version of the protocol specification. Without a fixed version of a specification, correctness of the finished stack and compatibility with other implementations of the same technology cannot be assured.
 
-As a \textit{compliant} stack would require extensive development and expensive certification procedures, the stack was instead aimed to be \textit{compatible} with version 2.1 of the Bluetooth specification. This subtle difference in the terminology indicates a large difference in the restrictions around the exact implementation. While a \textit{compliant} stack must be verified against the entire specification and rigorously tested to ensure exact conformance, a \textit{compatible} must only work with (most) other devices implementing their own compliant or compatible stacks of the same protocol version.
+As a \textit{compliant} stack would require extensive development and expensive certification procedures, the stack was instead aimed to be \textit{compatible} with version 2.1 of the Bluetooth specification. This subtle difference in the terminology indicates a large difference in the restrictions around the exact implementation. While a \textit{compliant} stack must be verified against the entire specification and rigorously tested to ensure exact conformance \cite{bt2p1specs_conformance}, a \textit{compatible} must only work with (most) other devices implementing their own compliant or compatible stacks of the same protocol version.
 
 In the future the stack could be made conformant if desired, however for the purposes of the project only protocol compatibility was tested.
 
@@ -102,7 +102,7 @@ In this section, the design and implementation of each individual software layer
 \FloatBarrier
 \subsection{Physical Transport}
 
-While not part of the completed stack proper, a functional USB transport layer was completed for the project as an sample implementation in the user application, and hooked into the stack via the provided APIs. The Bluetooth USB transport requires the use of four logical USB communication channels (``pipes'' in USB terminology) to the USB Bluetooth adapter; the mandatory control pipe for HCI commands, a pair of \textit{Bulk} type pipes for data packets to and from the controller, and an \textit{Interrupt} pipe for HCI event notifications.
+While not part of the completed stack proper, a functional USB transport layer was completed for the project as an sample implementation in the user application, and hooked into the stack via the provided APIs. The Bluetooth USB transport \cite{bt2p1specs_usbtransport} requires the use of four logical USB communication channels (``pipes'' in USB terminology) to the USB Bluetooth adapter; the mandatory control pipe for HCI commands, a pair of \textit{Bulk} type pipes for data packets to and from the controller, and an \textit{Interrupt} pipe for HCI event notifications.
 
 \begin{figure}[tbph]
 	\vspace{1em}
@@ -177,7 +177,7 @@ Each of the services designed for the stack use a common set of interface APIs; 
 \FloatBarrier
 \subsubsection{SDP Service}
 
-For service discovery to take place between devices, each device must implement the Service Discovery Protocol service. The SDP service exposes the capabilities and characteristics of other services within the device, allowing remote systems to query the server to determine what services a device implements, and their associated properties. Other services may register themselves with the SDP service within a device, so that remote Bluetooth devices may detect the existence of the second service and make use of it if desired.
+For service discovery to take place between devices, each device must implement the Service Discovery Protocol service \cite{bt2p1specs_sdp}. The SDP service exposes the capabilities and characteristics of other services within the device, allowing remote systems to query the server to determine what services a device implements, and their associated properties. Other services may register themselves with the SDP service within a device, so that remote Bluetooth devices may detect the existence of the second service and make use of it if desired.
 
 On large scale systems, SDP records are generally registered independently, and appropriate SDP records are built dynamically from the properties given to the SDP service by other services within a device. This approach allows for attributes to be dynamically added, removed and updated as required, however requires a variable amount of memory to store the generated SDP records. 
 
@@ -200,7 +200,7 @@ The SDP server maintains a linked list of registered services internally, using 
 \FloatBarrier
 \subsubsection{RFCOMM Service}
 
-For virtual serial port functionality, the RFCOMM service was implemented as a server role; remote devices can then request logical channels to be opened in the service, so that data can be exchanged. The RFCOMM service requires the creation of a logical channel multiplexer; this allows a single physical RFCOMM channel to multiplex a collection of one or more data channels simultaneously. In the implementation of this service, the multiplexer was created using a static array of \lstinline{RFCOMM_Channel_t} structure instances, each of which represented a virtual channel on the multiplexer.
+For virtual serial port functionality, the RFCOMM service was implemented as a server role; remote devices can then request logical channels to be opened in the service, so that data can be exchanged. The RFCOMM service requires the creation of a logical channel multiplexer; this allows a single physical L2CAP channel to multiplex a collection of one or more RFCOMM data channels simultaneously. In the implementation of this service, the multiplexer was created using a static array of \lstinline{RFCOMM_Channel_t} structure instances, each of which represented a virtual channel on the multiplexer.
 
 As the RFCOMM service is not tied directly into the core Bluetooth stack, the channel object array is not associated with a specific Bluetooth stack, rather, the channel object pool is shared amongst all Bluetooth stack instances in the system (see Figure \ref{fig:rfcommchannelpool}). The first time the service is initialised, the entire channel object pool is reset; in subsequent initializations, only channel objects currently associated to the stack instance being reset will be deallocated. This allows the RFCOMM service resources to be shared with all Bluetooth instances, without having to have multiple per-instance channel pools. The maximum number of simultaneously open RFCOMM channels is set via the \lstinline{RFCOMM_MAX_OPEN_CHANNELS} configuration parameter.
 
@@ -213,12 +213,12 @@ As the RFCOMM service is not tied directly into the core Bluetooth stack, the ch
 	\label{fig:rfcommchannelpool}
 \end{figure}
 
-While newer versions of the RFCOMM service specification (i.e. versions 1.1 onwards) add a mandatory ``credit based'' flow control scheme to control the flow of data in and out of each logical channel, versions 1.0B and earlier do not contain these additions. As most RFCOMM clients are compatible with either version (due to the prevalence of devices based on the older specification) the implemented service was based on the earlier protocol version for simplicity.
+While newer versions of the RFCOMM service specification (i.e. versions 1.1 onwards) add a mandatory ``credit based'' flow control scheme to control the flow of data in and out of each logical channel, versions 1.0B and earlier do not contain these additions. As most RFCOMM clients are compatible with either version (due to the prevalence of devices based on the older specification) the implemented service was based on the earlier protocol version \cite{rfcommspecs} for simplicity.
 
 \FloatBarrier
 \subsubsection{HID Service}
 
-Due to time limitations of the project, the HID service implementation was extremely minimal; only a basic implementation of the HID client role was designed and coded, so that received packets could be decoded and used to control the robot. As a client role version of the SDP server was not attempted, the HID service was unable to query the remote HID device's service tables for the HID descriptor, used to determine how to decode received HID data packets. This unfortunately resulted in the final robot firmware needing to hard-code the packet interpretation for each device type based on the length of the received data packet.
+Due to time limitations of the project, the HID service implementation was extremely minimal; only a basic implementation of the HID 1.0 profile \cite{bthidspecs} was designed and coded, so that received packets could be decoded and used to control the robot. As a client role version of the SDP server was not attempted, the HID service was unable to query the remote HID device's service tables for the HID descriptor, used to determine how to decode received HID data packets. This unfortunately resulted in the final robot firmware needing to hard-code the packet interpretation for each device type based on the length of the received data packet.
 
 \section{Integration into User Applications}
 

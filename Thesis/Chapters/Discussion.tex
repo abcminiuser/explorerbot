@@ -69,7 +69,7 @@ This scheme results in a reliable L2CAP layer, without the use of a large intern
 
 Sony's \textit{Playstation 3} controller presented several small difficulties in making it compatible with the rest of the system. While the controller itself implements the standard HID profiles in both wired USB and wireless Bluetooth modes, additional device-specific software tweaks are necessary for compatibility.
 
-When plugged in as a wired controller via the USB interface, a special HID Feature packet must be sent to the controller over the logical HID interface, via the USB Control endpoint. This packet, directed to the HID report ID \texttt{0xF4} and containing the special ``magic'' bytes \texttt{0x42 0x0C 0x00 0x00}, it is used to enable general controller reports through the regular HID data endpoints. Without this packet, the controller will not send any state change information to the host. In Bluetooth mode, the magic packet required for Bluetooth HID reporting is \texttt{0x42 0x03 0x00 0x00}.
+When plugged in as a wired controller via the USB interface, a special HID Feature packet must be sent to the controller over the logical HID interface, via the USB Control endpoint \cite{ps3reveng}. This packet, directed to the HID report ID \texttt{0xF4} and containing the special ``magic'' bytes \texttt{0x42 0x0C 0x00 0x00}, it is used to enable general controller reports through the regular HID data endpoints. Without this packet, the controller will not send any state change information to the host. In Bluetooth mode, the magic packet required for Bluetooth HID reporting is \texttt{0x42 0x03 0x00 0x00}.
 
 A second packet during initialization is also required, another HID Feature packet directed at the HID Report ID \texttt{0xF5}. Prefixed with the bytes \texttt{0x01 0x00}, this request packet data is followed by the six octets of the host's Bluetooth device address, to pair the controller to the specified address. This is in contrast with the general Bluetooth pairing mechanism, which usually involves a device discovery and authentication phase over the Bluetooth link.
 
@@ -80,13 +80,13 @@ The two initialization packets for USB HID reporting and Bluetooth address pairi
 \FloatBarrier
 \subsection{Misleading Sensor Datasheets}
 
-During the development of the sensor hardware drivers, inconsistencies and misleading portions of the datasheets caused significant confusion and difficulties in attempting to establish a functional data stream from the attached sensor devices. In the case of the Bosch BMA150 accelerometer, this issue was traced back to an apparent error in the datasheet; despite indicating an initial value of \texttt{0x00} for the control register at address \texttt{0x0A} (see \ref{fig:bma150regs}), the \textit{sleep} control bit had to be manually cleared on start-up for the sensor to function correctly.
+During the development of the sensor hardware drivers, inconsistencies and misleading portions of the datasheets caused significant confusion and difficulties in attempting to establish a functional data stream from the attached sensor devices. In the case of the Bosch BMA150 accelerometer, this issue was traced back to an apparent error in the datasheet \cite{bma150}; despite indicating an initial value of \texttt{0x00} for the control register at address \texttt{0x0A} (see \ref{fig:bma150regs}), the \textit{sleep} control bit had to be manually cleared on start-up for the sensor to function correctly.
 
 \begin{figure}[tbph]
 	\centering
 		\includegraphics[width=140mm]{BMA150Regs.png}
 	\rule{35em}{0.5pt}
-	\caption[BMA150 Register Defaults]{Table from the BMA150 sensor datasheet, showing the initial start-up values of the sensor's registers. \textit{Note the highlighted control register's stated default value}.}
+	\caption[BMA150 Register Defaults]{Table from the BMA150 sensor datasheet \cite{bma150}, showing the initial start-up values of the sensor's registers. \textit{Note the highlighted control register's stated default value}.}
 	\label{fig:bma150regs}
 \end{figure}
 

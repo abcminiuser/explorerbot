@@ -16,7 +16,7 @@ During and after the construction phase of the robot's hardware, a number of ver
 \FloatBarrier
 \subsubsection{Main Power Supply}
 
-The main power supply was tested with an oscilloscope, after the module components were installed onto the PCB. A static load of 300mA was placed on the switchmode supply output, and the voltage ripple on the supply measured with an oscilloscope (see Figure \ref{fig:mainpowerripple}). This yielded an output ripple of approximately 80mV, well within the tolerances of the system. At the given static load, the regulated output voltage was measured at 4.98V, within the specifications of \(4.8V\leq\text{V\subscript{out}}\leq5.2V\) listed in the LM2595-5 regulator datasheet.
+The main power supply was tested with an oscilloscope, after the module components were installed onto the PCB. A static load of 300mA was placed on the switchmode supply output, and the voltage ripple on the supply measured with an oscilloscope (see Figure \ref{fig:mainpowerripple}). This yielded an output ripple of approximately 80mV, well within the tolerances of the system. At the given static load, the regulated output voltage was measured at 4.98V, within the specifications of \(4.8V\leq\text{V\subscript{out}}\leq5.2V\) listed in the LM2595-5 regulator datasheet \cite{lm2595}.
 
 \begin{figure}[tbph]
 	\vspace{1em}
@@ -30,7 +30,7 @@ The main power supply was tested with an oscilloscope, after the module componen
 \FloatBarrier
 \subsubsection{Sensor Power Supply}
 
-For the secondary 3.3V LDO power supply used by the board's sensor modules, an identical set of tests to those used in the verification of the main power supply were performed, using the sensor boards as the regulator output load. This yielded a ripple of 120mV, and an output voltage of 3.27V. When compared to the ADP3308 datasheet output's electrical characteristics, this was within the stated \(\pm1.2\%\) accuracy (\(3.26V\leq\text{V\subscript{out}}\leq3.34V\)).
+For the secondary 3.3V LDO power supply used by the board's sensor modules, an identical set of tests to those used in the verification of the main power supply were performed, using the sensor boards as the regulator output load. This yielded a ripple of 120mV, and an output voltage of 3.27V. When compared to the ADP3308 datasheet \cite{adp3308} output's electrical characteristics, this was within the stated \(\pm1.2\%\) accuracy (\(3.26V\leq\text{V\subscript{out}}\leq3.34V\)).
 
 \begin{figure}[tbph]
 	\vspace{1em}

@@ -23,7 +23,7 @@ By default, only the Bluetooth stack core (giving the HCI and L2CAP layers) is i
 
 \section{Design Considerations}
 
-A number of design restrictions were placed on the development of the Bluetooth stack; these ensured that the completed stack remained modular, extensible and suitable for integration in a wide range of embedded systems with various capabilities, and conversely, limitations. As an unfortunate but expected side effect, a number of these restrictions complicated the software development process significantly.
+A number of design restrictions were placed on the development of the Bluetooth stack; these ensured that the completed stack remained modular, extensible and suitable for integration in a wide range of embedded systems with various capabilities and, conversely, limitations. As an unfortunate but expected side effect, a number of these restrictions complicated the software development process significantly.
 
 \FloatBarrier
 \subsection{No Heap Memory Allocations}
@@ -43,9 +43,9 @@ The design of embedded stacks based on a no-heap-allocation strategy is a comple
 \FloatBarrier
 \subsection{Endianness Correction}
 
-A second complication based on the physical constraints from the execution environment is the native endianness of the processor hardware, i.e., the order in which multiple-byte data values are stored inside the processor. Depending on the execution architecture, data values may be represented in Big Endian (most significant byte at the lowest address) or Little Endian (least significant byte at the lowest address) format within the CPU. Data transmitted and received at the local device to remote device boundary must undergo a encoding conversion if the endianness of the source and sink do not match.
+A second complication based on the physical constraints from the execution environment is the native endianness of the processor hardware, i.e., the order in which multiple-byte data values are stored and interpreted inside the processor registers. Depending on the execution architecture, data values may be represented in Big Endian (most significant byte at the lowest address) or Little Endian (least significant byte at the lowest address) format within the CPU. Data transmitted and received at the local device to remote device boundary must undergo a encoding conversion if the endianness of the source and sink do not match.
 
-In the case of the Bluetooth specification, this was further complicated by the various layers; some layers used Little Endian encoding for exchanged data, while others selected Big Endian. To perform the correct encoding/decoding on each platform, a set of conversion macros were implemented at points where multi-byte values were exchanged. This ensured that regardless of the native endian format of the architecture the stack is compiled to, multi-byte values will be interpreted correctly.
+In the case of the Bluetooth specification, this was further complicated by the various layers; some layers used Little Endian encoding for exchanged data, while others selected a Big Endian format. To perform the correct encoding/decoding on each platform, a set of conversion macros were implemented at points where multi-byte values were exchanged. This ensured that regardless of the native endian format of the architecture the stack is compiled to, multi-byte values will be interpreted correctly.
 
 \FloatBarrier
 \subsection{Physical Transport Independance}
@@ -64,7 +64,7 @@ In the future the stack could be made conformant if desired, however for the pur
 \FloatBarrier
 \subsection{Multiple Stack Instances}
 
-For maximum utility, the stack was designed to allow for multiple simultaneous stack instances. This was implemented to allow for unusual Bluetooth usage scenarios where more than one tranceiver is desirable in the one system, either for security, wireless signal coverage or bandwidth reasons. Each physical transceiver is allocated a logical stack instance, capable of sustaining one or more simultaneous connections, and one or more logical channels between devices. This flexibility ensures that the majority of usage scenarios are covered by the stack's implementation.
+For maximum utility, the stack was designed to allow for multiple simultaneous stack instances. This was implemented to allow for unusual Bluetooth usage scenarios where more than one tranceiver is desirable in a single system, either for security, wireless signal coverage or bandwidth reasons. Each physical transceiver is allocated a logical stack instance, capable of sustaining one or more simultaneous connections, and one or more logical channels between devices. This flexibility ensures that the majority of usage scenarios are covered by the stack's implementation.
 
 Code-wise, the multiple stack functionality is implemented as a common first parameter to all functions within the stack, \lstinline{BT_StackConfig_t* const StackState}. This parameter is used to pass around a reference to the stack instance being operated upon, and is somewhat analagous to the \lstinline{this} property in C++ classes, if the entire stack was wrapped in a single class. As the stack was written in the C language which lacks Object Orientated language capabilities, this form of basic polymorphism was implemented manually. For each physical tranceiver, the user application is expected to declare a new instance of the \lstinline{BT_StackConfig_t} structure within their code, and pass this to the main Bluetooth stack management routines (see Listing \ref{lst:stackconfig}).
 
@@ -91,7 +91,7 @@ As the stack does not use heap-based dynamic memory allocation, this approach en
 \FloatBarrier
 \subsection{Minimal Memory Usage}
 
-While large embedded systems may run the completed Bluetooth stack, the design decisions made during its development were primarily aimed at ensuring the best performance and smallest footprint in very low powered microcontrollers. This resulted in the stack being optimised for small systems; only the minimal attributes required to establish and maintain connections are stored by the stack. One example of these optimizations is in the event system (described in detail later in this chapter) implementation: rather than implementing a callback registration system for each event, named callbacks are used instead. Various portions of the Bluetooth stack expect the user application to provide callback and event functions using names and prototypes defined in the stack header files.
+While large embedded systems may run the completed Bluetooth stack, the design decisions made during its development were primarily aimed at ensuring the best performance and smallest footprint in severely resource-constrained microcontrollers. This resulted in the stack being optimised for small systems; only the minimal attributes required to establish and maintain connections are stored by the stack. One example of these optimizations is in the event system (described in detail later in this chapter) implementation: rather than implementing a callback registration system for each event, named callbacks are used instead. Various portions of the Bluetooth stack expect the user application to provide callback and event functions using names and prototypes defined in the stack header files.
 
 This named callback function system reduces the memory footprint of the stack, as the callback addresses do not need to be stored in RAM at runtime, and the compiler does not need to inflate the binary with additional functions to manage the callback function registrations.
 
@@ -102,7 +102,7 @@ In this section, the design and implementation of each individual software layer
 \FloatBarrier
 \subsection{Physical Transport}
 
-While not part of the completed stack proper, a functional USB transport layer was completed for the project as an sample implementation in the user application and hooked into the stack via the provided APIs. The Bluetooth USB transport requires the use of four logical USB communication channels (``pipes'' in USB terminology) to the USB Bluetooth adapter; the mandatory control pipe for HCI commands, a pair of \textit{Bulk} type pipes for data packets to and from the controller, and an \textit{Interrupt} pipe for HCI event notifications.
+While not part of the completed stack proper, a functional USB transport layer was completed for the project as an sample implementation in the user application, and hooked into the stack via the provided APIs. The Bluetooth USB transport requires the use of four logical USB communication channels (``pipes'' in USB terminology) to the USB Bluetooth adapter; the mandatory control pipe for HCI commands, a pair of \textit{Bulk} type pipes for data packets to and from the controller, and an \textit{Interrupt} pipe for HCI event notifications.
 
 \begin{figure}[tbph]
 	\vspace{1em}
@@ -118,7 +118,21 @@ Data and event packets received from the USB Bluetooth adapter's logical pipes a
 \FloatBarrier
 \subsection{HCI Layer}
 
-% TODO
+Sitting at the lowest level of the core stack, the HCI layer performs the main role of managing connections between Bluetooth devices, as well as processing events from the Bluetooth controller, and data encapsulation/decapsulation for transport over the Bluetooth link. To perform these tasks, the HCI layer is invoked each time a data packet is received or ready to be sent, an event is received from the controller, or during idle periods of the user application for general connection management.
+
+The current HCI layer state is implemented as a state machine, which is automatically advanced through the appropriate states on stack initialization to configure the attached Bluetooth device, according to the configuration parameters set in the stack instance configuration structure. These states, shown in Listing \ref{lst:hcistates}, correspond to the asynchronous initialization steps performed by the stack when the HCI layer is reset.
+
+\lstinputlisting[float=tbph,caption={State machine states for the HCI management layer.},label={lst:hcistates}]{./Figures/HCIStates.c}
+
+The HCI baseband controller management in the HCI layer is split into two distinct parts; an event processing routine to process commands and manage transitions between HCI states, and the state machine processing routine to execute commands based on the current HCI state. As commands must only be sent once on the transition between HCI state machine states, a flag \texttt{StateTransition} in the HCI state structure of each Bluetooth stack instance indicates if a state transition has occured within the event processing function, so that the state machine processor can issue the appropriate responses on transisiton edges only.
+
+State timeouts within each of the HCI states is managed via a \texttt{TicksElapsed} counter in the HCI state structure of each Bluetooth stack instance. This counter, incremented each time the HCI layer is notified by the user application of a tick period elapsing, forces a resend of the current HCI state's command by forcing the state transition flag \texttt{StateTransition} high when the timeout period has expired. This system ensures that HCI commands dropped during the initialisation of the module are properly re-issued.
+
+If a connection is requested by a remote device, the HCI layer will issue a \\ \lstinline{CALLBACK_Bluetooth_ConnectionRequest()} callback into the user application, if space is available within the HCI connection object pool. If no space is available (i.e. all HCI channel objects are currently allocated for established connections) the connection request is silently discarded with the Bluetooth error code \lstinline{HCI_ERROR_LIMITED_RESOURCES}. If the user application accepts the connection request, the stack will issue an acceptance response to the remote device. If rejected, a suitable rejection notification is issued by the stack's HCI layer.
+
+Authentication is currently implemented in a slave connection role only, as a PIN based authentication. All sent connection requests and acceptance packets indicate that the device requires a slave role in the connection establishment, indicating that the remote device is responsible for requesting the authentication PIN code from the user, which the local stack then authenticates against the PIN code configured in each stack instance.
+
+Inside the HCI layer, received data packets are stripped of their HCI layer headers and passed upwards to the L2CAP layer for further processing. Packets sent from the L2CAP layer to the HCI layer undergo the opposite process; a HCI layer packet header is prefixed onto the packet contents and passed to the user application for transmission to the Bluetooth controller.
 
 \FloatBarrier
 \subsection{L2CAP Layer}

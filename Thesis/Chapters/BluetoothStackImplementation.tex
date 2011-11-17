@@ -17,7 +17,7 @@ The software layers implemented in the completed Bluetooth stack are shown in Fi
 	\label{fig:completedbtstacklayers}
 \end{figure}
 
-Each software layer was implemented as a seperate pair of source code module files, written in the C language and targeted towards the C99 language specification. Configuration for the stack is located in the file \texttt{BluetoothCommon.h}, which must be included in the user application to operate the stack.
+Each software layer was implemented as a separate pair of source code module files, written in the C language and targeted towards the C99 language specification. Configuration for the stack is located in the file \texttt{BluetoothCommon.h}, which must be included in the user application to operate the stack.
 
 By default, only the Bluetooth stack core (giving the HCI and L2CAP layers) is integrated; services must be linked into the stack manually via the provided event and callback routines (see later in this chapter) to provide service-level functionality on top of the base stack functionality. This includes the SDP server service; while generally a core requirement of most Bluetooth devices, it may be omitted in applications not exposing server role services to save space in the resulting application binary.
 
@@ -32,8 +32,8 @@ The largest restriction placed on the stack design was the requirement of static
 
 \begin{enumerate}
 	\item \textbf{Static Allocations}, including global variables and \lstinline{static} qualified variables.
-	\item \textbf{Stack Allocations}, automatically populated to store local automatic variables, function paramaters, return addresses, etc.
-	\item \textbf{Heap Allocations}, persistant dynamic allocations manually managed by the user application.
+	\item \textbf{Stack Allocations}, automatically populated to store local automatic variables, function parameters, return addresses, etc.
+	\item \textbf{Heap Allocations}, persistent dynamic allocations manually managed by the user application.
 \end{enumerate}
 
 However, for significantly memory constrained systems, heap allocations are generally avoided due to the possibility of memory fragmentation; large numbers of differently-sized allocations and deallocations may cause fragmented holes to appear within the heap environment, causing allocation exhaustion to occur even if sufficient (raw) memory is available for an allocation request. In addition, dynamic memory complicates the formal analysis of a program, making memory requirements harder to judge, and thus harder to determine whether a given set of firmware will operate correctly within a specified environment without further in-depth analysis. In large embedded environments (ones with virtual memory management, and/or a large heap space) these problems are less of an issue and dynamic memory may be preferable for its simplicity.
@@ -48,9 +48,9 @@ A second complication based on the physical constraints from the execution envir
 In the case of the Bluetooth specification, this was further complicated by the various layers; some layers used Little Endian encoding for exchanged data, while others selected a Big Endian format. To perform the correct encoding/decoding on each platform, a set of conversion macros were implemented at points where multi-byte values were exchanged. This ensured that regardless of the native endian format of the architecture the stack is compiled to, multi-byte values will be interpreted correctly.
 
 \FloatBarrier
-\subsection{Physical Transport Independance}
+\subsection{Physical Transport Independence}
 
-As the Bluetooth 2.1 specification outlines a several possible physical transports of HCI packets between the Bluetooth transceiver silicon and the application microcontroller, it was important that the physical transport layer be made independant from the rest of the stack. By making no assumptions about the form of transport protocol used to transfer packets to and from the attached Bluetooth silicon, the user application is free to implement their own transport mechanism without having to modify the internals of the stack. One instance of the stack may run across a USB connection to an attached Bluetooth module, while another may simultaneously connect to the microcontroller over a USART link.
+As the Bluetooth 2.1 specification outlines a several possible physical transports of HCI packets between the Bluetooth transceiver silicon and the application microcontroller, it was important that the physical transport layer be made independent from the rest of the stack. By making no assumptions about the form of transport protocol used to transfer packets to and from the attached Bluetooth silicon, the user application is free to implement their own transport mechanism without having to modify the internals of the stack. One instance of the stack may run across a USB connection to an attached Bluetooth module, while another may simultaneously connect to the microcontroller over a UART link.
 
 \FloatBarrier
 \subsection{Bluetooth Specification Compatibility}
@@ -64,9 +64,9 @@ In the future the stack could be made conformant if desired, however for the pur
 \FloatBarrier
 \subsection{Multiple Stack Instances}
 
-For maximum utility, the stack was designed to allow for multiple simultaneous stack instances. This was implemented to allow for unusual Bluetooth usage scenarios where more than one tranceiver is desirable in a single system, either for security, wireless signal coverage or bandwidth reasons. Each physical transceiver is allocated a logical stack instance, capable of sustaining one or more simultaneous connections, and one or more logical channels between devices. This flexibility ensures that the majority of usage scenarios are covered by the stack's implementation.
+For maximum utility, the stack was designed to allow for multiple simultaneous stack instances. This was implemented to allow for unusual Bluetooth usage scenarios where more than one transceiver is desirable in a single system, either for security, wireless signal coverage or bandwidth reasons. Each physical transceiver is allocated a logical stack instance, capable of sustaining one or more simultaneous connections, and one or more logical channels between devices. This flexibility ensures that the majority of usage scenarios are covered by the stack's implementation.
 
-Code-wise, the multiple stack functionality is implemented as a common first parameter to all functions within the stack, \lstinline{BT_StackConfig_t* const StackState}. This parameter is used to pass around a reference to the stack instance being operated upon, and is somewhat analagous to the \lstinline{this} property in C++ classes, if the entire stack was wrapped in a single class. As the stack was written in the C language which lacks Object Orientated language capabilities, this form of basic polymorphism was implemented manually. For each physical tranceiver, the user application is expected to declare a new instance of the \lstinline{BT_StackConfig_t} structure within their code, and pass this to the main Bluetooth stack management routines (see Listing \ref{lst:stackconfig}).
+Code-wise, the multiple stack functionality is implemented as a common first parameter to all functions within the stack, \lstinline{BT_StackConfig_t* const StackState}. This parameter is used to pass around a reference to the stack instance being operated upon, and is somewhat analogous to the \lstinline{this} property in C++ classes, if the entire stack was wrapped in a single class. As the stack was written in the C language which lacks Object Orientated language capabilities, this form of basic polymorphism was implemented manually. For each physical transceiver, the user application is expected to declare a new instance of the \lstinline{BT_StackConfig_t} structure within their code, and pass this to the main Bluetooth stack management routines (see Listing \ref{lst:stackconfig}).
 
 \lstinputlisting[float=tbph,caption={Configuration example of a Bluetooth stack instance.},label={lst:stackconfig}]{./Figures/StackConfig.c}
 
@@ -86,7 +86,7 @@ The HCI connections and L2CAP channels for each stack instance are implemented a
 
 To positively link one used L2CAP channel instance to its parent HCI connection object, the HCI connection's \lstinline{handle} property is stored in the L2CAP channel object as a primary key. This handle value, allocated uniquely by the external Bluetooth HCI controller silicon when a new HCI connection is made, is then used to locate the HCI connection object within a stack instance from an established channel instance. While a pointer to the parent HCI object would offer a faster method of locating the associated HCI connection, this would tightly couple the HCI layer with the L2CAP layer as the former would need to alter the latter's objects if and when HCI connections are terminated.
 
-As the stack does not use heap-based dynamic memory allocation, this approach ensures that the stack contains similar levels of flexability to a dynamically allocated object approach, with only a minimal overhead. The maximum size of each object pool is set via the Bluetooth Stack's \lstinline{BT_MAX_DEVICE_CONNECTIONS} and \lstinline{BT_MAX_LOGICAL_CHANNELS} configuration defines.
+As the stack does not use heap-based dynamic memory allocation, this approach ensures that the stack contains similar levels of flexibility to a dynamically allocated object approach, with only a minimal overhead. The maximum size of each object pool is set via the Bluetooth Stack's \lstinline{BT_MAX_DEVICE_CONNECTIONS} and \lstinline{BT_MAX_LOGICAL_CHANNELS} configuration defines.
 
 \FloatBarrier
 \subsection{Minimal Memory Usage}
@@ -124,7 +124,7 @@ The current HCI layer state is implemented as a state machine, which is automati
 
 \lstinputlisting[float=tbph,caption={State machine states for the HCI management layer.},label={lst:hcistates}]{./Figures/HCIStates.c}
 
-The HCI baseband controller management in the HCI layer is split into two distinct parts; an event processing routine to process commands and manage transitions between HCI states, and the state machine processing routine to execute commands based on the current HCI state. As commands must only be sent once on the transition between HCI state machine states, a flag \lstinline{StateTransition} in the HCI state structure of each Bluetooth stack instance indicates if a state transition has occured within the event processing function, so that the state machine processor can issue the appropriate responses on transisiton edges only.
+The HCI baseband controller management in the HCI layer is split into two distinct parts; an event processing routine to process commands and manage transitions between HCI states, and the state machine processing routine to execute commands based on the current HCI state. As commands must only be sent once on the transition between HCI state machine states, a flag \lstinline{StateTransition} in the HCI state structure of each Bluetooth stack instance indicates if a state transition has occurred within the event processing function, so that the state machine processor can issue the appropriate responses on transition edges only.
 
 State timeouts within each of the HCI states is managed via a \lstinline{TicksElapsed} counter in the HCI state structure of each Bluetooth stack instance. This counter, incremented each time the HCI layer is notified by the user application of a tick period elapsing, forces a resend of the current HCI state's command by forcing the state transition flag \lstinline{StateTransition} high when the timeout period has expired. This system ensures that HCI commands dropped during the initialisation of the module are properly re-issued.
 
@@ -134,14 +134,14 @@ Authentication is currently implemented in a slave connection role only, as a PI
 
 Inside the HCI layer, received data packets are stripped of their HCI layer headers and passed upwards to the L2CAP layer for further processing. Packets sent from the L2CAP layer to the HCI layer undergo the opposite process; a HCI layer packet header is prefixed onto the packet contents and passed to the user application for transmission to the Bluetooth controller.
 
-As an implementation-specific detail, HCI connection destruction events (when an established HCI connection is disconnected) are notified to the L2CAP layer via the interal function \lstinline{Bluetooth_L2CAP_NotifyHCIDisconnection()}. This ensures that all associated L2CAP channels are correctly destructed once their host HCI connection is destroyed, to prevent synchronisation issues and to ensure that the L2CAP object pool is freed of any dead channel objects as soon as possible to prevent unneccesary pool exhaustion.
+As an implementation-specific detail, HCI connection destruction events (when an established HCI connection is disconnected) are notified to the L2CAP layer via the internal function \lstinline{Bluetooth_L2CAP_NotifyHCIDisconnection()}. This ensures that all associated L2CAP channels are correctly destructed once their host HCI connection is destroyed, to prevent synchronisation issues and to ensure that the L2CAP object pool is freed of any dead channel objects as soon as possible to prevent unnecessary pool exhaustion.
 
 \FloatBarrier
 \subsection{L2CAP Layer}
 
-The L2CAP layer, responsible for managing logical channels between devices for an established connection, was implemented in an unusual manner; due to uncertainties of the user application packet buffering scheme, the stack is not able to guarantee that packets to be sent are buffered correctly. As the L2CAP layer is used to establish communication channels between devices, it is essential that any issued channel configuration commands are delivered correctly to the remote device; delays in the channel negotiation process may cause communications to and from a remote device to fail. As a result, the L2CAP layer implemented a special event buffering scheme to ensure the reliable issuing of responses to remote devices even if a packet fails to send due to the controller's internal buffers becomming full.
+The L2CAP layer, responsible for managing logical channels between devices for an established connection, was implemented in an unusual manner; due to uncertainties of the user application packet buffering scheme, the stack is not able to guarantee that packets to be sent are buffered correctly. As the L2CAP layer is used to establish communication channels between devices, it is essential that any issued channel configuration commands are delivered correctly to the remote device; delays in the channel negotiation process may cause communications to and from a remote device to fail. As a result, the L2CAP layer implemented a special event buffering scheme to ensure the reliable issuing of responses to remote devices even if a packet fails to send due to the controller's internal buffers becoming full.
 
-As L2CAP signalling packets (identifiable via their destination channel ID of \texttt{0x0001}, the defined ID for \lstinline{BT_CHANNEL_SIGNALING} packets) are received by the L2CAP layer, the request is processed and an event object created in the L2CAP Event Queue. This queue, a fixed length queue of a size configured by the stack's \lstinline{BT_MAX_QUEUED_L2CAP_EVENTS} configuration parameter, stores the events in a First-In, First-Out ordered manner within each stack instance. The implementation of this queue is a simple flat array of event structure elements, where inserted items are appended to the end of the last allocated object in the array (see Figure \ref{fig:l2capeventinsertion}). A seperate \lstinline{PendingEvents} property in the L2CAP state structure to track the number of queued events.
+As L2CAP signalling packets (identifiable via their destination channel ID of \texttt{0x0001}, the defined ID for \lstinline{BT_CHANNEL_SIGNALING} packets) are received by the L2CAP layer, the request is processed and an event object created in the L2CAP Event Queue. This queue, a fixed length queue of a size configured by the stack's \lstinline{BT_MAX_QUEUED_L2CAP_EVENTS} configuration parameter, stores the events in a First-In, First-Out ordered manner within each stack instance. The implementation of this queue is a simple flat array of event structure elements, where inserted items are appended to the end of the last allocated object in the array (see Figure \ref{fig:l2capeventinsertion}). A separate \lstinline{PendingEvents} property in the L2CAP state structure to track the number of queued events.
 
 \begin{figure}[tbph]
 	\vspace{1em}
@@ -163,12 +163,12 @@ Event queue removal is performed by the moving of all queue items above the head
 	\label{fig:l2capeventremoval}
 \end{figure}
 
-If too many L2CAP events are attempted to be added to the queue, the new event allocation request will fail. This scheme will preserve existing events within the queue at the expense of dropping newer events until space becomes available. Despite this limitation, with an adequate queue size (of approproximately 10 items for most applications) the queue limit should never be exceeded under normal circumstances.
+If too many L2CAP events are attempted to be added to the queue, the new event allocation request will fail. This scheme will preserve existing events within the queue at the expense of dropping newer events until space becomes available. Despite this limitation, with an adequate queue size (of approximately 10 items for most applications) the queue limit should never be exceeded under normal circumstances.
 
 \FloatBarrier
 \subsection{Bluetooth Services}
 
-The Bluetooth services designed as part of the project were implemented seperately to the stack core; they are designed to hook into the stack APIs if desired by the user application, however they are entirely seperate entities which are not required to be built with the stack core if not needed.
+The Bluetooth services designed as part of the project were implemented separately to the stack core; they are designed to hook into the stack APIs if desired by the user application, however they are entirely separate entities which are not required to be built with the stack core if not needed.
 
 Bluetooth services can implement two possible roles; a \textit{client} role, or a \textit{server} role. It is possible for services to implement both roles, however this is not a requirement of the Bluetooth specification. Server role services (such as a Virtual Serial Port service server) provide a function to remote Bluetooth devices on demand, while client role services control remote service server instances (such as a termination application connecting to a remote Virtual Serial Port service server.)
 
@@ -177,7 +177,26 @@ Each of the services designed for the stack use a common set of interface APIs; 
 \FloatBarrier
 \subsubsection{SDP Service}
 
-% TODO
+For service discovery to take place between devices, each device must implement the Service Discovery Protocol service. The SDP service exposes the capabilities and characteristics of other services within the device, allowing remote systems to query the server to determine what services a device implements, and their associated properties. Other services may register themselves with the SDP service within a device, so that remote Bluetooth devices may detect the existence of the second service and make use of it if desired.
+
+On large scale systems, SDP records are generally registered independently, and appropriate SDP records are built dynamically from the properties given to the SDP service by other services within a device. This approach allows for attributes to be dynamically added, removed and updated as required, however requires a variable amount of memory to store the generated SDP records. 
+
+By contrast, the project's Bluetooth stack uses a novel static record initialization approach for SDP service attributes; services are required to contain pre-built SDP attribute records, which are then registered wholesale with the SDP server. While this requires complex SDP attribute tables to be built inside each service manually, this eliminates the need for costly run-time dynamic service record management and dynamic memory allocation.
+
+An example of such a static SDP attribute record is shown in Listing \ref{lst:sdpattribute}. Here, a single UUID attribute is encoded in the correct format structure for the SDP server.
+
+\lstinputlisting[float=tbph,caption={Example of a statically initialized SDP attribute.},label={lst:sdpattribute}]{./Figures/SDPAttribute.c}
+
+In addition to each individual SDP attribute structure, a single Service Attribute Table must be built for each service requiring SDP registration. Listing \ref{lst:sdpattributetable} shows an example of a service's complete attribute table. When queried, the SDP server will example the attributes contained in this table to determine what (if any) attributes need to be returned to the requesting remote Bluetooth device.
+
+\lstinputlisting[float=tbph,caption={Example of a statically initialized SDP attribute table.},label={lst:sdpattributetable}]{./Figures/SDPAttributeTable.c}
+
+Finally for each service, a SDP entry node must be created. This master node is used to register the entire service and associated SDP attribute table with the SDP server. Listing \ref{lst:sdpentrynode} contains a sample SDP node.
+
+\lstinputlisting[float=tbph,caption={Example of a statically initialized SDP service entry node.},label={lst:sdpentrynode}]{./Figures/SDPEntryNode.c}
+
+
+The SDP server maintains a linked list of registered services internally, using the externally created SDP node entry instances. As services are registered and removed, these nodes are inserted and removed from the master SDP service list. When the SDP server is queried by a remote device, the server will transverse the list, looking for matching attributes to the request to return back to the initiating device.
 
 \FloatBarrier
 \subsubsection{HID Service}
@@ -225,7 +244,7 @@ When a new packet is received from the Bluetooth controller, this function must 
 	void Bluetooth_TickElapsed(BT_StackConfig_t* const StackState);
 \end{lstlisting}
 
-To manage timeouts, the stack must be updated reguarly of the passage of time using this function. Each time the configured \lstinline{BT_TICK_MS} tick period elapses, this function should be invoked to determine if any timeout conditions must be generated internally.
+To manage timeouts, the stack must be updated regularly of the passage of time using this function. Each time the configured \lstinline{BT_TICK_MS} tick period elapses, this function should be invoked to determine if any timeout conditions must be generated internally.
 
 \FloatBarrier
 \subsection{Events and Callbacks}

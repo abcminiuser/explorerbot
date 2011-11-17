@@ -195,18 +195,30 @@ Finally for each service, a SDP entry node must be created. This master node is 
 
 \lstinputlisting[float=tbph,caption={Example of a statically initialized SDP service entry node.},label={lst:sdpentrynode}]{./Figures/SDPEntryNode.c}
 
-
 The SDP server maintains a linked list of registered services internally, using the externally created SDP node entry instances. As services are registered and removed, these nodes are inserted and removed from the master SDP service list. When the SDP server is queried by a remote device, the server will transverse the list, looking for matching attributes to the request to return back to the initiating device.
-
-\FloatBarrier
-\subsubsection{HID Service}
-
-% TODO
 
 \FloatBarrier
 \subsubsection{RFCOMM Service}
 
-% TODO
+For virtual serial port functionality, the RFCOMM service was implemented as a server role; remote devices can then request logical channels to be opened in the service, so that data can be exchanged. The RFCOMM service requires the creation of a logical channel multiplexer; this allows a single physical RFCOMM channel to multiplex a collection of one or more data channels simultaneously. In the implementation of this service, the multiplexer was created using a static array of \lstinline{RFCOMM_Channel_t} structure instances, each of which represented a virtual channel on the multiplexer.
+
+As the RFCOMM service is not tied directly into the core Bluetooth stack, the channel object array is not associated with a specific Bluetooth stack, rather, the channel object pool is shared amongst all Bluetooth stack instances in the system (see Figure \ref{fig:rfcommchannelpool}). The first time the service is initialised, the entire channel object pool is reset; in subsequent initializations, only channel objects currently associated to the stack instance being reset will be deallocated. This allows the RFCOMM service resources to be shared with all Bluetooth instances, without having to have multiple per-instance channel pools. The maximum number of simultaneously open RFCOMM channels is set via the \lstinline{RFCOMM_MAX_OPEN_CHANNELS} configuration parameter.
+
+\begin{figure}[tbph]
+	\vspace{1em}
+	\centering
+		\includegraphics[width=140mm]{RFCOMMChannels.png}
+	\rule{35em}{0.5pt}
+	\caption[Diagram of the shared RFCOMM Channel pool.]{Diagram showing the RFCOMM channel object pool, shared amongst two Bluetooth stack instances.}
+	\label{fig:rfcommchannelpool}
+\end{figure}
+
+While newer versions of the RFCOMM service specification (i.e. versions 1.1 onwards) add a mandatory ``credit based'' flow control scheme to control the flow of data in and out of each logical channel, versions 1.0B and earlier do not contain these additions. As most RFCOMM clients are compatible with either version (due to the prevalence of devices based on the older specification) the implemented service was based on the earlier protocol version for simplicity.
+
+\FloatBarrier
+\subsubsection{HID Service}
+
+Due to time limitations of the project, the HID service implementation was extremely minimal; only a basic implementation of the HID client role was designed and coded, so that received packets could be decoded and used to control the robot. As a client role version of the SDP server was not attempted, the HID service was unable to query the remote HID device's service tables for the HID descriptor, used to determine how to decode received HID data packets. This unfortunately resulted in the final robot firmware needing to hard-code the packet interpretation for each device type based on the length of the received data packet.
 
 \section{Integration into User Applications}
 
@@ -272,4 +284,3 @@ In the project's Bluetooth stack, the names of the event and callback functions 
 A minimal set of callback and event functions (excluding the physical packet transport callback) required to link in the SDP and RFCOMM services to the core Bluetooth stack are shown in Listing \ref{lst:minbteventcallbacks}.
 
 \lstinputlisting[float=tbph,caption={Minimal set of event callbacks for SDP and RFCOMM service use.},label={lst:minbteventcallbacks}]{./Figures/MinimalBTEventCallbacks.c}
-

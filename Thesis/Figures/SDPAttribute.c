@@ -3,7 +3,7 @@ static const struct
 	SDP_ItemSequence8Bit_t UUIDList_Header;
 	struct
 	{
-		SDP_ItemUUID_t     SerialPortUUID;
+		SDP_ItemUUID_t SerialPortUUID;
 	} UUIDList;
 } ATTR_PACKED PROGMEM SerialPort_Attr_ServiceClassIDs =
 	{

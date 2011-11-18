@@ -149,7 +149,7 @@
 			struct
 			{
 				uint32_t Class; /**< Class of the local device, a mask of DEVICE_CLASS_* masks. */
-				char     PINCode[16]; /**< Pin code required to send or receive in order to authenticate with a remote device. */
+				char     PINCode[17]; /**< Pin code required to send or receive in order to authenticate with a remote device. */
 				char*    Name; /**< Name of the local Bluetooth device, up to 248 characters. */
 				bool     Discoverable; /**< Indicates if the stack should be discoverable to other devices during an Inquiry. */
 				void*    PacketBuffer; /**< Pointer to a location where packets are to be stored and retrieved from the physical adapter. */

@@ -13,7 +13,7 @@ The software layers implemented in the completed Bluetooth stack are shown in Fi
 	\centering
 		\includegraphics[width=100mm]{CompletedBluetoothStack.png}
 	\rule{35em}{0.5pt}
-	\caption[Diagram of the completed Bluetooth stack layers]{Diagram showing the completed layers of the Bluetooth stack.}
+	\caption[Completed Bluetooth stack layers]{Completed layers of the Bluetooth stack.}
 	\label{fig:completedbtstacklayers}
 \end{figure}
 
@@ -25,7 +25,6 @@ By default, only the Bluetooth stack core (giving the HCI and L2CAP layers) is i
 
 A number of design restrictions were placed on the development of the Bluetooth stack; these ensured that the completed stack remained modular, extensible and suitable for integration in a wide range of embedded systems with various capabilities and, conversely, limitations. As an unfortunate but expected side effect, a number of these restrictions complicated the software development process significantly.
 
-\FloatBarrier
 \subsection{No Heap Memory Allocations}
 
 The largest restriction placed on the stack design was the requirement of static and stack allocated memory allocation only --- no dynamic heap allocated memory was to be used via the usual \lstinline{malloc()} and \lstinline{free()} functions from the \texttt{libc} library. Most embedded environments contain three types of memory allocations:
@@ -40,28 +39,24 @@ However, for significantly memory constrained systems, heap allocations are gene
 
 The design of embedded stacks based on a no-heap-allocation strategy is a complex one, requiring certain trade-offs to be made. In the case of the Bluetooth stack presented here, a major side-effect of this decision was the need to fix the maximum number of simultaneous HCI device connections, L2CAP channel connections, and other queue- and list-like data structures within each instance of the stack. A major downside to this approach is the increased complexity of packet buffering and re-assembly, as fixed-size buffers must be used.
 
-\FloatBarrier
 \subsection{Endianness Correction}
 
 A second complication based on the physical constraints from the execution environment is the native endianness of the processor hardware, i.e., the order in which multiple-byte data values are stored and interpreted inside the processor registers. Depending on the execution architecture, data values may be represented in Big Endian (most significant byte at the lowest address) or Little Endian (least significant byte at the lowest address) format within the CPU. Data transmitted and received at the local device to remote device boundary must undergo a encoding conversion if the endianness of the source and sink do not match.
 
-In the case of the Bluetooth specification \cite{bt2p1specs}, this was further complicated by the various layers; some layers used Little Endian encoding for exchanged data, while others selected a Big Endian format. To perform the correct encoding/decoding on each platform, a set of conversion macros were implemented at points where multi-byte values were exchanged. This ensured that regardless of the native endian format of the architecture the stack is compiled to, multi-byte values will be interpreted correctly.
+In the case of the Bluetooth 2.1 specification \cite{bt2p1specs}, this was further complicated by the various layers; some layers used Little Endian encoding for exchanged data, while others selected a Big Endian format. To perform the correct encoding/decoding on each platform, a set of conversion macros were implemented at points where multi-byte values were exchanged. This ensured that regardless of the native endian format of the architecture the stack is compiled to, multi-byte values will be interpreted correctly.
 
-\FloatBarrier
 \subsection{Physical Transport Independence}
 
 As the Bluetooth 2.1 specification outlines a several possible physical transports \cite{bt2p1specs_transports} of HCI packets between the Bluetooth transceiver silicon and the application microcontroller, it was important that the physical transport layer be made independent from the rest of the stack. By making no assumptions about the form of transport protocol used to transfer packets to and from the attached Bluetooth silicon, the user application is free to implement their own transport mechanism without having to modify the internals of the stack. One instance of the stack may run across a USB connection to an attached Bluetooth module, while another may simultaneously connect to the microcontroller over a UART link.
 
-\FloatBarrier
 \subsection{Bluetooth Specification Compatibility}
 
 For a software stack to be suitable for general use, it must be designed around, and undergo a series of tests to ensure compatibility with, a particular version of the protocol specification. Without a fixed version of a specification, correctness of the finished stack and compatibility with other implementations of the same technology cannot be assured.
 
-As a \textit{compliant} stack would require extensive development and expensive certification procedures, the stack was instead aimed to be \textit{compatible} with version 2.1 of the Bluetooth specification. This subtle difference in the terminology indicates a large difference in the restrictions around the exact implementation. While a \textit{compliant} stack must be verified against the entire specification and rigorously tested to ensure exact conformance \cite{bt2p1specs_conformance}, a \textit{compatible} must only work with (most) other devices implementing their own compliant or compatible stacks of the same protocol version.
+As a \textit{compliant} stack would require extensive development and expensive certification procedures, the stack was instead aimed to be \textit{compatible} with version 2.1 of the Bluetooth specification. This subtle difference in the terminology indicates a large difference in the restrictions around the exact implementation. While a \textit{compliant} stack must be verified against the entire specification and rigorously tested to ensure exact conformance \cite{bt2p1specs_conformance}, a \textit{compatible} stack must only work with (most) other devices implementing their own compliant or compatible stacks of the same protocol version.
 
 In the future the stack could be made conformant if desired, however for the purposes of the project only protocol compatibility was tested.
 
-\FloatBarrier
 \subsection{Multiple Stack Instances}
 
 For maximum utility, the stack was designed to allow for multiple simultaneous stack instances. This was implemented to allow for unusual Bluetooth usage scenarios where more than one transceiver is desirable in a single system, either for security, wireless signal coverage or bandwidth reasons. Each physical transceiver is allocated a logical stack instance, capable of sustaining one or more simultaneous connections, and one or more logical channels between devices. This flexibility ensures that the majority of usage scenarios are covered by the stack's implementation.
@@ -70,17 +65,16 @@ Code-wise, the multiple stack functionality is implemented as a common first par
 
 \lstinputlisting[float=tbph,caption={Configuration example of a Bluetooth stack instance.},label={lst:stackconfig}]{./Figures/StackConfig.c}
 
-\FloatBarrier
 \subsection{Multiple Simultaneous Connections and Channels}
 
-The HCI connections and L2CAP channels for each stack instance are implemented as an pair of object pools within the \lstinline{BT_StackConfig_t} structure; L2CAP channel objects within the pool are shared amongst all established HCI connections --- for example, one HCI connection may use all the available L2CAP channels, or two connections may share the pool equally. This design decision allows the full pool of L2CAP channel objects to be used by the stack regardless of the HCI connection requesting them. Figure \ref{fig:stackobjectpools} illustrates a single stack instance with a typical usage scenario, with two of the stack's HCI objects containing established connections, each with several L2CAP channel objects associated with the connection from the channel object pool.
+The HCI connections and L2CAP channels for each stack instance are implemented as an pair of object pools within the \lstinline{BT_StackConfig_t} structure; L2CAP channel objects within the pool are shared amongst all established HCI connections --- for example, one HCI connection may use all the available L2CAP channels, or two connections may share the pool equally. This design decision allows the full pool of L2CAP channel objects to be used by the stack regardless of the HCI connection requesting them. Figure \ref{fig:stackobjectpools} illustrates a single stack instance with a typical usage scenario, with two of the stack's HCI connection objects containing established connections, each with several L2CAP channel objects associated with the connection from the channel object pool.
 
 \begin{figure}[tbph]
 	\vspace{1em}
 	\centering
 		\includegraphics[width=140mm]{StackObjectPools.png}
 	\rule{35em}{0.5pt}
-	\caption[Diagram of the Bluetooth stack instance object pools]{Diagram showing the HCI Connection and L2CAP object pools within a single Bluetooth stack instance.}
+	\caption[Bluetooth stack instance object pools]{HCI Connection and L2CAP object pools within a single instance of the Bluetooth stack.}
 	\label{fig:stackobjectpools}
 \end{figure}
 
@@ -88,7 +82,6 @@ To positively link one used L2CAP channel instance to its parent HCI connection 
 
 As the stack does not use heap-based dynamic memory allocation, this approach ensures that the stack contains similar levels of flexibility to a dynamically allocated object approach, with only a minimal overhead. The maximum size of each object pool is set via the Bluetooth Stack's \lstinline{BT_MAX_DEVICE_CONNECTIONS} and \lstinline{BT_MAX_LOGICAL_CHANNELS} configuration defines.
 
-\FloatBarrier
 \subsection{Minimal Memory Usage}
 
 While large embedded systems may run the completed Bluetooth stack, the design decisions made during its development were primarily aimed at ensuring the best performance and smallest footprint in severely resource-constrained microcontrollers. This resulted in the stack being optimised for small systems; only the minimal attributes required to establish and maintain connections are stored by the stack. One example of these optimizations is in the event system (described in detail later in this chapter) implementation: rather than implementing a callback registration system for each event, named callbacks are used instead. Various portions of the Bluetooth stack expect the user application to provide callback and event functions using names and prototypes defined in the stack header files.
@@ -99,7 +92,6 @@ This named callback function system reduces the memory footprint of the stack, a
 
 In this section, the design and implementation of each individual software layer that comprises the complete Bluetooth stack is described in detail.
 
-\FloatBarrier
 \subsection{Physical Transport}
 
 While not part of the completed stack proper, a functional USB transport layer was completed for the project as an sample implementation in the user application, and hooked into the stack via the provided APIs. The Bluetooth USB transport \cite{bt2p1specs_usbtransport} requires the use of four logical USB communication channels (``pipes'' in USB terminology) to the USB Bluetooth adapter; the mandatory control pipe for HCI commands, a pair of \textit{Bulk} type pipes for data packets to and from the controller, and an \textit{Interrupt} pipe for HCI event notifications.
@@ -109,13 +101,12 @@ While not part of the completed stack proper, a functional USB transport layer w
 	\centering
 		\includegraphics[width=100mm]{BluetoothUSBTransport.png}
 	\rule{35em}{0.5pt}
-	\caption[Diagram of the logical pipes within the Bluetooth USB transport.]{Diagram showing the logical USB pipes within the Bluetooth USB physical transport.}
+	\caption[Logical USB pipes within the Bluetooth USB transport]{Logical USB pipes within the Bluetooth USB physical transport.}
 	\label{fig:btusbtransport}
 \end{figure}
 
 Data and event packets received from the USB Bluetooth adapter's logical pipes are written into the packet buffer indicated in the stack instance configuration, and dispatched to the stack via the \lstinline{Bluetooth_ProcessPacket()} function. There they are processed internally via the Bluetooth stack, moving up the HCI, L2CAP and user-provided service layers as appropriate. The matching \lstinline{CALLBACK_Bluetooth_SendPacket()} callback function from the stack implements the data and HCI control packet transmission code back to the adapter, sourcing the generated packets from the same packet buffer location.
 
-\FloatBarrier
 \subsection{HCI Layer}
 
 Sitting at the lowest level of the core stack, the HCI layer performs the main role of managing connections between Bluetooth devices, as well as processing events from the Bluetooth controller, and data encapsulation/decapsulation for transport over the Bluetooth link. To perform these tasks, the HCI layer is invoked each time a data packet is received or ready to be sent, an event is received from the controller, or during idle periods of the user application for general connection management.
@@ -136,36 +127,34 @@ Inside the HCI layer, received data packets are stripped of their HCI layer head
 
 As an implementation-specific detail, HCI connection destruction events (when an established HCI connection is disconnected) are notified to the L2CAP layer via the internal function \lstinline{Bluetooth_L2CAP_NotifyHCIDisconnection()}. This ensures that all associated L2CAP channels are correctly destructed once their host HCI connection is destroyed, to prevent synchronisation issues and to ensure that the L2CAP object pool is freed of any dead channel objects as soon as possible to prevent unnecessary pool exhaustion.
 
-\FloatBarrier
 \subsection{L2CAP Layer}
 
 The L2CAP layer, responsible for managing logical channels between devices for an established connection, was implemented in an unusual manner; due to uncertainties of the user application packet buffering scheme, the stack is not able to guarantee that packets to be sent are buffered correctly. As the L2CAP layer is used to establish communication channels between devices, it is essential that any issued channel configuration commands are delivered correctly to the remote device; delays in the channel negotiation process may cause communications to and from a remote device to fail. As a result, the L2CAP layer implemented a special event buffering scheme to ensure the reliable issuing of responses to remote devices even if a packet fails to send due to the controller's internal buffers becoming full.
 
-As L2CAP signalling packets (identifiable via their destination channel ID of \texttt{0x0001}, the defined ID for \lstinline{BT_CHANNEL_SIGNALING} packets) are received by the L2CAP layer, the request is processed and an event object created in the L2CAP Event Queue. This queue, a fixed length queue of a size configured by the stack's \lstinline{BT_MAX_QUEUED_L2CAP_EVENTS} configuration parameter, stores the events in a First-In, First-Out ordered manner within each stack instance. The implementation of this queue is a simple flat array of event structure elements, where inserted items are appended to the end of the last allocated object in the array (see Figure \ref{fig:l2capeventinsertion}). A separate \lstinline{PendingEvents} property in the L2CAP state structure to track the number of queued events.
+As L2CAP signalling packets (identifiable via their destination channel ID of \texttt{0x0001}, the defined ID for \lstinline{BT_CHANNEL_SIGNALING} packets) are received by the L2CAP layer, the request is processed and an event object created in the L2CAP Event Queue. This queue, a fixed length queue of a size configured by the stack's \lstinline{BT_MAX_QUEUED_L2CAP_EVENTS} configuration parameter, stores the events in a First-In, First-Out ordered manner within each stack instance. The implementation of this queue is a simple flat array of event structure elements, where inserted items are appended to the end of the last allocated object in the array (see Figure \ref{fig:l2capeventinsertion}). A separate \lstinline{PendingEvents} property in the L2CAP state structure is used to track the number of queued events.
 
 \begin{figure}[tbph]
 	\vspace{1em}
 	\centering
 		\includegraphics[width=140mm]{L2CAPEventInsertion.png}
 	\rule{35em}{0.5pt}
-	\caption[L2CAP Event Object Queue Insertion]{Diagram showing the insertion of a new L2CAP event into the tail of the queue.}
+	\caption[L2CAP event object queue insertion]{Insertion of a new L2CAP event into the tail of the object queue.}
 	\label{fig:l2capeventinsertion}
 \end{figure}
 
-Event queue removal is performed by the moving of all queue items above the head of the list leftwards in the array, to shuffle all entries one place towards the head of the queue (see Figure \ref{fig:l2capeventremoval}). L2CAP event objects are only dequeued once the transport layer confirms the transmission of the signalling packet request to the remote device. In this manner, L2CAP events maintain a reliable transport regardless of the physical transport's abilitiy to buffer excess packets.
+Event queue removal is performed by the moving of all queue items above the head of the list leftwards in the array, to shuffle all entries one place towards the head of the queue (see Figure \ref{fig:l2capeventremoval}). L2CAP event objects are only dequeued once the transport layer confirms the transmission of the signalling packet request to the remote device. In this manner, L2CAP events maintain a reliable transport regardless of the physical transport's ability to buffer excess packets.
 
 \begin{figure}[tbph]
 	\vspace{1em}
 	\centering
 		\includegraphics[width=140mm]{L2CAPEventRemoval.png}
 	\rule{35em}{0.5pt}
-	\caption[L2CAP Event Object Queue Removal]{Diagram showing the removal of the L2CAP event queue head item.}
+	\caption[L2CAP event object queue removal]{Removal of the L2CAP event queue head item.}
 	\label{fig:l2capeventremoval}
 \end{figure}
 
 If too many L2CAP events are attempted to be added to the queue, the new event allocation request will fail. This scheme will preserve existing events within the queue at the expense of dropping newer events until space becomes available. Despite this limitation, with an adequate queue size (of approximately 10 items for most applications) the queue limit should never be exceeded under normal circumstances.
 
-\FloatBarrier
 \subsection{Bluetooth Services}
 
 The Bluetooth services designed as part of the project were implemented separately to the stack core; they are designed to hook into the stack APIs if desired by the user application, however they are entirely separate entities which are not required to be built with the stack core if not needed.
@@ -174,7 +163,6 @@ Bluetooth services can implement two possible roles; a \textit{client} role, or 
 
 Each of the services designed for the stack use a common set of interface APIs; functions are provided to the user application to notify the service of channel open/close events, data packet reception, and other such common events. In addition, each service may or may not expose a set of service-specific functions and callbacks, which can be used to interact with the service's functionality from the user application.
 
-\FloatBarrier
 \subsubsection{SDP Service}
 
 For service discovery to take place between devices, each device must implement the Service Discovery Protocol service \cite{bt2p1specs_sdp}. The SDP service exposes the capabilities and characteristics of other services within the device, allowing remote systems to query the server to determine what services a device implements, and their associated properties. Other services may register themselves with the SDP service within a device, so that remote Bluetooth devices may detect the existence of the second service and make use of it if desired.
@@ -187,7 +175,7 @@ An example of such a static SDP attribute record is shown in Listing \ref{lst:sd
 
 \lstinputlisting[float=tbph,caption={Example of a statically initialized SDP attribute.},label={lst:sdpattribute}]{./Figures/SDPAttribute.c}
 
-In addition to each individual SDP attribute structure, a single Service Attribute Table must be built for each service requiring SDP registration. Listing \ref{lst:sdpattributetable} shows an example of a service's complete attribute table. When queried, the SDP server will example the attributes contained in this table to determine what (if any) attributes need to be returned to the requesting remote Bluetooth device.
+In addition to each individual SDP attribute structure, a single Service Attribute Table must be built for each service requiring SDP registration. Listing \ref{lst:sdpattributetable} shows an example of a service's complete attribute table. When queried, the SDP server will examine the attributes contained in this table to determine what (if any) attributes need to be returned to the requesting remote Bluetooth device.
 
 \lstinputlisting[float=tbph,caption={Example of a statically initialized SDP attribute table.},label={lst:sdpattributetable}]{./Figures/SDPAttributeTable.c}
 
@@ -197,25 +185,23 @@ Finally for each service, a SDP entry node must be created. This master node is 
 
 The SDP server maintains a linked list of registered services internally, using the externally created SDP node entry instances. As services are registered and removed, these nodes are inserted and removed from the master SDP service list. When the SDP server is queried by a remote device, the server will transverse the list, looking for matching attributes to the request to return back to the initiating device.
 
-\FloatBarrier
 \subsubsection{RFCOMM Service}
 
-For virtual serial port functionality, the RFCOMM service was implemented as a server role; remote devices can then request logical channels to be opened in the service, so that data can be exchanged. The RFCOMM service requires the creation of a logical channel multiplexer; this allows a single physical L2CAP channel to multiplex a collection of one or more RFCOMM data channels simultaneously. In the implementation of this service, the multiplexer was created using a static array of \lstinline{RFCOMM_Channel_t} structure instances, each of which represented a virtual channel on the multiplexer.
+For virtual serial port functionality, the RFCOMM service was implemented as a server role; remote devices can then request logical channels to be opened in the service, so that data can be exchanged. The RFCOMM service requires the creation of a logical channel multiplexer; this allows a single established L2CAP channel to multiplex a collection of one or more RFCOMM data channels simultaneously. In the implementation of this service, the multiplexer was created using a static array of \lstinline{RFCOMM_Channel_t} structure instances, each of which represented a virtual channel on the multiplexer.
 
-As the RFCOMM service is not tied directly into the core Bluetooth stack, the channel object array is not associated with a specific Bluetooth stack, rather, the channel object pool is shared amongst all Bluetooth stack instances in the system (see Figure \ref{fig:rfcommchannelpool}). The first time the service is initialised, the entire channel object pool is reset; in subsequent initializations, only channel objects currently associated to the stack instance being reset will be deallocated. This allows the RFCOMM service resources to be shared with all Bluetooth instances, without having to have multiple per-instance channel pools. The maximum number of simultaneously open RFCOMM channels is set via the \lstinline{RFCOMM_MAX_OPEN_CHANNELS} configuration parameter.
+As the RFCOMM service is not tied directly into the core Bluetooth stack, the channel object array is not associated with a specific Bluetooth stack instance, rather, the channel object pool is shared amongst all Bluetooth stack instances in the system (see Figure \ref{fig:rfcommchannelpool}). The first time the service is initialised, the entire channel object pool is reset; in subsequent initializations, only channel objects currently associated to the stack instance being reset will be deallocated. This allows the RFCOMM service resources to be shared with all Bluetooth instances, without having to have multiple per-instance channel pools. The maximum number of simultaneously open RFCOMM channels is set via the \lstinline{RFCOMM_MAX_OPEN_CHANNELS} configuration parameter.
 
 \begin{figure}[tbph]
 	\vspace{1em}
 	\centering
 		\includegraphics[width=140mm]{RFCOMMChannels.png}
 	\rule{35em}{0.5pt}
-	\caption[Diagram of the shared RFCOMM Channel pool.]{Diagram showing the RFCOMM channel object pool, shared amongst two Bluetooth stack instances.}
+	\caption[Shared RFCOMM channel pool]{RFCOMM channel object pool, shared amongst two Bluetooth stack instances.}
 	\label{fig:rfcommchannelpool}
 \end{figure}
 
 While newer versions of the RFCOMM service specification (i.e. versions 1.1 onwards) add a mandatory ``credit based'' flow control scheme to control the flow of data in and out of each logical channel, versions 1.0B and earlier do not contain these additions. As most RFCOMM clients are compatible with either version (due to the prevalence of devices based on the older specification) the implemented service was based on the earlier protocol version \cite{rfcommspecs} for simplicity.
 
-\FloatBarrier
 \subsubsection{HID Service}
 
 Due to time limitations of the project, the HID service implementation was extremely minimal; only a basic implementation of the HID 1.0 profile \cite{bthidspecs} was designed and coded, so that received packets could be decoded and used to control the robot. As a client role version of the SDP server was not attempted, the HID service was unable to query the remote HID device's service tables for the HID descriptor, used to determine how to decode received HID data packets. This unfortunately resulted in the final robot firmware needing to hard-code the packet interpretation for each device type based on the length of the received data packet.
@@ -224,7 +210,6 @@ Due to time limitations of the project, the HID service implementation was extre
 
 In order to implement the Bluetooth stack into a user application, the entire base stack (excluding the services) must be added to the project for compilation. The user configuration and interface to the stack is made via the header file \texttt{BluetoothCommon.h}. User applications attempting to use the stack must be compiled using the C99 language specification, and a GCC compiler derivative.
 
-\FloatBarrier
 \subsection{Management Functions}
 
 The following functions must be executed by the user application to operate the stack correctly.
@@ -258,7 +243,6 @@ When a new packet is received from the Bluetooth controller, this function must 
 
 To manage timeouts, the stack must be updated regularly of the passage of time using this function. Each time the configured \lstinline{BT_TICK_MS} tick period elapses, this function should be invoked to determine if any timeout conditions must be generated internally.
 
-\FloatBarrier
 \subsection{Events and Callbacks}
 
 In response to conditions set within the stack internals, one or more event or callback functions may be invoked. These functions, implemented by the user application, allow the system to respond to events in a synchronous manner as they occur within the stack, and/or indicate to the stack the appropriate action to take when a decision is required. The user-implemented functions are split into two categories:
@@ -275,7 +259,7 @@ Event and callback invocations are generated by the stack layers as required. Fi
 	\centering
 		\includegraphics[width=140mm]{MessageResponseCallback.png}
 	\rule{35em}{0.5pt}
-	\caption[Diagram of the Message, Response and Callback sequence]{Diagram showing the Message, Response and Callback sequence of a typical software stack when passing a message and response through several intermediate layers.}
+	\caption[Message, response and callback sequence]{Message, Response and Callback sequence of a typical software stack when passing a message and response through several intermediate layers.}
 	\label{fig:messageresponsecallback}
 \end{figure}
 

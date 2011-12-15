@@ -133,6 +133,7 @@ void LCD_Init(bool AutoBacklight)
 	LCD_WriteByte(0x08);
 	LCD_WriteByte(0x01);
 	LCD_WriteByte(0x04);
+	LCD_WriteByte(0x28);
 	LCD_WriteByte(0x0C);
 
 	LCD_CTRL_PORT |=  LCD_RS;

@@ -29,7 +29,7 @@
  *  \param[in]      RemoteBDADDR  Bluetooth device address of the remote device to search for, \c NULL to search by link handle.
  *  \param[in]      Handle        If \c RemoteBDADDR is \c NULL, the link handle to search for.
  *
- *  \return Pointer to the device connection handle if one was found, NULL otherwise.
+ *  \return Pointer to the device connection handle if one was found, \c NULL otherwise.
  */
 BT_HCI_Connection_t* const Bluetooth_HCI_FindConnection(BT_StackConfig_t* const StackState,
                                                         const uint8_t* const RemoteBDADDR,
@@ -40,7 +40,7 @@ BT_HCI_Connection_t* const Bluetooth_HCI_FindConnection(BT_StackConfig_t* const 
 	{
 		BT_HCI_Connection_t* Connection = &StackState->State.HCI.Connections[i];
 		
-		/* Free connection entries are inactive must be skipped */
+		/* Free connection entries are inactive and must be skipped */
 		if (Connection->State == HCI_CONSTATE_Closed)
 		  continue;
 
@@ -66,7 +66,7 @@ BT_HCI_Connection_t* const Bluetooth_HCI_FindConnection(BT_StackConfig_t* const 
  *  \param[in]      RemoteBDADDR  Bluetooth device address of the remote device.
  *  \param[in]      LinkType      Type of Bluetooth link, a value from \ref BT_LinkTypes_t.
  *
- *  \return Pointer to the new connection handle if one was created, NULL otherwise.
+ *  \return Pointer to the new connection handle if one was created, \c NULL otherwise.
  */
 static BT_HCI_Connection_t* const Bluetooth_HCI_NewConnection(BT_StackConfig_t* const StackState,
                                                               const uint8_t* const RemoteBDADDR,

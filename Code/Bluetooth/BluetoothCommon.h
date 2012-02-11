@@ -111,7 +111,7 @@
 			uint8_t  Identifier; /**< L2CAP signalling identifier for the given event's response (if any). */
 			uint16_t LocalNumber; /**< Local L2CAP channel related to the event (if any). */
 			uint16_t RemoteNumber; /**< Remote L2CAP channel related to the event (if any). */
-			uint8_t  Result; /**< Result of the event (if any). */
+			uint16_t Result; /**< Result of the event (if any). */
 		} BT_L2CAP_Event_t;
 
 		/** Type define for a Bluetooth HCI connection information structure.  This structure contains all the relevant

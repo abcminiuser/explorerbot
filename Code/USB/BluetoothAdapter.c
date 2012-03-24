@@ -92,7 +92,7 @@ bool BluetoothAdapter_ConfigurePipes(USB_Descriptor_Device_t* const DeviceDescri
 	if (!(ConfigDescriptorSize))
 	  return false;
 
-	while (!(DataINEndpoint) || !(DataOUTEndpoint))
+	while (!(DataINEndpoint) || !(DataOUTEndpoint) !(EventsEndpoint))
 	{
 		/* Get the next Bluetooth interface's data endpoint descriptor */
 		if (USB_GetNextDescriptorComp(&ConfigDescriptorSize, &ConfigDescriptorData,
@@ -108,10 +108,12 @@ bool BluetoothAdapter_ConfigurePipes(USB_Descriptor_Device_t* const DeviceDescri
 		/* If the endpoint is a IN type endpoint */
 		if ((EndpointData->EndpointAddress & ENDPOINT_DIR_MASK) == ENDPOINT_DIR_IN)
 		{
+			uint8_t EndpointType = (EndpointData->Attributes & EP_TYPE_MASK);
+			
 			/* Check if the found endpoint is a interrupt or bulk type descriptor */
-			if ((EndpointData->Attributes & EP_TYPE_MASK) == EP_TYPE_INTERRUPT)
+			if (EndpointType == EP_TYPE_INTERRUPT)
 			  EventsEndpoint = EndpointData;
-			else
+			else if (EndpointType == EP_TYPE_BULK)
 			  DataINEndpoint = EndpointData;
 		}
 		else

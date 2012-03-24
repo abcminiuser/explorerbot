@@ -105,20 +105,21 @@ bool BluetoothAdapter_ConfigurePipes(USB_Descriptor_Device_t* const DeviceDescri
 		/* Retrieve the endpoint address from the endpoint descriptor */
 		USB_Descriptor_Endpoint_t* EndpointData = DESCRIPTOR_PCAST(ConfigDescriptorData, USB_Descriptor_Endpoint_t);
 
+		uint8_t EndpointType = (EndpointData->Attributes & EP_TYPE_MASK);
+
 		/* If the endpoint is a IN type endpoint */
 		if ((EndpointData->EndpointAddress & ENDPOINT_DIR_MASK) == ENDPOINT_DIR_IN)
-		{
-			uint8_t EndpointType = (EndpointData->Attributes & EP_TYPE_MASK);
-			
+		{	
 			/* Check if the found endpoint is a interrupt or bulk type descriptor */
-			if (EndpointType == EP_TYPE_INTERRUPT)
-			  EventsEndpoint = EndpointData;
-			else if (EndpointType == EP_TYPE_BULK)
+			if (EndpointType == EP_TYPE_BULK)
 			  DataINEndpoint = EndpointData;
+			else if (EndpointType == EP_TYPE_INTERRUPT)
+			  EventsEndpoint = EndpointData;
 		}
 		else
 		{
-			DataOUTEndpoint = EndpointData;
+			if (EndpointType == EP_TYPE_BULK)
+			  DataOUTEndpoint = EndpointData;
 		}
 	}
 

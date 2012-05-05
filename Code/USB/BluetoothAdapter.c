@@ -92,7 +92,7 @@ bool BluetoothAdapter_ConfigurePipes(USB_Descriptor_Device_t* const DeviceDescri
 	if (!(ConfigDescriptorSize))
 	  return false;
 
-	while (!(DataINEndpoint) || !(DataOUTEndpoint) !(EventsEndpoint))
+	while (!(DataINEndpoint) || !(DataOUTEndpoint) || !(EventsEndpoint))
 	{
 		/* Get the next Bluetooth interface's data endpoint descriptor */
 		if (USB_GetNextDescriptorComp(&ConfigDescriptorSize, &ConfigDescriptorData,

@@ -184,6 +184,24 @@ bool MassStorage_PostConfiguration(void)
 	if (!(Disk_MS_Interface.State.IsActive))
 	  return true;
 
+	uint8_t MaxLUNIndex;
+	if (MS_Host_GetMaxLUN(&Disk_MS_Interface, &MaxLUNIndex))
+	  return false;
+
+	if (MS_Host_ResetMSInterface(&Disk_MS_Interface))
+	  return false;
+
+	SCSI_Request_Sense_Response_t SenseData;
+	if (MS_Host_RequestSense(&Disk_MS_Interface, 0, &SenseData) != 0)
+	  return false;
+
+	if (MS_Host_PreventAllowMediumRemoval(&Disk_MS_Interface, 0, true))
+	  return false;
+
+	SCSI_Inquiry_Response_t InquiryData;
+	if (MS_Host_GetInquiryData(&Disk_MS_Interface, 0, &InquiryData))
+	  return false;
+
 	f_mount(0, &MassStorage_DiskFATState);	
 
 	/* Try to read in the data file containing the remote Bluetooth device address to connect to on demand */

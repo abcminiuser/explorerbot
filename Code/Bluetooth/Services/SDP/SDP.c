@@ -48,7 +48,7 @@ void SDP_RegisterService(SDP_ServiceEntry_t* const ServiceEntry)
 
 	/* Insert new service as the new tail node */
 	CurrentService->NextService = ServiceEntry;
-	
+
 	/* Make sure new node indicates that it is the tail node */
 	ServiceEntry->NextService   = NULL;
 }
@@ -327,7 +327,7 @@ static bool SDP_SearchServiceTable(const SDP_ServiceEntry_t* const ServiceEntry,
                                    const uint8_t TotalUUIDs)
 {
 	uint16_t UUIDMatchFlags = 0;
-	
+
 	/* Search through the current attribute table, checking each attribute value for UUID matches */\
 	for (uint8_t i = 0; i < ServiceEntry->TotalTableAttributes; i++)
 	{
@@ -453,7 +453,7 @@ static void SDP_ServiceSearch(BT_StackConfig_t* const StackState,
 	/* Read search UUID list sequence header and obtain its data size and a pointer to start of the data */
 	uint8_t  UUIDList[12][UUID_SIZE_BYTES];
 	uint8_t  TotalUUIDs          = SDP_GetUUIDList(UUIDList, &CurrParameterPos);
-		
+
 	/* Read maximum service count for the response */
 	uint16_t MaximumServiceCount = SDP_ReadData16(&CurrParameterPos);
 
@@ -480,7 +480,7 @@ static void SDP_ServiceSearch(BT_StackConfig_t* const StackState,
 		/* Ignore service nodes registered to other stacks */
 		if (CurrentService->Stack && (CurrentService->Stack != StackState))
 		  continue;
-	
+
 		/* Search the current SDP service attribute table for the given UUIDs */
 		if (SDP_SearchServiceTable(CurrentService, UUIDList, TotalUUIDs))
 		{
@@ -491,15 +491,15 @@ static void SDP_ServiceSearch(BT_StackConfig_t* const StackState,
 			uint8_t AttrHeaderSize;
 			uint8_t AttrSize = SDP_GetLocalAttributeContainerSize(AttributeValue, &AttrHeaderSize);
 			memcpy_P(CurrResponsePos, AttributeValue + AttrHeaderSize, AttrSize);
-			CurrResponsePos += AttrHeaderSize + AttrSize;
+			CurrResponsePos += AttrSize;
 
 			AddedServiceHandles++;
 
 			if (AddedServiceHandles == MaximumServiceCount)
 			  break;
 		}
-		
-		/* Select next registered service in the service table list */	
+
+		/* Select next registered service in the service table list */
 		CurrentService = CurrentService->NextService;
 	}
 
@@ -532,11 +532,11 @@ static void SDP_ServiceAttribute(BT_StackConfig_t* const StackState,
 
 	/* Read maximum attribute size byte count for the response */
 	uint16_t MaximumAttributeSize = SDP_ReadData16(&CurrParameterPos);
-	
+
 	/* Read search Attribute list sequence header and obtain its data size and a pointer to start of the data */
 	uint16_t AttributeList[8][2];
 	uint8_t  TotalAttributes      = SDP_GetAttributeList(AttributeList, &CurrParameterPos);
-	
+
 	/* Read continuation state value from the client */
 	uint8_t  ContinuationState    = SDP_ReadData8(&CurrParameterPos);
 
@@ -581,8 +581,8 @@ static void SDP_ServiceAttribute(BT_StackConfig_t* const StackState,
 				break;
 			}
 		}
-		
-		/* Select next registered service in the service table list */	
+
+		/* Select next registered service in the service table list */
 		CurrentService = CurrentService->NextService;
 	}
 
@@ -613,11 +613,11 @@ static void SDP_ServiceSearchAttribute(BT_StackConfig_t* const StackState,
 
 	/* Read maximum attribute size byte count for the response */
 	uint16_t MaximumAttributeSize = SDP_ReadData16(&CurrParameterPos);
-	
+
 	/* Read search Attribute list sequence header and obtain its data size and a pointer to start of the data */
 	uint16_t AttributeList[8][2];
 	uint8_t  TotalAttributes      = SDP_GetAttributeList(AttributeList, &CurrParameterPos);
-	
+
 	/* Read continuation state value from the client */
 	uint8_t  ContinuationState    = SDP_ReadData8(&CurrParameterPos);
 
@@ -629,7 +629,7 @@ static void SDP_ServiceSearchAttribute(BT_StackConfig_t* const StackState,
 	} ATTR_PACKED ResponsePacket;
 
 	void* CurrResponsePos = ResponsePacket.ResponseData;
-	
+
 	/* Clamp the maximum attribute size to the size of the allocated buffer */
 	if (MaximumAttributeSize > sizeof(ResponsePacket.ResponseData))
 	  MaximumAttributeSize = sizeof(ResponsePacket.ResponseData);
@@ -647,16 +647,16 @@ static void SDP_ServiceSearchAttribute(BT_StackConfig_t* const StackState,
 			/* Add the listed attributes for the found UUID to the response */
 			*RespAttributeListSize += SDP_AddListedAttributesToResponse(CurrentService, AttributeList, TotalAttributes, &CurrResponsePos);
 		}
-		
-		/* Select next registered service in the service table list */	
+
+		/* Select next registered service in the service table list */
 		CurrentService = CurrentService->NextService;
 	}
 
 	*RespAttributeListSize = cpu_to_be16(*RespAttributeListSize);
-	
+
 	/* Write continuation state - always zero */
 	SDP_WriteData8(&CurrResponsePos, 0);
-	
+
 	/* Set the total response list size to the size of the outer container plus its header size and continuation state */
 	ResponsePacket.AttributeListByteCount    = cpu_to_be16((uintptr_t)CurrResponsePos - (uintptr_t)ResponsePacket.ResponseData - sizeof(uint8_t));
 
@@ -676,7 +676,7 @@ void SDP_Init(BT_StackConfig_t* const StackState)
 	{
 		SDP_ServiceEntry_t* PreviousService = NULL;
 		SDP_ServiceEntry_t* CurrentService  = RegisteredServices;
-		
+
 		/* Search through the registered service list nodes */
 		while (CurrentService != NULL)
 		{
@@ -689,7 +689,7 @@ void SDP_Init(BT_StackConfig_t* const StackState)
 				else
 				  PreviousService->NextService = CurrentService->NextService;
 			}
-			
+
 			/* Save reference to previous node for node removal, transverse linked list to next registered service */
 			PreviousService = CurrentService;
 			CurrentService  = CurrentService->NextService;
@@ -705,13 +705,13 @@ void SDP_Manage(BT_StackConfig_t* const StackState)
 void SDP_ChannelOpened(BT_StackConfig_t* const StackState,
                        BT_L2CAP_Channel_t* const Channel)
 {
-	
+
 }
 
 void SDP_ChannelClosed(BT_StackConfig_t* const StackState,
                        BT_L2CAP_Channel_t* const Channel)
 {
-	
+
 }
 
 void SDP_ProcessPacket(BT_StackConfig_t* const StackState,
@@ -722,9 +722,9 @@ void SDP_ProcessPacket(BT_StackConfig_t* const StackState,
 	/* Ensure correct channel PSM before processing the data */
 	if (Channel->PSM != CHANNEL_PSM_SDP)
 	  return;
-	
+
 	BT_SDP_PDUHeader_t* SDPHeader = (BT_SDP_PDUHeader_t*)Data;
-	
+
 	/* Dispatch to the correct processing routine for the given SDP packet type */
 	switch (SDPHeader->PDU)
 	{

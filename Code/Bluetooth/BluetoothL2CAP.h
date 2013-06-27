@@ -1,5 +1,5 @@
 /*
-            Bluetooth Stack
+             Bluetooth Robot
      Copyright (C) Dean Camera, 2011.
 
   dean [at] fourwalledcubicle [dot] com
@@ -9,7 +9,23 @@
 /*
   Copyright 2011  Dean Camera (dean [at] fourwalledcubicle [dot] com)
 
-  All rights reserved.
+  Permission to use, copy, modify, distribute, and sell this
+  software and its documentation for any purpose is hereby granted
+  without fee, provided that the above copyright notice appear in
+  all copies and that both that the copyright notice and this
+  permission notice and warranty disclaimer appear in supporting
+  documentation, and that the name of the author not be used in
+  advertising or publicity pertaining to distribution of the
+  software without specific, written prior permission.
+
+  The author disclaim all warranties with regard to this
+  software, including all implied warranties of merchantability
+  and fitness.  In no event shall the author be liable for any
+  special, indirect or consequential damages or any damages
+  whatsoever resulting from loss of use, data or profits, whether
+  in an action of contract, negligence or other tortious action,
+  arising out of or in connection with the use or performance of
+  this software.
 */
 
 /** \file
@@ -23,7 +39,7 @@
 	/* Includes: */
 		#include <stdbool.h>
 		#include <stdint.h>
-		
+
 		#include "BluetoothCommon.h"
 		#include "BluetoothL2CAPPacketTypes.h"
 		#include "BluetoothL2CAPSignalCodes.h"
@@ -38,7 +54,7 @@
 
 		/** Bluetooth specification defined channel number for connectionless data. */
 		#define BT_CHANNEL_CONNECTIONLESS         0x0002
-		
+
 	/* Enums: */
 		/** Enum for the possible states for a Bluetooth L2CAP channel. */
 		enum BT_L2CAP_ChannelStates_t
@@ -61,7 +77,7 @@
 			L2CAP_CHANSTATE_Open                  = 9, /**< Channel is open and ready to send or receive data */
 			L2CAP_CHANSTATE_WaitDisconnectRsp     = 10, /**< A disconnection request has been sent, but not yet acknowledged. */
 		};
-		
+
 	/* Function Prototypes: */
 		void Bluetooth_L2CAP_NotifyHCIDisconnection(BT_StackConfig_t* const StackState,
 		                                            const uint16_t ConnectionHandle);

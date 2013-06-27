@@ -1,5 +1,5 @@
 /*
-            Bluetooth Stack
+             Bluetooth Robot
      Copyright (C) Dean Camera, 2011.
 
   dean [at] fourwalledcubicle [dot] com
@@ -9,7 +9,23 @@
 /*
   Copyright 2011  Dean Camera (dean [at] fourwalledcubicle [dot] com)
 
-  All rights reserved.
+  Permission to use, copy, modify, distribute, and sell this
+  software and its documentation for any purpose is hereby granted
+  without fee, provided that the above copyright notice appear in
+  all copies and that both that the copyright notice and this
+  permission notice and warranty disclaimer appear in supporting
+  documentation, and that the name of the author not be used in
+  advertising or publicity pertaining to distribution of the
+  software without specific, written prior permission.
+
+  The author disclaim all warranties with regard to this
+  software, including all implied warranties of merchantability
+  and fitness.  In no event shall the author be liable for any
+  special, indirect or consequential damages or any damages
+  whatsoever resulting from loss of use, data or profits, whether
+  in an action of contract, negligence or other tortious action,
+  arising out of or in connection with the use or performance of
+  this software.
 */
 
 /** \file
@@ -48,7 +64,7 @@
 		#define SDP_ATTRIBUTE_ID_SERVICENAME            0x0100
 		#define SDP_ATTRIBUTE_ID_SERVICEDESCRIPTION     0x0101
 		//@}
-		
+
 		/** \name Convenience macros to encode SDP service attribute values for a given type and/or size. */
 		//@{
 		#define SDP_ITEM8BIT(Type, Value)               {(SDP_DATASIZE_8Bit   | (Type)), Value}
@@ -103,7 +119,7 @@
 			uint16_t D; /**< Bits 64-79 of the UUID. */
 			uint8_t  E[6]; /**< Bits 80-127 of the UUID. */
 		} ATTR_PACKED UUID_t;
-		
+
 		/** Structure for the association of attribute ID values to an attribute value in FLASH. A table of these
 		 *  structures can then be built up for each supported UUID service within the device.
 		 */
@@ -171,5 +187,5 @@
 			uint8_t  Header; /**< Data Element header, should be (SDP_DATATYPE_Sequence | SDP_DATASIZE_Variable16Bit). */
 			uint16_t Size; /**< Size of the inner Data Element sequence. */
 		} ATTR_PACKED SDP_ItemSequence16Bit_t;
-		
+
 #endif

@@ -1,5 +1,5 @@
 /*
-            Bluetooth Stack
+             Bluetooth Robot
      Copyright (C) Dean Camera, 2011.
 
   dean [at] fourwalledcubicle [dot] com
@@ -9,7 +9,23 @@
 /*
   Copyright 2011  Dean Camera (dean [at] fourwalledcubicle [dot] com)
 
-  All rights reserved.
+  Permission to use, copy, modify, distribute, and sell this
+  software and its documentation for any purpose is hereby granted
+  without fee, provided that the above copyright notice appear in
+  all copies and that both that the copyright notice and this
+  permission notice and warranty disclaimer appear in supporting
+  documentation, and that the name of the author not be used in
+  advertising or publicity pertaining to distribution of the
+  software without specific, written prior permission.
+
+  The author disclaim all warranties with regard to this
+  software, including all implied warranties of merchantability
+  and fitness.  In no event shall the author be liable for any
+  special, indirect or consequential damages or any damages
+  whatsoever resulting from loss of use, data or profits, whether
+  in an action of contract, negligence or other tortious action,
+  arising out of or in connection with the use or performance of
+  this software.
 */
 
 /** \file
@@ -44,7 +60,7 @@
 		#define RFCOMM_SIGNAL_RTR                (1 << 3)
 		#define RFCOMM_SIGNAL_IC                 (1 << 6)
 		#define RFCOMM_SIGNAL_DV                 (1 << 7)
-		
+
 		#define RFCOMM_RPN_PMASK_BITRATE         (1 << 0)
 		#define RFCOMM_RPN_PMASK_DATABITS        (1 << 1)
 		#define RFCOMM_RPN_PMASK_STOPBITS        (1 << 2)
@@ -82,7 +98,7 @@
 			RFCOMM_Channel_Configure             = 1,
 			RFCOMM_Channel_Open                  = 2,
 		};
-		
+
 		enum RFCOMM_PortConfig_BaudRate_t
 		{
 			RFCOMM_BaudRate_2400                 = 0,
@@ -103,13 +119,13 @@
 			RFCOMM_DataBits_7                    = 2,
 			RFCOMM_DataBits_8                    = 3,
 		};
-		
+
 		enum RFCOMM_PortConfig_StopBits_t
 		{
 			RFCOMM_StopBits_1                    = 0,
 			RFCOMM_StopBits_1p5                  = 1,
 		};
-		
+
 		enum RFCOMM_PortConfig_Parity_t
 		{
 			RFCOMM_Parity_Odd                    = 0,
@@ -181,11 +197,11 @@
 		{
 			BT_StackConfig_t*   Stack;
 			BT_L2CAP_Channel_t* ACLChannel;
-			
+
 			uint8_t DLCI;
 			uint8_t State;
 			uint8_t ConfigFlags;
-			
+
 			struct
 			{
 				uint8_t  Priority;
@@ -193,7 +209,7 @@
 				uint8_t  LocalSignals;
 				uint8_t  RemoteSignals;
 			} ATTR_PACKED DataLink;
-			
+
 			RFCOMM_PortConfig_t PortConfig;
 		} RFCOMM_Channel_t;
 

@@ -1,5 +1,5 @@
 /*
-            Bluetooth Stack
+             Bluetooth Robot
      Copyright (C) Dean Camera, 2011.
 
   dean [at] fourwalledcubicle [dot] com
@@ -9,7 +9,23 @@
 /*
   Copyright 2011  Dean Camera (dean [at] fourwalledcubicle [dot] com)
 
-  All rights reserved.
+  Permission to use, copy, modify, distribute, and sell this
+  software and its documentation for any purpose is hereby granted
+  without fee, provided that the above copyright notice appear in
+  all copies and that both that the copyright notice and this
+  permission notice and warranty disclaimer appear in supporting
+  documentation, and that the name of the author not be used in
+  advertising or publicity pertaining to distribution of the
+  software without specific, written prior permission.
+
+  The author disclaim all warranties with regard to this
+  software, including all implied warranties of merchantability
+  and fitness.  In no event shall the author be liable for any
+  special, indirect or consequential damages or any damages
+  whatsoever resulting from loss of use, data or profits, whether
+  in an action of contract, negligence or other tortious action,
+  arising out of or in connection with the use or performance of
+  this software.
 */
 
 /** \file
@@ -57,7 +73,7 @@
 			uint16_t DataLength; /**< Length of the HCI packet data following the header. */
 			uint8_t  Data[]; /**< Data payload of the HCI data packet. */
 		} ATTR_PACKED BT_HCIData_Header_t;
-		
+
 		/** HCI Command Status Event structure. */
 		typedef struct
 		{
@@ -65,7 +81,7 @@
 			uint8_t  Packets; /**< Number of HCI packets which may be sent to the controller from the host. */
 			uint16_t OpCode; /**< OpCode of the operation being processed. */
 		} ATTR_PACKED BT_HCIEvent_CommandStatus_t;
-		
+
 		/** HCI Command Complete Event structure. */
 		typedef struct
 		{
@@ -84,7 +100,7 @@
 				uint16_t PacketsCompleted; /**< Number of HCI data packets which have been completed  by the controller. */
 			} PacketInfo[]; /**< List of HCI connection handles and completed HCI data packets. */
 		} ATTR_PACKED BT_HCIEvent_NumPacketsComplete_t;
-		
+
 		/** HCI Connection Request Event structure. */
 		typedef struct
 		{
@@ -168,5 +184,5 @@
 			uint16_t ClockOffset; /**< Clock offset between the local and remote device, if known. */
 			uint8_t  AllowRoleSwitch; /**< Indicates if the remote device may request a role switch in the connection. */
 		} ATTR_PACKED BT_HCICommand_CreateConnection_t;
-		
+
 #endif

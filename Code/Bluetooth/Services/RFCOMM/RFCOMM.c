@@ -1,5 +1,5 @@
 /*
-            Bluetooth Stack
+             Bluetooth Robot
      Copyright (C) Dean Camera, 2011.
 
   dean [at] fourwalledcubicle [dot] com
@@ -9,7 +9,23 @@
 /*
   Copyright 2011  Dean Camera (dean [at] fourwalledcubicle [dot] com)
 
-  All rights reserved.
+  Permission to use, copy, modify, distribute, and sell this
+  software and its documentation for any purpose is hereby granted
+  without fee, provided that the above copyright notice appear in
+  all copies and that both that the copyright notice and this
+  permission notice and warranty disclaimer appear in supporting
+  documentation, and that the name of the author not be used in
+  advertising or publicity pertaining to distribution of the
+  software without specific, written prior permission.
+
+  The author disclaim all warranties with regard to this
+  software, including all implied warranties of merchantability
+  and fitness.  In no event shall the author be liable for any
+  special, indirect or consequential damages or any damages
+  whatsoever resulting from loss of use, data or profits, whether
+  in an action of contract, negligence or other tortious action,
+  arising out of or in connection with the use or performance of
+  this software.
 */
 
 /** \file
@@ -105,11 +121,11 @@ static RFCOMM_Channel_t* const RFCOMM_NewChannel(BT_StackConfig_t* const StackSt
 		RFCOMMChannel->DataLink.MTU             = 127;
 		RFCOMMChannel->DataLink.RemoteSignals   = 0;
 		RFCOMMChannel->DataLink.LocalSignals    = (RFCOMM_SIGNAL_RTC | RFCOMM_SIGNAL_RTR | RFCOMM_SIGNAL_DV);
-		
+
 		RFCOMMChannel->PortConfig.BaudRate      = RFCOMM_BaudRate_9600;
 		RFCOMMChannel->PortConfig.DataBits      = RFCOMM_DataBits_8;
 		RFCOMMChannel->PortConfig.StopBits      = RFCOMM_StopBits_1;
-		RFCOMMChannel->PortConfig.ParameterMask = (RFCOMM_RPN_PMASK_BITRATE | RFCOMM_RPN_PMASK_DATABITS | RFCOMM_RPN_PMASK_STOPBITS | RFCOMM_RPN_PMASK_PARITY);	
+		RFCOMMChannel->PortConfig.ParameterMask = (RFCOMM_RPN_PMASK_BITRATE | RFCOMM_RPN_PMASK_DATABITS | RFCOMM_RPN_PMASK_STOPBITS | RFCOMM_RPN_PMASK_PARITY);
 		return RFCOMMChannel;
 	}
 
@@ -130,7 +146,7 @@ static bool RFCOMM_SendFrame(BT_StackConfig_t* const StackState,
 		uint8_t         Data[DataLen];
 		uint8_t         FCS;
 	} ATTR_PACKED ResponsePacket;
-	
+
 	/* Abort if invalid ACL connection handle is given */
 	if (!(ACLChannel))
 	  return false;
@@ -149,7 +165,7 @@ static bool RFCOMM_SendFrame(BT_StackConfig_t* const StackState,
 
 	/* Set lower 7 bits of the Size field - LSB reserved for 16-bit field extension */
 	ResponsePacket.Size[0] = (DataLen << 1);
-	
+
 	/* If length extension not required, set terminator bit, otherwise add upper length bits */
 	if (DataLen < 128)
 	  ResponsePacket.Size[0] |= 0x01;
@@ -186,10 +202,10 @@ static bool RFCOMM_SendControlFrame(BT_StackConfig_t* const StackState,
 		uint8_t          Length;
 		uint8_t          Data[DataLen];
 	} ATTR_PACKED ResponsePacket;
-	
+
 	/* Fill out the control header and copy over the payload */
 	ResponsePacket.CommandHeader = (RFCOMM_Command_t){.Command = Command, .EA = true, .CR = CR};
-	ResponsePacket.Length        = ((DataLen << 1) | 0x01);	
+	ResponsePacket.Length        = ((DataLen << 1) | 0x01);
 	memcpy(&ResponsePacket.Data, Data, DataLen);
 
 	/* Send the constructed control frame encapsulated as a UIH frame */
@@ -229,11 +245,11 @@ static void RFCOMM_ProcessMSCommand(BT_StackConfig_t* const StackState,
                                     const uint16_t CommandDataLen)
 {
 	RFCOMM_MSC_Parameters_t* MSCParams = (RFCOMM_MSC_Parameters_t*)CommandData;
-	
+
 	/* Ignore status flags sent to the control channel */
 	if (MSCParams->Address.DLCI == RFCOMM_CONTROL_DLCI)
 	  return;
-	  
+
 	/* Find the corresponding entry in the RFCOMM channel list that the data is directed to */
 	RFCOMM_Channel_t* RFCOMMChannel = RFCOMM_FindChannel(StackState, ACLChannel, MSCParams->Address.DLCI);
 
@@ -246,13 +262,13 @@ static void RFCOMM_ProcessMSCommand(BT_StackConfig_t* const StackState,
 			RFCOMM_SendFrame(StackState, ACLChannel, MSCParams->Address.DLCI, RFCOMM_Frame_DM, 0, NULL);
 			return;
 		}
-		
+
 		/* Save the new channel signals to the channel state structure */
 		RFCOMMChannel->DataLink.RemoteSignals = (MSCParams->Signals & ~0x01);
 		RFCOMMChannel->ConfigFlags |= RFCOMM_CONFIG_REMOTESIGNALS;
-		
+
 		/* Send the MSC response to the remote device (echo sent data to confirm) */
-		RFCOMM_SendControlFrame(StackState, ACLChannel, RFCOMM_Control_ModemStatus, false, sizeof(*MSCParams), MSCParams);		
+		RFCOMM_SendControlFrame(StackState, ACLChannel, RFCOMM_Control_ModemStatus, false, sizeof(*MSCParams), MSCParams);
 	}
 	else
 	{
@@ -285,7 +301,7 @@ static void RFCOMM_ProcessRPNCommand(BT_StackConfig_t* const StackState,
 			RFCOMM_SendFrame(StackState, ACLChannel, RPNParams->Address.DLCI, RFCOMM_Frame_DM, 0, NULL);
 			return;
 		}
-		
+
 		/* If a single byte was sent, it is a request for the current parameters, otherwise it is a request to set the parameters */
 		if (CommandDataLen > 1)
 		  memcpy(&RFCOMMChannel->PortConfig, &RPNParams->Params, sizeof(RFCOMMChannel->PortConfig));
@@ -309,7 +325,7 @@ static void RFCOMM_ProcessPNCommand(BT_StackConfig_t* const StackState,
                                     uint8_t* CommandData)
 {
 	RFCOMM_PN_Parameters_t* PNParams = (RFCOMM_PN_Parameters_t*)CommandData;
-		
+
 	/* Find the corresponding entry in the RFCOMM channel list that the data is directed to */
 	RFCOMM_Channel_t* RFCOMMChannel = RFCOMM_FindChannel(StackState, ACLChannel, PNParams->DLCI);
 
@@ -319,11 +335,11 @@ static void RFCOMM_ProcessPNCommand(BT_StackConfig_t* const StackState,
 		/* Existing channel not found, attempt to create a new one */
 		if (!(RFCOMMChannel))
 		  RFCOMMChannel = RFCOMM_NewChannel(StackState, ACLChannel, PNParams->DLCI);
-		
+
 		/* Cound not create new channel entry, abort */
 		if (!(RFCOMMChannel))
 		  return;
-		  
+
 		/* Save remote requested channel priority and MTU */
 		RFCOMMChannel->DataLink.Priority = PNParams->Priority;
 		RFCOMMChannel->DataLink.MTU      = PNParams->MaximumFrameSize;
@@ -340,7 +356,7 @@ static void RFCOMM_ProcessPNCommand(BT_StackConfig_t* const StackState,
 
 		/* Send the PN response to acknowledge the command */
 		RFCOMM_SendFrame(StackState, ACLChannel, PNParams->DLCI, RFCOMM_Frame_SABM, 0, NULL);
-	}	
+	}
 }
 
 void RFCOMM_ProcessMultiplexerCommand(BT_StackConfig_t* const StackState,
@@ -349,7 +365,7 @@ void RFCOMM_ProcessMultiplexerCommand(BT_StackConfig_t* const StackState,
 {
 	uint8_t* CommandData = (uint8_t*)CommandHeader + sizeof(RFCOMM_Command_t);
 	uint16_t CommandDataLen;
-	
+
 	/* Unpack the command data length field - may be 8 or 16 bits depending on LSB */
 	if (*CommandData & 0x01)
 	{
@@ -361,7 +377,7 @@ void RFCOMM_ProcessMultiplexerCommand(BT_StackConfig_t* const StackState,
 		CommandDataLen = ((*(CommandData + 1) << 7) | (*CommandData >> 1));
 		CommandData   += 2;
 	}
-	
+
 	switch (CommandHeader->Command)
 	{
 		case RFCOMM_Control_Test:
@@ -398,7 +414,7 @@ static void RFCOMM_ProcessSABM(BT_StackConfig_t* const StackState,
 	/* ACK requests to the control channel (start the multiplexer) */
 	if (FrameHeader->Address.DLCI == RFCOMM_CONTROL_DLCI)
 	{
-		RFCOMM_SendFrame(StackState, ACLChannel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_UA, 0, NULL);	
+		RFCOMM_SendFrame(StackState, ACLChannel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_UA, 0, NULL);
 		return;
 	}
 
@@ -408,7 +424,7 @@ static void RFCOMM_ProcessSABM(BT_StackConfig_t* const StackState,
 	/* If an existing channel wasn't found, create a new channel entry */
 	if (!(RFCOMMChannel))
 	  RFCOMMChannel = RFCOMM_NewChannel(StackState, ACLChannel, FrameHeader->Address.DLCI);
-	  
+
 	uint8_t ResponseFrameType = RFCOMM_Frame_DM;
 
 	/* If a channel was found or created sucessfully, set response to ACK the request and indicate channel ABM mode set */
@@ -455,19 +471,19 @@ static void RFCOMM_ProcessDISC(BT_StackConfig_t* const StackState,
 		for (uint8_t i = 0; i < RFCOMM_MAX_OPEN_CHANNELS; i++)
 		{
 			RFCOMM_Channel_t* RFCOMMChannel = &RFCOMM_Channels[i];
-			
+
 			if ((RFCOMMChannel->ACLChannel == ACLChannel) && (RFCOMMChannel->State != RFCOMM_Channel_Closed))
 			{
 				RFCOMMChannel->State = RFCOMM_Channel_Closed;
 				EVENT_RFCOMM_ChannelStateChange(StackState, RFCOMMChannel);
 			}
 		}
-		
+
 		/* ACK the session disconnection request */
 		RFCOMM_SendFrame(StackState, ACLChannel, RFCOMM_CONTROL_DLCI, RFCOMM_Frame_UA, 0, NULL);
 		return;
 	}
-	
+
 	/* Find the corresponding entry in the RFCOMM channel list that the data is directed to */
 	RFCOMM_Channel_t* RFCOMMChannel = RFCOMM_FindChannel(StackState, ACLChannel, FrameHeader->Address.DLCI);
 
@@ -511,13 +527,13 @@ static void RFCOMM_ProcessUIH(BT_StackConfig_t* const StackState,
 	/* Check if the data is directed to the control DLCI - if so run command processor */
 	if (FrameHeader->Address.DLCI == RFCOMM_CONTROL_DLCI)
 	{
-		RFCOMM_ProcessMultiplexerCommand(StackState, ACLChannel, (RFCOMM_Command_t*)FrameData);	
+		RFCOMM_ProcessMultiplexerCommand(StackState, ACLChannel, (RFCOMM_Command_t*)FrameData);
 		return;
 	}
 
 	/* Find the corresponding entry in the RFCOMM channel list that the data is directed to */
 	RFCOMM_Channel_t* RFCOMMChannel = RFCOMM_FindChannel(StackState, ACLChannel, FrameHeader->Address.DLCI);
-	
+
 	/* Cound not find corresponding channel entry, abort */
 	if (!(RFCOMMChannel))
 	{
@@ -539,7 +555,7 @@ void RFCOMM_Init(BT_StackConfig_t* const StackState)
 
 	/* Mark the channel table as having been globally initialized at least once */
 	RFCOMM_ChannelListValid = true;
-	
+
 	/* Register the RFCOMM virtual serial port service with the SDP service */
 	SDP_RegisterService(&ServiceEntry_RFCOMMSerialPort);
 }
@@ -549,7 +565,7 @@ void RFCOMM_Manage(BT_StackConfig_t* const StackState)
 	for (uint8_t i = 0; i < RFCOMM_MAX_OPEN_CHANNELS; i++)
 	{
 		RFCOMM_Channel_t* RFCOMMChannel = &RFCOMM_Channels[i];
-		
+
 		/* Ignore channels allocated to different stack instances */
 		if (RFCOMMChannel->Stack != StackState)
 		  continue;
@@ -563,7 +579,7 @@ void RFCOMM_Manage(BT_StackConfig_t* const StackState)
 				RFCOMM_MSC_Parameters_t MSCommand;
 				MSCommand.Address = (RFCOMM_Address_t){.DLCI = RFCOMMChannel->DLCI, .EA = true, .CR = false};
 				MSCommand.Signals = (RFCOMMChannel->DataLink.LocalSignals | 0x01);
-				
+
 				/* Send the MSC command to the remote device */
 				if (RFCOMM_SendControlFrame(StackState, RFCOMMChannel->ACLChannel, RFCOMM_Control_ModemStatus, true, sizeof(MSCommand), &MSCommand))
 				{
@@ -579,7 +595,7 @@ void RFCOMM_Manage(BT_StackConfig_t* const StackState)
 				RFCOMMChannel->State = RFCOMM_Channel_Open;
 				EVENT_RFCOMM_ChannelStateChange(StackState, RFCOMMChannel);
 			}
-		}		
+		}
 	}
 }
 
@@ -597,7 +613,7 @@ void RFCOMM_ChannelClosed(BT_StackConfig_t* const StackState,
 	for (uint8_t i = 0; i < RFCOMM_MAX_OPEN_CHANNELS; i++)
 	{
 		RFCOMM_Channel_t* RFCOMMChannel = &RFCOMM_Channels[i];
-		
+
 		if (RFCOMMChannel->ACLChannel == Channel)
 		{
 			RFCOMMChannel->State = RFCOMM_Channel_Closed;
@@ -616,7 +632,7 @@ void RFCOMM_ProcessPacket(BT_StackConfig_t* const StackState,
 	  return;
 
 	RFCOMM_Header_t* FrameHeader = (RFCOMM_Header_t*)Data;
-	
+
 	/* Decode the RFCOMM frame type from the header */
 	switch (FrameHeader->Control & ~FRAME_POLL_FINAL)
 	{

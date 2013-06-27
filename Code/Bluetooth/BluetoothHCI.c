@@ -1,5 +1,5 @@
 /*
-            Bluetooth Stack
+             Bluetooth Robot
      Copyright (C) Dean Camera, 2011.
 
   dean [at] fourwalledcubicle [dot] com
@@ -9,7 +9,23 @@
 /*
   Copyright 2011  Dean Camera (dean [at] fourwalledcubicle [dot] com)
 
-  All rights reserved.
+  Permission to use, copy, modify, distribute, and sell this
+  software and its documentation for any purpose is hereby granted
+  without fee, provided that the above copyright notice appear in
+  all copies and that both that the copyright notice and this
+  permission notice and warranty disclaimer appear in supporting
+  documentation, and that the name of the author not be used in
+  advertising or publicity pertaining to distribution of the
+  software without specific, written prior permission.
+
+  The author disclaim all warranties with regard to this
+  software, including all implied warranties of merchantability
+  and fitness.  In no event shall the author be liable for any
+  special, indirect or consequential damages or any damages
+  whatsoever resulting from loss of use, data or profits, whether
+  in an action of contract, negligence or other tortious action,
+  arising out of or in connection with the use or performance of
+  this software.
 */
 
 /** \file
@@ -39,7 +55,7 @@ BT_HCI_Connection_t* const Bluetooth_HCI_FindConnection(BT_StackConfig_t* const 
 	for (uint8_t i = 0; i < BT_MAX_DEVICE_CONNECTIONS; i++)
 	{
 		BT_HCI_Connection_t* Connection = &StackState->State.HCI.Connections[i];
-		
+
 		/* Free connection entries are inactive and must be skipped */
 		if (Connection->State == HCI_CONSTATE_Closed)
 		  continue;
@@ -53,10 +69,10 @@ BT_HCI_Connection_t* const Bluetooth_HCI_FindConnection(BT_StackConfig_t* const 
 		else
 		{
 			if (Connection->Handle == (Handle & BT_HCI_CONNECTION_HANDLE_MASK))
-			  return Connection;		
+			  return Connection;
 		}
 	}
-	
+
 	return NULL;
 }
 
@@ -87,7 +103,7 @@ static BT_HCI_Connection_t* const Bluetooth_HCI_NewConnection(BT_StackConfig_t* 
 			return Connection;
 		}
 	}
-	
+
 	return NULL;
 }
 
@@ -130,12 +146,12 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 	if (HCIEventHeader->EventCode == EVENT_COMMAND_COMPLETE)
 	{
 		BT_HCIEvent_CommandComplete_t* CommandCompleteHeader = (BT_HCIEvent_CommandComplete_t*)&HCIEventHeader->Parameters;
-		
+
 		/* Update number of allowable command packets to the controller */
 		StackState->State.HCI.CommandPackets = CommandCompleteHeader->Packets;
-		
+
 		uint8_t NextHCIState = StackState->State.HCI.State;
-		
+
 		/* Determine the next state to change to according to the current state and which command completed */
 		switch (StackState->State.HCI.State)
 		{
@@ -147,7 +163,7 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 				if (CommandCompleteHeader->Opcode == CPU_TO_LE16(OGF_CTRLR_INFORMATIONAL | OCF_CTRLR_INFORMATIONAL_READBUFFERSIZE))
 				{
 					NextHCIState = HCISTATE_Init_GetBDADDR;
-				  
+
 					/* Store the total number of ACL data packets the controller is able to queue internally */
 					StackState->State.HCI.ACLDataPackets = (((uint16_t)CommandCompleteHeader->Parameters[5] << 8) | CommandCompleteHeader->Parameters[4]);
 				}
@@ -158,7 +174,7 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 					NextHCIState = HCISTATE_Init_SetLocalName;
 
 					/* Copy over the returned local device address to the stack state buffer */
-					memcpy(StackState->State.HCI.LocalBDADDR, &CommandCompleteHeader->Parameters[1], sizeof(BDADDR_t));				
+					memcpy(StackState->State.HCI.LocalBDADDR, &CommandCompleteHeader->Parameters[1], sizeof(BDADDR_t));
 				}
 				break;
 			case HCISTATE_Init_SetLocalName:
@@ -174,21 +190,21 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 				  NextHCIState = HCISTATE_Idle;
 				break;
 		}
-		
+
 		StackState->State.HCI.StateTransition = (StackState->State.HCI.State != NextHCIState);
-		StackState->State.HCI.State           = NextHCIState;		
+		StackState->State.HCI.State           = NextHCIState;
 	}
 	else if (HCIEventHeader->EventCode == EVENT_COMMAND_STATUS)
 	{
 		BT_HCIEvent_CommandStatus_t* CommandStatusHeader = (BT_HCIEvent_CommandStatus_t*)&HCIEventHeader->Parameters;
-		
+
 		/* Update number of allowable command packets to the controller */
 		StackState->State.HCI.CommandPackets = CommandStatusHeader->Packets;
 	}
 	else if (HCIEventHeader->EventCode == EVENT_NUM_PACKETS_COMPLETE)
 	{
 		BT_HCIEvent_NumPacketsComplete_t* CurrentPacketInfo = (BT_HCIEvent_NumPacketsComplete_t*)&HCIEventHeader->Parameters;
-		
+
 		/* For each connection reported in the event, find the associated connection object and decrease the number of
 		 * queued packets by the number of completed packets reported for each connection */
 		for (uint8_t i = 0; i < CurrentPacketInfo->Handles; i++)
@@ -204,13 +220,13 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 		BT_HCIEvent_ConnectionRequest_t* ConnectionRequestEventHeader = (BT_HCIEvent_ConnectionRequest_t*)&HCIEventHeader->Parameters;
 
 		/* Try to create a new connection handle for the connection request */
-		BT_HCI_Connection_t* Connection      = Bluetooth_HCI_NewConnection(StackState, ConnectionRequestEventHeader->RemoteBDADDR, ConnectionRequestEventHeader->LinkType);		
+		BT_HCI_Connection_t* Connection      = Bluetooth_HCI_NewConnection(StackState, ConnectionRequestEventHeader->RemoteBDADDR, ConnectionRequestEventHeader->LinkType);
 		uint8_t              RejectionReason = HCI_ERROR_LIMITED_RESOURCES;
-		
+
 		/* If a connection handle was created, fire user-application callback to accept or reject the request - otherwise reject with a LIMITED RESOURCES error code */
 		if (Connection)
 		  RejectionReason = CALLBACK_Bluetooth_ConnectionRequest(StackState, Connection) ? 0 : HCI_ERROR_UNACCEPTABLE_BDADDR;
-		
+
 		/* If a rejection reason was given, reject the request, otherwise send a connection request accept */
 		if (RejectionReason)
 		{
@@ -218,12 +234,12 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 
 			memcpy(HCIRejectConnectionHeader.RemoteBDADDR, ConnectionRequestEventHeader->RemoteBDADDR, sizeof(BDADDR_t));
 			HCIRejectConnectionHeader.Reason = RejectionReason;
-			
+
 			/* Mark the connection as free again as it was rejected */
 			if (Connection)
 			  Connection->State = HCI_CONSTATE_Closed;
 
-			Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_REJECT_CONNECTION_REQUEST), sizeof(HCIRejectConnectionHeader), &HCIRejectConnectionHeader);			
+			Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_REJECT_CONNECTION_REQUEST), sizeof(HCIRejectConnectionHeader), &HCIRejectConnectionHeader);
 		}
 		else
 		{
@@ -231,26 +247,26 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 
 			memcpy(HCIAcceptConnectionHeader.RemoteBDADDR, ConnectionRequestEventHeader->RemoteBDADDR, sizeof(BDADDR_t));
 			HCIAcceptConnectionHeader.SlaveRole = true;
-			
-			Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_ACCEPT_CONNECTION_REQUEST), sizeof(HCIAcceptConnectionHeader), &HCIAcceptConnectionHeader);			
+
+			Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_ACCEPT_CONNECTION_REQUEST), sizeof(HCIAcceptConnectionHeader), &HCIAcceptConnectionHeader);
 		}
 	}
 	else if (HCIEventHeader->EventCode == EVENT_CONNECTION_COMPLETE)
 	{
-		BT_HCIEvent_ConnectionComplete_t* ConnectionCompleteEventHeader = (BT_HCIEvent_ConnectionComplete_t*)&HCIEventHeader->Parameters;		
+		BT_HCIEvent_ConnectionComplete_t* ConnectionCompleteEventHeader = (BT_HCIEvent_ConnectionComplete_t*)&HCIEventHeader->Parameters;
 
 		/* Find the existing connection handle in the HCI device connection table if it exists, from the remote device BDADDR */
 		BT_HCI_Connection_t* Connection = Bluetooth_HCI_FindConnection(StackState, ConnectionCompleteEventHeader->RemoteBDADDR, 0);
-		
+
 		/* If the connection handle exists, store the created connection handle and change the device connection state to connected */
 		if (Connection)
 		{
 			Connection->Handle = (le16_to_cpu(ConnectionCompleteEventHeader->Handle) & BT_HCI_CONNECTION_HANDLE_MASK);
 			Connection->State  = (ConnectionCompleteEventHeader->Status == HCI_ERROR_SUCCESS) ? HCI_CONSTATE_Connected : HCI_CONSTATE_Failed;
-			
+
 			/* Fire user application callback to signal the connection completion */
 			EVENT_Bluetooth_ConnectionStateChange(StackState, Connection);
-			
+
 			/* Once the user application callback has fired with the failed connection state, free up the connection entry */
 			if (Connection->State == HCI_CONSTATE_Failed)
 			  Connection->State = HCI_CONSTATE_Closed;
@@ -267,32 +283,32 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 		if (Connection)
 		{
 			Connection->State = HCI_CONSTATE_Closed;
-			
-			Bluetooth_L2CAP_NotifyHCIDisconnection(StackState, Connection->Handle);			
+
+			Bluetooth_L2CAP_NotifyHCIDisconnection(StackState, Connection->Handle);
 			EVENT_Bluetooth_ConnectionStateChange(StackState, Connection);
 		}
 	}
 	else if (HCIEventHeader->EventCode == EVENT_PIN_CODE_REQUEST)
 	{
-		BT_HCIEvent_PinCodeReq_t* PINCodeRequestEventHeader = (BT_HCIEvent_PinCodeReq_t*)&HCIEventHeader->Parameters;		
+		BT_HCIEvent_PinCodeReq_t* PINCodeRequestEventHeader = (BT_HCIEvent_PinCodeReq_t*)&HCIEventHeader->Parameters;
 
 		/* Check if a PIN code has been set of one or more characters */
 		if ((StackState->Config.PINCode != NULL) && strlen(StackState->Config.PINCode))
 		{
 			BT_HCICommand_PinCodeACKResp_t PINKeyACKResponse;
-			
+
 			memcpy(PINKeyACKResponse.RemoteBDADDR, PINCodeRequestEventHeader->RemoteBDADDR, sizeof(BDADDR_t));
 			PINKeyACKResponse.PINCodeLength = MIN(strlen(StackState->Config.PINCode), sizeof(PINKeyACKResponse.PINCode));
 			strlcpy((void*)PINKeyACKResponse.PINCode, StackState->Config.PINCode, sizeof(PINKeyACKResponse.PINCode));
-			
+
 			Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_PIN_CODE_REQUEST_REPLY), sizeof(PINKeyACKResponse), &PINKeyACKResponse);
 		}
 		else
 		{
 			BT_HCICommand_PinCodeNAKResp_t PINKeyNAKResponse;
 
-			memcpy(PINKeyNAKResponse.RemoteBDADDR, PINCodeRequestEventHeader->RemoteBDADDR, sizeof(BDADDR_t));			
-			
+			memcpy(PINKeyNAKResponse.RemoteBDADDR, PINCodeRequestEventHeader->RemoteBDADDR, sizeof(BDADDR_t));
+
 			Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_PIN_CODE_REQUEST_NEG_REPLY), sizeof(PINKeyNAKResponse), &PINKeyNAKResponse);
 		}
 	}
@@ -304,7 +320,7 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 		memcpy(LinkKeyRequestNAKHeader.RemoteBDADDR, LinkKeyRequestEventHeader->RemoteBDADDR, sizeof(BDADDR_t));
 
 		Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_LINK_KEY_REQUEST_NEG_REPLY), sizeof(LinkKeyRequestNAKHeader), &LinkKeyRequestNAKHeader);
-	}	
+	}
 }
 
 /** Processes a recieved Bluetooth HCI Data packet from a Bluetooth adapter.
@@ -314,14 +330,14 @@ void Bluetooth_HCI_ProcessEventPacket(BT_StackConfig_t* const StackState)
 void Bluetooth_HCI_ProcessDataPacket(BT_StackConfig_t* const StackState)
 {
 	BT_HCIData_Header_t* HCIDataHeader = (BT_HCIData_Header_t*)StackState->Config.PacketBuffer;
-	
-	/* If an open device connection with the correct connection handle was not foumd, abort */	
+
+	/* If an open device connection with the correct connection handle was not foumd, abort */
 	BT_HCI_Connection_t* HCIConnection = Bluetooth_HCI_FindConnection(StackState, NULL, HCIDataHeader->Handle);
 
 	/* If an open device connection with the correct connection handle was not foumd, abort */
 	if (!(HCIConnection))
 	  return;
-	
+
 	Bluetooth_L2CAP_ProcessPacket(StackState, HCIConnection, HCIDataHeader->Data);
 }
 
@@ -336,12 +352,12 @@ bool Bluetooth_HCI_Manage(BT_StackConfig_t* const StackState)
 	/* Only process HCI state transitions (one action per transition) when the controller is willing to accept a new command */
 	if (!(StackState->State.HCI.StateTransition) || !(StackState->State.HCI.CommandPackets))
 	  return false;
-	
+
 	/* Reset HCI layer timeout counter */
 	StackState->State.HCI.TicksElapsed = 0;
-	
+
 	uint8_t ParamBuffer[3];
-	
+
 	/* Determine if a packet needs to be sent based on the current HCI state */
 	switch (StackState->State.HCI.State)
 	{
@@ -399,18 +415,18 @@ BT_HCI_Connection_t* Bluetooth_HCI_Connect(BT_StackConfig_t* const StackState,
 	/* Only ACL connections are implemented at present, reject other types */
 	if (LinkType != LINK_TYPE_ACL)
 	  return NULL;
-	
+
 	/* Create a new HCI connection entry in the stack's HCI connection table */
 	BT_HCI_Connection_t* HCIConnection = Bluetooth_HCI_NewConnection(StackState, RemoteBDADDR, LinkType);
 
 	/* Abort if no space was found in the HCI connection table */
 	if (!(HCIConnection))
 	  return NULL;
-	
+
 	/* Indicate that the connection is currently attempting a connection to the remote device */
 	HCIConnection->State                 = HCI_CONSTATE_Connecting;
 	HCIConnection->LocallyInitiated      = true;
-	
+
 	/* Fill out HCI connection parameters - assume role switch allowed for now, and all packet types supported */
 	BT_HCICommand_CreateConnection_t CreateConnectHeader;
 	memcpy(CreateConnectHeader.RemoteBDADDR, RemoteBDADDR, sizeof(BDADDR_t));
@@ -419,14 +435,14 @@ BT_HCI_Connection_t* Bluetooth_HCI_Connect(BT_StackConfig_t* const StackState,
 	CreateConnectHeader.Reserved        = 0;
 	CreateConnectHeader.ClockOffset     = CPU_TO_LE16(0);
 	CreateConnectHeader.AllowRoleSwitch = true;
-	
+
 	/* If the command packet failed to send, kill the created channel object */
 	if (!(Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_CREATE_CONNECTION), sizeof(CreateConnectHeader), &CreateConnectHeader)))
 	{
 		HCIConnection->State = HCI_CONSTATE_Closed;
 		return NULL;
 	}
-	
+
 	return HCIConnection;
 }
 
@@ -443,17 +459,17 @@ bool Bluetooth_HCI_Disconnect(BT_StackConfig_t* const StackState,
 	/* Disallow connections until the stack is ready */
 	if (StackState->State.HCI.State != HCISTATE_Idle)
 	  return false;
-	  
+
 	/* Abort if invalid connection handle was given */
 	if (!(HCIConnection))
 	  return false;
 
-	struct 
+	struct
 	{
 		uint16_t ConnectionHandle;
 		uint8_t  Reason;
 	} ATTR_PACKED DisconnectParams;
-	
+
 	DisconnectParams.ConnectionHandle = cpu_to_le16(HCIConnection->Handle);
 	DisconnectParams.Reason           = HCI_ERROR_REMOTE_USER_TERMINATED_CONN;
 
@@ -463,7 +479,7 @@ bool Bluetooth_HCI_Disconnect(BT_StackConfig_t* const StackState,
 			/* Can only terminate connections initiated from the local device (not remote devices) */
 			if (!(HCIConnection->LocallyInitiated))
 			  return false;
-		
+
 			return Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_CREATE_CONNECTION_CANCEL), sizeof(BDADDR_t), HCIConnection->RemoteBDADDR);
 		case HCI_CONSTATE_Connected:
 			return Bluetooth_HCI_SendControlPacket(StackState, (OGF_LINK_CONTROL | OCF_LINK_CONTROL_DISCONNECT), sizeof(DisconnectParams), &DisconnectParams);
@@ -480,7 +496,7 @@ bool Bluetooth_HCI_Disconnect(BT_StackConfig_t* const StackState,
  *  \param[in]      Data       Command data to send to the Bluetooth controller.
  *
  *  \return Boolean \c true if the data was sent, \c false otherwise.
- */ 
+ */
 bool Bluetooth_HCI_SendControlPacket(BT_StackConfig_t* const StackState,
                                      const uint16_t OpCode,
 		                             const uint8_t Length,
@@ -511,7 +527,7 @@ bool Bluetooth_HCI_SendControlPacket(BT_StackConfig_t* const StackState,
  *  \param[in]      Data                Data to send through the nominated HCI connection.
  *
  *  \return Boolean \c true if the data was sent, \c false otherwise.
- */ 
+ */
 bool Bluetooth_HCI_SendPacket(BT_StackConfig_t* const StackState,
                               BT_HCI_Connection_t* const HCIConnection,
                               const bool PacketContinuation,
@@ -523,11 +539,11 @@ bool Bluetooth_HCI_SendPacket(BT_StackConfig_t* const StackState,
 
 	if (!(HCIConnection) || (HCIConnection->State != HCI_CONSTATE_Connected))
 	  return false;
-	  
+
 	/* Discard and fail the packet transmission if the HCI data packet buffers are currently full */
 	if (HCIConnection->DataPacketsQueued == StackState->State.HCI.ACLDataPackets)
 		return false;
-	
+
 	/* Keep track of how many packets have been queued into the controller for the connection to prevent buffer overrun */
 	HCIConnection->DataPacketsQueued++;
 

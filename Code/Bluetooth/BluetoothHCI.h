@@ -1,5 +1,5 @@
 /*
-            Bluetooth Stack
+             Bluetooth Robot
      Copyright (C) Dean Camera, 2011.
 
   dean [at] fourwalledcubicle [dot] com
@@ -9,7 +9,23 @@
 /*
   Copyright 2011  Dean Camera (dean [at] fourwalledcubicle [dot] com)
 
-  All rights reserved.
+  Permission to use, copy, modify, distribute, and sell this
+  software and its documentation for any purpose is hereby granted
+  without fee, provided that the above copyright notice appear in
+  all copies and that both that the copyright notice and this
+  permission notice and warranty disclaimer appear in supporting
+  documentation, and that the name of the author not be used in
+  advertising or publicity pertaining to distribution of the
+  software without specific, written prior permission.
+
+  The author disclaim all warranties with regard to this
+  software, including all implied warranties of merchantability
+  and fitness.  In no event shall the author be liable for any
+  special, indirect or consequential damages or any damages
+  whatsoever resulting from loss of use, data or profits, whether
+  in an action of contract, negligence or other tortious action,
+  arising out of or in connection with the use or performance of
+  this software.
 */
 
 /** \file
@@ -23,23 +39,23 @@
 	/* Includes: */
 		#include <stdbool.h>
 		#include <stdint.h>
-		
+
 		#include "BluetoothCommon.h"
 		#include "BluetoothClassCodes.h"
 		#include "BluetoothHCIEventCodes.h"
 		#include "BluetoothHCIPacketTypes.h"
 		#include "BluetoothL2CAP.h"
-	
+
 	/* Macros: */
 		/** Mask for a HCI connection handle value to remove all HCI packet connection flags, leaving only the unique handle value. */
 		#define BT_HCI_CONNECTION_HANDLE_MASK     0x0EFF
-		
+
 		/** Number of milliseconds before an issued HCI command times out and is re-tried. */
 		#define BT_HCI_COMMAND_TIMEOUT_MS         1000
-	
+
 		/** HCI connection flag to automatically flush packets to the receiver. */
 		#define BT_L2CAP_FIRST_AUTOFLUSH          (2 << 12)
-		
+
 		/** HCI connection flag to indicate a continuation of a higher layer packet. */
 		#define BT_L2CAP_PACKET_CONTINUATION      (1 << 12)
 
@@ -82,7 +98,7 @@
 		                                           const uint8_t LinkType);
 		bool Bluetooth_HCI_Disconnect(BT_StackConfig_t* const StackState,
 		                              BT_HCI_Connection_t* const HCIConnection);
-									  
+
 		bool Bluetooth_HCI_SendControlPacket(BT_StackConfig_t* const StackState,
                                              const uint16_t OpCode,
 		                                     const uint8_t Length,

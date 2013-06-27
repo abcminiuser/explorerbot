@@ -1,5 +1,5 @@
 /*
-            Bluetooth Stack
+             Bluetooth Robot
      Copyright (C) Dean Camera, 2011.
 
   dean [at] fourwalledcubicle [dot] com
@@ -9,7 +9,23 @@
 /*
   Copyright 2011  Dean Camera (dean [at] fourwalledcubicle [dot] com)
 
-  All rights reserved.
+  Permission to use, copy, modify, distribute, and sell this
+  software and its documentation for any purpose is hereby granted
+  without fee, provided that the above copyright notice appear in
+  all copies and that both that the copyright notice and this
+  permission notice and warranty disclaimer appear in supporting
+  documentation, and that the name of the author not be used in
+  advertising or publicity pertaining to distribution of the
+  software without specific, written prior permission.
+
+  The author disclaim all warranties with regard to this
+  software, including all implied warranties of merchantability
+  and fitness.  In no event shall the author be liable for any
+  special, indirect or consequential damages or any damages
+  whatsoever resulting from loss of use, data or profits, whether
+  in an action of contract, negligence or other tortious action,
+  arising out of or in connection with the use or performance of
+  this software.
 */
 
 /** \file
@@ -22,22 +38,22 @@
 
 	/* Includes: */
 		#include <LUFA/Common/Common.h>
-		
+
 		#include "Drivers/LCD.h"
 
 	/* Defines: */
 		/** Maximum number of simultaneous device connections (user-configurable). */
 		#define BT_MAX_DEVICE_CONNECTIONS         5
-		
+
 		/** Maximum number of simultaneous L2CAP logical channels (user-configurable). */
 		#define BT_MAX_LOGICAL_CHANNELS           (BT_MAX_DEVICE_CONNECTIONS * 5)
-		
+
 		/** Maximum number of queued L2CAP signalling commands (user-configurable). */
 		#define BT_MAX_QUEUED_L2CAP_EVENTS        10
 
 		/** Default maximum transmission unit size for a L2CAP channel packet (user-configurable). */
 		#define BT_DEFAULT_L2CAP_CHANNEL_MTU      1024
-		
+
 		/** Tick length interval that \ref Bluetooth_TickElapsed() is called at (user-configurable). */
 		#define BT_TICK_MS                        SYSTEM_TICK_MS
 
@@ -65,7 +81,7 @@
 			BLUETOOTH_PACKET_HCISynchData         = 0x03, /**< Bluetooth packet is a HCI Synchronous Data Packet. */
 			BLUETOOTH_PACKET_HCIEvent             = 0x04, /**< Bluetooth packet is a HCI Event Packet. */
 		};
-		
+
 		/** Enum for the possible Bluetooth link types. */
 		enum BT_LinkTypes_t
 		{
@@ -98,8 +114,8 @@
 		 *  \note This is an array type, and thus is not passed by value between functions.
 		 */
 		typedef uint8_t BDADDR_t[6];
-		
-		/** Type define for a queued L2CAP event. As the L2AP layer receives commands from remote devices and from the 
+
+		/** Type define for a queued L2CAP event. As the L2AP layer receives commands from remote devices and from the
 		 *  user application, events are generated and queued for later processing. This queue allows for events to be
 		 *  deferred until such time that there is adequate space in the data packet buffers, to prevent buffer overruns
 		 *  or lost command packets.
@@ -127,7 +143,7 @@
 			uint8_t  CurrentIdentifier; /**< Current Bluetooth HCI signal layer identifier index. */
 			bool     LocallyInitiated; /**< Boolean true if the connection was initiated by the local device, false if remotely initiated. */
 		} BT_HCI_Connection_t;
-	
+
 		/** Type define for a Bluetooth L2CAP channel information structure. This structure contains all the relevant
 		 *  information on an L2CAP channel for data transmission and reception by the stack.
 		 */
@@ -154,7 +170,7 @@
 				bool     Discoverable; /**< Indicates if the stack should be discoverable to other devices during an Inquiry. */
 				void*    PacketBuffer; /**< Pointer to a location where packets are to be stored and retrieved from the physical adapter. */
 			} Config; /**< Stack configuration. This must be set by the user application before the stack is initialized via \ref Bluetooth_Init(). */
-			
+
 			struct
 			{
 				struct
@@ -167,7 +183,7 @@
 					BDADDR_t            LocalBDADDR; /**< Address of the local Bluetooth adapter attached to this stack instance. */
 					BT_HCI_Connection_t Connections[BT_MAX_DEVICE_CONNECTIONS]; /**< HCI connection state information list. */
 				} HCI; /**< HCI layer connection state information. */
-				
+
 				struct
 				{
 					uint16_t            LastAllocatedChannel; /**< Index of the last allocated L2CAP channel. */
@@ -212,7 +228,7 @@
 		bool CALLBACK_Bluetooth_ChannelRequest(BT_StackConfig_t* const StackState,
 		                                       BT_HCI_Connection_t* const Connection,
 		                                       BT_L2CAP_Channel_t* const Channel);
-	
+
 	/* User Implemented Callback Event Functions: */
 		/** User application event callback, fired when the Bluetooth stack initialization has completed.
 		 *
@@ -264,6 +280,6 @@
 		                                  BT_L2CAP_Channel_t* const Channel,
 		                                  uint16_t Length,
 		                                  uint8_t* Data);
-		
+
 #endif
 
